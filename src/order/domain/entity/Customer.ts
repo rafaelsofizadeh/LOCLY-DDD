@@ -1,14 +1,25 @@
 import { ValidateNested } from 'class-validator';
 import { Address } from './Address';
-import { Entity } from '../../../common/domain/Entity';
+import { EntityProps } from '../../../common/domain/Entity';
+import { Type } from 'class-transformer';
+import { EntityId } from '../../../common/domain/EntityId';
 
-export type CustomerProps = {
-  selectedAddress: Address;
-};
-
-export class Customer extends Entity<CustomerProps> {
+export class CustomerProps extends EntityProps {
   @ValidateNested()
-  get selectedAddress(): Address {
-    return this.props?.selectedAddress;
+  @Type(() => Address)
+  selectedAddress: Address;
+}
+
+export class Customer extends CustomerProps {
+  constructor(
+    {
+      id = new EntityId(),
+      selectedAddress,
+    }: CustomerProps = new CustomerProps(),
+  ) {
+    super();
+
+    this.id = id;
+    this.selectedAddress = selectedAddress;
   }
 }

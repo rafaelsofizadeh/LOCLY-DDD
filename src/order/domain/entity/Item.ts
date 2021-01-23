@@ -1,13 +1,9 @@
-import {
-  IsEnum,
-  IsInt,
-  IsPositive,
-  IsString,
-  Length,
-  Max,
-} from 'class-validator';
+import { IsEnum, IsInt, IsPositive, IsString, Length } from 'class-validator';
 
-import { Entity } from '../../../common/domain/Entity';
+import { EntityProps } from '../../../common/domain/Entity';
+import { EntityId } from '../../../common/domain/EntityId';
+import { Identifiable } from '../../../common/domain/Identifiable';
+import { Validatable } from '../../../common/domain/Validatable';
 
 // TODO: Change enum to union
 enum Category {
@@ -16,65 +12,65 @@ enum Category {
   Electronics,
 }
 
-export type Dimensions = {
+export type PhysicalCharacteristics = {
   width: number;
   length: number;
   height: number;
+  weight: number;
 };
 
-export interface ItemProps {
-  title: string;
-  storeName: string;
-  category: Category;
-  weight: number;
-  width: number;
-  length: number;
-  height: number;
-}
-
-export class Item extends Entity<ItemProps> {
+export class ItemProps extends EntityProps {
   @IsString()
   @Length(5, 280)
-  get title(): string {
-    return this.props?.title;
-  }
+  title: string;
 
   @IsString()
   @Length(2, 50)
-  get storeName(): string {
-    return this.props?.storeName;
-  }
+  storeName: string;
 
   @IsEnum(Category)
-  get category(): Category {
-    return this.props?.category;
-  }
+  category: Category;
 
   @IsInt()
   @IsPositive()
-  get weight(): number {
-    return this.props?.weight;
-  }
+  weight: number;
 
   @IsInt()
   @IsPositive()
-  @Max(200)
-  get width(): number {
-    return this.props?.width;
-  }
+  width: number;
 
   @IsInt()
   @IsPositive()
-  @Max(200)
-  get length(): number {
-    return this.props?.length;
-  }
+  length: number;
 
   @IsInt()
   @IsPositive()
-  @Max(200)
-  get height(): number {
-    return this.props?.height;
+  height: number;
+}
+
+export class Item extends Identifiable(Validatable(ItemProps)) {
+  constructor(
+    {
+      id = new EntityId(),
+      title,
+      storeName,
+      category,
+      weight,
+      width,
+      length,
+      height,
+    }: ItemProps = new ItemProps(),
+  ) {
+    super();
+
+    this.id = id;
+    this.title = title;
+    this.storeName = storeName;
+    this.category = category;
+    this.weight = weight;
+    this.width = width;
+    this.length = length;
+    this.height = height;
   }
 
   get physicalCharacteristics(): PhysicalCharacteristics {

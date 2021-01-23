@@ -7,13 +7,16 @@ import {
   IsOptional,
   ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+import { EntityProps } from '../../../common/domain/Entity';
 import { Address } from './Address';
-import { Entity } from '../../../common/domain/Entity';
 import { Item } from './Item';
 import { Customer } from './Customer';
+import { Validatable } from '../../../common/domain/Validatable';
 import { ShipmentCostCalculatorPort } from '../../application/port/ShipmentCostCalculatorPort';
-import { Optional } from '../../../common/types';
-import { UniqueEntityID } from '../../../common/domain/UniqueEntityId';
+import { EntityId } from '../../../common/domain/EntityId';
+import { Identifiable } from '../../../common/domain/Identifiable';
 
 export type ShipmentCost = {
   amount: number;
@@ -28,53 +31,51 @@ export const OrderStatus = {
 
 export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
 
-type OrderProps = {
-  status?: OrderStatus;
-  customer: Customer;
-  // Non-empty array
-  items: Item[];
-  originCountry: string;
-  shipmentCost?: ShipmentCost;
-};
-
-export class Order extends Entity<OrderProps> {
-  constructor(
-    { status = OrderStatus.Requested, ...rest }: OrderProps,
-    id?: UniqueEntityID,
-  ) {
-    super({ status, ...rest }, id);
-  }
-
+export class OrderProps extends EntityProps {
   @IsEnum(OrderStatus)
-  get status(): OrderStatus {
-    return this.props?.status;
-  }
+  status?: OrderStatus;
 
   @ValidateNested()
-  get customer(): Customer {
-    return this.props?.customer;
-  }
+  @Type(() => Customer)
+  customer: Customer;
 
-  @IsArray()
-  @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  get items(): Item[] {
-    return this.props?.items;
-  }
+  @ArrayMinSize(1)
+  @IsArray()
+  @Type(() => Item)
+  items: Item[];
 
   @IsISO31661Alpha3()
-  get originCountry(): string {
-    return this.props?.originCountry;
-  }
+  originCountry: string;
 
   @IsOptional()
   @IsNumber()
-  get shipmentCost(): Optional<ShipmentCost> {
-    return this.props?.shipmentCost;
+  shipmentCost?: ShipmentCost;
+}
+
+export class Order extends Identifiable(Validatable(OrderProps)) {
+  get destination(): Address {
+    return this.customer.selectedAddress;
   }
 
-  get destination(): Address {
-    return this.customer?.selectedAddress;
+  constructor(
+    {
+      id = new EntityId(),
+      status = OrderStatus.Requested,
+      customer,
+      items,
+      originCountry,
+      shipmentCost,
+    }: OrderProps = new OrderProps(),
+  ) {
+    super();
+
+    this.id = id;
+    this.items = items;
+    this.status = status;
+    this.customer = customer;
+    this.shipmentCost = shipmentCost;
+    this.originCountry = originCountry;
   }
 
   async calculateShipmentCost(
@@ -83,12 +84,11 @@ export class Order extends Entity<OrderProps> {
     const shipmentCost: ShipmentCost = await calculator.getRate({
       originCountry: this.originCountry,
       destinationCountry: this.destination.country,
-      packages: this.items.map(({ weight, width, length, height }) => ({
-        weight,
-        dimensions: { width, length, height },
+      packages: this.items.map(({ physicalCharacteristics }) => ({
+        ...physicalCharacteristics,
       })),
     });
 
-    this.props.shipmentCost = shipmentCost;
+    this.shipmentCost = shipmentCost;
   }
 }
