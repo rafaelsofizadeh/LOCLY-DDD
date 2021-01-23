@@ -1,8 +1,10 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Inject,
   Post,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -21,11 +23,7 @@ export class OrderController {
 
   @Post('create')
   // Validation and transformation is performed by Nest.js global validation pipe
-  @UsePipes(
-    new ValidationPipe({
-      transform: true,
-    }),
-  )
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async createOrder(@Body() orderRequest: CreateOrderRequestAdapter) {
     const createdOrder: Order = await this.createOrderUseCase.execute(
       orderRequest,

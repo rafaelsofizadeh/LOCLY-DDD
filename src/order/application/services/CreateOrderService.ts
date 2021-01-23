@@ -32,7 +32,6 @@ export class CreateOrder implements CreateOrderUseCase {
       items,
     });
 
-    // TODO: 'whitelist' option throws random errors on all fields
     await order.validate();
 
     // TODO(?): Turn into a constructor action, after enough use cases accumulate for this
