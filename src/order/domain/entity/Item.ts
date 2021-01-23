@@ -76,19 +76,13 @@ export class Item extends Entity<ItemProps> {
   get height(): number {
     return this.props?.height;
   }
-  /*
-  get dimensions(): Dimensions {
+
+  get physicalCharacteristics(): PhysicalCharacteristics {
     return {
       width: this.width,
       length: this.length,
       height: this.height,
+      weight: this.weight,
     };
   }
-
-  set dimensions({ width, length, height }: Dimensions) {
-    this.props.width = width ?? this.props?.width;
-    this.props.length = length ?? this.props?.length;
-    this.props.height = height ?? this.props?.height;
-  }
-  */
 }
