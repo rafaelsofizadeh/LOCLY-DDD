@@ -1,14 +1,13 @@
-import { ValidationError, validate } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
 
-import { UniqueEntityID } from './UniqueEntityId';
-import { Base } from './Base';
-import { Exception } from '../error-handling/Exception';
-import { Code } from '../error-handling/Code';
+import { EntityId } from './EntityId';
 
-// TODO: enforce UUID everywhere
-export class Entity<P> extends Base<P> {
-  constructor(props: P, public readonly id = new UniqueEntityID()) {
-    super(props);
-  }
-
+export class EntityProps {
+  @ValidateNested({ groups: ['existing'] })
+  @Type(() => EntityId)
+  @Transform(({ value: id }: { value: EntityId }) => id.value, {
+    toPlainOnly: true,
+  })
+  id?: EntityId;
 }
