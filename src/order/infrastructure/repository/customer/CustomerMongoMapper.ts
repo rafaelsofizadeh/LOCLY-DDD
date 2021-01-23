@@ -1,7 +1,7 @@
 import { Binary } from 'mongodb';
 import * as MUUID from 'uuid-mongodb';
 
-import { UniqueEntityID } from '../../../../common/domain/UniqueEntityId';
+import { EntityId } from '../../../../common/domain/EntityId';
 import { Customer } from '../../../domain/entity/Customer';
 import { Address, AddressProps } from '../../../domain/entity/Address';
 
@@ -17,10 +17,10 @@ export function mongoDocumentToCustomer({
   _id,
   addresses,
 }: CustomerMongoDocument): Customer {
-  const customerId = new UniqueEntityID(MUUID.from(_id).toString());
+  const customerId = new EntityId(MUUID.from(_id).toString());
   const selectedAddress = new Address(
     addresses.find(({ selected }) => selected),
   );
 
-  return new Customer({ selectedAddress }, customerId);
+  return new Customer({ id: customerId, selectedAddress });
 }
