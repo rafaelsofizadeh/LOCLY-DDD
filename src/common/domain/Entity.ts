@@ -11,16 +11,4 @@ export class Entity<P> extends Base<P> {
     super(props);
   }
 
-  equals(entity: Entity<P>): boolean {
-    if (entity === null || entity === undefined) {
-      return false;
-    }
-
-    if (this === entity) {
-      return true;
-    }
-
-    return this.id === entity.id;
-  }
-
 }
