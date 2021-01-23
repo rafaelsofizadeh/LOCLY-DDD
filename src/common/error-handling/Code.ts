@@ -41,19 +41,14 @@ export class Code {
     message: 'Entity not found.',
   };
 
-  public static ENTITY_VALIDATION_ERROR: CodeDescription = {
-    code: 1001,
-    message: 'Entity validation error.',
-  };
-
   public static USE_CASE_PORT_VALIDATION_ERROR: CodeDescription = {
     code: 1002,
     message: 'Use-case port validation error.',
   };
 
-  public static VALUE_OBJECT_VALIDATION_ERROR: CodeDescription = {
+  public static VALIDATION_ERROR: CodeDescription = {
     code: 1003,
-    message: 'Value object validation error.',
+    message: 'Class validation error.',
   };
 
   public static ENTITY_ALREADY_EXISTS_ERROR: CodeDescription = {
