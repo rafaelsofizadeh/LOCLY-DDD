@@ -23,29 +23,4 @@ export class Entity<P> extends Base<P> {
     return this.id === entity.id;
   }
 
-  async validate(): Promise<ValidationError[] | void> {
-    console.log(`Validate ${(this as object).constructor.name}`, this);
-    const details: ValidationError[] = await validate(this);
-    console.log('details', details);
-
-    if (details.length) {
-      throw new Exception(
-        Code.ENTITY_VALIDATION_ERROR,
-        `Validation error(s) in ${(this as object).constructor.name}`,
-        details,
-      );
-    }
-  }
-
-  /*async validate(): Promise<void> {
-           try {
-             await super.validate.call(this);
-           } catch (exception) {
-             const typedException = exception as Exception<ValidationError[]>;
-             throw new Exception(
-               Code.ENTITY_VALIDATION_ERROR,
-               `Validation error(s) in ${(this as object).constructor.name}`,
-               typedException.data,
-             );
-           }*/
 }
