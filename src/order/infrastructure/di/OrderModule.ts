@@ -41,7 +41,7 @@ const useCaseProviders: Provider[] = [
 
 @Module({
   imports: [
-    MongoModule.forFeature(['orders', 'customers']),
+    MongoModule.forFeature(['orders', 'customers', 'hosts']),
     EventEmitterModule.forRoot(),
   ],
   controllers: [OrderController],
