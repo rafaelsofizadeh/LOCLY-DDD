@@ -11,9 +11,9 @@ import { isISO31661Alpha3, validate } from 'class-validator';
 
 export class CreateOrder implements CreateOrderUseCase {
   constructor(
-    private readonly customerRepository: CustomerRepositoryPort,
-    private readonly orderRepository: OrderRepositoryPort,
-    private readonly shipmentCostCalculator: ShipmentCostCalculatorPort,
+    private readonly customerRepository: CustomerRepository,
+    private readonly orderRepository: OrderRepository,
+    private readonly shipmentCostCalculator: ShipmentCostCalculator,
   ) {}
 
   // Input validation in Controllers (infra)
@@ -21,7 +21,7 @@ export class CreateOrder implements CreateOrderUseCase {
     customerId,
     originCountry,
     items,
-  }: CreateOrderRequestPort): Promise<Order> {
+  }: CreateOrderRequest): Promise<Order> {
     const customer: Customer = await this.customerRepository.findCustomer(
       customerId,
     );
@@ -35,7 +35,7 @@ export class CreateOrder implements CreateOrderUseCase {
     await order.validate();
 
     // TODO(?): Turn into a constructor action, after enough use cases accumulate for this
-    // order.calculateShipmentCost(this.shipmentCostCalculator);
+    order.calculateShipmentCost(this.shipmentCostCalculator);
 
     this.orderRepository.addOrder(order);
 

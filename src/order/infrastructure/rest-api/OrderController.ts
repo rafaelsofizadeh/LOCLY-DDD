@@ -11,15 +11,11 @@ import {
 
 import { CreateOrderRequestAdapter } from './CreateOrderRequestAdapter';
 import { CreateOrderUseCase } from '../../domain/use-case/create-order/CreateOrderUseCase';
-import { CreateOrderUseCaseProvider } from '../di/OrderDiTokens';
 import { Order } from '../../domain/entity/Order';
 
 @Controller('order')
 export class OrderController {
-  constructor(
-    @Inject(CreateOrderUseCaseProvider)
-    private readonly createOrderUseCase: CreateOrderUseCase,
-  ) {}
+  constructor(private readonly createOrderUseCase: CreateOrderUseCase) {}
 
   @Post('create')
   // Validation and transformation is performed by Nest.js global validation pipe

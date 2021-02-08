@@ -1,3 +1,3 @@
-export interface UseCase<TUseCasePort, TUseCaseResult> {
-  execute(port?: TUseCasePort): Promise<TUseCaseResult>;
+export abstract class UseCase<TUseCasePort, TUseCaseResult> {
+  abstract execute(port?: TUseCasePort): Promise<TUseCaseResult>;
 }

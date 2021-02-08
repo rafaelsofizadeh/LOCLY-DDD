@@ -3,12 +3,12 @@ import { Collection } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 import { Code } from '../../../../common/error-handling/Code';
 import { Exception } from '../../../../common/error-handling/Exception';
-import { OrderRepositoryPort } from '../../../application/port/OrderRepositoryPort';
+import { OrderRepository } from '../../../application/port/OrderRepository';
 import { Order } from '../../../domain/entity/Order';
 import { OrderMongoDocument, orderToMongoDocument } from './OrderMongoMapper';
 
 @Injectable()
-export class OrderMongoRepositoryAdapter implements OrderRepositoryPort {
+export class OrderMongoRepositoryAdapter implements OrderRepository {
   constructor(
     @InjectCollection('orders')
     private readonly orderCollection: Collection<OrderMongoDocument>,

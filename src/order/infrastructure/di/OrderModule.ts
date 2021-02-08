@@ -1,32 +1,32 @@
 import { Module, Provider } from '@nestjs/common';
 import { MongoModule } from 'nest-mongodb';
+import { CustomerRepository } from '../../application/port/CustomerRepository';
+import { OrderRepository } from '../../application/port/OrderRepository';
+import { ShipmentCostCalculator } from '../../application/port/ShipmentCostCalculator';
 import { CreateOrder } from '../../application/services/CreateOrderService';
+import { CreateOrderUseCase } from '../../domain/use-case/create-order/CreateOrderUseCase';
 import { CustomerMongoRepositoryAdapter } from '../repository/customer/CustomerMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from '../repository/order/OrderMongoRepositoryAdapter';
 import { OrderController } from '../rest-api/OrderController';
-import {
-  CreateOrderUseCaseProvider,
-  CustomerRepositoryProvider,
-  OrderRepositoryProvider,
-} from './OrderDiTokens';
 
 const persistenceProviders: Provider[] = [
   {
-    provide: OrderRepositoryProvider,
+    provide: OrderRepository,
     useClass: OrderMongoRepositoryAdapter,
   },
   {
-    provide: CustomerRepositoryProvider,
+    provide: CustomerRepository,
     useClass: CustomerMongoRepositoryAdapter,
   },
+];
+const infrastructureProviders: Provider[] = [
+  { provide: ShipmentCostCalculator, useValue: 'shipment' },
 ];
 
 const useCaseProviders: Provider[] = [
   {
-    provide: CreateOrderUseCaseProvider,
-    useFactory: (customerRepository, orderRepository) =>
-      new CreateOrder(customerRepository, orderRepository, 'a' as any),
-    inject: [CustomerRepositoryProvider, OrderRepositoryProvider],
+    provide: CreateOrderUseCase,
+    useClass: CreateOrder,
   },
 ];
 

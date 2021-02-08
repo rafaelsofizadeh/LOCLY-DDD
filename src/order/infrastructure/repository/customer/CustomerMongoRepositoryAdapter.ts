@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
 import { EntityId } from '../../../../common/domain/EntityId';
-import { CustomerRepositoryPort } from '../../../application/port/CustomerRepositoryPort';
+import { CustomerRepository } from '../../../application/port/CustomerRepository';
 import { Customer } from '../../../domain/entity/Customer';
 import {
   mongoDocumentToCustomer,
@@ -14,7 +14,7 @@ import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
 
 @Injectable()
-export class CustomerMongoRepositoryAdapter implements CustomerRepositoryPort {
+export class CustomerMongoRepositoryAdapter implements CustomerRepository {
   constructor(
     @InjectCollection('customers')
     private readonly customerCollection: Collection<CustomerMongoDocument>,

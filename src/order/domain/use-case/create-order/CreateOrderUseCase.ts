@@ -1,5 +1,6 @@
 import { OrderUseCase } from '../OrderUseCase';
 import { CreateOrderRequestPort } from './CreateOrderRequestPort';
 
-export interface CreateOrderUseCase
-  extends OrderUseCase<CreateOrderRequestPort> {}
+export abstract class CreateOrderUseCase extends OrderUseCase<
+  CreateOrderRequest
+> {}
