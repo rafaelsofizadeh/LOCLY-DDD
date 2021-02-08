@@ -1,22 +1,29 @@
-import { OrderRepositoryPort } from '../port/OrderRepositoryPort';
-import { CustomerRepositoryPort } from '../port/CustomerRepositoryPort';
-import { ShipmentCostCalculatorPort } from '../port/ShipmentCostCalculatorPort';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import { OrderRepository } from '../port/OrderRepository';
+import { CustomerRepository } from '../port/CustomerRepository';
+import { ShipmentCostCalculator } from '../port/ShipmentCostCalculator';
 
 import { CreateOrderUseCase } from '../../domain/use-case/create-order/CreateOrderUseCase';
 
 import { Order } from '../../domain/entity/Order';
 import { Customer } from '../../domain/entity/Customer';
-import { CreateOrderRequestPort } from '../../domain/use-case/create-order/CreateOrderRequestPort';
-import { isISO31661Alpha3, validate } from 'class-validator';
+import { CreateOrderRequest } from '../../domain/use-case/create-order/CreateOrderRequest';
+import { Injectable } from '@nestjs/common';
+import { HostMatcher } from '../port/HostMatcher';
 
+@Injectable()
 export class CreateOrder implements CreateOrderUseCase {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,
     private readonly shipmentCostCalculator: ShipmentCostCalculator,
+    private readonly hostMatcher: HostMatcher,
+    // TODO: More general EventEmitter class, wrapper around eventEmitter
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  // Input validation in Controllers (infra)
+  // Input validation in Controllers (/infrastructure)
   async execute({
     customerId,
     originCountry,
@@ -37,9 +44,22 @@ export class CreateOrder implements CreateOrderUseCase {
     // TODO(?): Turn into a constructor action, after enough use cases accumulate for this
     order.calculateShipmentCost(this.shipmentCostCalculator);
 
-    this.orderRepository.addOrder(order);
+    await this.orderRepository.addOrder(order);
 
-    // Serialization in Controllers (infra)
+    // TODO(NOW): Make this throw and handle all subsequent events (refer to the diagram) (or find a better way)
+    await this.hostMatcher.checkServiceAvailability(
+      order.originCountry,
+      order.destination.country,
+    );
+
+    // TODO(NOW): Make this throw and handle all subsequent events (refer to the diagram) (or find a better way)
+    const host = await this.hostMatcher.matchHost(originCountry);
+    order.host = host;
+
+    // TODO: Wrapper around eventEmitter
+    this.eventEmitter.emitAsync('order.created', order);
+
+    // Serialization in Controllers (/infrastructure)
     return order;
   }
 }

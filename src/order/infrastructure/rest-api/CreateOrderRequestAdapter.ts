@@ -8,7 +8,6 @@ import {
 } from 'class-validator';
 
 import { EntityId } from '../../../common/domain/EntityId';
-import { Identifiable } from '../../../common/domain/Identifiable';
 import { Validatable } from '../../../common/domain/Validatable';
 import { Item, ItemProps } from '../../domain/entity/Item';
 

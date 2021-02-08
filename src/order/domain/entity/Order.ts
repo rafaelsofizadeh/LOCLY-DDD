@@ -14,9 +14,10 @@ import { Address } from './Address';
 import { Item } from './Item';
 import { Customer } from './Customer';
 import { Validatable } from '../../../common/domain/Validatable';
-import { ShipmentCostCalculatorPort } from '../../application/port/ShipmentCostCalculatorPort';
+import { ShipmentCostCalculator } from '../../application/port/ShipmentCostCalculator';
 import { EntityId } from '../../../common/domain/EntityId';
 import { Identifiable } from '../../../common/domain/Identifiable';
+import { Host } from './Host';
 
 export type ShipmentCost = {
   amount: number;
@@ -24,9 +25,8 @@ export type ShipmentCost = {
 };
 
 export const OrderStatus = {
-  Requested: 'requested',
+  Drafted: 'drafted',
   Initialized: 'initialized',
-  Uninitialized: 'uninitilized',
 } as const;
 
 export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
@@ -38,6 +38,12 @@ export class OrderProps extends EntityProps {
   @ValidateNested()
   @Type(() => Customer)
   customer: Customer;
+
+  // TODO(NOW): Condition 'optional' on order's status (or find a better way)
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => Host)
+  host?: Host;
 
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
@@ -60,8 +66,8 @@ export class Order extends Identifiable(Validatable(OrderProps)) {
 
   constructor(
     {
-      id = new EntityId(),
-      status = OrderStatus.Requested,
+      id,
+      status,
       customer,
       items,
       originCountry,
@@ -70,16 +76,16 @@ export class Order extends Identifiable(Validatable(OrderProps)) {
   ) {
     super();
 
-    this.id = id;
+    this.id = id || new EntityId();
     this.items = items;
-    this.status = status;
+    this.status = status || OrderStatus.Drafted;
     this.customer = customer;
     this.shipmentCost = shipmentCost;
     this.originCountry = originCountry;
   }
 
   async calculateShipmentCost(
-    calculator: ShipmentCostCalculatorPort,
+    calculator: ShipmentCostCalculator,
   ): Promise<void> {
     const shipmentCost: ShipmentCost = await calculator.getRate({
       originCountry: this.originCountry,
