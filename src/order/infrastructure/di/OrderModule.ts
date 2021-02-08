@@ -6,6 +6,7 @@ import { HostMatcher } from '../../application/port/HostMatcher';
 import { HostRepository } from '../../application/port/HostRepository';
 import { OrderRepository } from '../../application/port/OrderRepository';
 import { ShipmentCostCalculator } from '../../application/port/ShipmentCostCalculator';
+import { CalculateShipmentCost } from '../../application/services/CalculateShipmentCostService';
 import { CreateOrder } from '../../application/services/CreateOrderService';
 import { MatchHost } from '../../application/services/MatchHostService';
 import { CreateOrderUseCase } from '../../domain/use-case/create-order/CreateOrderUseCase';
@@ -27,7 +28,7 @@ const persistenceProviders: Provider[] = [
 ];
 
 const infrastructureProviders: Provider[] = [
-  { provide: ShipmentCostCalculator, useValue: 'shipment' },
+  { provide: ShipmentCostCalculator, useClass: CalculateShipmentCost },
   { provide: HostMatcher, useClass: MatchHost },
 ];
 
