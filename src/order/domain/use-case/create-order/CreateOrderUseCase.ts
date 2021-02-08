@@ -1,5 +1,5 @@
 import { OrderUseCase } from '../OrderUseCase';
-import { CreateOrderRequestPort } from './CreateOrderRequestPort';
+import { CreateOrderRequest } from './CreateOrderRequest';
 
 export abstract class CreateOrderUseCase extends OrderUseCase<
   CreateOrderRequest
