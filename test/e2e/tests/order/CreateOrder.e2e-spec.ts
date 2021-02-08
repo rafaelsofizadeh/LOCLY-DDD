@@ -52,14 +52,14 @@ describe('Create Order – POST /order/create', () => {
           },
         ],
       });
-    
+
     expect(response.status).toBe(201);
 
     const body = response.body;
 
     expect(isUUID(body.id)).toBe(true);
     expect(body.customer).toEqual(classToPlain(testCustomer));
-    expect(body.status).toBe('drafted');
+    expect(body.status).toBe('submitted');
     expect(body.originCountry).toBe(testCustomer.selectedAddress.country);
   });
 });

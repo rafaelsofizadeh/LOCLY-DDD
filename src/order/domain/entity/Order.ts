@@ -25,7 +25,7 @@ export type ShipmentCost = {
 };
 
 export const OrderStatus = {
-  Drafted: 'drafted',
+  Submitted: 'submitted',
   Initialized: 'initialized',
 } as const;
 
@@ -78,7 +78,7 @@ export class Order extends Identifiable(Validatable(OrderProps)) {
 
     this.id = id || new EntityId();
     this.items = items;
-    this.status = status || OrderStatus.Drafted;
+    this.status = status || OrderStatus.Submitted;
     this.customer = customer;
     this.shipmentCost = shipmentCost;
     this.originCountry = originCountry;
