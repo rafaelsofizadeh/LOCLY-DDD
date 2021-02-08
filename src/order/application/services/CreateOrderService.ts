@@ -10,7 +10,6 @@ import { Order } from '../../domain/entity/Order';
 import { Customer } from '../../domain/entity/Customer';
 import { CreateOrderRequest } from '../../domain/use-case/create-order/CreateOrderRequest';
 import { Injectable } from '@nestjs/common';
-import { HostMatcher } from '../port/HostMatcher';
 
 @Injectable()
 export class CreateOrder implements CreateOrderUseCase {
@@ -18,7 +17,6 @@ export class CreateOrder implements CreateOrderUseCase {
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,
     private readonly shipmentCostCalculator: ShipmentCostCalculator,
-    private readonly hostMatcher: HostMatcher,
     // TODO: More general EventEmitter class, wrapper around eventEmitter
     private readonly eventEmitter: EventEmitter2,
   ) {}
@@ -45,16 +43,6 @@ export class CreateOrder implements CreateOrderUseCase {
     order.calculateShipmentCost(this.shipmentCostCalculator);
 
     await this.orderRepository.addOrder(order);
-
-    // TODO(NOW): Make this throw and handle all subsequent events (refer to the diagram) (or find a better way)
-    await this.hostMatcher.checkServiceAvailability(
-      order.originCountry,
-      order.destination.country,
-    );
-
-    // TODO(NOW): Make this throw and handle all subsequent events (refer to the diagram) (or find a better way)
-    const host = await this.hostMatcher.matchHost(originCountry);
-    order.host = host;
 
     // TODO: Wrapper around eventEmitter
     this.eventEmitter.emitAsync('order.created', order);
