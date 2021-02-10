@@ -1,31 +1,13 @@
-import { Nullable, Optional } from './types';
+import { Binary } from 'mongodb';
+import * as MUUID from 'uuid-mongodb';
+
+import { EntityId } from './domain/EntityId';
 
 export function enumToArray(inputEnum: any): any[] {
   const middle = Math.floor(inputEnum.length / 2);
   return Object.values(inputEnum).slice(0, middle);
 }
 
-export namespace Assert {
-  export function trueOrThrow(expression: boolean, exception: Error): void {
-    if (!expression) {
-      throw exception;
-    }
-  }
-
-  export function falseOrThrow(expression: boolean, exception: Error): void {
-    if (expression) {
-      throw exception;
-    }
-  }
-
-  export function notEmptyOrThrow<T>(
-    value: Optional<Nullable<T>>,
-    exception: Error,
-  ): T {
-    if (value === null || value === undefined) {
-      throw exception;
-    }
-
-    return value as T;
-  }
+export function muuidToEntityId(id: Binary): EntityId {
+  return new EntityId(MUUID.from(id).toString());
 }

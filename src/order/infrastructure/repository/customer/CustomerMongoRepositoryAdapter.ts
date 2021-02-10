@@ -13,6 +13,7 @@ import {
 import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
 
+// TODO: mongoDocumentToXXX to a decorator
 @Injectable()
 export class CustomerMongoRepositoryAdapter implements CustomerRepository {
   constructor(
@@ -21,11 +22,6 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
   ) {}
 
   async findCustomer(customerId: EntityId): Promise<Customer> {
-    /*await this.customerCollection.insertOne({
-      _id: MUUID.from('bbee31b0-14b4-4d7f-9f12-12456c686b19'),
-      addresses: [{ selected: true, country: 'AUS' }],
-    });*/
-
     const customerDocument: CustomerMongoDocument = await this.customerCollection.findOne(
       { _id: MUUID.from(customerId.value) },
     );

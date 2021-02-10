@@ -2,13 +2,17 @@ import { Binary } from 'mongodb';
 import * as MUUID from 'uuid-mongodb';
 import { classToPlain } from 'class-transformer';
 
+import { EntityId } from '../../../../common/domain/EntityId';
 import { AddressProps } from '../../../domain/entity/Address';
-import { ItemProps } from '../../../domain/entity/Item';
+import { Item, ItemProps } from '../../../domain/entity/Item';
 import {
+  Order,
   OrderProps,
   OrderStatus,
   ShipmentCost,
 } from '../../../domain/entity/Order';
+import { muuidToEntityId } from '../../../../common/utils';
+import { Customer } from '../../../domain/entity/Customer';
 
 export type OrderMongoDocument = {
   _id: Binary;
@@ -19,6 +23,11 @@ export type OrderMongoDocument = {
   shipmentCost: ShipmentCost;
   destination: AddressProps;
 };
+
+export type PopulatedOrderMongoDocument = Omit<
+  OrderMongoDocument,
+  'customerId'
+> & { customer: Customer };
 
 export function orderToMongoDocument(order: OrderProps): OrderMongoDocument {
   // For id, see: Entity { @Transform() id }
@@ -34,4 +43,18 @@ export function orderToMongoDocument(order: OrderProps): OrderMongoDocument {
     _id: mongoBinaryId,
     ...restPlainOrder,
   };
+}
+
+export function mongoDocumentToOrder({
+  _id,
+  items,
+  originCountry,
+  customer,
+}: PopulatedOrderMongoDocument): Order {
+  return new Order({
+    id: muuidToEntityId(_id),
+    customer,
+    items: items.map(item => new Item(item)),
+    originCountry,
+  });
 }

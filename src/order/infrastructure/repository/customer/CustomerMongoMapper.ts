@@ -4,6 +4,7 @@ import * as MUUID from 'uuid-mongodb';
 import { EntityId } from '../../../../common/domain/EntityId';
 import { Customer } from '../../../domain/entity/Customer';
 import { Address, AddressProps } from '../../../domain/entity/Address';
+import { muuidToEntityId } from '../../../../common/utils';
 
 type CustomerAddress = AddressProps & { selected: boolean };
 
@@ -17,10 +18,8 @@ export function mongoDocumentToCustomer({
   _id,
   addresses,
 }: CustomerMongoDocument): Customer {
-  const customerId = new EntityId(MUUID.from(_id).toString());
-  const selectedAddress = new Address(
-    addresses.find(({ selected }) => selected),
-  );
-
-  return new Customer({ id: customerId, selectedAddress });
+  return new Customer({
+    id: muuidToEntityId(_id),
+    selectedAddress: new Address(addresses.find(({ selected }) => selected)),
+  });
 }

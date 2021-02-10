@@ -4,6 +4,7 @@ import * as MUUID from 'uuid-mongodb';
 import { EntityId } from '../../../../common/domain/EntityId';
 import { Host } from '../../../domain/entity/Host';
 import { Address } from '../../../domain/entity/Address';
+import { muuidToEntityId } from '../../../../common/utils';
 
 export type HostMongoDocument = {
   _id: Binary;
@@ -17,7 +18,7 @@ export function mongoDocumentToHost({
   available,
 }: HostMongoDocument): Host {
   return new Host({
-    id: new EntityId(MUUID.from(_id).toString()),
+    id: muuidToEntityId(_id),
     address,
     available,
   });
