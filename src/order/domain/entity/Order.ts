@@ -77,10 +77,27 @@ export class Order extends Identifiable(Validatable(OrderProps)) {
     super();
 
     this.id = id || new EntityId();
+    this.updateStatus(status);
     this.items = items;
     this.customer = customer;
     this.shipmentCost = shipmentCost;
     this.originCountry = originCountry;
+  }
+
+  updateStatus(newStatus?: OrderStatus): OrderStatus {
+    if (newStatus) {
+      this.status = newStatus;
+      return this.status;
+    }
+
+    const statusTuples = Object.entries(OrderStatus);
+    const currentStatusIndex: number = statusTuples.findIndex(
+      ([_, status]: [string, OrderStatus]) => this.status === status,
+    );
+    const nextStatus: OrderStatus = statusTuples[currentStatusIndex + 1][1];
+
+    this.status = nextStatus;
+    return this.status;
   }
 
   async calculateShipmentCost(
