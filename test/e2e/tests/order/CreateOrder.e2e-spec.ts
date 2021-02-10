@@ -59,7 +59,7 @@ describe('Create Order – POST /order/create', () => {
 
     expect(isUUID(body.id)).toBe(true);
     expect(body.customer).toEqual(classToPlain(testCustomer));
-    expect(body.status).toBe('submitted');
+    expect(body.status).toBe('drafted');
     expect(body.originCountry).toBe(testCustomer.selectedAddress.country);
   });
 });

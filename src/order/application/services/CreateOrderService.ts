@@ -45,7 +45,8 @@ export class CreateOrder implements CreateOrderUseCase {
     await this.orderRepository.addOrder(order);
 
     // TODO: Wrapper around eventEmitter
-    this.eventEmitter.emitAsync('order.created', order);
+    // TODO(?): Event emitting decorator
+    this.eventEmitter.emitAsync('order.drafted', order);
 
     // Serialization in Controllers (/infrastructure)
     return order;

@@ -22,10 +22,10 @@ export class OrderController {
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @UseInterceptors(ClassSerializerInterceptor)
   async createOrder(@Body() orderRequest: CreateOrderRequestAdapter) {
-    const createdOrder: Order = await this.createOrderUseCase.execute(
+    const draftedOrder: Order = await this.createOrderUseCase.execute(
       orderRequest,
     );
 
-    return createdOrder;
+    return draftedOrder;
   }
 }
