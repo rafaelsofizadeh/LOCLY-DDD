@@ -7,8 +7,10 @@ import { HostRepository } from '../../application/port/HostRepository';
 import { OrderRepository } from '../../application/port/OrderRepository';
 import { ShipmentCostCalculator } from '../../application/port/ShipmentCostCalculator';
 import { CalculateShipmentCost } from '../../application/services/CalculateShipmentCostService';
+import { ConfirmOrder } from '../../application/services/ConfirmOrderService';
 import { CreateOrder } from '../../application/services/CreateOrderService';
 import { MatchHost } from '../../application/services/MatchHostService';
+import { ConfirmOrderUseCase } from '../../domain/use-case/confirm-order/ConfirmOrderUseCase';
 import { CreateOrderUseCase } from '../../domain/use-case/create-order/CreateOrderUseCase';
 import { CustomerMongoRepositoryAdapter } from '../repository/customer/CustomerMongoRepositoryAdapter';
 import { HostMongoRepositoryAdapter } from '../repository/host/HostMongoRepositoryAdapter';
@@ -36,6 +38,10 @@ const useCaseProviders: Provider[] = [
   {
     provide: CreateOrderUseCase,
     useClass: CreateOrder,
+  },
+  {
+    provide: ConfirmOrderUseCase,
+    useClass: ConfirmOrder,
   },
 ];
 

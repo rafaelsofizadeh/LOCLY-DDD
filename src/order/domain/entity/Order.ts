@@ -18,6 +18,7 @@ import { ShipmentCostCalculator } from '../../application/port/ShipmentCostCalcu
 import { EntityId } from '../../../common/domain/EntityId';
 import { Identifiable } from '../../../common/domain/Identifiable';
 import { Host } from './Host';
+import { HostMatcher } from '../../application/port/HostMatcher';
 
 export type ShipmentCost = {
   amount: number;
@@ -112,5 +113,11 @@ export class Order extends Identifiable(Validatable(OrderProps)) {
     });
 
     this.shipmentCost = shipmentCost;
+  }
+
+  async matchHost(hostMatcher: HostMatcher): Promise<void> {
+    const host: Host = await hostMatcher.matchHost(this.originCountry);
+
+    this.host = host;
   }
 }

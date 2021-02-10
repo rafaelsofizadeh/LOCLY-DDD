@@ -21,6 +21,9 @@ export class MatchHost implements HostMatcher {
   }
 
   async matchHost(country: string): Promise<Host> {
-    return this.hostRepository.findAvailableHostInCountry(country);
+    // Round robin
+    return this.hostRepository.findHostAvailableInCountryWithMinimumNumberOfOrders(
+      country,
+    );
   }
 }
