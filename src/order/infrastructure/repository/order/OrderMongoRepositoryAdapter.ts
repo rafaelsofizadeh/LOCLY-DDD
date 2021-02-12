@@ -56,5 +56,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     }
 
     return mongoDocumentToOrder({ ...orderDocument, customer });
+
+  async deleteOrder(orderId: EntityId): Promise<void> {
+    this.orderCollection.deleteOne({ _id: MUUID.from(orderId.value) });
   }
 }

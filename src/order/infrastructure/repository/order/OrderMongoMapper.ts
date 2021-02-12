@@ -2,7 +2,6 @@ import { Binary } from 'mongodb';
 import * as MUUID from 'uuid-mongodb';
 import { classToPlain } from 'class-transformer';
 
-import { EntityId } from '../../../../common/domain/EntityId';
 import { AddressProps } from '../../../domain/entity/Address';
 import { Item, ItemProps } from '../../../domain/entity/Item';
 import {

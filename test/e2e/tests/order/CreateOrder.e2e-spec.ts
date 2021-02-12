@@ -8,10 +8,16 @@ import { CustomerFixture } from '../../fixture/CustomerFixture';
 import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { isUUID } from 'class-validator';
 import { classToPlain } from 'class-transformer';
+import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
+import { EntityId } from '../../../../src/common/domain/EntityId';
 
 describe('Create Order – POST /order/create', () => {
   let app: INestApplication;
+
   let customerFixture: CustomerFixture;
+  let orderRepository: OrderRepository;
+
+  let testOrderId: EntityId;
   let testCustomer: Customer;
 
   beforeAll(async () => {
@@ -26,13 +32,20 @@ describe('Create Order – POST /order/create', () => {
       // TODO: how to use @InjectCollection without inserting the string token manually?
       moduleRef.get<mongo.Collection>(`customersCollection`),
     );
+
+    orderRepository = await moduleRef.resolve(OrderRepository);
   });
 
   beforeEach(async () => {
-    testCustomer = await customerFixture.insertTestCustomer();
+    testCustomer = await customerFixture.createTestCustomer();
   });
 
-  afterEach(() => customerFixture.deleteTestCustomer());
+  afterEach(() =>
+    Promise.all([
+      customerFixture.deleteTestCustomer(),
+      orderRepository.deleteOrder(testOrderId),
+    ]),
+  );
 
   it('returns an Order object on proper Order Request format and existing customerId', async () => {
     const response: supertest.Response = await supertest(app.getHttpServer())
@@ -56,6 +69,7 @@ describe('Create Order – POST /order/create', () => {
     expect(response.status).toBe(201);
 
     const body = response.body;
+    testOrderId = new EntityId(body.id);
 
     expect(isUUID(body.id)).toBe(true);
     expect(body.customer).toEqual(classToPlain(testCustomer));
