@@ -55,15 +55,22 @@ export class OrderProps extends EntityProps {
   @IsISO31661Alpha3()
   originCountry: string;
 
+  // Why not just use a destination() getter, that will get the destination country from the Customer?
+  // A problem arises if, after Order's submission, the Customer updates their "selectedAddress" field.
+  // Upon getting the Order from persistence (and, together with it, the Order's Customer),
+  // the destination will be updated accordingly, which SHOULDN'T happen.
+  // So we have to save the relevant bits of Customer's state at the time of Order submission.
+  @IsISO31661Alpha3()
+  @ValidateNested()
+  @Type(() => Address)
+  destination: Address;
+
   @IsOptional()
   @IsNumber()
   shipmentCost?: ShipmentCost;
 }
 
 export class Order extends Identifiable(Validatable(OrderProps)) {
-  get destination(): Address {
-    return this.customer.selectedAddress;
-  }
 
   constructor(
     {
@@ -72,6 +79,7 @@ export class Order extends Identifiable(Validatable(OrderProps)) {
       customer,
       items,
       originCountry,
+      destination,
       shipmentCost,
     }: OrderProps = new OrderProps(),
   ) {
@@ -81,8 +89,9 @@ export class Order extends Identifiable(Validatable(OrderProps)) {
     this.updateStatus(status);
     this.items = items;
     this.customer = customer;
-    this.shipmentCost = shipmentCost;
     this.originCountry = originCountry;
+    this.destination = destination;
+    this.shipmentCost = shipmentCost;
   }
 
   updateStatus(newStatus?: OrderStatus): OrderStatus {
