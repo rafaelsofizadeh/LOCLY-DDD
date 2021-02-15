@@ -11,7 +11,11 @@ import {
   ShipmentCost,
 } from '../../../domain/entity/Order';
 import { muuidToEntityId } from '../../../../common/utils';
-import { Customer } from '../../../domain/entity/Customer';
+import { Customer, CustomerProps } from '../../../domain/entity/Customer';
+import {
+  EntityIdToStringId,
+  MongoIdToEntityId,
+} from '../../../../common/types';
 
 export type OrderMongoDocument = {
   _id: Binary;
@@ -28,19 +32,22 @@ export type PopulatedOrderMongoDocument = Omit<
   'customerId'
 > & { customer: Customer };
 
+// TOFIX
 export function orderToMongoDocument(order: OrderProps): OrderMongoDocument {
   // For id, see: Entity { @Transform() id }
-  const { id: rawId, ...restPlainOrder } = classToPlain(order) as Omit<
-    OrderMongoDocument,
-    '_id'
-  > & {
-    id: string;
+  const { id: rawId, customer, ...restPlainOrder } = classToPlain(
+    order,
+  ) as Omit<MongoIdToEntityId<OrderMongoDocument>, 'customer'> & {
+    customer: EntityIdToStringId<CustomerProps>;
   };
+
   const mongoBinaryId = MUUID.from(rawId);
+  const customerMongoBinaryId = MUUID.from(customer.id);
 
   return {
-    _id: mongoBinaryId,
     ...restPlainOrder,
+    _id: mongoBinaryId,
+    customerId: customerMongoBinaryId,
   };
 }
 
