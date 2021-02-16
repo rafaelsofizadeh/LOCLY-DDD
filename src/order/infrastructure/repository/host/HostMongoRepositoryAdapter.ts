@@ -27,7 +27,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     // $sort + $limit coalescense: https://docs.mongodb.com/manual/reference/method/cursor.sort/#limit-results
     const [hostDocument]: HostMongoDocument[] = await this.hostCollection
       .aggregate([
-        { $match: this.hostAvailableInHostQuery(country) },
+        { $match: this.hostAvailableInCountryQuery(country) },
         {
           $addFields: {
             orderCount: {
@@ -55,7 +55,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     return mongoDocumentToHost(hostDocument);
   }
 
-  private hostAvailableInHostQuery(country) {
+  private hostAvailableInCountryQuery(country) {
     return {
       'address.country': country,
       available: true,
