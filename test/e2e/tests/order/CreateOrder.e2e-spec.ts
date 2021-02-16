@@ -1,21 +1,21 @@
-import * as mongo from 'mongodb';
 import * as supertest from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-
-import { AppModule } from '../../../../src/AppModule';
-import { CustomerFixture } from '../../fixture/CustomerFixture';
-import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { isUUID } from 'class-validator';
 import { classToPlain } from 'class-transformer';
+
+import { AppModule } from '../../../../src/AppModule';
+import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { EntityId } from '../../../../src/common/domain/EntityId';
 import { OrderStatus } from '../../../../src/order/domain/entity/Order';
+import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
+import { Address } from '../../../../src/order/domain/entity/Address';
 
 describe('Create Order – POST /order/create', () => {
   let app: INestApplication;
 
-  let customerFixture: CustomerFixture;
+  let customerRepository: CustomerRepository;
   let orderRepository: OrderRepository;
 
   let testOrderId: EntityId;
@@ -29,24 +29,26 @@ describe('Create Order – POST /order/create', () => {
     app = moduleRef.createNestApplication();
     await app.init();
 
-    customerFixture = new CustomerFixture(
-      // TODO: how to use @InjectCollection without inserting the string token manually?
-      moduleRef.get<mongo.Collection>(`customersCollection`),
-    );
+    customerRepository = (await moduleRef.resolve(
+      CustomerRepository,
+    )) as CustomerRepository;
 
-    orderRepository = await moduleRef.resolve(OrderRepository);
+    orderRepository = (await moduleRef.resolve(
+      OrderRepository,
+    )) as OrderRepository;
+
+    // Customer shouldn't be affected from test case to test case,
+    // so we initialize it once, before all tests.
+    testCustomer = new Customer({
+      selectedAddress: new Address({ country: 'AUS' }),
+    });
+
+    await customerRepository.addCustomer(testCustomer);
   });
 
-  beforeEach(async () => {
-    testCustomer = await customerFixture.createTestCustomer();
-  });
-
-  afterEach(() =>
-    Promise.all([
-      customerFixture.deleteTestCustomer(),
-      orderRepository.deleteOrder(testOrderId),
-    ]),
-  );
+  // Customer shouldn't be affected from test case to test case,
+  // so we destroy it once, after all tests.
+  afterAll(() => customerRepository.deleteCustomer(testCustomer));
 
   it('returns an Order object on proper Order Request format and existing customerId', async () => {
     const response: supertest.Response = await supertest(app.getHttpServer())
