@@ -23,9 +23,9 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   ): Promise<Host> {
     // Finding max value in array: https://stackoverflow.com/questions/32076382/mongodb-how-to-get-max-value-from-collections
     // Sorting by array length: https://stackoverflow.com/a/54529224/6539857
-    // Destructuring because the result is limited to 1
+    // Destructuring because the result is limited to 1 (TODO: ARRAY DESTR. DOESN'T WORK)
     // $sort + $limit coalescense: https://docs.mongodb.com/manual/reference/method/cursor.sort/#limit-results
-    const [hostDocument]: HostMongoDocument[] = await this.hostCollection
+    const hostDocuments: HostMongoDocument[] = await this.hostCollection
       .aggregate([
         { $match: this.hostAvailableInCountryQuery(country) },
         {
@@ -44,6 +44,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
       ])
       .toArray();
 
+    const hostDocument = hostDocuments[0];
     if (!hostDocument) {
       throw new Exception(
         Code.ENTITY_NOT_FOUND_ERROR,
