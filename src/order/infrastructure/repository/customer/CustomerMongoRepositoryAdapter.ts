@@ -21,10 +21,10 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
     private readonly customerCollection: Collection<CustomerMongoDocument>,
   ) {}
 
-  async addCustomer(customer: Customer): Promise<void> {
+  async addCustomer({ id, selectedAddress }: Customer): Promise<void> {
     this.customerCollection.insertOne({
-      _id: MUUID.from(customer.id.value),
-      addresses: [{ ...customer.selectedAddress, selected: true }],
+      _id: MUUID.from(id.value),
+      addresses: [{ ...selectedAddress, selected: true }],
     });
   }
 
