@@ -10,6 +10,7 @@ import { isUUID } from 'class-validator';
 import { classToPlain } from 'class-transformer';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { EntityId } from '../../../../src/common/domain/EntityId';
+import { OrderStatus } from '../../../../src/order/domain/entity/Order';
 
 describe('Create Order – POST /order/create', () => {
   let app: INestApplication;
@@ -73,7 +74,7 @@ describe('Create Order – POST /order/create', () => {
 
     expect(isUUID(body.id)).toBe(true);
     expect(body.customer).toEqual(classToPlain(testCustomer));
-    expect(body.status).toBe('drafted');
+    expect(body.status).toBe(OrderStatus.Drafted);
     expect(body.originCountry).toBe(testCustomer.selectedAddress.country);
   });
 });
