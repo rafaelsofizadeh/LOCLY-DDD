@@ -26,7 +26,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     private readonly customerRepository: CustomerRepository,
   ) {}
 
-  async addOrder(order: Order) {
+  async addOrder(order: Order): Promise<void> {
     const orderDocument = orderToMongoDocument(order);
 
     await this.orderCollection.insertOne(orderDocument).catch(error => {
