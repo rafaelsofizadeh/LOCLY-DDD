@@ -25,8 +25,12 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   async addHost(host: Host): Promise<void> {
     this.hostCollection.insertOne(hostToMongoDocument(host));
   }
-    );
 
+
+  async deleteHost({ id: { value: idValue } }: Host): Promise<void> {
+    this.hostCollection.deleteOne({
+      _id: MUUID.from(idValue),
+    });
   }
 
   async findHostAvailableInCountryWithMinimumNumberOfOrders(
