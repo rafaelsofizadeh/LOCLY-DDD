@@ -11,3 +11,8 @@ export function enumToArray(inputEnum: any): any[] {
 export function muuidToEntityId(id: Binary): EntityId {
   return new EntityId(MUUID.from(id).toString());
 }
+
+export function getRandomElement<T>(array: T[]): T {
+  const elementCount = array.length;
+  return array[Math.floor(Math.random() * elementCount)];
+}
