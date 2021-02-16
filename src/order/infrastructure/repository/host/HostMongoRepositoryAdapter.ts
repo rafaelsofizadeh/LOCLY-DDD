@@ -1,14 +1,20 @@
-import { Collection } from 'mongodb';
-import * as MUUID from 'uuid-mongodb';
+import { Binary, Collection } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
+import * as MUUID from 'uuid-mongodb';
 
-import { EntityId } from '../../../../common/domain/EntityId';
 import { HostRepository } from '../../../application/port/HostRepository';
 import { Host } from '../../../domain/entity/Host';
-import { mongoDocumentToHost, HostMongoDocument } from './HostMongoMapper';
+import {
+  mongoDocumentToHost,
+  HostMongoDocument,
+  hostToMongoDocument,
+} from './HostMongoMapper';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
+import { OrderRepository } from '../../../application/port/OrderRepository';
+import { Order } from '../../../domain/entity/Order';
+import { muuidToEntityId } from '../../../../common/utils';
 
 // TODO: mongoDocumentToXXX to a decorator
 @Injectable()
@@ -16,7 +22,28 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   constructor(
     @InjectCollection('hosts')
     private readonly hostCollection: Collection<HostMongoDocument>,
+    private readonly orderRepository: OrderRepository,
   ) {}
+
+  async addHost(host: Host): Promise<void> {
+    this.hostCollection.insertOne(hostToMongoDocument(host));
+  }
+
+  async addOrderToHost(
+    { orders, ...restHost }: Host,
+    newOrder: Order,
+  ): Promise<Host> {
+    await this.hostCollection.updateOne(
+      { _id: MUUID.from(restHost.id.value) },
+      {
+        $push: {
+          orderIds: MUUID.from(newOrder.id.value),
+        },
+      },
+    );
+
+    return new Host({ ...restHost, orders: [...orders, newOrder] });
+  }
 
   async findHostAvailableInCountryWithMinimumNumberOfOrders(
     country: string,
@@ -45,6 +72,11 @@ export class HostMongoRepositoryAdapter implements HostRepository {
       .toArray();
 
     const hostDocument = hostDocuments[0];
+
+    const hostOrders: Order[] = await this.orderRepository.findOrders(
+      hostDocument.orderIds.map((orderId: Binary) => muuidToEntityId(orderId)),
+    );
+
     if (!hostDocument) {
       throw new Exception(
         Code.ENTITY_NOT_FOUND_ERROR,
@@ -53,7 +85,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
       );
     }
 
-    return mongoDocumentToHost(hostDocument);
+    return mongoDocumentToHost({ ...hostDocument, orders: hostOrders });
   }
 
   private hostAvailableInCountryQuery(country) {
