@@ -56,11 +56,5 @@ const useCaseProviders: Provider[] = [
     ...useCaseProviders,
     ...infrastructureProviders,
   ],
-  exports: [
-    OrderRepository,
-    CustomerRepository,
-    CreateOrderUseCase,
-    ShipmentCostCalculator,
-  ],
 })
 export class OrderModule {}
