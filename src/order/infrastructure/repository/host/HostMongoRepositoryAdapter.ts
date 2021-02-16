@@ -27,9 +27,9 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   }
 
 
-  async deleteHost({ id: { value: idValue } }: Host): Promise<void> {
+  async deleteHost({ id }: Host): Promise<void> {
     this.hostCollection.deleteOne({
-      _id: MUUID.from(idValue),
+      _id: MUUID.from(id.value),
     });
   }
 
