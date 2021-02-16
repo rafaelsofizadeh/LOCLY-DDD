@@ -10,8 +10,9 @@ import {
 import { EntityId } from '../../../common/domain/EntityId';
 import { Validatable } from '../../../common/domain/Validatable';
 import { Item, ItemProps } from '../../domain/entity/Item';
+import { CreateOrderRequest } from '../../domain/use-case/create-order/CreateOrderRequest';
 
-class BaseCreateOrderRequestAdapter {
+class BaseCreateOrderRequestAdapter implements CreateOrderRequest {
   /*
    * Nest.js first performs transformation, then validation, so, the process is like:
    * HTTP request -> customerId: "string" ->

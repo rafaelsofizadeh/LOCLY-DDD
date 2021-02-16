@@ -3,8 +3,9 @@ import { ValidateNested } from 'class-validator';
 
 import { EntityId } from '../../../common/domain/EntityId';
 import { Validatable } from '../../../common/domain/Validatable';
+import { ConfirmOrderRequest } from '../../domain/use-case/confirm-order/ConfirmOrderRequest';
 
-class BaseConfirmOrderRequestAdapter {
+class BaseConfirmOrderRequestAdapter implements ConfirmOrderRequest {
   /*
    * Nest.js first performs transformation, then validation, so, the process is like:
    * HTTP request -> customerId: "string" ->
