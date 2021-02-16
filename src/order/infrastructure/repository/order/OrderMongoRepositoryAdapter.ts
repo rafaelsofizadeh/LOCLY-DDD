@@ -39,7 +39,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     });
   }
 
-  // TODO: Should populate hosts too
+  // TODO(NOW): Populate hosts
   async findOrder(orderId: EntityId): Promise<Order> {
     const {
       customerId,
@@ -66,7 +66,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     });
   }
 
-  // TODO: Should populate hosts too
+  // TODO(NOW): populate hosts
   async findOrders(orderIds: EntityId[]): Promise<Order[]> {
     const orderMUUIDs: Binary[] = orderIds.map(({ value }) =>
       MUUID.from(value),
