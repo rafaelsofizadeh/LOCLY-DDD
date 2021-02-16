@@ -28,8 +28,8 @@ export class CustomerFixture {
   }
 
   // TODO: generalize to cleanup() once more use cases are available
-  async deleteTestCustomer(): Promise<DeleteWriteOpResultObject> {
-    return await this.customerCollection.deleteOne({
+  async deleteTestCustomer(): Promise<void> {
+    this.customerCollection.deleteOne({
       _id: MUUID.from(this.testCustomer.id.value),
     });
   }
