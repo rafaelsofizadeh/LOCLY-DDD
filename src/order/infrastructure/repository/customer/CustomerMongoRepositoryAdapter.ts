@@ -21,6 +21,13 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
     private readonly customerCollection: Collection<CustomerMongoDocument>,
   ) {}
 
+  async addCustomer(customer: Customer): Promise<void> {
+    this.customerCollection.insertOne({
+      _id: MUUID.from(customer.id.value),
+      addresses: [{ ...customer.selectedAddress, selected: true }],
+    });
+  }
+
   async findCustomer(customerId: EntityId): Promise<Customer> {
     const customerDocument: CustomerMongoDocument = await this.customerCollection.findOne(
       { _id: MUUID.from(customerId.value) },

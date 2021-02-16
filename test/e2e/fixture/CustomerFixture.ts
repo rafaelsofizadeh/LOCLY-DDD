@@ -24,24 +24,7 @@ export class CustomerFixture {
     @InjectCollection('customers')
     private readonly customerCollection: Collection<CustomerMongoDocument>,
   ) {}
-
-  async insertTestCustomer(): Promise<Customer> {
-    const customer: Customer = new Customer({
-      id: new EntityId(uuidv4()),
-      selectedAddress: new Address({ country: 'AUS' }),
     });
-
-    /**
-     * TODO: Insert customer through CustomerRepositoryProvider.
-     * For that, add .addCustomer() method to CustomerRepository and its implementations.
-     */
-    await this.customerCollection.insertOne({
-      _id: MUUID.from(customer.id.value),
-      addresses: [{ ...customer.selectedAddress, selected: true }],
-    });
-
-    this.testCustomer = customer;
-    return this.testCustomer;
   }
 
   // TODO: generalize to cleanup() once more use cases are available
