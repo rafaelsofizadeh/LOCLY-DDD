@@ -58,7 +58,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
         {
           $addFields: {
             orderCount: {
-              $size: '$orders',
+              $size: '$orderIds',
             },
           },
         },
