@@ -1,12 +1,11 @@
 import { Binary } from 'mongodb';
 import * as MUUID from 'uuid-mongodb';
-import { classToPlain } from 'class-transformer';
 
-import { Host, HostProps } from '../../../domain/entity/Host';
-import { Address, AddressProps } from '../../../domain/entity/Address';
 import { muuidToEntityId } from '../../../../common/utils';
-import { Order, OrderProps } from '../../../domain/entity/Order';
-import { MongoIdToEntityId } from '../../../../common/types';
+
+import { Host } from '../../../domain/entity/Host';
+import { Order } from '../../../domain/entity/Order';
+import { Address, AddressProps } from '../../../domain/entity/Address';
 
 export type HostMongoDocument = {
   _id: Binary;
@@ -33,15 +32,11 @@ export function mongoDocumentToHost({
   });
 }
 
-export function hostToMongoDocument(host: HostProps): HostMongoDocument {
+export function hostToMongoDocument(host: Host): HostMongoDocument {
   // For id, see: Entity { @Transform() id }
-  const { id: rawId, orders, ...restPlainHost } = classToPlain(host) as Omit<
-    MongoIdToEntityId<HostMongoDocument>,
-    'orderIds'
-  > & { orders: OrderProps[] };
-
-  const mongoBinaryId = MUUID.from(rawId);
-  const orderMongoBinaryIds = orders.map(({ id }) => MUUID.from(id.value));
+  const { id, orders, ...restPlainHost } = host.serialize();
+  const mongoBinaryId = MUUID.from(id);
+  const orderMongoBinaryIds = orders.map(({ id }) => MUUID.from(id));
 
   return {
     ...restPlainHost,

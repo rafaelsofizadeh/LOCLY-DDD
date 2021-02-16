@@ -1,12 +1,11 @@
 import { Binary } from 'mongodb';
-import { classToPlain } from 'class-transformer';
 import * as MUUID from 'uuid-mongodb';
 
-import { Customer, CustomerProps } from '../../../domain/entity/Customer';
-import { Address, AddressProps } from '../../../domain/entity/Address';
 import { muuidToEntityId } from '../../../../common/utils';
-import { MongoIdToEntityId } from '../../../../common/types';
-import { Order, OrderProps } from '../../../domain/entity/Order';
+
+import { Order } from '../../../domain/entity/Order';
+import { Customer } from '../../../domain/entity/Customer';
+import { Address, AddressProps } from '../../../domain/entity/Address';
 
 type CustomerAddress = AddressProps & { selected: boolean };
 
@@ -37,25 +36,18 @@ export function mongoDocumentToCustomer({
 }
 
 export function customerToMongoDocument(
-  customer: CustomerProps,
+  customer: Customer,
 ): CustomerMongoDocument {
-  // For id, see: Entity { @Transform() id }
   const {
-    id: rawId,
+    id,
     selectedAddress,
     orders,
     ...restPlainCustomer
-  } = classToPlain(customer) as Omit<
-    MongoIdToEntityId<CustomerMongoDocument>,
-    'addresses' | 'orderIds'
-  > & {
-    selectedAddress: AddressProps;
-    orders: OrderProps[];
-  };
+  } = customer.serialize();
 
-  const mongoBinaryId = MUUID.from(rawId);
+  const mongoBinaryId = MUUID.from(id);
   const mongoCustomerSelectedAddress = { ...selectedAddress, selected: true };
-  const orderMongoBinaryIds = orders.map(({ id }) => MUUID.from(id.value));
+  const orderMongoBinaryIds = orders.map(({ id }) => MUUID.from(id));
 
   return {
     _id: mongoBinaryId,

@@ -10,15 +10,18 @@ import {
 import { Type } from 'class-transformer';
 
 import { EntityProps } from '../../../common/domain/Entity';
-import { Address } from './Address';
-import { Item } from './Item';
-import { Customer } from './Customer';
-import { Validatable } from '../../../common/domain/Validatable';
-import { ShipmentCostCalculator } from '../../application/port/ShipmentCostCalculator';
 import { EntityId } from '../../../common/domain/EntityId';
+import { Validatable } from '../../../common/domain/Validatable';
+import { Serializable } from '../../../common/domain/Serializable';
 import { Identifiable } from '../../../common/domain/Identifiable';
-import { Host } from './Host';
+import { EntityIdToStringId } from '../../../common/types';
+
+import { Item, ItemProps } from './Item';
+import { Host, HostPropsPlain } from './Host';
+import { Address, AddressProps } from './Address';
+import { Customer, CustomerPropsPlain } from './Customer';
 import { HostMatcher } from '../../application/port/HostMatcher';
+import { ShipmentCostCalculator } from '../../application/port/ShipmentCostCalculator';
 
 export type ShipmentCost = {
   amount: number;
@@ -70,8 +73,21 @@ export class OrderProps extends EntityProps {
   shipmentCost?: ShipmentCost;
 }
 
-export class Order extends Identifiable(Validatable(OrderProps)) {
+export type OrderPropsPlain = Omit<
+  EntityIdToStringId<Required<OrderProps>>,
+  'customer' | 'host' | 'items' | 'destination'
+> & {
+  customer: CustomerPropsPlain;
+  host: HostPropsPlain[];
+  items: ItemProps[];
+  destination: AddressProps;
+};
 
+// TODO: assert that all optional properties in <SomeClassProps> are initialized.
+// After: get rid of Required<SomeClassProps> in <SomeClassPropsPlain>
+export class Order extends Identifiable(
+  Validatable(Serializable<OrderPropsPlain, typeof OrderProps>(OrderProps)),
+) {
   constructor(
     {
       id,
