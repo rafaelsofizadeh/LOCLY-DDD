@@ -1,6 +1,7 @@
 import { Module, Provider } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongoModule } from 'nest-mongodb';
+import { HostFixture } from '../../../../test/e2e/fixture/HostFixture';
 import { CustomerRepository } from '../../application/port/CustomerRepository';
 import { HostMatcher } from '../../application/port/HostMatcher';
 import { HostRepository } from '../../application/port/HostRepository';
@@ -45,6 +46,15 @@ const useCaseProviders: Provider[] = [
   },
 ];
 
+// TODO(NOW): find a better place to initialize testing dependencies
+// ATTENTION: Cool thing. Polymorphism (?) through interface injections.
+const testProviders: Provider[] = [
+  {
+    provide: HostFixture,
+    useClass: HostMongoRepositoryAdapter,
+  },
+];
+
 @Module({
   imports: [
     MongoModule.forFeature(['orders', 'customers', 'hosts']),
@@ -55,6 +65,7 @@ const useCaseProviders: Provider[] = [
     ...persistenceProviders,
     ...useCaseProviders,
     ...infrastructureProviders,
+    ...testProviders,
   ],
 })
 export class OrderModule {}
