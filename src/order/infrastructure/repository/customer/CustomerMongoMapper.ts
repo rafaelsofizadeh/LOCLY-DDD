@@ -12,29 +12,39 @@ export type CustomerMongoDocument = {
   _id: Binary;
   // https://devblogs.microsoft.com/typescript/announcing-typescript-4-1/#template-literal-types
   addresses: CustomerAddress[];
+  orderIds: Binary[];
 };
 
 export function mongoDocumentToCustomer({
   _id,
   addresses,
+  orderIds,
 }: CustomerMongoDocument): Customer {
   return new Customer({
     id: muuidToEntityId(_id),
     selectedAddress: new Address(addresses.find(({ selected }) => selected)),
+    orderIds: orderIds.map(muuidToEntityId),
   });
 }
 
 export function customerToMongoDocument(
   customer: Customer,
 ): CustomerMongoDocument {
-  const { id, selectedAddress, ...restPlainCustomer } = customer.serialize();
+  const {
+    id,
+    selectedAddress,
+    orderIds,
+    ...restPlainCustomer
+  } = customer.serialize();
 
   const mongoBinaryId = MUUID.from(id);
   const mongoCustomerSelectedAddress = { ...selectedAddress, selected: true };
+  const orderMongoBinaryIds = orderIds.map(orderId => MUUID.from(orderId));
 
   return {
     _id: mongoBinaryId,
     addresses: [mongoCustomerSelectedAddress],
+    orderIds: orderMongoBinaryIds,
     ...restPlainCustomer,
   };
 }
