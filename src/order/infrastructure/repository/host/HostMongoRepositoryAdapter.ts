@@ -13,6 +13,7 @@ import {
   HostMongoDocument,
   hostToMongoDocument,
 } from './HostMongoMapper';
+import { EntityId } from '../../../../common/domain/EntityId';
 
 // TODO: mongoDocumentToXXX to a decorator
 @Injectable()
@@ -34,17 +35,17 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   }
 
   // For testing
-  async deleteManyHosts(hosts: Host[]): Promise<void> {
+  async deleteManyHosts(hostIds: EntityId[]): Promise<void> {
     this.hostCollection.deleteMany({
       _id: {
-        $in: hosts.map(({ id: { value: idValue } }) => MUUID.from(idValue)),
+        $in: hostIds.map(({ value }) => MUUID.from(value)),
       },
     });
   }
 
-  async deleteHost({ id }: Host): Promise<void> {
+  async deleteHost(hostId: EntityId): Promise<void> {
     this.hostCollection.deleteOne({
-      _id: MUUID.from(id.value),
+      _id: MUUID.from(hostId.value),
     });
   }
 

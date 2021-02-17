@@ -28,9 +28,9 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
     });
   }
 
-  async deleteCustomer({ id }: Customer): Promise<void> {
+  async deleteCustomer(customerId: EntityId): Promise<void> {
     this.customerCollection.deleteOne({
-      _id: MUUID.from(id.value),
+      _id: MUUID.from(customerId.value),
     });
   }
 
