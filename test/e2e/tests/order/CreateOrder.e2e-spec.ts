@@ -97,6 +97,8 @@ describe('Create Order – POST /order/create', () => {
       testCustomer.id,
     );
 
-    expect(updatedTestCustomer.orderIds).toContain(testOrderId);
+    expect(updatedTestCustomer.orderIds.map(({ value }) => value)).toContain(
+      testOrderId.value,
+    );
   });
 });
