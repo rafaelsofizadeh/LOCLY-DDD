@@ -140,15 +140,11 @@ describe('Confirm Order – POST /order/confirm', () => {
       originCountry,
     });
 
-    await customerRepository.addCustomer(testCustomer);
-    await hostFixture.addManyHosts(testHosts);
-    await orderRepository.addOrder(testOrder);
-
-    /*await Promise.all([
+    await Promise.all([
       customerRepository.addCustomer(testCustomer),
       hostFixture.addManyHosts(testHosts),
       orderRepository.addOrder(testOrder),
-    ]);*/
+    ]);
   });
 
   afterEach(() =>
@@ -167,6 +163,11 @@ describe('Confirm Order – POST /order/confirm', () => {
       });
 
     expect(response.status).toBe(201);
+
+    /*console.log(testCustomer);
+    console.log(testHosts);
+    console.log(testOrder);
+    console.log(response.body);*/
 
     const {
       status,
