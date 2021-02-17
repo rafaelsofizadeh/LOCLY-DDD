@@ -63,7 +63,6 @@ export class OrderProps extends EntityProps {
   // Upon getting the Order from persistence (and, together with it, the Order's Customer),
   // the destination will be updated accordingly, which SHOULDN'T happen.
   // So we have to save the relevant bits of Customer's state at the time of Order submission.
-  @IsISO31661Alpha3()
   @ValidateNested()
   @Type(() => Address)
   destination: Address;
