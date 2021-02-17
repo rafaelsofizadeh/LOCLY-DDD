@@ -9,11 +9,13 @@ import { ConfirmOrderRequest } from '../../domain/use-case/confirm-order/Confirm
 import { ConfirmOrderUseCase } from '../../domain/use-case/confirm-order/ConfirmOrderUseCase';
 import { HostMatcher } from '../port/HostMatcher';
 import { OrderRepository } from '../port/OrderRepository';
+import { HostRepository } from '../port/HostRepository';
 
 @Injectable()
 export class ConfirmOrder implements ConfirmOrderUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
+    private readonly hostRepository: HostRepository,
     private readonly hostMatcher: HostMatcher,
     // TODO: More general EventEmitter class, wrapper around eventEmitter
     private readonly eventEmitter: EventEmitter2,
@@ -46,6 +48,8 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       this.eventEmitter.emit('order.rejected.host_availability');
       throw error;
     });
+
+    await this.hostRepository.addOrderToHost(order.host, order);
 
     // TODO: Wrapper around eventEmitter
     // TODO(?): Event emitting decorator

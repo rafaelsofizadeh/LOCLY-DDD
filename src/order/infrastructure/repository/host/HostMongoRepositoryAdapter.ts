@@ -13,6 +13,7 @@ import {
   HostMongoDocument,
   hostToMongoDocument,
 } from './HostMongoMapper';
+import { Order } from '../../../domain/entity/Order';
 import { EntityId } from '../../../../common/domain/EntityId';
 
 // TODO: mongoDocumentToXXX to a decorator
@@ -47,6 +48,22 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     this.hostCollection.deleteOne({
       _id: MUUID.from(hostId.value),
     });
+  }
+
+  async addOrderToHost(
+    { orderIds, ...restHost }: Host,
+    newOrder: Order,
+  ): Promise<Host> {
+    await this.hostCollection.updateOne(
+      { _id: MUUID.from(restHost.id.value) },
+      {
+        $push: {
+          orderIds: MUUID.from(newOrder.id.value),
+        },
+      },
+    );
+
+    return new Host({ ...restHost, orderIds: [...orderIds, newOrder.id] });
   }
 
   async findHostAvailableInCountryWithMinimumNumberOfOrders(
