@@ -25,8 +25,6 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
   async execute({ orderId }: ConfirmOrderRequest) {
     const order: Order = await this.orderRepository.findOrder(orderId);
 
-    order.status = OrderStatus.Confirmed;
-
     const isServiceAvailable: boolean = await this.hostMatcher.checkServiceAvailability(
       order.originCountry,
       order.destination.country,
@@ -60,6 +58,8 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     // TODO: Wrapper around eventEmitter
     // TODO(?): Event emitting decorator
     this.eventEmitter.emit('order.confirmed');
+
+    order.status = OrderStatus.Confirmed;
 
     return order;
   }
