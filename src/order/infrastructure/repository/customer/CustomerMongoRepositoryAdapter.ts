@@ -35,7 +35,7 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
   async addOrderToCustomer(
     { orderIds, ...restCustomer }: Customer,
     newOrder: Order,
-  ): Promise<Customer> {
+  ): Promise<void> {
     await this.customerCollection.updateOne(
       { _id: MUUID.from(restCustomer.id.value) },
       {
@@ -44,11 +44,6 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
         },
       },
     );
-
-    return new Customer({
-      ...restCustomer,
-      orderIds: [...orderIds, newOrder.id],
-    });
   }
 
   async findCustomer(customerId: EntityId): Promise<Customer> {

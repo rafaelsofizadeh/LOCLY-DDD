@@ -138,9 +138,10 @@ export class Order extends Identifiable(
     this.shipmentCost = shipmentCost;
   }
 
-  async matchHost(hostMatcher: HostMatcher): Promise<void> {
+  async matchHost(hostMatcher: HostMatcher): Promise<Host> {
     const host: Host = await hostMatcher.matchHost(this.originCountry);
-
     this.host = host;
+
+    return host;
   }
 }

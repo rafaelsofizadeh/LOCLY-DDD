@@ -49,8 +49,8 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   async addOrderToHost(
     { orderIds, ...restHost }: Host,
     newOrder: Order,
-  ): Promise<Host> {
-    await this.hostCollection.updateOne(
+  ): Promise<void> {
+    this.hostCollection.updateOne(
       { _id: MUUID.from(restHost.id.value) },
       {
         $push: {
@@ -58,8 +58,6 @@ export class HostMongoRepositoryAdapter implements HostRepository {
         },
       },
     );
-
-    return new Host({ ...restHost, orderIds: [...orderIds, newOrder.id] });
   }
 
   async findHost(hostId: EntityId): Promise<Host> {

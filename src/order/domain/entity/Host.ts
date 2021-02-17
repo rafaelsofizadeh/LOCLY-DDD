@@ -6,6 +6,7 @@ import { EntityId } from '../../../common/domain/EntityId';
 import { EntityIdToStringId } from '../../../common/types';
 import { Serializable } from '../../../common/domain/Serializable';
 import { Identifiable } from '../../../common/domain/Identifiable';
+import { Order } from './Order';
 
 export class HostProps extends EntityProps {
   @ValidateNested()
@@ -49,5 +50,14 @@ export class Host extends Identifiable(
     this.address = address;
     this.orderIds = orderIds;
     this.available = available;
+  }
+
+  async acceptOrder(
+    order: Order,
+    persist: (host: Host, order: Order) => Promise<void>,
+  ) {
+    // TODO: Add error handling
+    await persist(this, order);
+    this.orderIds.push(order.id);
   }
 }

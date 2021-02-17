@@ -10,6 +10,7 @@ import { ConfirmOrderUseCase } from '../../domain/use-case/confirm-order/Confirm
 import { HostMatcher } from '../port/HostMatcher';
 import { OrderRepository } from '../port/OrderRepository';
 import { HostRepository } from '../port/HostRepository';
+import { Host } from '../../domain/entity/Host';
 
 @Injectable()
 export class ConfirmOrder implements ConfirmOrderUseCase {
@@ -42,14 +43,19 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       );
     }
 
-    await order.matchHost(this.hostMatcher).catch(error => {
-      // TODO: Wrapper around eventEmitter
-      // TODO(?): Event emitting decorator
-      this.eventEmitter.emit('order.rejected.host_availability');
-      throw error;
-    });
+    const matchedHost: Host = await order
+      .matchHost(this.hostMatcher)
+      .catch(error => {
+        // TODO: Wrapper around eventEmitter
+        // TODO(?): Event emitting decorator
+        this.eventEmitter.emit('order.rejected.host_availability');
+        throw error;
+      });
 
-    await this.hostRepository.addOrderToHost(order.host, order);
+    await matchedHost.acceptOrder(
+      order,
+      this.hostRepository.addOrderToHost.bind(this.hostRepository),
+    );
 
     // TODO: Wrapper around eventEmitter
     // TODO(?): Event emitting decorator
