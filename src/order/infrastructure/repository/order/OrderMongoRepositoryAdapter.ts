@@ -18,7 +18,6 @@ import {
   PopulatedOrderMongoDocument,
 } from './OrderMongoMapper';
 
-// TODO: mongoDocumentToXXX to a decorator
 @Injectable()
 export class OrderMongoRepositoryAdapter implements OrderRepository {
   constructor(

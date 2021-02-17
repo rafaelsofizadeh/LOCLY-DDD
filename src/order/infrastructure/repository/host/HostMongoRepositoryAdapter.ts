@@ -3,9 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 import * as MUUID from 'uuid-mongodb';
 
-import { Exception } from '../../../../common/error-handling/Exception';
-import { Code } from '../../../../common/error-handling/Code';
-
 import { HostRepository } from '../../../application/port/HostRepository';
 import { Host } from '../../../domain/entity/Host';
 import {
@@ -13,10 +10,11 @@ import {
   HostMongoDocument,
   hostToMongoDocument,
 } from './HostMongoMapper';
+import { Exception } from '../../../../common/error-handling/Exception';
+import { Code } from '../../../../common/error-handling/Code';
 import { Order } from '../../../domain/entity/Order';
 import { EntityId } from '../../../../common/domain/EntityId';
 
-// TODO: mongoDocumentToXXX to a decorator
 @Injectable()
 export class HostMongoRepositoryAdapter implements HostRepository {
   constructor(
@@ -26,9 +24,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
 
   // For testing
   async addManyHosts(hosts: Host[]): Promise<void> {
-    this.hostCollection.insertMany(
-      hosts.map(host => hostToMongoDocument(host)),
-    );
+    this.hostCollection.insertMany(hosts.map(hostToMongoDocument));
   }
 
   async addHost(host: Host): Promise<void> {
@@ -105,7 +101,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     return mongoDocumentToHost(hostDocument);
   }
 
-  private hostAvailableInCountryQuery(country) {
+  private hostAvailableInCountryQuery(country: string) {
     return {
       'address.country': country,
       available: true,

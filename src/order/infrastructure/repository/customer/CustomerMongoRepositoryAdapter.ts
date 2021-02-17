@@ -9,11 +9,12 @@ import { Customer } from '../../../domain/entity/Customer';
 import {
   mongoDocumentToCustomer,
   CustomerMongoDocument,
+  customerToMongoDocument,
 } from './CustomerMongoMapper';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
+import { Order } from '../../../domain/entity/Order';
 
-// TODO: mongoDocumentToXXX to a decorator
 @Injectable()
 export class CustomerMongoRepositoryAdapter implements CustomerRepository {
   constructor(
@@ -21,11 +22,8 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
     private readonly customerCollection: Collection<CustomerMongoDocument>,
   ) {}
 
-  async addCustomer({ id, selectedAddress }: Customer): Promise<void> {
-    this.customerCollection.insertOne({
-      _id: MUUID.from(id.value),
-      addresses: [{ ...selectedAddress, selected: true }],
-    });
+  async addCustomer(customer: Customer): Promise<void> {
+    this.customerCollection.insertOne(customerToMongoDocument(customer));
   }
 
   async deleteCustomer(customerId: EntityId): Promise<void> {
