@@ -2,10 +2,12 @@ import * as supertest from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { isUUID } from 'class-validator';
-import { classToPlain } from 'class-transformer';
 
 import { AppModule } from '../../../../src/AppModule';
-import { Customer } from '../../../../src/order/domain/entity/Customer';
+import {
+  Customer,
+  CustomerPropsPlain,
+} from '../../../../src/order/domain/entity/Customer';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { EntityId } from '../../../../src/common/domain/EntityId';
 import { OrderStatus } from '../../../../src/order/domain/entity/Order';
@@ -41,6 +43,7 @@ describe('Create Order – POST /order/create', () => {
     // so we initialize it once, before all tests.
     testCustomer = new Customer({
       selectedAddress: new Address({ country: 'AUS' }),
+      orderIds: [],
     });
 
     await customerRepository.addCustomer(testCustomer);
@@ -71,12 +74,29 @@ describe('Create Order – POST /order/create', () => {
 
     expect(response.status).toBe(201);
 
-    const body = response.body;
-    testOrderId = new EntityId(body.id);
+    const {
+      id,
+      customer,
+      status,
+      originCountry,
+    }: {
+      id: string;
+      customer: CustomerPropsPlain;
+      status: OrderStatus;
+      originCountry: string;
+    } = response.body;
 
-    expect(isUUID(body.id)).toBe(true);
-    expect(body.customer).toEqual(classToPlain(testCustomer));
-    expect(body.status).toBe(OrderStatus.Drafted);
-    expect(body.originCountry).toBe(testCustomer.selectedAddress.country);
+    testOrderId = new EntityId(id);
+
+    expect(isUUID(id)).toBe(true);
+    expect(customer).toEqual(testCustomer.serialize());
+    expect(status).toBe(OrderStatus.Drafted);
+    expect(originCountry).toBe(testCustomer.selectedAddress.country);
+
+    const updatedTestCustomer: Customer = await customerRepository.findCustomer(
+      testCustomer.id,
+    );
+
+    expect(updatedTestCustomer.orderIds).toContain(testOrderId);
   });
 });
