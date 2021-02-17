@@ -94,9 +94,8 @@ export class Order extends Identifiable(
       customer,
       items,
       originCountry,
-      destination,
       shipmentCost,
-    }: OrderProps = new OrderProps(),
+    }: Omit<OrderProps, 'destination'> = new OrderProps(),
   ) {
     super();
 
@@ -105,7 +104,7 @@ export class Order extends Identifiable(
     this.items = items;
     this.customer = customer;
     this.originCountry = originCountry;
-    this.destination = destination;
+    this.destination = customer.selectedAddress;
     this.shipmentCost = shipmentCost;
   }
 
