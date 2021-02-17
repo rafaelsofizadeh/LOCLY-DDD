@@ -88,11 +88,6 @@ describe('Create Order – POST /order/create', () => {
 
     testOrderId = new EntityId(id);
 
-    expect(isUUID(id)).toBe(true);
-    expect(customer).toEqual(testCustomer.serialize());
-    expect(status).toBe(OrderStatus.Drafted);
-    expect(originCountry).toBe(testCustomer.selectedAddress.country);
-
     const updatedTestCustomer: Customer = await customerRepository.findCustomer(
       testCustomer.id,
     );
@@ -100,5 +95,9 @@ describe('Create Order – POST /order/create', () => {
     expect(updatedTestCustomer.orderIds.map(({ value }) => value)).toContain(
       testOrderId.value,
     );
+    expect(isUUID(id)).toBe(true);
+    expect(customer).toEqual(updatedTestCustomer.serialize());
+    expect(status).toBe(OrderStatus.Drafted);
+    expect(originCountry).toBe(testCustomer.selectedAddress.country);
   });
 });
