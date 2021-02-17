@@ -34,6 +34,25 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
     });
   }
 
+  async addOrderToCustomer(
+    { orderIds, ...restCustomer }: Customer,
+    newOrder: Order,
+  ): Promise<Customer> {
+    await this.customerCollection.updateOne(
+      { _id: MUUID.from(restCustomer.id.value) },
+      {
+        $push: {
+          orderIds: MUUID.from(newOrder.id.value),
+        },
+      },
+    );
+
+    return new Customer({
+      ...restCustomer,
+      orderIds: [...orderIds, newOrder.id],
+    });
+  }
+
   async findCustomer(customerId: EntityId): Promise<Customer> {
     const customerDocument: CustomerMongoDocument = await this.customerCollection.findOne(
       { _id: MUUID.from(customerId.value) },

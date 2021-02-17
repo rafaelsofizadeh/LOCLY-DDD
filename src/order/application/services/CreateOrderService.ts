@@ -43,7 +43,10 @@ export class CreateOrder implements CreateOrderUseCase {
     // TODO(?): Turn into a constructor action, after enough use cases accumulate for this
     order.calculateShipmentCost(this.shipmentCostCalculator);
 
-    await this.orderRepository.addOrder(order);
+    await Promise.all([
+      this.orderRepository.addOrder(order),
+      this.customerRepository.addOrderToCustomer(customer, order),
+    ]);
 
     // TODO: Wrapper around eventEmitter
     // TODO(?): Event emitting decorator
