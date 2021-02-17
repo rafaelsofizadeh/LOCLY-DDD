@@ -159,7 +159,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     ]),
   );
 
-  it('', async () => {
+  it('Matches Order with a Host, updates Order\'s "hostId" property, and Host\'s "orderIds" property', async () => {
     const response: supertest.Response = await supertest(app.getHttpServer())
       .post('/order/confirm')
       .send({
