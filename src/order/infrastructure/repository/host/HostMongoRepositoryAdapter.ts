@@ -22,10 +22,25 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     private readonly hostCollection: Collection<HostMongoDocument>,
   ) {}
 
+  // For testing
+  async addManyHosts(hosts: Host[]): Promise<void> {
+    this.hostCollection.insertMany(
+      hosts.map(host => hostToMongoDocument(host)),
+    );
+  }
+
   async addHost(host: Host): Promise<void> {
     this.hostCollection.insertOne(hostToMongoDocument(host));
   }
 
+  // For testing
+  async deleteManyHosts(hosts: Host[]): Promise<void> {
+    this.hostCollection.deleteMany({
+      _id: {
+        $in: hosts.map(({ id: { value: idValue } }) => MUUID.from(idValue)),
+      },
+    });
+  }
 
   async deleteHost({ id }: Host): Promise<void> {
     this.hostCollection.deleteOne({
