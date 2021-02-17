@@ -21,7 +21,10 @@ import { Host, HostPropsPlain } from './Host';
 import { Address, AddressProps } from './Address';
 import { Customer, CustomerPropsPlain } from './Customer';
 import { HostMatcher } from '../../application/port/HostMatcher';
-import { ShipmentCostCalculator } from '../../application/port/ShipmentCostCalculator';
+import {
+  ShipmentCostCalculator,
+  ShipmentCostRequest,
+} from '../../application/port/ShipmentCostCalculator';
 
 export type ShipmentCost = {
   amount: number;
@@ -108,7 +111,30 @@ export class Order extends Identifiable(
     this.shipmentCost = shipmentCost;
   }
 
-  updateStatus(newStatus?: OrderStatus): OrderStatus {
+  async draft(
+    getShipmentCostRate: (
+      costRequest: ShipmentCostRequest,
+    ) => Promise<ShipmentCost>,
+    persist: (order: Order) => Promise<void>,
+  ): Promise<void> {
+    // TODO: Do I need validation here?
+    await this.validate();
+    this.shipmentCost = await this.calculateShipmentCost(getShipmentCostRate);
+
+    await persist(this);
+  }
+
+  async confirm(
+    host: Host,
+    persist: (order: Order) => Promise<void>,
+  ): Promise<void> {
+    this.host = host;
+    this.status = OrderStatus.Confirmed;
+
+    await persist(this);
+  }
+
+  private updateStatus(newStatus?: OrderStatus): OrderStatus {
     if (newStatus) {
       this.status = newStatus;
       return this.status;
@@ -124,10 +150,12 @@ export class Order extends Identifiable(
     return this.status;
   }
 
-  async calculateShipmentCost(
-    calculator: ShipmentCostCalculator,
-  ): Promise<void> {
-    const shipmentCost: ShipmentCost = await calculator.getRate({
+  private async calculateShipmentCost(
+    getShipmentCostRate: (
+      costRequest: ShipmentCostRequest,
+    ) => Promise<ShipmentCost>,
+  ): Promise<ShipmentCost> {
+    const shipmentCost: ShipmentCost = await getShipmentCostRate({
       originCountry: this.originCountry,
       destinationCountry: this.destination.country,
       packages: this.items.map(({ physicalCharacteristics }) => ({
@@ -135,13 +163,6 @@ export class Order extends Identifiable(
       })),
     });
 
-    this.shipmentCost = shipmentCost;
-  }
-
-  async matchHost(hostMatcher: HostMatcher): Promise<Host> {
-    const host: Host = await hostMatcher.matchHost(this.originCountry);
-    this.host = host;
-
-    return host;
+    return shipmentCost;
   }
 }

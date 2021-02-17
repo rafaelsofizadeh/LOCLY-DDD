@@ -41,8 +41,8 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       );
     }
 
-    const matchedHost: Host = await order
-      .matchHost(this.hostMatcher)
+    const matchedHost: Host = await this.hostMatcher
+      .matchHost(order.originCountry)
       .catch(error => {
         // TODO: Wrapper around eventEmitter
         // TODO(?): Event emitting decorator
@@ -50,6 +50,11 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
         throw error;
       });
 
+    // TODO: Add persistance function. Update tracking.
+    await order.confirm(
+      matchedHost,
+      order => new Promise(resolve => resolve()),
+    );
     await matchedHost.acceptOrder(
       order,
       this.hostRepository.addOrderToHost.bind(this.hostRepository),
@@ -58,8 +63,6 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     // TODO: Wrapper around eventEmitter
     // TODO(?): Event emitting decorator
     this.eventEmitter.emit('order.confirmed');
-
-    order.status = OrderStatus.Confirmed;
 
     return order;
   }
