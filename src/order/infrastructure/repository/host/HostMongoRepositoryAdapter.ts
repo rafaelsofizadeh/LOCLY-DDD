@@ -62,6 +62,22 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     return new Host({ ...restHost, orderIds: [...orderIds, newOrder.id] });
   }
 
+  async findHost(hostId: EntityId): Promise<Host> {
+    const hostDocument: HostMongoDocument = await this.hostCollection.findOne({
+      _id: MUUID.from(hostId.value),
+    });
+
+    if (!hostDocument) {
+      throw new Exception(
+        Code.ENTITY_NOT_FOUND_ERROR,
+        `Order (id: ${hostId.value}) not found`,
+        { hostId },
+      );
+    }
+
+    return mongoDocumentToHost(hostDocument);
+  }
+
   async findHostAvailableInCountryWithMinimumNumberOfOrders(
     country: string,
   ): Promise<Host> {

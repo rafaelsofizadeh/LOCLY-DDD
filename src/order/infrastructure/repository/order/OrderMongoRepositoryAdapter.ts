@@ -38,7 +38,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     });
   }
 
-  // TODO(NOW): Populate hosts
+  // TODO(NOW): DE-POPULATE HOSTS AND CUSTOMERS
   async findOrder(orderId: EntityId): Promise<Order> {
     const {
       customerId,
@@ -65,7 +65,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     });
   }
 
-  // TODO(NOW): populate hosts
+  // TODO(NOW): DE-POPULATE HOSTS AND CUSTOMERS
   async findOrders(orderIds: EntityId[]): Promise<Order[]> {
     const orderMUUIDs: Binary[] = orderIds.map(({ value }) =>
       MUUID.from(value),

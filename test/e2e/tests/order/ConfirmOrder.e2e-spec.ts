@@ -17,6 +17,7 @@ import { HostFixture } from '../../fixture/HostFixture';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { muuidToEntityId } from '../../../../src/common/utils';
+import { EntityId } from '../../../../src/common/domain/EntityId';
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;
@@ -175,6 +176,12 @@ describe('Confirm Order – POST /order/confirm', () => {
     expect(status).toBe(OrderStatus.Confirmed);
     expect(host.id).toBe(testHosts[0].id.value);
 
-    // TODO: Add test for host update
+    const updatedTestHost: Host = await hostFixture.findHost(
+      new EntityId(host.id),
+    );
+
+    expect(updatedTestHost.orderIds.map(({ value }) => value)).toContain(
+      testOrder.id.value,
+    );
   });
 });

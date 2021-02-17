@@ -9,6 +9,8 @@ export abstract class HostFixture {
 
   abstract addOrderToHost(host: Host, order: Order): Promise<Host>;
 
+  abstract findHost(hostId: EntityId): Promise<Host>;
+
   abstract deleteManyHosts(hostIds: EntityId[]): Promise<void>;
 
   abstract deleteHost(hostId: EntityId): Promise<void>;
