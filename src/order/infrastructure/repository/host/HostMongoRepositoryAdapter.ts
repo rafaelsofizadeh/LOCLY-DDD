@@ -46,6 +46,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     });
   }
 
+  // This should always be used together with OrderRepository.addHostToOrder
   async addOrderToHost(
     { id: hostId }: Host,
     { id: orderId }: Order,

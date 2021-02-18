@@ -17,7 +17,6 @@ import { ConfirmOrderUseCase } from '../../domain/use-case/confirm-order/Confirm
 
 @Controller('order')
 export class OrderController {
-  // TODO(?): Separate into classes
   constructor(
     private readonly createOrderUseCase: CreateOrderUseCase,
     private readonly confirmOrderUseCase: ConfirmOrderUseCase,

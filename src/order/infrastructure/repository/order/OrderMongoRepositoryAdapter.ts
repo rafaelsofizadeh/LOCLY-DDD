@@ -34,7 +34,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     });
   }
 
-  // TODO: This should always be used together with HostRepository.addOrderToHost
+  // This should always be used together with HostRepository.addOrderToHost
   async addHostToOrder(
     { id: orderId }: Order,
     { id: hostId }: Host,
@@ -72,7 +72,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       .find({ _id: { $in: orderMongoBinaryIds } })
       .toArray();
 
-    // TODO: Still pass successfulOrderIds further?
+    // To access all orderIds and failedOrderIds, catch the exception and access its 'data' property
     if (orderDocuments.length !== orderIds.length) {
       const failedOrderIds: EntityId[] = orderIds.filter(
         orderId =>

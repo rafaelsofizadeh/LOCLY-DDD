@@ -8,6 +8,7 @@ export abstract class CustomerRepository {
 
   abstract deleteCustomer(customerId: EntityId): Promise<void>;
 
+  // This should always be used together with OrderRepository.addCustomerToOrder
   abstract addOrderToCustomer(customer: Customer, order: Order): Promise<void>;
 
   abstract findCustomer(customerId: EntityId): Promise<Optional<Customer>>; // throws new Exception(Code.ENTITY_NOT_FOUND_ERROR, 'Customer not found.')

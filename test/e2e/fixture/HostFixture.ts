@@ -7,6 +7,7 @@ export abstract class HostFixture {
 
   abstract addHost(host: Host): Promise<void>;
 
+  // This should always be used together with OrderRepository.addHostToOrder
   abstract addOrderToHost(host: Host, order: Order): Promise<Host>;
 
   abstract findHost(hostId: EntityId): Promise<Host>;
