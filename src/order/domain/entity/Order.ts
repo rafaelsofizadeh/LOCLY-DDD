@@ -84,7 +84,7 @@ export type OrderPropsPlain = Omit<
   destination: AddressProps;
 };
 
-// TODO: assert that all optional properties in <SomeClassProps> are initialized.
+// TODO(IMPORTANT)(GLOBAL): assert that all optional properties in <SomeClassProps> are initialized.
 // After: get rid of Required<SomeClassProps> in <SomeClassPropsPlain>
 export class Order extends Identifiable(
   Validatable(Serializable<OrderPropsPlain, typeof OrderProps>(OrderProps)),
