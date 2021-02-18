@@ -5,12 +5,13 @@ import { EntityId } from '../../../common/domain/EntityId';
 import { Identifiable } from '../../../common/domain/Identifiable';
 import { Validatable } from '../../../common/domain/Validatable';
 
-// TODO: Change enum to union
-enum Category {
-  Art,
-  Games,
-  Electronics,
-}
+export const Category = {
+  Art: 'art',
+  Games: 'games',
+  Electronics: 'electronics',
+} as const;
+
+export type Category = typeof Category[keyof typeof Category];
 
 export type PhysicalCharacteristics = {
   width: number;
