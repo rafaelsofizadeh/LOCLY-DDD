@@ -1,4 +1,3 @@
-import * as MUUID from 'uuid-mongodb';
 import { Injectable } from '@nestjs/common';
 import { Binary, Collection } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
@@ -14,6 +13,7 @@ import {
   orderToMongoDocument,
 } from './OrderMongoMapper';
 import { Host } from '../../../domain/entity/Host';
+import { entityIdToMuuid } from '../../../../common/utils';
 
 @Injectable()
 export class OrderMongoRepositoryAdapter implements OrderRepository {
@@ -40,15 +40,15 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     { id: hostId }: Host,
   ): Promise<void> {
     this.orderCollection.updateOne(
-      { _id: MUUID.from(orderId.value) },
-      { $set: { hostId: MUUID.from(hostId.value) } },
+      { _id: entityIdToMuuid(orderId) },
+      { $set: { hostId: entityIdToMuuid(hostId) } },
     );
   }
 
   async findOrder(orderId: EntityId): Promise<Order> {
     const orderDocument: OrderMongoDocument = await this.orderCollection.findOne(
       {
-        _id: MUUID.from(orderId.value),
+        _id: entityIdToMuuid(orderId),
       },
     );
 
@@ -64,8 +64,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   async findOrders(orderIds: EntityId[]): Promise<Order[]> {
-    const orderMongoBinaryIds: Binary[] = orderIds.map(({ value }) =>
-      MUUID.from(value),
+    const orderMongoBinaryIds: Binary[] = orderIds.map(orderId =>
+      entityIdToMuuid(orderId),
     );
 
     const orderDocuments: OrderMongoDocument[] = await this.orderCollection
@@ -77,7 +77,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       const failedOrderIds: EntityId[] = orderIds.filter(
         orderId =>
           orderDocuments.findIndex(
-            orderDocument => MUUID.from(orderId.value) === orderDocument._id,
+            orderDocument => entityIdToMuuid(orderId) === orderDocument._id,
           ) === -1,
       );
 
@@ -96,6 +96,6 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   async deleteOrder(orderId: EntityId): Promise<void> {
-    this.orderCollection.deleteOne({ _id: MUUID.from(orderId.value) });
+    this.orderCollection.deleteOne({ _id: entityIdToMuuid(orderId) });
   }
 }

@@ -1,7 +1,6 @@
 import { Binary } from 'mongodb';
-import * as MUUID from 'uuid-mongodb';
 
-import { muuidToEntityId } from '../../../../common/utils';
+import { muuidToEntityId, stringToMuuid } from '../../../../common/utils';
 
 import { Item, ItemProps } from '../../../domain/entity/Item';
 import { Address, AddressProps } from '../../../domain/entity/Address';
@@ -22,12 +21,13 @@ export function orderToMongoDocument(order: Order): OrderMongoDocument {
   // For id, see: Entity { @Transform() id }
   const { id, customerId, hostId, ...restPlainOrder } = order.serialize();
 
-  const mongoBinaryId = MUUID.from(id);
-  const customerMongoBinaryId = MUUID.from(customerId);
+  const mongoBinaryId = stringToMuuid(id);
+  const customerMongoBinaryId = stringToMuuid(customerId);
   let hostMongoBinaryId: Binary;
 
+  // TODO: Better way to handle optional values
   if (hostId) {
-    hostMongoBinaryId = MUUID.from(hostId);
+    hostMongoBinaryId = stringToMuuid(hostId);
   }
 
   return {

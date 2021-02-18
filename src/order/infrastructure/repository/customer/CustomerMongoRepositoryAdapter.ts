@@ -1,5 +1,4 @@
 import { Collection } from 'mongodb';
-import * as MUUID from 'uuid-mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
@@ -14,6 +13,7 @@ import {
 import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
 import { Order } from '../../../domain/entity/Order';
+import { entityIdToMuuid } from '../../../../common/utils';
 
 @Injectable()
 export class CustomerMongoRepositoryAdapter implements CustomerRepository {
@@ -28,19 +28,19 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
 
   async deleteCustomer(customerId: EntityId): Promise<void> {
     this.customerCollection.deleteOne({
-      _id: MUUID.from(customerId.value),
+      _id: entityIdToMuuid(customerId),
     });
   }
 
   async addOrderToCustomer(
-    { orderIds, ...restCustomer }: Customer,
-    newOrder: Order,
+    { id: customerId }: Customer,
+    { id: orderId }: Order,
   ): Promise<void> {
     await this.customerCollection.updateOne(
-      { _id: MUUID.from(restCustomer.id.value) },
+      { _id: entityIdToMuuid(customerId) },
       {
         $push: {
-          orderIds: MUUID.from(newOrder.id.value),
+          orderIds: entityIdToMuuid(orderId),
         },
       },
     );
@@ -48,7 +48,7 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
 
   async findCustomer(customerId: EntityId): Promise<Customer> {
     const customerDocument: CustomerMongoDocument = await this.customerCollection.findOne(
-      { _id: MUUID.from(customerId.value) },
+      { _id: entityIdToMuuid(customerId) },
     );
 
     if (!customerDocument) {

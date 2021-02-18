@@ -1,7 +1,6 @@
 import { Collection } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
-import * as MUUID from 'uuid-mongodb';
 
 import { HostRepository } from '../../../application/port/HostRepository';
 import { Host } from '../../../domain/entity/Host';
@@ -14,6 +13,7 @@ import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
 import { Order } from '../../../domain/entity/Order';
 import { EntityId } from '../../../../common/domain/EntityId';
+import { entityIdToMuuid } from '../../../../common/utils';
 
 @Injectable()
 export class HostMongoRepositoryAdapter implements HostRepository {
@@ -35,26 +35,26 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   async deleteManyHosts(hostIds: EntityId[]): Promise<void> {
     this.hostCollection.deleteMany({
       _id: {
-        $in: hostIds.map(({ value }) => MUUID.from(value)),
+        $in: hostIds.map(hostId => entityIdToMuuid(hostId)),
       },
     });
   }
 
   async deleteHost(hostId: EntityId): Promise<void> {
     this.hostCollection.deleteOne({
-      _id: MUUID.from(hostId.value),
+      _id: entityIdToMuuid(hostId),
     });
   }
 
   async addOrderToHost(
-    { orderIds, ...restHost }: Host,
-    newOrder: Order,
+    { id: hostId }: Host,
+    { id: orderId }: Order,
   ): Promise<void> {
     this.hostCollection.updateOne(
-      { _id: MUUID.from(restHost.id.value) },
+      { _id: entityIdToMuuid(hostId) },
       {
         $push: {
-          orderIds: MUUID.from(newOrder.id.value),
+          orderIds: entityIdToMuuid(orderId),
         },
       },
     );
@@ -62,7 +62,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
 
   async findHost(hostId: EntityId): Promise<Host> {
     const hostDocument: HostMongoDocument = await this.hostCollection.findOne({
-      _id: MUUID.from(hostId.value),
+      _id: entityIdToMuuid(hostId),
     });
 
     if (!hostDocument) {

@@ -1,7 +1,10 @@
 import { Binary } from 'mongodb';
-import * as MUUID from 'uuid-mongodb';
 
-import { muuidToEntityId } from '../../../../common/utils';
+import {
+  entityIdToMuuid,
+  muuidToEntityId,
+  stringToMuuid,
+} from '../../../../common/utils';
 
 import { Customer } from '../../../domain/entity/Customer';
 import { Address, AddressProps } from '../../../domain/entity/Address';
@@ -37,9 +40,9 @@ export function customerToMongoDocument(
     ...restPlainCustomer
   } = customer.serialize();
 
-  const mongoBinaryId = MUUID.from(id);
+  const mongoBinaryId = stringToMuuid(id);
   const mongoCustomerSelectedAddress = { ...selectedAddress, selected: true };
-  const orderMongoBinaryIds = orderIds.map(orderId => MUUID.from(orderId));
+  const orderMongoBinaryIds = orderIds.map(orderId => stringToMuuid(orderId));
 
   return {
     _id: mongoBinaryId,

@@ -1,5 +1,4 @@
 import { Collection } from 'mongodb';
-import * as MUUID from 'uuid-mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
 import { Order } from '../../../src/order/domain/entity/Order';
@@ -10,7 +9,7 @@ import { OrderMongoRepositoryAdapter } from '../../../src/order/infrastructure/r
 */
 import { OrderMongoDocument } from '../../../src/order/infrastructure/repository/order/OrderMongoMapper';
 import { Customer } from '../../../src/order/domain/entity/Customer';
-import { getRandomElement } from '../../../src/common/utils';
+import { entityIdToMuuid, getRandomElement } from '../../../src/common/utils';
 import {
   destinationCountriesAvailable,
   originCountriesAvailable,
@@ -52,9 +51,10 @@ export class OrderFixture {
     await this.orderCollection.insertOne({
       status,
       shipmentCost,
-      _id: MUUID.from(id.value),
-      customerId: MUUID.from(customerId.value),
-      hostId: hostId ? MUUID.from(hostId.value) : undefined,
+      _id: entityIdToMuuid(id),
+      customerId: entityIdToMuuid(customerId),
+      // TODO: Better way to handle optional property
+      hostId: hostId ? entityIdToMuuid(hostId) : undefined,
       destination: order.destination,
       ...orderDocumentBody,
     });
@@ -80,7 +80,7 @@ export class OrderFixture {
   // TODO: generalize to cleanup() once more use cases are available
   async deleteTestOrder(): Promise<void> {
     this.orderCollection.deleteOne({
-      _id: MUUID.from(this.testOrder.id.value),
+      _id: entityIdToMuuid(this.testOrder.id),
     });
   }
 
