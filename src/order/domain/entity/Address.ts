@@ -9,7 +9,7 @@ export class AddressProps {
 }
 
 export class Address extends StructurallyComparable(Validatable(AddressProps)) {
-  constructor({ country }: AddressProps = new AddressProps()) {
+  constructor({ country }: AddressProps) {
     super();
 
     this.country = country;

@@ -49,18 +49,16 @@ export class ItemProps extends EntityProps {
 }
 
 export class Item extends Identifiable(Validatable(ItemProps)) {
-  constructor(
-    {
-      id = new EntityId(),
-      title,
-      storeName,
-      category,
-      weight,
-      width,
-      length,
-      height,
-    }: ItemProps = new ItemProps(),
-  ) {
+  constructor({
+    id = new EntityId(),
+    title,
+    storeName,
+    category,
+    weight,
+    width,
+    length,
+    height,
+  }: ItemProps) {
     super();
 
     this.id = id;

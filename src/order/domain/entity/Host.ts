@@ -29,19 +29,20 @@ export class HostProps extends EntityProps {
 export type HostPropsPlain = Omit<
   EntityIdToStringId<Required<HostProps>>,
   'address' | 'orderIds'
-> & { address: AddressProps; orderIds: string[] };
+> & {
+  address: AddressProps;
+  orderIds: string[];
+};
 
 export class Host extends Identifiable(
   Serializable<HostPropsPlain, typeof HostProps>(HostProps),
 ) {
-  constructor(
-    {
-      id = new EntityId(),
-      address,
-      orderIds,
-      available,
-    }: HostProps = new HostProps(),
-  ) {
+  constructor({
+    id = new EntityId(),
+    address,
+    orderIds,
+    available,
+  }: HostProps) {
     super();
 
     this.id = id;

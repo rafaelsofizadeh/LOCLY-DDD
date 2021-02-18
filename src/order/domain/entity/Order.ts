@@ -89,28 +89,29 @@ export type OrderPropsPlain = Omit<
 export class Order extends Identifiable(
   Validatable(Serializable<OrderPropsPlain, typeof OrderProps>(OrderProps)),
 ) {
-  constructor(
-    {
-      id,
-      status,
-      customerId,
-      hostId,
-      items,
-      originCountry,
-      destination,
-      shipmentCost,
-    }: OrderProps = new OrderProps(),
-  ) {
+  constructor({
+    id = new EntityId(),
+    status,
+    customerId,
+    hostId,
+    items,
+    originCountry,
+    destination,
+    shipmentCost,
+  }: OrderProps) {
     super();
 
-    this.id = id || new EntityId();
-    this.updateStatus(status);
-    this.items = items;
+    this.id = id;
     this.customerId = customerId;
+    // TODO: Better way to handle optional properties
     this.hostId = hostId;
+    this.items = items;
     this.originCountry = originCountry;
     this.destination = destination;
     this.shipmentCost = shipmentCost;
+
+    // TODO: Better way to handle optional properties
+    this.updateStatus(status);
   }
 
   // TODO: Persist Customer to Order more explicitly maybe?

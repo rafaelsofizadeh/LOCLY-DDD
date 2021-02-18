@@ -33,13 +33,11 @@ export type CustomerPropsPlain = Omit<
 export class Customer extends Identifiable(
   Serializable<CustomerPropsPlain, typeof CustomerProps>(CustomerProps),
 ) {
-  constructor(
-    {
-      id = new EntityId(),
-      selectedAddress,
-      orderIds,
-    }: CustomerProps = new CustomerProps(),
-  ) {
+  constructor({
+    id = new EntityId(),
+    selectedAddress,
+    orderIds,
+  }: CustomerProps) {
     super();
 
     this.id = id;

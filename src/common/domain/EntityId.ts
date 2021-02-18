@@ -9,8 +9,12 @@ class Id {
   @IsUUID(4)
   readonly value: UUID;
 
-  constructor(id?: UUID) {
-    this.value = id || uuidv4();
+  constructor(id: UUID = uuidv4()) {
+    this.value = id;
+  }
+
+  toString() {
+    return this.value;
   }
 }
 
