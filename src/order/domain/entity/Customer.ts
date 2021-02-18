@@ -1,13 +1,16 @@
 import { IsArray, ValidateNested } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
-import { Address, AddressProps } from './Address';
+import { Exception } from '../../../common/error-handling/Exception';
 import { EntityProps } from '../../../common/domain/Entity';
 import { EntityId } from '../../../common/domain/EntityId';
 import { EntityIdToStringId } from '../../../common/types';
 import { Serializable } from '../../../common/domain/Serializable';
 import { Identifiable } from '../../../common/domain/Identifiable';
+
+import { Address, AddressProps } from './Address';
 import { Order } from './Order';
+import { Code } from '../../../common/error-handling/Code';
 import { TransformEntityIdArrayToStringArray } from '../../../common/utils';
 
 export class CustomerProps extends EntityProps {
@@ -52,8 +55,14 @@ export class Customer extends Identifiable(
       order: Order,
     ) => Promise<void>,
   ) {
-    // TODO: Add error handling
-    await persistAddOrderToCustomer(this, order);
+    await persistAddOrderToCustomer(this, order).catch(error => {
+      throw new Exception(
+        Code.INTERNAL_ERROR,
+        `Customer couldn't accept order and add order to consumer (orderId: ${order.id}, customerId: ${this.id}): ${error}`,
+        { order, customer: this },
+      );
+    });
+
     this.orderIds.push(order.id);
   }
 }

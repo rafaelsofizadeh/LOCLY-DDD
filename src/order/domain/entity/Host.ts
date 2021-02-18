@@ -9,6 +9,8 @@ import { Identifiable } from '../../../common/domain/Identifiable';
 
 import { Address, AddressProps } from './Address';
 import { Order } from './Order';
+import { Exception } from '../../../common/error-handling/Exception';
+import { Code } from '../../../common/error-handling/Code';
 import { TransformEntityIdArrayToStringArray } from '../../../common/utils';
 
 export class HostProps extends EntityProps {
@@ -55,8 +57,14 @@ export class Host extends Identifiable(
     order: Order,
     persistAddOrderToHost: (host: Host, order: Order) => Promise<void>,
   ) {
-    // TODO: Add error handling
-    await persistAddOrderToHost(this, order);
+    await persistAddOrderToHost(this, order).catch(error => {
+      throw new Exception(
+        Code.INTERNAL_ERROR,
+        `Host couldn't accept order and add order to host (orderId: ${order.id}, hostId: ${this.id}): ${error}`,
+        { order, host: this },
+      );
+    });
+
     this.orderIds.push(order.id);
   }
 }
