@@ -8,6 +8,7 @@ import { EntityIdToStringId } from '../../../common/types';
 import { Serializable } from '../../../common/domain/Serializable';
 import { Identifiable } from '../../../common/domain/Identifiable';
 import { Order } from './Order';
+import { TransformEntityIdArrayToStringArray } from '../../../common/utils';
 
 export class CustomerProps extends EntityProps {
   @ValidateNested()
@@ -17,12 +18,7 @@ export class CustomerProps extends EntityProps {
   @ValidateNested({ each: true })
   @IsArray()
   @Type(() => EntityId)
-  @Transform(
-    ({ value: ids }: { value: EntityId[] }) => ids.map(id => id.value),
-    {
-      toPlainOnly: true,
-    },
-  )
+  @TransformEntityIdArrayToStringArray()
   orderIds: EntityId[];
 }
 

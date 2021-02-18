@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { Binary } from 'mongodb';
 import * as MUUID from 'uuid-mongodb';
 
@@ -23,4 +24,31 @@ export function stringToMuuid(id: string): Binary {
 export function getRandomElement<T>(array: T[]): T {
   const elementCount = array.length;
   return array[Math.floor(Math.random() * elementCount)];
+}
+
+export function TransformEntityIdToString(): PropertyDecorator {
+  return Transform(
+    ({ value: decoratedId }: { value: EntityId }) => decoratedId.value,
+    {
+      toPlainOnly: true,
+    },
+  );
+}
+
+export function TransformEntityIdArrayToStringArray(): PropertyDecorator {
+  return Transform(
+    ({ value: decoratedIdArray }: { value: EntityId[] }) =>
+      decoratedIdArray.map(id => id.value),
+    {
+      toPlainOnly: true,
+    },
+  );
+}
+
+export function TransformStringToEntityId(): PropertyDecorator {
+  return Transform(
+    ({ value: decoratedIdRaw }: { value: string }) =>
+      new EntityId(decoratedIdRaw),
+    { toClassOnly: true },
+  );
 }

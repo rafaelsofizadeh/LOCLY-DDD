@@ -20,6 +20,7 @@ import { Item, ItemProps } from './Item';
 import { Host } from './Host';
 import { Address, AddressProps } from './Address';
 import { ShipmentCostRequest } from '../../application/port/ShipmentCostCalculator';
+import { TransformEntityIdToString } from '../../../common/utils';
 
 export type ShipmentCost = {
   amount: number;
@@ -39,9 +40,7 @@ export class OrderProps extends EntityProps {
 
   @ValidateNested()
   @Type(() => EntityId)
-  @Transform(({ value: id }: { value: EntityId }) => id.value, {
-    toPlainOnly: true,
-  })
+  @TransformEntityIdToString()
   customerId: EntityId;
 
   // TODO(NOW): Condition 'optional' on order's status (or find a better way)
@@ -49,9 +48,7 @@ export class OrderProps extends EntityProps {
   @IsOptional()
   @ValidateNested()
   @Type(() => EntityId)
-  @Transform(({ value: id }: { value: EntityId }) => id?.value, {
-    toPlainOnly: true,
-  })
+  @TransformEntityIdToString()
   hostId?: EntityId;
 
   @ValidateNested({ each: true })

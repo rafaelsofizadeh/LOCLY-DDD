@@ -8,6 +8,7 @@ import {
 
 import { EntityId } from '../../../common/domain/EntityId';
 import { Validatable } from '../../../common/domain/Validatable';
+import { TransformStringToEntityId } from '../../../common/utils';
 import { Item, ItemProps } from '../../domain/entity/Item';
 import { CreateOrderRequest } from '../../domain/use-case/create-order/CreateOrderRequest';
 
@@ -21,11 +22,7 @@ class BaseCreateOrderRequestAdapter implements CreateOrderRequest {
    */
   @ValidateNested()
   @Type(() => EntityId)
-  @Transform(
-    ({ value: customerIdRaw }: { value: string }) =>
-      new EntityId(customerIdRaw),
-    { toClassOnly: true },
-  )
+  @TransformStringToEntityId()
   readonly customerId: EntityId;
 
   @IsISO31661Alpha3()

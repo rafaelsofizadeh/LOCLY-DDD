@@ -18,7 +18,7 @@ export type OrderMongoDocument = {
 };
 
 export function orderToMongoDocument(order: Order): OrderMongoDocument {
-  // For id, see: Entity { @Transform() id }
+  // For id, see: Entity { @TransformEntityIdToString() id }
   const { id, customerId, hostId, ...restPlainOrder } = order.serialize();
 
   const mongoBinaryId = stringToMuuid(id);

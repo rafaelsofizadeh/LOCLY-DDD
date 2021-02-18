@@ -3,6 +3,7 @@ import { ValidateNested } from 'class-validator';
 
 import { EntityId } from '../../../common/domain/EntityId';
 import { Validatable } from '../../../common/domain/Validatable';
+import { TransformStringToEntityId } from '../../../common/utils';
 import { ConfirmOrderRequest } from '../../domain/use-case/confirm-order/ConfirmOrderRequest';
 
 class BaseConfirmOrderRequestAdapter implements ConfirmOrderRequest {
@@ -15,10 +16,7 @@ class BaseConfirmOrderRequestAdapter implements ConfirmOrderRequest {
    */
   @ValidateNested()
   @Type(() => EntityId)
-  @Transform(
-    ({ value: orderIdRaw }: { value: string }) => new EntityId(orderIdRaw),
-    { toClassOnly: true },
-  )
+  @TransformStringToEntityId()
   readonly orderId: EntityId;
 }
 

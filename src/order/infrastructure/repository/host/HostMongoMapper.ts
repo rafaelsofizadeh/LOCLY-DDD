@@ -27,7 +27,7 @@ export function mongoDocumentToHost({
 }
 
 export function hostToMongoDocument(host: Host): HostMongoDocument {
-  // For id, see: Entity { @Transform() id }
+  // For id, see: Entity { @TransformEntityIdToString id }
   const { id, orderIds, ...restPlainHost } = host.serialize();
   const mongoBinaryId = stringToMuuid(id);
   const orderMongoBinaryIds = orderIds.map(stringToMuuid);

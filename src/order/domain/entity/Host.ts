@@ -9,6 +9,7 @@ import { Identifiable } from '../../../common/domain/Identifiable';
 
 import { Address, AddressProps } from './Address';
 import { Order } from './Order';
+import { TransformEntityIdArrayToStringArray } from '../../../common/utils';
 
 export class HostProps extends EntityProps {
   @ValidateNested()
@@ -21,12 +22,7 @@ export class HostProps extends EntityProps {
   @ValidateNested({ each: true })
   @IsArray()
   @Type(() => EntityId)
-  @Transform(
-    ({ value: ids }: { value: EntityId[] }) => ids.map(id => id.value),
-    {
-      toPlainOnly: true,
-    },
-  )
+  @TransformEntityIdArrayToStringArray()
   orderIds: EntityId[];
 }
 
