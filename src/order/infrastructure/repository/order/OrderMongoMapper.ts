@@ -44,6 +44,7 @@ export function mongoDocumentToOrder({
   originCountry,
   customerId,
   hostId,
+  destination,
 }: OrderMongoDocument): Order {
   return new Order({
     id: muuidToEntityId(_id),
@@ -52,5 +53,6 @@ export function mongoDocumentToOrder({
     hostId: hostId ? muuidToEntityId(hostId) : undefined,
     items: items.map(item => new Item(item)),
     originCountry,
+    destination: new Address(destination),
   });
 }

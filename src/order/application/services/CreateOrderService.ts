@@ -35,6 +35,7 @@ export class CreateOrder implements CreateOrderUseCase {
       customerId: customer.id,
       originCountry,
       items,
+      destination: customer.selectedAddress,
     });
 
     await order.draft(

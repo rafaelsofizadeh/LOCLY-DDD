@@ -101,6 +101,7 @@ export class Order extends Identifiable(
       hostId,
       items,
       originCountry,
+      destination,
       shipmentCost,
     }: OrderProps = new OrderProps(),
   ) {
@@ -112,6 +113,7 @@ export class Order extends Identifiable(
     this.customerId = customerId;
     this.hostId = hostId;
     this.originCountry = originCountry;
+    this.destination = destination;
     this.shipmentCost = shipmentCost;
   }
 

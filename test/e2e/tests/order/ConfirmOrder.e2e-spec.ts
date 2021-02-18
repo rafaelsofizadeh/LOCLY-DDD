@@ -138,6 +138,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       customerId: testCustomer.id,
       items: [],
       originCountry,
+      destination: testCustomer.selectedAddress,
     });
 
     await Promise.all([
