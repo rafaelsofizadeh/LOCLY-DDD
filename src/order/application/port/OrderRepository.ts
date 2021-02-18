@@ -1,4 +1,5 @@
 import { EntityId } from '../../../common/domain/EntityId';
+import { Host } from '../../domain/entity/Host';
 import { Order } from '../../domain/entity/Order';
 
 export abstract class OrderRepository {
@@ -6,4 +7,5 @@ export abstract class OrderRepository {
   abstract findOrder(orderId: EntityId): Promise<Order>;
   abstract findOrders(orderIds: EntityId[]): Promise<Order[]>;
   abstract deleteOrder(orderId: EntityId): Promise<void>;
+  abstract addHostToOrder(order: Order, host: Host): Promise<void>;
 }

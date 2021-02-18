@@ -53,10 +53,13 @@ export class Customer extends Identifiable(
 
   async acceptOrder(
     order: Order,
-    persist: (customer: Customer, order: Order) => Promise<void>,
+    persistAddOrderToCustomer: (
+      customer: Customer,
+      order: Order,
+    ) => Promise<void>,
   ) {
     // TODO: Add error handling
-    await persist(this, order);
+    await persistAddOrderToCustomer(this, order);
     this.orderIds.push(order.id);
   }
 }

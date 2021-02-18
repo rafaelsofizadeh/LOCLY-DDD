@@ -71,10 +71,6 @@ export class OrderFixture {
       customerId: customer.id,
       items: [],
       originCountry,
-    });
-
-    await order.calculateShipmentCost({
-      getRate: async () => ({ amount: 400, currency: 'usd' }),
       destination: customer.selectedAddress,
     });
 

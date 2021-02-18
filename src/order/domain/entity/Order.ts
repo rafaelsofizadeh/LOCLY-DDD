@@ -122,23 +122,23 @@ export class Order extends Identifiable(
     getShipmentCostRate: (
       costRequest: ShipmentCostRequest,
     ) => Promise<ShipmentCost>,
-    persist: (order: Order) => Promise<void>,
+    persistAddOrder: (order: Order) => Promise<void>,
   ): Promise<void> {
     // TODO: Do I need validation here?
     await this.validate();
     this.shipmentCost = await this.calculateShipmentCost(getShipmentCostRate);
 
-    await persist(this);
+    await persistAddOrder(this);
   }
 
   async confirm(
     host: Host,
-    persist: (order: Order) => Promise<void>,
+    persistAddHostToOrder: (order: Order, host: Host) => Promise<void>,
   ): Promise<void> {
     this.hostId = host.id;
     this.status = OrderStatus.Confirmed;
 
-    await persist(this);
+    await persistAddHostToOrder(this, host);
   }
 
   private updateStatus(newStatus?: OrderStatus): OrderStatus {

@@ -50,11 +50,12 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
         throw error;
       });
 
-    // TODO: Add persistance function. Update tracking.
+    // TODO(NOW)(IMPORTANT): Add persistance function. Update tracking.
     await order.confirm(
       matchedHost,
-      order => new Promise(resolve => resolve()),
+      this.orderRepository.addHostToOrder.bind(this.orderRepository),
     );
+
     await matchedHost.acceptOrder(
       order,
       this.hostRepository.addOrderToHost.bind(this.hostRepository),

@@ -54,10 +54,10 @@ export class Host extends Identifiable(
 
   async acceptOrder(
     order: Order,
-    persist: (host: Host, order: Order) => Promise<void>,
+    persistAddOrderToHost: (host: Host, order: Order) => Promise<void>,
   ) {
     // TODO: Add error handling
-    await persist(this, order);
+    await persistAddOrderToHost(this, order);
     this.orderIds.push(order.id);
   }
 }
