@@ -32,7 +32,7 @@ export class CreateOrder implements CreateOrderUseCase {
     );
 
     const order: Order = new Order({
-      customer,
+      customerId: customer.id,
       originCountry,
       items,
     });

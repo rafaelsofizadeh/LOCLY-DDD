@@ -74,14 +74,15 @@ describe('Create Order – POST /order/create', () => {
 
     expect(response.status).toBe(201);
 
+    // TODO: strong typing
     const {
       id,
-      customer,
+      customerId,
       status,
       originCountry,
     }: {
       id: string;
-      customer: CustomerPropsPlain;
+      customerId: string;
       status: OrderStatus;
       originCountry: string;
     } = response.body;
@@ -96,7 +97,7 @@ describe('Create Order – POST /order/create', () => {
       testOrderId.value,
     );
     expect(isUUID(id)).toBe(true);
-    expect(customer).toEqual(updatedTestCustomer.serialize());
+    expect(customerId).toEqual(updatedTestCustomer.id.value);
     expect(status).toBe(OrderStatus.Drafted);
     expect(originCountry).toBe(testCustomer.selectedAddress.country);
   });

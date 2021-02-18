@@ -7,7 +7,7 @@ import {
   IsOptional,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 import { EntityProps } from '../../../common/domain/Entity';
 import { EntityId } from '../../../common/domain/EntityId';
@@ -19,12 +19,8 @@ import { EntityIdToStringId } from '../../../common/types';
 import { Item, ItemProps } from './Item';
 import { Host, HostPropsPlain } from './Host';
 import { Address, AddressProps } from './Address';
-import { Customer, CustomerPropsPlain } from './Customer';
-import { HostMatcher } from '../../application/port/HostMatcher';
-import {
-  ShipmentCostCalculator,
-  ShipmentCostRequest,
-} from '../../application/port/ShipmentCostCalculator';
+import { CustomerPropsPlain } from './Customer';
+import { ShipmentCostRequest } from '../../application/port/ShipmentCostCalculator';
 
 export type ShipmentCost = {
   amount: number;
@@ -43,14 +39,21 @@ export class OrderProps extends EntityProps {
   status?: OrderStatus;
 
   @ValidateNested()
-  @Type(() => Customer)
-  customer: Customer;
+  @Type(() => EntityId)
+  @Transform(({ value: id }: { value: EntityId }) => id.value, {
+    toPlainOnly: true,
+  })
+  customerId: EntityId;
 
   // TODO(NOW): Condition 'optional' on order's status (or find a better way)
+  // TODO: A better way to handle optional properties (maybe through multiple classes)
   @IsOptional()
   @ValidateNested()
-  @Type(() => Host)
-  host?: Host;
+  @Type(() => EntityId)
+  @Transform(({ value: id }: { value: EntityId }) => id?.value, {
+    toPlainOnly: true,
+  })
+  hostId?: EntityId;
 
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
@@ -77,10 +80,10 @@ export class OrderProps extends EntityProps {
 
 export type OrderPropsPlain = Omit<
   EntityIdToStringId<Required<OrderProps>>,
-  'customer' | 'host' | 'items' | 'destination'
+  'customerId' | 'hostId' | 'items' | 'destination'
 > & {
-  customer: CustomerPropsPlain;
-  host: HostPropsPlain[];
+  customerId: string;
+  hostId?: string;
   items: ItemProps[];
   destination: AddressProps;
 };
@@ -94,23 +97,25 @@ export class Order extends Identifiable(
     {
       id,
       status,
-      customer,
+      customerId,
+      hostId,
       items,
       originCountry,
       shipmentCost,
-    }: Omit<OrderProps, 'destination'> = new OrderProps(),
+    }: OrderProps = new OrderProps(),
   ) {
     super();
 
     this.id = id || new EntityId();
     this.updateStatus(status);
     this.items = items;
-    this.customer = customer;
+    this.customerId = customerId;
+    this.hostId = hostId;
     this.originCountry = originCountry;
-    this.destination = customer.selectedAddress;
     this.shipmentCost = shipmentCost;
   }
 
+  // TODO: Persist Customer to Order more explicitly maybe?
   async draft(
     getShipmentCostRate: (
       costRequest: ShipmentCostRequest,
@@ -128,7 +133,7 @@ export class Order extends Identifiable(
     host: Host,
     persist: (order: Order) => Promise<void>,
   ): Promise<void> {
-    this.host = host;
+    this.hostId = host.id;
     this.status = OrderStatus.Confirmed;
 
     await persist(this);

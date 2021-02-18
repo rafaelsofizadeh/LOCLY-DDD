@@ -135,7 +135,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     // TODO(NOW): CreateOrder through a use case, not manually.
     testOrder = new Order({
-      customer: testCustomer,
+      customerId: testCustomer.id,
       items: [],
       originCountry,
     });
@@ -171,14 +171,14 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     const {
       status,
-      host,
-    }: { status: OrderStatus; host: HostPropsPlain } = response.body;
+      hostId,
+    }: { status: OrderStatus; hostId: string } = response.body;
 
     expect(status).toBe(OrderStatus.Confirmed);
-    expect(host.id).toBe(testHosts[0].id.value);
+    expect(hostId).toBe(testHosts[0].id.value);
 
     const updatedTestHost: Host = await hostFixture.findHost(
-      new EntityId(host.id),
+      new EntityId(hostId),
     );
 
     expect(updatedTestHost.orderIds.map(({ value }) => value)).toContain(

@@ -36,7 +36,14 @@ export class OrderFixture {
       fixtureCustomer,
       originCountry,
     );
-    const { id, customer, status, shipmentCost, ...orderDocumentBody } = order;
+    const {
+      id,
+      customerId,
+      hostId,
+      status,
+      shipmentCost,
+      ...orderDocumentBody
+    } = order;
 
     /**
      * TODO: Insert order through OrderRepositoryProvider.
@@ -46,7 +53,8 @@ export class OrderFixture {
       status,
       shipmentCost,
       _id: MUUID.from(id.value),
-      customerId: MUUID.from(customer.id.value),
+      customerId: MUUID.from(customerId.value),
+      hostId: hostId ? MUUID.from(hostId.value) : undefined,
       destination: order.destination,
       ...orderDocumentBody,
     });
@@ -60,7 +68,7 @@ export class OrderFixture {
     originCountry: string,
   ): Promise<Order> {
     const order = new Order({
-      customer,
+      customerId: customer.id,
       items: [],
       originCountry,
     });
