@@ -1,11 +1,13 @@
 import { IsArray, IsBoolean, ValidateNested } from 'class-validator';
-import { Address, AddressProps } from './Address';
-import { EntityProps } from '../../../common/domain/Entity';
 import { Transform, Type } from 'class-transformer';
+
+import { EntityProps } from '../../../common/domain/Entity';
 import { EntityId } from '../../../common/domain/EntityId';
 import { EntityIdToStringId } from '../../../common/types';
 import { Serializable } from '../../../common/domain/Serializable';
 import { Identifiable } from '../../../common/domain/Identifiable';
+
+import { Address, AddressProps } from './Address';
 import { Order } from './Order';
 
 export class HostProps extends EntityProps {

@@ -3,7 +3,6 @@ import {
   ArrayMinSize,
   IsArray,
   IsISO31661Alpha3,
-  IsUUID,
   ValidateNested,
 } from 'class-validator';
 

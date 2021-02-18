@@ -6,7 +6,7 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { Order, OrderStatus } from '../../../../src/order/domain/entity/Order';
-import { Host, HostPropsPlain } from '../../../../src/order/domain/entity/Host';
+import { Host } from '../../../../src/order/domain/entity/Host';
 import { Address } from '../../../../src/order/domain/entity/Address';
 
 import {

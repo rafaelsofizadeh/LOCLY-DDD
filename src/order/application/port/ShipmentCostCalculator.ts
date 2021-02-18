@@ -1,5 +1,5 @@
 import { PhysicalCharacteristics } from '../../domain/entity/Item';
-import { Order, ShipmentCost } from '../../domain/entity/Order';
+import { ShipmentCost } from '../../domain/entity/Order';
 
 export type ShipmentCostRequest = {
   originCountry: string;

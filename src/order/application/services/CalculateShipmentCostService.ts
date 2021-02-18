@@ -1,4 +1,3 @@
-import { Order } from '../../domain/entity/Order';
 import {
   ShipmentCostCalculator,
   ShipmentCostRequest,

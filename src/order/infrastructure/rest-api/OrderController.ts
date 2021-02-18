@@ -2,7 +2,6 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  Inject,
   Post,
   UseInterceptors,
   UsePipes,

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { Code } from '../../../common/error-handling/Code';
-import { Order, OrderStatus } from '../../domain/entity/Order';
+import { Order } from '../../domain/entity/Order';
 import { Exception } from '../../../common/error-handling/Exception';
 
 import { ConfirmOrderRequest } from '../../domain/use-case/confirm-order/ConfirmOrderRequest';

@@ -4,10 +4,7 @@ import { Test } from '@nestjs/testing';
 import { isUUID } from 'class-validator';
 
 import { AppModule } from '../../../../src/AppModule';
-import {
-  Customer,
-  CustomerPropsPlain,
-} from '../../../../src/order/domain/entity/Customer';
+import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { EntityId } from '../../../../src/common/domain/EntityId';
 import { OrderStatus } from '../../../../src/order/domain/entity/Order';

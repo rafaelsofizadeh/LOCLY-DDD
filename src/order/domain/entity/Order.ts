@@ -17,9 +17,8 @@ import { Identifiable } from '../../../common/domain/Identifiable';
 import { EntityIdToStringId } from '../../../common/types';
 
 import { Item, ItemProps } from './Item';
-import { Host, HostPropsPlain } from './Host';
+import { Host } from './Host';
 import { Address, AddressProps } from './Address';
-import { CustomerPropsPlain } from './Customer';
 import { ShipmentCostRequest } from '../../application/port/ShipmentCostCalculator';
 
 export type ShipmentCost = {
