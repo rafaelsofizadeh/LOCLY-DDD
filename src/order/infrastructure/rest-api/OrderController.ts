@@ -11,10 +11,10 @@ import {
 import { CreateOrderRequestAdapter } from './CreateOrderRequestAdapter';
 import { CreateOrderUseCase } from '../../domain/use-case/create-order/CreateOrderUseCase';
 import { Order } from '../../domain/entity/Order';
-import { ConfirmOrderRequest } from '../../domain/use-case/confirm-order/ConfirmOrderRequest';
 import { ConfirmOrderRequestAdapter } from './ConfirmOrderRequestAdapter';
 import { ConfirmOrderUseCase } from '../../domain/use-case/confirm-order/ConfirmOrderUseCase';
 
+// TODO: Separate out to classes per each use case
 @Controller('order')
 export class OrderController {
   constructor(

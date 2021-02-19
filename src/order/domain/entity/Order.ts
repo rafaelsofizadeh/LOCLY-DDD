@@ -89,16 +89,19 @@ export type OrderPropsPlain = Omit<
 export class Order extends Identifiable(
   Validatable(Serializable<OrderPropsPlain, typeof OrderProps>(OrderProps)),
 ) {
-  constructor({
-    id = new EntityId(),
-    status,
-    customerId,
-    hostId,
-    items,
-    originCountry,
-    destination,
-    shipmentCost,
-  }: OrderProps) {
+  constructor(
+    {
+      id = new EntityId(),
+      status,
+      customerId,
+      hostId,
+      items,
+      originCountry,
+      destination,
+      shipmentCost,
+    }: OrderProps = new OrderProps(), // default value is needed for class-validator plainToClass
+    // Why? plainToClass calls the constructors without any input data, which, together with destructuring, leads to an error.
+  ) {
     super();
 
     this.id = id;

@@ -9,7 +9,8 @@ export class AddressProps {
 }
 
 export class Address extends StructurallyComparable(Validatable(AddressProps)) {
-  constructor({ country }: AddressProps) {
+  // default value is needed for class-validator plainToClass. Refer to: Order.ts
+  constructor({ country }: AddressProps = new AddressProps()) {
     super();
 
     this.country = country;

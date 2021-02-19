@@ -34,35 +34,37 @@ export type CustomerPropsPlain = Omit<
 };
 
 export class Customer extends Identifiable(
-  Serializable<CustomerPropsPlain, typeof CustomerProps>(CustomerProps),
-) {
-  constructor({
-    id = new EntityId(),
-    selectedAddress,
-    orderIds,
-  }: CustomerProps) {
-    super();
+         Serializable<CustomerPropsPlain, typeof CustomerProps>(CustomerProps),
+       ) {
+         constructor(
+           {
+             id = new EntityId(),
+             selectedAddress,
+             orderIds,
+           }: CustomerProps = new CustomerProps(), // default value is needed for class-validator plainToClass. Refer to: Order.ts
+         ) {
+           super();
 
-    this.id = id;
-    this.selectedAddress = selectedAddress;
-    this.orderIds = orderIds;
-  }
+           this.id = id;
+           this.selectedAddress = selectedAddress;
+           this.orderIds = orderIds;
+         }
 
-  async acceptOrder(
-    order: Order,
-    persistAddOrderToCustomer: (
-      customer: Customer,
-      order: Order,
-    ) => Promise<void>,
-  ) {
-    await persistAddOrderToCustomer(this, order).catch(error => {
-      throw new Exception(
-        Code.INTERNAL_ERROR,
-        `Customer couldn't accept order and add order to consumer (orderId: ${order.id}, customerId: ${this.id}): ${error}`,
-        { order, customer: this },
-      );
-    });
+         async acceptOrder(
+           order: Order,
+           persistAddOrderToCustomer: (
+             customer: Customer,
+             order: Order,
+           ) => Promise<void>,
+         ) {
+           await persistAddOrderToCustomer(this, order).catch(error => {
+             throw new Exception(
+               Code.INTERNAL_ERROR,
+               `Customer couldn't accept order and add order to consumer (orderId: ${order.id}, customerId: ${this.id}): ${error}`,
+               { order, customer: this },
+             );
+           });
 
-    this.orderIds.push(order.id);
-  }
-}
+           this.orderIds.push(order.id);
+         }
+       }

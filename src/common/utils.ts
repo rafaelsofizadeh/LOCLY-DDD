@@ -28,7 +28,7 @@ export function getRandomElement<T>(array: T[]): T {
 
 export function TransformEntityIdToString(): PropertyDecorator {
   return Transform(
-    ({ value: decoratedId }: { value: EntityId }) => decoratedId.value,
+    ({ value: decoratedId }: { value: EntityId }) => decoratedId?.value,
     {
       toPlainOnly: true,
     },

@@ -50,16 +50,18 @@ export class ItemProps extends EntityProps {
 }
 
 export class Item extends Identifiable(Validatable(ItemProps)) {
-  constructor({
-    id = new EntityId(),
-    title,
-    storeName,
-    category,
-    weight,
-    width,
-    length,
-    height,
-  }: ItemProps) {
+  constructor(
+    {
+      id = new EntityId(),
+      title,
+      storeName,
+      category,
+      weight,
+      width,
+      length,
+      height,
+    }: ItemProps = new ItemProps(), // default value is needed for class-validator plainToClass. Refer to: Order.ts
+  ) {
     super();
 
     this.id = id;

@@ -10,6 +10,7 @@ import { EntityId } from '../../../../src/common/domain/EntityId';
 import { OrderStatus } from '../../../../src/order/domain/entity/Order';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { Address } from '../../../../src/order/domain/entity/Address';
+import { Category } from '../../../../src/order/domain/entity/Item';
 
 describe('Create Order – POST /order/create', () => {
   let app: INestApplication;
@@ -65,7 +66,7 @@ describe('Create Order – POST /order/create', () => {
             height: 100,
             length: 100,
             weight: 10,
-            category: 'Electronics',
+            category: Category.Electronics,
           },
         ],
       });

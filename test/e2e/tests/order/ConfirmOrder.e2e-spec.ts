@@ -18,6 +18,8 @@ import { CustomerRepository } from '../../../../src/order/application/port/Custo
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { muuidToEntityId } from '../../../../src/common/utils';
 import { EntityId } from '../../../../src/common/domain/EntityId';
+import { CreateOrderUseCase } from '../../../../src/order/domain/use-case/create-order/CreateOrderUseCase';
+import { Category, Item } from '../../../../src/order/domain/entity/Item';
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;
@@ -29,6 +31,8 @@ describe('Confirm Order – POST /order/confirm', () => {
   let customerRepository: CustomerRepository;
   let orderRepository: OrderRepository;
   let hostFixture: HostFixture;
+
+  let createOrderUseCase: CreateOrderUseCase;
 
   let testCustomer: Customer;
   let testOrder: Order;
@@ -50,7 +54,12 @@ describe('Confirm Order – POST /order/confirm', () => {
       OrderRepository,
     )) as OrderRepository;
 
+    // TODO: Do I need a hostFixture? Fixtures in general?
     hostFixture = (await moduleRef.resolve(HostFixture)) as HostFixture;
+
+    createOrderUseCase = (await moduleRef.resolve(
+      CreateOrderUseCase,
+    )) as CreateOrderUseCase;
   });
 
   beforeEach(async () => {
@@ -133,25 +142,34 @@ describe('Confirm Order – POST /order/confirm', () => {
         }),
     );
 
-    // TODO(NOW): CreateOrder through a use case, not manually.
-    testOrder = new Order({
-      customerId: testCustomer.id,
-      items: [],
-      originCountry,
-      destination: testCustomer.selectedAddress,
-    });
-
     await Promise.all([
       customerRepository.addCustomer(testCustomer),
       hostFixture.addManyHosts(testHosts),
-      orderRepository.addOrder(testOrder),
     ]);
+
+    testOrder = await createOrderUseCase.execute({
+      customerId: testCustomer.id,
+      // TODO: Item fixture
+      items: [
+        new Item({
+          title: 'Laptop',
+          storeName: 'Amazon',
+          width: 100,
+          height: 100,
+          length: 100,
+          weight: 10,
+          category: Category.Electronics,
+        }),
+      ],
+      originCountry,
+    });
   });
 
   afterEach(() =>
     Promise.all([
       customerRepository.deleteCustomer(testCustomer.id),
       hostFixture.deleteManyHosts(testHosts.map(({ id }) => id)),
+      // TODO (FUTURE): Delete through deleteOrderUseCase
       orderRepository.deleteOrder(testOrder.id),
     ]),
   );
@@ -165,10 +183,10 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     expect(response.status).toBe(201);
 
-    /*console.log(testCustomer);
-    console.log(testHosts);
-    console.log(testOrder);
-    console.log(response.body);*/
+    console.log('testCustomer', testCustomer);
+    console.log('testHosts', testHosts);
+    console.log('testOrder', testOrder);
+    console.log('response', response.body);
 
     const {
       status,
@@ -181,6 +199,8 @@ describe('Confirm Order – POST /order/confirm', () => {
     const updatedTestHost: Host = await hostFixture.findHost(
       new EntityId(hostId),
     );
+
+    console.log('updatedTestHost', updatedTestHost);
 
     expect(updatedTestHost.orderIds.map(({ value }) => value)).toContain(
       testOrder.id.value,
