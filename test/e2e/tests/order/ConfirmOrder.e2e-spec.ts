@@ -183,7 +183,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     expect(response.status).toBe(201);
 
-    console.log('testCustomer', testCustomer);
+    // console.log('testCustomer', testCustomer);
     console.log('testHosts', testHosts);
     console.log('testOrder', testOrder);
     console.log('response', response.body);
