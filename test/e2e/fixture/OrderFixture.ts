@@ -13,7 +13,7 @@ import { entityIdToMuuid, getRandomElement } from '../../../src/common/utils';
 import {
   destinationCountriesAvailable,
   originCountriesAvailable,
-} from '../../../src/order/application/services/MatchHostService';
+} from '../../../src/order/application/services/HostMatcherService';
 
 export class OrderFixture {
   protected testOrder: Order;

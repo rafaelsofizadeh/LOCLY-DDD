@@ -12,7 +12,7 @@ import { Address } from '../../../../src/order/domain/entity/Address';
 import {
   destinationCountriesAvailable,
   originCountriesAvailable,
-} from '../../../../src/order/application/services/MatchHostService';
+} from '../../../../src/order/application/services/HostMatcherService';
 import { HostFixture } from '../../fixture/HostFixture';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';

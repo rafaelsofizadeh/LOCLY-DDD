@@ -8,7 +8,7 @@ export const originCountriesAvailable = ['AUS', 'USA', 'AZE'];
 export const destinationCountriesAvailable = ['AZE', 'ITA', 'CAN'];
 
 @Injectable()
-export class MatchHost implements HostMatcher {
+export class HostMatcherService implements HostMatcher {
   constructor(private hostRepository: HostRepository) {}
 
   checkServiceAvailability(

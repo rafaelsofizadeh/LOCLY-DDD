@@ -1,16 +1,18 @@
 import { Module, Provider } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongoModule } from 'nest-mongodb';
+import { StripeModule } from '@golevelup/nestjs-stripe';
+
 import { HostFixture } from '../../../../test/e2e/fixture/HostFixture';
 import { CustomerRepository } from '../../application/port/CustomerRepository';
 import { HostMatcher } from '../../application/port/HostMatcher';
 import { HostRepository } from '../../application/port/HostRepository';
 import { OrderRepository } from '../../application/port/OrderRepository';
 import { ShipmentCostCalculator } from '../../application/port/ShipmentCostCalculator';
-import { CalculateShipmentCost } from '../../application/services/CalculateShipmentCostService';
+import { ShipmentCostCalculatorService } from '../../application/services/ShipmentCostCalculatorService';
 import { ConfirmOrder } from '../../application/services/ConfirmOrderService';
 import { CreateOrder } from '../../application/services/CreateOrderService';
-import { MatchHost } from '../../application/services/MatchHostService';
+import { HostMatcherService } from '../../application/services/HostMatcherService';
 import { ConfirmOrderUseCase } from '../../domain/use-case/confirm-order/ConfirmOrderUseCase';
 import { CreateOrderUseCase } from '../../domain/use-case/create-order/CreateOrderUseCase';
 import { CustomerMongoRepositoryAdapter } from '../repository/customer/CustomerMongoRepositoryAdapter';
@@ -31,8 +33,8 @@ const persistenceProviders: Provider[] = [
 ];
 
 const infrastructureProviders: Provider[] = [
-  { provide: ShipmentCostCalculator, useClass: CalculateShipmentCost },
-  { provide: HostMatcher, useClass: MatchHost },
+  { provide: ShipmentCostCalculator, useClass: ShipmentCostCalculatorService },
+  { provide: HostMatcher, useClass: HostMatcherService },
 ];
 
 const useCaseProviders: Provider[] = [
@@ -59,6 +61,9 @@ const testProviders: Provider[] = [
   imports: [
     MongoModule.forFeature(['orders', 'customers', 'hosts']),
     EventEmitterModule.forRoot(),
+    StripeModule.forRoot(StripeModule, {
+      apiKey: process.env.STRIPE_SECRET_API_TEST_KEY,
+    }),
   ],
   controllers: [OrderController],
   providers: [
