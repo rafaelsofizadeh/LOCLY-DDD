@@ -7,7 +7,7 @@ import { OrderRepositoryProvider } from '../../../src/order/infrastructure/di/Or
 import { OrderRepository } from '../../../src/order/application/port/OrderRepository';
 import { OrderMongoRepositoryAdapter } from '../../../src/order/infrastructure/repository/order/OrderMongoRepositoryAdapter';
 */
-import { OrderMongoDocument } from '../../../src/order/infrastructure/repository/order/OrderMongoMapper';
+import { OrderMongoDocument } from '../../../src/order/infrastructure/persistence/order/OrderMongoMapper';
 import { Customer } from '../../../src/order/domain/entity/Customer';
 import { entityIdToMuuid, getRandomElement } from '../../../src/common/utils';
 import {

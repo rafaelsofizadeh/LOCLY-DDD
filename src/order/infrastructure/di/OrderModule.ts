@@ -15,9 +15,9 @@ import { CreateOrder } from '../../application/services/CreateOrderService';
 import { HostMatcherService } from '../../application/services/HostMatcherService';
 import { ConfirmOrderUseCase } from '../../domain/use-case/confirm-order/ConfirmOrderUseCase';
 import { CreateOrderUseCase } from '../../domain/use-case/create-order/CreateOrderUseCase';
-import { CustomerMongoRepositoryAdapter } from '../repository/customer/CustomerMongoRepositoryAdapter';
-import { HostMongoRepositoryAdapter } from '../repository/host/HostMongoRepositoryAdapter';
-import { OrderMongoRepositoryAdapter } from '../repository/order/OrderMongoRepositoryAdapter';
+import { CustomerMongoRepositoryAdapter } from '../persistence/customer/CustomerMongoRepositoryAdapter';
+import { HostMongoRepositoryAdapter } from '../persistence/host/HostMongoRepositoryAdapter';
+import { OrderMongoRepositoryAdapter } from '../persistence/order/OrderMongoRepositoryAdapter';
 import { OrderController } from '../rest-api/OrderController';
 
 const persistenceProviders: Provider[] = [
