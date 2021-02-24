@@ -1,3 +1,6 @@
+# passwords and keys
+.env
+
 # compiled output
 /dist
 /node_modules
