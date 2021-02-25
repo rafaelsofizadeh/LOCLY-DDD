@@ -9,10 +9,13 @@ import {
 } from '@nestjs/common';
 
 import { CreateOrderRequestAdapter } from './CreateOrderRequestAdapter';
-import { CreateOrderUseCase } from '../../domain/use-case/create-order/CreateOrderUseCase';
+import { CreateOrderUseCase } from '../../domain/use-case/CreateOrderUseCase';
 import { Order } from '../../domain/entity/Order';
 import { ConfirmOrderRequestAdapter } from './ConfirmOrderRequestAdapter';
-import { ConfirmOrderUseCase } from '../../domain/use-case/confirm-order/ConfirmOrderUseCase';
+import {
+  ConfirmOrderResult,
+  ConfirmOrderUseCase,
+} from '../../domain/use-case/ConfirmOrderUseCase';
 
 // TODO: Separate out to classes per each use case
 @Controller('order')

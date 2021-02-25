@@ -5,8 +5,10 @@ import { Code } from '../../../common/error-handling/Code';
 import { Order } from '../../domain/entity/Order';
 import { Exception } from '../../../common/error-handling/Exception';
 
-import { ConfirmOrderRequest } from '../../domain/use-case/confirm-order/ConfirmOrderRequest';
-import { ConfirmOrderUseCase } from '../../domain/use-case/confirm-order/ConfirmOrderUseCase';
+import {
+  ConfirmOrderRequest,
+  ConfirmOrderUseCase,
+} from '../../domain/use-case/ConfirmOrderUseCase';
 import { HostMatcher } from '../port/HostMatcher';
 import { OrderRepository } from '../port/OrderRepository';
 import { HostRepository } from '../port/HostRepository';

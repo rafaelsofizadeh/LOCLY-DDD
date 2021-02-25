@@ -4,11 +4,13 @@ import { OrderRepository } from '../port/OrderRepository';
 import { CustomerRepository } from '../port/CustomerRepository';
 import { ShipmentCostCalculator } from '../port/ShipmentCostCalculator';
 
-import { CreateOrderUseCase } from '../../domain/use-case/create-order/CreateOrderUseCase';
+import {
+  CreateOrderRequest,
+  CreateOrderUseCase,
+} from '../../domain/use-case/CreateOrderUseCase';
 
 import { Order } from '../../domain/entity/Order';
 import { Customer } from '../../domain/entity/Customer';
-import { CreateOrderRequest } from '../../domain/use-case/create-order/CreateOrderRequest';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

@@ -11,7 +11,7 @@ import { Validatable } from '../../../common/domain/Validatable';
 import { TransformStringToEntityId } from '../../../common/utils';
 import { Country } from '../../domain/data/Country';
 import { Item, ItemProps } from '../../domain/entity/Item';
-import { CreateOrderRequest } from '../../domain/use-case/create-order/CreateOrderRequest';
+import { CreateOrderRequest } from '../../domain/use-case/CreateOrderUseCase';
 
 class BaseCreateOrderRequestAdapter implements CreateOrderRequest {
   /*

@@ -13,8 +13,8 @@ import { ShipmentCostCalculatorService } from '../../application/services/Shipme
 import { ConfirmOrder } from '../../application/services/ConfirmOrderService';
 import { CreateOrder } from '../../application/services/CreateOrderService';
 import { HostMatcherService } from '../../application/services/HostMatcherService';
-import { ConfirmOrderUseCase } from '../../domain/use-case/confirm-order/ConfirmOrderUseCase';
-import { CreateOrderUseCase } from '../../domain/use-case/create-order/CreateOrderUseCase';
+import { ConfirmOrderUseCase } from '../../domain/use-case/ConfirmOrderUseCase';
+import { CreateOrderUseCase } from '../../domain/use-case/CreateOrderUseCase';
 import { CustomerMongoRepositoryAdapter } from '../persistence/customer/CustomerMongoRepositoryAdapter';
 import { HostMongoRepositoryAdapter } from '../persistence/host/HostMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from '../persistence/order/OrderMongoRepositoryAdapter';

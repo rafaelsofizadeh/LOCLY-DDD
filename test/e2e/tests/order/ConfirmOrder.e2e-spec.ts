@@ -18,7 +18,7 @@ import { CustomerRepository } from '../../../../src/order/application/port/Custo
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { muuidToEntityId } from '../../../../src/common/utils';
 import { EntityId } from '../../../../src/common/domain/EntityId';
-import { CreateOrderUseCase } from '../../../../src/order/domain/use-case/create-order/CreateOrderUseCase';
+import { CreateOrderUseCase } from '../../../../src/order/domain/use-case/CreateOrderUseCase';
 import { Category, Item } from '../../../../src/order/domain/entity/Item';
 import { Country } from '../../../../src/order/domain/data/Country';
 

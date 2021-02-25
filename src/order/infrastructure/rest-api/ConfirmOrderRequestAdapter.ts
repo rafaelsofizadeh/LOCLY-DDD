@@ -1,10 +1,10 @@
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
 import { EntityId } from '../../../common/domain/EntityId';
 import { Validatable } from '../../../common/domain/Validatable';
 import { TransformStringToEntityId } from '../../../common/utils';
-import { ConfirmOrderRequest } from '../../domain/use-case/confirm-order/ConfirmOrderRequest';
+import { ConfirmOrderRequest } from '../../domain/use-case/ConfirmOrderUseCase';
 
 class BaseConfirmOrderRequestAdapter implements ConfirmOrderRequest {
   /*
