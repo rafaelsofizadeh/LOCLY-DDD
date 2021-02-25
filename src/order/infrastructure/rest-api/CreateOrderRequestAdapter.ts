@@ -9,6 +9,7 @@ import {
 import { EntityId } from '../../../common/domain/EntityId';
 import { Validatable } from '../../../common/domain/Validatable';
 import { TransformStringToEntityId } from '../../../common/utils';
+import { Country } from '../../domain/data/Country';
 import { Item, ItemProps } from '../../domain/entity/Item';
 import { CreateOrderRequest } from '../../domain/use-case/create-order/CreateOrderRequest';
 
@@ -26,7 +27,7 @@ class BaseCreateOrderRequestAdapter implements CreateOrderRequest {
   readonly customerId: EntityId;
 
   @IsISO31661Alpha3()
-  readonly originCountry: string;
+  readonly originCountry: Country;
 
   @ValidateNested({ each: true })
   @ArrayMinSize(1)

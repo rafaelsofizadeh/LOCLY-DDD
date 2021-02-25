@@ -1,4 +1,5 @@
 import { EntityId } from '../../../common/domain/EntityId';
+import { Country } from '../../domain/data/Country';
 import { Host } from '../../domain/entity/Host';
 import { Order } from '../../domain/entity/Order';
 
@@ -11,6 +12,6 @@ export abstract class HostRepository {
   abstract deleteHost(hostId: EntityId): Promise<void>;
 
   abstract findHostAvailableInCountryWithMinimumNumberOfOrders(
-    country: string,
+    country: Country,
   ): Promise<Host>;
 }

@@ -1,10 +1,11 @@
+import { Country } from '../../domain/data/Country';
 import { Host } from '../../domain/entity/Host';
 
 export abstract class HostMatcher {
   abstract checkServiceAvailability(
-    originCountry: string,
-    destinationCountry: string,
+    originCountry: Country,
+    destinationCountry: Country,
   ): boolean | Promise<boolean>;
 
-  abstract matchHost(country: string): Promise<Host>;
+  abstract matchHost(country: Country): Promise<Host>;
 }

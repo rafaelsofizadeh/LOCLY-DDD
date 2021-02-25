@@ -5,13 +5,14 @@ import { muuidToEntityId, stringToMuuid } from '../../../../common/utils';
 import { Item, ItemProps } from '../../../domain/entity/Item';
 import { Address, AddressProps } from '../../../domain/entity/Address';
 import { Order, OrderStatus, ShipmentCost } from '../../../domain/entity/Order';
+import { Country } from '../../../domain/data/Country';
 
 export type OrderMongoDocument = {
   _id: Binary;
   status: OrderStatus;
   customerId: Binary;
   hostId: Binary;
-  originCountry: string;
+  originCountry: Country;
   items: ItemProps[];
   shipmentCost: ShipmentCost;
   destination: AddressProps;

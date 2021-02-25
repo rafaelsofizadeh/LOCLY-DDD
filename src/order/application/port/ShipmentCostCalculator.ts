@@ -1,9 +1,10 @@
+import { Country } from '../../domain/data/Country';
 import { PhysicalCharacteristics } from '../../domain/entity/Item';
 import { ShipmentCost } from '../../domain/entity/Order';
 
 export type ShipmentCostRequest = {
-  originCountry: string;
-  destinationCountry: string;
+  originCountry: Country;
+  destinationCountry: Country;
   packages: Array<PhysicalCharacteristics>;
 };
 

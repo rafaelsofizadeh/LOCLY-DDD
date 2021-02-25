@@ -20,6 +20,7 @@ import { muuidToEntityId } from '../../../../src/common/utils';
 import { EntityId } from '../../../../src/common/domain/EntityId';
 import { CreateOrderUseCase } from '../../../../src/order/domain/use-case/create-order/CreateOrderUseCase';
 import { Category, Item } from '../../../../src/order/domain/entity/Item';
+import { Country } from '../../../../src/order/domain/data/Country';
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;
@@ -63,8 +64,8 @@ describe('Confirm Order – POST /order/confirm', () => {
   });
 
   beforeEach(async () => {
-    const originCountry: string = originCountriesAvailable[0];
-    const destinationCountry: string = destinationCountriesAvailable[0];
+    const originCountry: Country = originCountriesAvailable[0] as Country;
+    const destinationCountry: Country = destinationCountriesAvailable[0] as Country;
 
     testCustomer = new Customer({
       selectedAddress: new Address({
@@ -73,7 +74,11 @@ describe('Confirm Order – POST /order/confirm', () => {
       orderIds: [],
     });
 
-    const testHostConfigs = [
+    const testHostConfigs: Array<{
+      country: Country;
+      available: boolean;
+      orderCount: number;
+    }> = [
       /*
       Test host #1:
       ✔ available

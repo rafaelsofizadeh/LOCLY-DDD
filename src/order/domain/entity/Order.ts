@@ -21,6 +21,7 @@ import { Host } from './Host';
 import { Address, AddressProps } from './Address';
 import { ShipmentCostRequest } from '../../application/port/ShipmentCostCalculator';
 import { TransformEntityIdToString } from '../../../common/utils';
+import { Country } from '../data/Country';
 
 export type ShipmentCost = {
   amount: number;
@@ -58,7 +59,7 @@ export class OrderProps extends EntityProps {
   items: Item[];
 
   @IsISO31661Alpha3()
-  originCountry: string;
+  originCountry: Country;
 
   // Why not just use a destination() getter, that will get the destination country from the Customer?
   // A problem arises if, after Order's submission, the Customer updates their "selectedAddress" field.

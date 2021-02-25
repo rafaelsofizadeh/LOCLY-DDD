@@ -14,6 +14,7 @@ import { Code } from '../../../../common/error-handling/Code';
 import { Order } from '../../../domain/entity/Order';
 import { EntityId } from '../../../../common/domain/EntityId';
 import { entityIdToMuuid } from '../../../../common/utils';
+import { Country } from '../../../domain/data/Country';
 
 @Injectable()
 export class HostMongoRepositoryAdapter implements HostRepository {
@@ -78,7 +79,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   }
 
   async findHostAvailableInCountryWithMinimumNumberOfOrders(
-    country: string,
+    country: Country,
   ): Promise<Host> {
     // Finding max value in array: https://stackoverflow.com/questions/32076382/mongodb-how-to-get-max-value-from-collections
     // Sorting by array length: https://stackoverflow.com/a/54529224/6539857
@@ -116,7 +117,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     return mongoDocumentToHost(hostDocument);
   }
 
-  private hostAvailableInCountryQuery(country: string) {
+  private hostAvailableInCountryQuery(country: Country) {
     return {
       'address.country': country,
       available: true,

@@ -11,6 +11,7 @@ import { OrderStatus } from '../../../../src/order/domain/entity/Order';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { Address } from '../../../../src/order/domain/entity/Address';
 import { Category } from '../../../../src/order/domain/entity/Item';
+import { Country } from '../../../../src/order/domain/data/Country';
 
 describe('Create Order – POST /order/create', () => {
   let app: INestApplication;
@@ -83,7 +84,7 @@ describe('Create Order – POST /order/create', () => {
       id: string;
       customerId: string;
       status: OrderStatus;
-      originCountry: string;
+      originCountry: Country;
     } = response.body;
 
     testOrderId = new EntityId(id);

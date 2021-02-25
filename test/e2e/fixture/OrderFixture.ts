@@ -14,6 +14,7 @@ import {
   destinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../src/order/application/services/HostMatcherService';
+import { Country } from '../../../src/order/domain/data/Country';
 
 export class OrderFixture {
   protected testOrder: Order;
@@ -29,7 +30,7 @@ export class OrderFixture {
 
   async createTestOrder(
     fixtureCustomer: Customer,
-    originCountry: string,
+    originCountry: Country,
   ): Promise<Order> {
     const order: Order = await OrderFixture.createOrder(
       fixtureCustomer,
@@ -65,7 +66,7 @@ export class OrderFixture {
 
   static async createOrder(
     customer: Customer,
-    originCountry: string,
+    originCountry: Country,
   ): Promise<Order> {
     const order = new Order({
       customerId: customer.id,
