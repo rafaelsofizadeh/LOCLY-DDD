@@ -50,7 +50,12 @@ describe('Create Order – POST /order/create', () => {
 
   // Customer shouldn't be affected from test case to test case,
   // so we destroy it once, after all tests.
-  afterAll(() => customerRepository.deleteCustomer(testCustomer.id));
+  afterAll(() =>
+    Promise.all([
+      customerRepository.deleteCustomer(testCustomer.id),
+      orderRepository.deleteOrder(testOrderId),
+    ]),
+  );
 
   it('returns an Order object on proper Order Request format and existing customerId', async () => {
     const response: supertest.Response = await supertest(app.getHttpServer())
