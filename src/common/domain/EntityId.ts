@@ -3,6 +3,7 @@ import { IsUUID } from 'class-validator';
 
 import { Validatable } from './Validatable';
 
+// TODO: Use this everywhere
 export type UUID = string;
 
 class Id {
