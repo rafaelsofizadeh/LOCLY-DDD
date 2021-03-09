@@ -21,14 +21,8 @@ import { OrderMongoRepositoryAdapter } from '../persistence/order/OrderMongoRepo
 import { OrderController } from '../rest-api/OrderController';
 
 const persistenceProviders: Provider[] = [
-  {
-    provide: OrderRepository,
-    useClass: OrderMongoRepositoryAdapter,
-  },
-  {
-    provide: CustomerRepository,
-    useClass: CustomerMongoRepositoryAdapter,
-  },
+  { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
+  { provide: CustomerRepository, useClass: CustomerMongoRepositoryAdapter },
   { provide: HostRepository, useClass: HostMongoRepositoryAdapter },
 ];
 
@@ -38,23 +32,14 @@ const infrastructureProviders: Provider[] = [
 ];
 
 const useCaseProviders: Provider[] = [
-  {
-    provide: CreateOrderUseCase,
-    useClass: CreateOrder,
-  },
-  {
-    provide: ConfirmOrderUseCase,
-    useClass: ConfirmOrder,
-  },
+  { provide: CreateOrderUseCase, useClass: CreateOrder },
+  { provide: ConfirmOrderUseCase, useClass: ConfirmOrder },
 ];
 
 // TODO(NOW): find a better place to initialize testing dependencies
 // ATTENTION: Cool thing. Polymorphism (?) through interface injections.
 const testProviders: Provider[] = [
-  {
-    provide: HostFixture,
-    useClass: HostMongoRepositoryAdapter,
-  },
+  { provide: HostFixture, useClass: HostMongoRepositoryAdapter },
 ];
 
 @Module({
