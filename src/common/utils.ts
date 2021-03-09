@@ -9,8 +9,12 @@ export function enumToArray(inputEnum: any): any[] {
   return Object.values(inputEnum).slice(0, middle);
 }
 
+export function muuidToString(id: Binary): string {
+  return MUUID.from(id).toString();
+}
+
 export function muuidToEntityId(id: Binary): EntityId {
-  return new EntityId(MUUID.from(id).toString());
+  return new EntityId(muuidToString(id));
 }
 
 export function entityIdToMuuid(id: EntityId): Binary {
