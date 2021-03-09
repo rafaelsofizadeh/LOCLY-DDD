@@ -42,14 +42,13 @@ export class OrderController {
   @Post('confirm')
   // Validation and transformation is performed by Nest.js global validation pipe
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @UseInterceptors(ClassSerializerInterceptor)
   async confirmOrder(
     @Body() confirmationRequest: ConfirmOrderRequestAdapter,
-  ): Promise<Order> {
-    const confirmedOrder: Order = await this.confirmOrderUseCase.execute(
+  ): Promise<ConfirmOrderResult> {
+    const checkoutId = await this.confirmOrderUseCase.execute(
       confirmationRequest,
     );
 
-    return confirmedOrder;
+    return checkoutId;
   }
 }

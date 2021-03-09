@@ -3,6 +3,7 @@ import { AppModule } from './AppModule';
 
 // TODO(GLOBAL): https://github.com/microsoft/TypeScript/issues/2845
 // TODO(GLOBAL): https://stackoverflow.com/a/37300663/6539857 !!!
+// TODO(GLOBAL): "not found document" handling application-wide.
 
 /**
 TOOD(GLOBAL):
@@ -14,7 +15,7 @@ Move service functionality to the Domain Entities themselves
 declare const module: any;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
   await app.listen(3000);
 
   if (module.hot) {

@@ -17,10 +17,14 @@ import { HostFixture } from '../../fixture/HostFixture';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { muuidToEntityId } from '../../../../src/common/utils';
-import { EntityId } from '../../../../src/common/domain/EntityId';
 import { CreateOrderUseCase } from '../../../../src/order/domain/use-case/CreateOrderUseCase';
 import { Category, Item } from '../../../../src/order/domain/entity/Item';
 import { Country } from '../../../../src/order/domain/data/Country';
+import { isString } from 'class-validator';
+import { MatchFixture } from '../../fixture/MatchFixture';
+import { Match } from '../../../../src/order/application/port/MatchCache';
+import { MatchReference } from '../../../../src/order/application/services/ConfirmOrderService';
+import { EntityId } from '../../../../src/common/domain/EntityId';
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;
@@ -32,6 +36,7 @@ describe('Confirm Order – POST /order/confirm', () => {
   let customerRepository: CustomerRepository;
   let orderRepository: OrderRepository;
   let hostFixture: HostFixture;
+  let matchFixture: MatchFixture;
 
   let createOrderUseCase: CreateOrderUseCase;
 
@@ -57,6 +62,8 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     // TODO: Do I need a hostFixture? Fixtures in general?
     hostFixture = (await moduleRef.resolve(HostFixture)) as HostFixture;
+
+    matchFixture = (await moduleRef.resolve(MatchFixture)) as MatchFixture;
 
     createOrderUseCase = (await moduleRef.resolve(
       CreateOrderUseCase,
@@ -171,6 +178,7 @@ describe('Confirm Order – POST /order/confirm', () => {
   });
 
   afterEach(() =>
+    // TODO: Hosts and orders don't get deleted
     Promise.all([
       customerRepository.deleteCustomer(testCustomer.id),
       hostFixture.deleteManyHosts(testHosts.map(({ id }) => id)),
@@ -186,14 +194,29 @@ describe('Confirm Order – POST /order/confirm', () => {
         orderId: testOrder.id.value,
       });
 
-    expect(response.status).toBe(201);
-
-    // console.log('testCustomer', testCustomer);
     console.log('testHosts', testHosts);
     console.log('testOrder', testOrder);
-    console.log('response', response.body);
 
-    const {
+    expect(response.status).toBe(201);
+
+    // TODO: strong typing
+    const { checkoutId }: { checkoutId: string } = response.body;
+
+    expect(checkoutId).toBeDefined();
+    expect(isString(checkoutId)).toBe(true);
+    expect(checkoutId.slice(0, 2)).toBe('cs'); // "Checkout Session"
+
+    const match: Match = await matchFixture.findMatch(
+      testOrder.id,
+      // testOrder SHOULD be matched with the first testHost
+      testHosts[0].id,
+    );
+
+    expect(match).toBeDefined();
+  });
+});
+
+/*const {
       status,
       hostId,
     }: { status: OrderStatus; hostId: string } = response.body;
@@ -209,6 +232,4 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     expect(updatedTestHost.orderIds.map(({ value }) => value)).toContain(
       testOrder.id.value,
-    );
-  });
-});
+    );*/

@@ -19,11 +19,16 @@ import { CustomerMongoRepositoryAdapter } from '../persistence/customer/Customer
 import { HostMongoRepositoryAdapter } from '../persistence/host/HostMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from '../persistence/order/OrderMongoRepositoryAdapter';
 import { OrderController } from '../rest-api/OrderController';
+import { MatchCache } from '../../application/port/MatchCache';
+import { MatchMongoCacheAdapter } from '../persistence/match/MatchMongoCacheAdapter';
+import { ConfigModule } from '@nestjs/config';
+import { MatchFixture } from '../../../../test/e2e/fixture/MatchFixture';
 
 const persistenceProviders: Provider[] = [
   { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
   { provide: CustomerRepository, useClass: CustomerMongoRepositoryAdapter },
   { provide: HostRepository, useClass: HostMongoRepositoryAdapter },
+  { provide: MatchCache, useClass: MatchMongoCacheAdapter },
 ];
 
 const infrastructureProviders: Provider[] = [
@@ -40,14 +45,20 @@ const useCaseProviders: Provider[] = [
 // ATTENTION: Cool thing. Polymorphism (?) through interface injections.
 const testProviders: Provider[] = [
   { provide: HostFixture, useClass: HostMongoRepositoryAdapter },
+  { provide: MatchFixture, useClass: MatchMongoCacheAdapter },
 ];
 
 @Module({
   imports: [
-    MongoModule.forFeature(['orders', 'customers', 'hosts']),
+    // { isGlobal: true } doesn't work — environment variables still undefined.
+    ConfigModule.forRoot(),
+    MongoModule.forFeature(['orders', 'customers', 'hosts', 'matches']),
     EventEmitterModule.forRoot(),
     StripeModule.forRoot(StripeModule, {
       apiKey: process.env.STRIPE_SECRET_API_TEST_KEY,
+      webhookConfig: {
+        stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+      },
     }),
   ],
   controllers: [OrderController],

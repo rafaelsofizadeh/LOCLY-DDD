@@ -15,9 +15,10 @@ import { Order } from '../../../domain/entity/Order';
 import { EntityId } from '../../../../common/domain/EntityId';
 import { entityIdToMuuid } from '../../../../common/utils';
 import { Country } from '../../../domain/data/Country';
+import { HostFixture } from '../../../../../test/e2e/fixture/HostFixture';
 
 @Injectable()
-export class HostMongoRepositoryAdapter implements HostRepository {
+export class HostMongoRepositoryAdapter implements HostRepository, HostFixture {
   constructor(
     @InjectCollection('hosts')
     private readonly hostCollection: Collection<HostMongoDocument>,
