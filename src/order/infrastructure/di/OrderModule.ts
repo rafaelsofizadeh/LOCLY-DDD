@@ -21,8 +21,10 @@ import { OrderMongoRepositoryAdapter } from '../persistence/order/OrderMongoRepo
 import { OrderController } from '../rest-api/OrderController';
 import { MatchCache } from '../../application/port/MatchCache';
 import { MatchMongoCacheAdapter } from '../persistence/match/MatchMongoCacheAdapter';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MatchFixture } from '../../../../test/e2e/fixture/MatchFixture';
+import { FinalizeOrderUseCase } from '../../domain/use-case/FinalizeOrderUseCase';
+import { FinalizeOrderService } from '../../application/services/FinalizeOrderService';
 
 const persistenceProviders: Provider[] = [
   { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
@@ -39,6 +41,7 @@ const infrastructureProviders: Provider[] = [
 const useCaseProviders: Provider[] = [
   { provide: CreateOrderUseCase, useClass: CreateOrder },
   { provide: ConfirmOrderUseCase, useClass: ConfirmOrder },
+  { provide: FinalizeOrderUseCase, useClass: FinalizeOrderService },
 ];
 
 // TODO(NOW): find a better place to initialize testing dependencies
@@ -50,15 +53,19 @@ const testProviders: Provider[] = [
 
 @Module({
   imports: [
-    // { isGlobal: true } doesn't work — environment variables still undefined.
     ConfigModule.forRoot(),
     MongoModule.forFeature(['orders', 'customers', 'hosts', 'matches']),
-    EventEmitterModule.forRoot(),
-    StripeModule.forRoot(StripeModule, {
-      apiKey: process.env.STRIPE_SECRET_API_TEST_KEY,
-      webhookConfig: {
-        stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
-      },
+    StripeModule.forRootAsync(StripeModule, {
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        apiKey: configService.get<string>('STRIPE_SECRET_API_TEST_KEY'),
+        webhookConfig: {
+          stripeWebhookSecret: configService.get<string>(
+            'STRIPE_WEBHOOK_SECRET',
+          ),
+        },
+      }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [OrderController],
