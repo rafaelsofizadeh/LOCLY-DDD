@@ -12,15 +12,22 @@ import {
 } from '@golevelup/nestjs-webhooks';
 
 import { OrderModule } from './order/infrastructure/di/OrderModule';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
+    // { isGlobal: true } doesn't work — environment variables still undefined.
     ConfigModule.forRoot(),
-    MongoModule.forRoot(
-      'mongodb+srv://rafasofizada:METUclass2022@cluster0.tcrn6.mongodb.net/test?authSource=admin&replicaSet=atlas-zrpmay-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true',
-      'locly',
-    ),
+    MongoModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_LOCLY_CONNECTION_STRING'),
+        dbName: configService.get<string>('MONGO_LOCLY_DB_NAME'),
+      }),
+      inject: [ConfigService],
+    }),
+    EventEmitterModule.forRoot(),
     OrderModule,
     JsonBodyMiddleware,
     RawBodyMiddleware,
