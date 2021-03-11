@@ -1,10 +1,6 @@
 import { Binary } from 'mongodb';
 
-import {
-  entityIdToMuuid,
-  muuidToEntityId,
-  stringToMuuid,
-} from '../../../../common/utils';
+import { muuidToEntityId, stringToMuuid } from '../../../../common/utils';
 
 import { Customer } from '../../../domain/entity/Customer';
 import { Address, AddressProps } from '../../../domain/entity/Address';

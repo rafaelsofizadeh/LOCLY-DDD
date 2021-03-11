@@ -5,7 +5,7 @@ import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/domain/entity/Customer';
-import { Order, OrderStatus } from '../../../../src/order/domain/entity/Order';
+import { Order } from '../../../../src/order/domain/entity/Order';
 import { Host } from '../../../../src/order/domain/entity/Host';
 import { Address } from '../../../../src/order/domain/entity/Address';
 
@@ -24,7 +24,6 @@ import { isString } from 'class-validator';
 import { MatchFixture } from '../../fixture/MatchFixture';
 import { Match } from '../../../../src/order/application/port/MatchCache';
 import { MatchReference } from '../../../../src/order/application/services/ConfirmOrderService';
-import { EntityId } from '../../../../src/common/domain/EntityId';
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;

@@ -9,7 +9,6 @@ import { FinalizeOrderUseCase } from '../../domain/use-case/FinalizeOrderUseCase
 import { HostRepository } from '../port/HostRepository';
 import { Match, MatchCache } from '../port/MatchCache';
 import { OrderRepository } from '../port/OrderRepository';
-import { MatchReference } from './ConfirmOrderService';
 
 @Injectable()
 export class FinalizeOrderService implements FinalizeOrderUseCase {
@@ -37,7 +36,6 @@ export class FinalizeOrderService implements FinalizeOrderUseCase {
       this.hostRepository.findHost(match.hostId),
     ]);
 
-    // TODO: is order important here? Can this be done concurrently?
     await Promise.all([
       order.confirm(
         host,
