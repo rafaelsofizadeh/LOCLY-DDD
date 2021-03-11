@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Binary, Collection } from 'mongodb';
+import { Binary, ClientSession, Collection } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
-import { MatchFixture } from '../../../../../test/e2e/fixture/MatchFixture';
 import { EntityId } from '../../../../common/domain/EntityId';
+import { Code } from '../../../../common/error-handling/Code';
+import { Exception } from '../../../../common/error-handling/Exception';
 import { entityIdToMuuid } from '../../../../common/utils';
 
 // TODO(NOW(IMPORTANT)): Remove MatchRepository, record the match in Stripe metadata
@@ -18,32 +19,44 @@ import {
 } from './MatchMongoMapper';
 
 @Injectable()
-export class MatchMongoCacheAdapter implements MatchCache, MatchFixture {
+export class MatchMongoCacheAdapter implements MatchCache {
   constructor(
     @InjectCollection('matches')
     private readonly matchCollection: Collection<MatchMongoDocument>,
   ) {}
 
-  async recordMatch(match: Match): Promise<void> {
-    this.matchCollection.insertOne(matchToMongoDocument(match));
+  async recordMatch(match: Match, transaction?: ClientSession): Promise<void> {
+    this.matchCollection.insertOne(matchToMongoDocument(match), {
+      session: transaction,
+    });
   }
 
-  async retrieveAndDeleteMatch(matchId: EntityId): Promise<Match> {
+  async retrieveAndDeleteMatch(
+    matchId: EntityId,
+    transaction?: ClientSession,
+  ): Promise<Match> {
     const matchMongoBinaryId: Binary = entityIdToMuuid(matchId);
     const matchDocument: MatchMongoDocument = await this.matchCollection.findOne(
       { _id: matchMongoBinaryId },
+      { session: transaction },
     );
 
     // TODO(GLOBAL): "not found document" handling application-wide.
 
-    await this.matchCollection.deleteOne({ _id: matchMongoBinaryId });
+    await this.matchCollection.deleteOne(
+      { _id: matchMongoBinaryId },
+      { session: transaction },
+    );
 
     return mongoDocumentToMatch(matchDocument);
   }
 
-  // TODO: Redundancy with retrieveAndDeleteMatch
   // TODO: Make orderId and hostId mutually optional
-  async findMatch(orderId: EntityId, hostId: EntityId): Promise<Match> {
+  async findMatch(
+    orderId: EntityId,
+    hostId: EntityId,
+    transaction?: ClientSession,
+  ): Promise<Match> {
     const orderMongoBinaryId: Binary = entityIdToMuuid(orderId);
     const hostMongoBinaryId: Binary = entityIdToMuuid(hostId);
 
@@ -51,7 +64,21 @@ export class MatchMongoCacheAdapter implements MatchCache, MatchFixture {
       {
         $and: [{ orderId: orderMongoBinaryId }, { hostId: hostMongoBinaryId }],
       },
+      { session: transaction },
     );
+
+    if (!matchDocument) {
+      // TODO(GLOBAL): Session transaction abortion in non-mongo methods
+      /*if (transaction) {
+        await transaction.abortTransaction();
+      }*/
+
+      throw new Exception(
+        Code.ENTITY_NOT_FOUND_ERROR,
+        `Match (orderId: ${orderId.value}, hostId: ${hostId.value}) not found`,
+        { orderId, hostId },
+      );
+    }
 
     return mongoDocumentToMatch(matchDocument);
   }

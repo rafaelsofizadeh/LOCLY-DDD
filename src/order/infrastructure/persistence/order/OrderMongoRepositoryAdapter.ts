@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Binary, Collection } from 'mongodb';
+import { Binary, ClientSession, Collection } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
 import { EntityId } from '../../../../common/domain/EntityId';
@@ -22,34 +22,42 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     private readonly orderCollection: Collection<OrderMongoDocument>,
   ) {}
 
-  async addOrder(order: Order): Promise<void> {
+  async addOrder(order: Order, transaction?: ClientSession): Promise<void> {
     const orderDocument = orderToMongoDocument(order);
 
-    this.orderCollection.insertOne(orderDocument).catch(error => {
-      throw new Exception(
-        Code.INTERNAL_ERROR,
-        `Error creating a new order in the database. ${error.name}: ${error.message}`,
-        { order, orderDocument },
-      );
-    });
+    this.orderCollection
+      .insertOne(orderDocument, { session: transaction })
+      .catch(error => {
+        throw new Exception(
+          Code.INTERNAL_ERROR,
+          `Error creating a new order in the database. ${error.name}: ${error.message}`,
+          { order, orderDocument },
+        );
+      });
   }
 
   // This should always be used together with HostRepository.addOrderToHost
   async addHostToOrder(
     { id: orderId }: Order,
     { id: hostId }: Host,
+    transaction?: ClientSession,
   ): Promise<void> {
     this.orderCollection.updateOne(
       { _id: entityIdToMuuid(orderId) },
       { $set: { hostId: entityIdToMuuid(hostId) } },
+      { session: transaction },
     );
   }
 
-  async findOrder(orderId: EntityId): Promise<Order> {
+  async findOrder(
+    orderId: EntityId,
+    transaction?: ClientSession,
+  ): Promise<Order> {
     const orderDocument: OrderMongoDocument = await this.orderCollection.findOne(
       {
         _id: entityIdToMuuid(orderId),
       },
+      { session: transaction },
     );
 
     if (!orderDocument) {
@@ -63,13 +71,16 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     return mongoDocumentToOrder(orderDocument);
   }
 
-  async findOrders(orderIds: EntityId[]): Promise<Order[]> {
+  async findOrders(
+    orderIds: EntityId[],
+    transaction?: ClientSession,
+  ): Promise<Order[]> {
     const orderMongoBinaryIds: Binary[] = orderIds.map(orderId =>
       entityIdToMuuid(orderId),
     );
 
     const orderDocuments: OrderMongoDocument[] = await this.orderCollection
-      .find({ _id: { $in: orderMongoBinaryIds } })
+      .find({ _id: { $in: orderMongoBinaryIds } }, { session: transaction })
       .toArray();
 
     // To access all orderIds and failedOrderIds, catch the exception and access its 'data' property
@@ -95,7 +106,13 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     );
   }
 
-  async deleteOrder(orderId: EntityId): Promise<void> {
-    this.orderCollection.deleteOne({ _id: entityIdToMuuid(orderId) });
+  async deleteOrder(
+    orderId: EntityId,
+    transaction?: ClientSession,
+  ): Promise<void> {
+    this.orderCollection.deleteOne(
+      { _id: entityIdToMuuid(orderId) },
+      { session: transaction },
+    );
   }
 }

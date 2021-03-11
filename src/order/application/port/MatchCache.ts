@@ -1,3 +1,4 @@
+import { ClientSession } from 'mongodb';
 import { EntityId } from '../../../common/domain/EntityId';
 
 // TODO/DECIDE: id is specifically a string (Stripe.Checkout.Session['client_reference_id']),
@@ -9,6 +10,19 @@ export type Match = {
 };
 
 export abstract class MatchCache {
-  abstract recordMatch(match: Match): Promise<void>;
-  abstract retrieveAndDeleteMatch(matchId: EntityId): Promise<Match>;
+  abstract recordMatch(
+    match: Match,
+    transaction?: ClientSession,
+  ): Promise<void>;
+
+  abstract retrieveAndDeleteMatch(
+    matchId: EntityId,
+    transaction?: ClientSession,
+  ): Promise<Match>;
+
+  abstract findMatch(
+    orderId: EntityId,
+    hostId: EntityId,
+    transaction?: ClientSession,
+  ): Promise<Match>;
 }
