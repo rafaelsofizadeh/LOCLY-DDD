@@ -12,6 +12,11 @@ import {
 import { Order } from '../../domain/entity/Order';
 import { Customer } from '../../domain/entity/Customer';
 import { Injectable } from '@nestjs/common';
+import { InjectClient } from 'nest-mongodb';
+import { ClientSession, MongoClient, TransactionOptions } from 'mongodb';
+import { EntityId } from '../../../common/domain/EntityId';
+import { Country } from '../../domain/data/Country';
+import { Item } from '../../domain/entity/Item';
 
 @Injectable()
 export class CreateOrder implements CreateOrderUseCase {
@@ -21,6 +26,7 @@ export class CreateOrder implements CreateOrderUseCase {
     private readonly shipmentCostCalculator: ShipmentCostCalculator,
     // TODO: More general EventEmitter class, wrapper around eventEmitter
     private readonly eventEmitter: EventEmitter2,
+    @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
   // Input validation in Controllers (/infrastructure)
@@ -29,32 +35,70 @@ export class CreateOrder implements CreateOrderUseCase {
     originCountry,
     items,
   }: CreateOrderRequest): Promise<Order> {
+    const session = this.mongoClient.startSession();
+    const transactionOptions: TransactionOptions = {
+      readPreference: 'primary',
+      readConcern: { level: 'local' },
+      writeConcern: { w: 'majority' },
+    };
+
+    // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
+    let order: Order;
+
+    try {
+      await session.withTransaction(async (session: ClientSession) => {
+        order = await this.createDraftOrderAndPersist(
+          customerId,
+          originCountry,
+          items,
+          session,
+        );
+      }, transactionOptions);
+    } finally {
+      await session.endSession();
+    }
+
+    // Serialization in Controllers (/infrastructure)
+    return order;
+  }
+
+  private async createDraftOrderAndPersist(
+    customerId: EntityId,
+    originCountry: Country,
+    items: Item[],
+    session: ClientSession,
+  ): Promise<Order> {
     const customer: Customer = await this.customerRepository.findCustomer(
       customerId,
+      session,
     );
 
-    const order: Order = new Order({
+    const order = new Order({
       customerId: customer.id,
       originCountry,
       items,
       destination: customer.selectedAddress,
     });
 
-    await order.draft(
-      this.shipmentCostCalculator.getRate.bind(this.shipmentCostCalculator),
-      this.orderRepository.addOrder.bind(this.orderRepository),
-    );
-
-    await customer.acceptOrder(
-      order,
-      this.customerRepository.addOrderToCustomer.bind(this.customerRepository),
-    );
+    // Thanks to transactions, I can run these two concurrently
+    await Promise.all([
+      order.draft(
+        this.shipmentCostCalculator.getRate.bind(this.shipmentCostCalculator),
+        // TODO: Bind only last argument
+        (order: Order) => this.orderRepository.addOrder(order, session),
+      ),
+      customer.acceptOrder(
+        order,
+        // TODO: Bind only last argument
+        (customer: Customer, order: Order) =>
+          this.customerRepository.addOrderToCustomer(customer, order, session),
+      ),
+    ]);
 
     // TODO: Wrapper around eventEmitter
     // TODO(?): Event emitting decorator
     this.eventEmitter.emitAsync('order.drafted', order);
 
-    // Serialization in Controllers (/infrastructure)
     return order;
   }
 }
