@@ -1,9 +1,7 @@
 import { Module, Provider } from '@nestjs/common';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongoModule } from 'nest-mongodb';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 
-import { HostFixture } from '../../../../test/e2e/fixture/HostFixture';
 import { CustomerRepository } from '../../application/port/CustomerRepository';
 import { HostMatcher } from '../../application/port/HostMatcher';
 import { HostRepository } from '../../application/port/HostRepository';
@@ -22,7 +20,6 @@ import { OrderController } from '../rest-api/OrderController';
 import { MatchCache } from '../../application/port/MatchCache';
 import { MatchMongoCacheAdapter } from '../persistence/match/MatchMongoCacheAdapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MatchFixture } from '../../../../test/e2e/fixture/MatchFixture';
 import { FinalizeOrderUseCase } from '../../domain/use-case/FinalizeOrderUseCase';
 import { FinalizeOrderService } from '../../application/services/FinalizeOrderService';
 
@@ -46,10 +43,7 @@ const useCaseProviders: Provider[] = [
 
 // TODO(NOW): find a better place to initialize testing dependencies
 // ATTENTION: Cool thing. Polymorphism (?) through interface injections.
-const testProviders: Provider[] = [
-  { provide: HostFixture, useClass: HostMongoRepositoryAdapter },
-  { provide: MatchFixture, useClass: MatchMongoCacheAdapter },
-];
+const testProviders: Provider[] = [];
 
 @Module({
   imports: [

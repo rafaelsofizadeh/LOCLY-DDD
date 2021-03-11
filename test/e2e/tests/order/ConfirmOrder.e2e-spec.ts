@@ -13,7 +13,6 @@ import {
   destinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../../src/order/application/services/HostMatcherService';
-import { HostFixture } from '../../fixture/HostFixture';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { muuidToEntityId } from '../../../../src/common/utils';
@@ -21,21 +20,19 @@ import { CreateOrderUseCase } from '../../../../src/order/domain/use-case/Create
 import { Category, Item } from '../../../../src/order/domain/entity/Item';
 import { Country } from '../../../../src/order/domain/data/Country';
 import { isString } from 'class-validator';
-import { MatchFixture } from '../../fixture/MatchFixture';
-import { Match } from '../../../../src/order/application/port/MatchCache';
-import { MatchReference } from '../../../../src/order/application/services/ConfirmOrderService';
+import {
+  Match,
+  MatchCache,
+} from '../../../../src/order/application/port/MatchCache';
+import { HostRepository } from '../../../../src/order/application/port/HostRepository';
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;
 
-  /*let customerFixture: CustomerFixture;
-  let orderFixture: OrderFixture;
-  let hostFixture: HostFixture;*/
-
   let customerRepository: CustomerRepository;
   let orderRepository: OrderRepository;
-  let hostFixture: HostFixture;
-  let matchFixture: MatchFixture;
+  let hostRepository: HostRepository;
+  let matchCache: MatchCache;
 
   let createOrderUseCase: CreateOrderUseCase;
 
@@ -59,10 +56,11 @@ describe('Confirm Order – POST /order/confirm', () => {
       OrderRepository,
     )) as OrderRepository;
 
-    // TODO: Do I need a hostFixture? Fixtures in general?
-    hostFixture = (await moduleRef.resolve(HostFixture)) as HostFixture;
+    hostRepository = (await moduleRef.resolve(
+      HostRepository,
+    )) as HostRepository;
 
-    matchFixture = (await moduleRef.resolve(MatchFixture)) as MatchFixture;
+    matchCache = (await moduleRef.resolve(MatchCache)) as MatchCache;
 
     createOrderUseCase = (await moduleRef.resolve(
       CreateOrderUseCase,
@@ -155,7 +153,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     await Promise.all([
       customerRepository.addCustomer(testCustomer),
-      hostFixture.addManyHosts(testHosts),
+      hostRepository.addManyHosts(testHosts),
     ]);
 
     testOrder = await createOrderUseCase.execute({
@@ -176,11 +174,13 @@ describe('Confirm Order – POST /order/confirm', () => {
     });
   });
 
+  // IMPORTANT: ALWAYS clean up the database after commenting out the cleanup in afterEach
+  // (usually done for testing purposes)
   afterEach(() =>
     // TODO: Hosts and orders don't get deleted
     Promise.all([
       customerRepository.deleteCustomer(testCustomer.id),
-      hostFixture.deleteManyHosts(testHosts.map(({ id }) => id)),
+      hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
       // TODO (FUTURE): Delete through deleteOrderUseCase
       orderRepository.deleteOrder(testOrder.id),
     ]),
@@ -205,7 +205,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     expect(isString(checkoutId)).toBe(true);
     expect(checkoutId.slice(0, 2)).toBe('cs'); // "Checkout Session"
 
-    const match: Match = await matchFixture.findMatch(
+    const match: Match = await matchCache.findMatch(
       testOrder.id,
       // testOrder SHOULD be matched with the first testHost
       testHosts[0].id,
@@ -223,7 +223,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     expect(status).toBe(OrderStatus.Confirmed);
     expect(hostId).toBe(testHosts[0].id.value);
 
-    const updatedTestHost: Host = await hostFixture.findHost(
+    const updatedTestHost: Host = await hostRepository.findHost(
       new EntityId(hostId),
     );
 
