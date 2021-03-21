@@ -1,5 +1,6 @@
 import { StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { Injectable } from '@nestjs/common';
+import { ClientSession } from 'mongodb';
 import Stripe from 'stripe';
 import { EntityId, UUID } from '../../../common/domain/EntityId';
 
@@ -11,13 +12,14 @@ import { Match, MatchCache } from '../port/MatchCache';
 import { OrderRepository } from '../port/OrderRepository';
 
 @Injectable()
-export class FinalizeOrderService implements FinalizeOrderUseCase {
+export class FinalizeOrderWebhookHandler implements FinalizeOrderUseCase {
   constructor(
     private readonly matchCache: MatchCache,
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,
   ) {}
 
+  // TODO: Transient session
   @StripeWebhookHandler('checkout.session.completed')
   // TODO: Event typing
   async execute(paymentFinalizedEvent: Stripe.Event): Promise<Order> {
@@ -37,13 +39,11 @@ export class FinalizeOrderService implements FinalizeOrderUseCase {
     ]);
 
     await Promise.all([
-      order.confirm(
-        host,
-        this.orderRepository.addHostToOrder.bind(this.orderRepository),
+      order.confirm(host, (order: Order, host: Host) =>
+        this.orderRepository.addHostToOrder(order, host),
       ),
-      host.acceptOrder(
-        order,
-        this.hostRepository.addOrderToHost.bind(this.hostRepository),
+      host.acceptOrder(order, (host: Host, order: Order) =>
+        this.hostRepository.addOrderToHost(host, order),
       ),
     ]);
 
