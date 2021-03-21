@@ -25,8 +25,11 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   async addOrder(order: Order, transaction?: ClientSession): Promise<void> {
     const orderDocument = orderToMongoDocument(order);
 
-    this.orderCollection
-      .insertOne(orderDocument, { session: transaction })
+    await this.orderCollection
+      .insertOne(
+        orderDocument,
+        transaction ? { session: transaction } : undefined,
+      )
       .catch(error => {
         throw new Exception(
           Code.INTERNAL_ERROR,
@@ -42,10 +45,10 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     { id: hostId }: Host,
     transaction?: ClientSession,
   ): Promise<void> {
-    this.orderCollection.updateOne(
+    await this.orderCollection.updateOne(
       { _id: entityIdToMuuid(orderId) },
       { $set: { hostId: entityIdToMuuid(hostId) } },
-      { session: transaction },
+      transaction ? { session: transaction } : undefined,
     );
   }
 
@@ -57,7 +60,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       {
         _id: entityIdToMuuid(orderId),
       },
-      { session: transaction },
+      transaction ? { session: transaction } : undefined,
     );
 
     if (!orderDocument) {
@@ -80,7 +83,10 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     );
 
     const orderDocuments: OrderMongoDocument[] = await this.orderCollection
-      .find({ _id: { $in: orderMongoBinaryIds } }, { session: transaction })
+      .find(
+        { _id: { $in: orderMongoBinaryIds } },
+        transaction ? { session: transaction } : undefined,
+      )
       .toArray();
 
     // To access all orderIds and failedOrderIds, catch the exception and access its 'data' property
@@ -110,9 +116,9 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     orderId: EntityId,
     transaction?: ClientSession,
   ): Promise<void> {
-    this.orderCollection.deleteOne(
+    await this.orderCollection.deleteOne(
       { _id: entityIdToMuuid(orderId) },
-      { session: transaction },
+      transaction ? { session: transaction } : undefined,
     );
   }
 }

@@ -26,7 +26,7 @@ export class MatchMongoCacheAdapter implements MatchCache {
   ) {}
 
   async recordMatch(match: Match, transaction?: ClientSession): Promise<void> {
-    this.matchCollection.insertOne(matchToMongoDocument(match), {
+    await this.matchCollection.insertOne(matchToMongoDocument(match), {
       session: transaction,
     });
   }
@@ -38,14 +38,14 @@ export class MatchMongoCacheAdapter implements MatchCache {
     const matchMongoBinaryId: Binary = entityIdToMuuid(matchId);
     const matchDocument: MatchMongoDocument = await this.matchCollection.findOne(
       { _id: matchMongoBinaryId },
-      { session: transaction },
+      transaction ? { session: transaction } : undefined,
     );
 
     // TODO(GLOBAL): "not found document" handling application-wide.
 
     await this.matchCollection.deleteOne(
       { _id: matchMongoBinaryId },
-      { session: transaction },
+      transaction ? { session: transaction } : undefined,
     );
 
     return mongoDocumentToMatch(matchDocument);
@@ -64,15 +64,10 @@ export class MatchMongoCacheAdapter implements MatchCache {
       {
         $and: [{ orderId: orderMongoBinaryId }, { hostId: hostMongoBinaryId }],
       },
-      { session: transaction },
+      transaction ? { session: transaction } : undefined,
     );
 
     if (!matchDocument) {
-      // TODO(GLOBAL): Session transaction abortion in non-mongo methods
-      /*if (transaction) {
-        await transaction.abortTransaction();
-      }*/
-
       throw new Exception(
         Code.ENTITY_NOT_FOUND_ERROR,
         `Match (orderId: ${orderId.value}, hostId: ${hostId.value}) not found`,

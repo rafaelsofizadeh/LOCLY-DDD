@@ -2,7 +2,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { OrderRepository } from '../port/OrderRepository';
 import { CustomerRepository } from '../port/CustomerRepository';
-import { ShipmentCostCalculator } from '../port/ShipmentCostCalculator';
+import {
+  ShipmentCostCalculator,
+  ShipmentCostRequest,
+} from '../port/ShipmentCostCalculator';
 
 import {
   CreateOrderRequest,
@@ -17,6 +20,7 @@ import { ClientSession, MongoClient, TransactionOptions } from 'mongodb';
 import { EntityId } from '../../../common/domain/EntityId';
 import { Country } from '../../domain/data/Country';
 import { Item } from '../../domain/entity/Item';
+import { withTransaction } from '../../../common/utils';
 
 @Injectable()
 export class CreateOrder implements CreateOrderUseCase {
@@ -36,27 +40,18 @@ export class CreateOrder implements CreateOrderUseCase {
     items,
   }: CreateOrderRequest): Promise<Order> {
     const session = this.mongoClient.startSession();
-    const transactionOptions: TransactionOptions = {
-      readPreference: 'primary',
-      readConcern: { level: 'local' },
-      writeConcern: { w: 'majority' },
-    };
 
     // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
-    let order: Order;
-
-    try {
-      await session.withTransaction(async (session: ClientSession) => {
-        order = await this.createDraftOrderAndPersist(
+    const order: Order = await withTransaction(
+      () =>
+        this.createDraftOrderAndPersist(
           customerId,
           originCountry,
           items,
           session,
-        );
-      }, transactionOptions);
-    } finally {
-      await session.endSession();
-    }
+        ),
+      session,
+    );
 
     // Serialization in Controllers (/infrastructure)
     return order;

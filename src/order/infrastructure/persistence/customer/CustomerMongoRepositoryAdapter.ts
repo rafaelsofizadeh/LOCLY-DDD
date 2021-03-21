@@ -1,4 +1,4 @@
-import { Collection } from 'mongodb';
+import { ClientSession, Collection } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
@@ -22,20 +22,37 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
     private readonly customerCollection: Collection<CustomerMongoDocument>,
   ) {}
 
-  async addCustomer(customer: Customer): Promise<void> {
-    this.customerCollection.insertOne(customerToMongoDocument(customer));
+  async addCustomer(
+    customer: Customer,
+    transaction?: ClientSession,
+  ): Promise<void> {
+    await this.customerCollection.insertOne(
+      customerToMongoDocument(customer),
+      transaction
+        ? {
+            session: transaction,
+          }
+        : undefined,
+    );
   }
 
-  async deleteCustomer(customerId: EntityId): Promise<void> {
-    this.customerCollection.deleteOne({
-      _id: entityIdToMuuid(customerId),
-    });
+  async deleteCustomer(
+    customerId: EntityId,
+    transaction?: ClientSession,
+  ): Promise<void> {
+    await this.customerCollection.deleteOne(
+      {
+        _id: entityIdToMuuid(customerId),
+      },
+      transaction ? { session: transaction } : undefined,
+    );
   }
 
   // This should always be used together with OrderRepository.addCustomerToOrder
   async addOrderToCustomer(
     { id: customerId }: Customer,
     { id: orderId }: Order,
+    transaction?: ClientSession,
   ): Promise<void> {
     await this.customerCollection.updateOne(
       { _id: entityIdToMuuid(customerId) },
@@ -44,12 +61,17 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
           orderIds: entityIdToMuuid(orderId),
         },
       },
+      transaction ? { session: transaction } : undefined,
     );
   }
 
-  async findCustomer(customerId: EntityId): Promise<Customer> {
+  async findCustomer(
+    customerId: EntityId,
+    transaction?: ClientSession,
+  ): Promise<Customer> {
     const customerDocument: CustomerMongoDocument = await this.customerCollection.findOne(
       { _id: entityIdToMuuid(customerId) },
+      transaction ? { session: transaction } : undefined,
     );
 
     if (!customerDocument) {

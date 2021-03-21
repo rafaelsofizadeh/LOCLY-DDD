@@ -28,13 +28,13 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     hosts: Host[],
     transaction?: ClientSession,
   ): Promise<void> {
-    this.hostCollection.insertMany(hosts.map(hostToMongoDocument), {
+    await this.hostCollection.insertMany(hosts.map(hostToMongoDocument), {
       session: transaction,
     });
   }
 
   async addHost(host: Host, transaction?: ClientSession): Promise<void> {
-    this.hostCollection.insertOne(hostToMongoDocument(host), {
+    await this.hostCollection.insertOne(hostToMongoDocument(host), {
       session: transaction,
     });
   }
@@ -44,13 +44,13 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     hostIds: EntityId[],
     transaction?: ClientSession,
   ): Promise<void> {
-    this.hostCollection.deleteMany(
+    await this.hostCollection.deleteMany(
       {
         _id: {
           $in: hostIds.map(hostId => entityIdToMuuid(hostId)),
         },
       },
-      { session: transaction },
+      transaction ? { session: transaction } : undefined,
     );
   }
 
@@ -58,11 +58,11 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     hostId: EntityId,
     transaction?: ClientSession,
   ): Promise<void> {
-    this.hostCollection.deleteOne(
+    await this.hostCollection.deleteOne(
       {
         _id: entityIdToMuuid(hostId),
       },
-      { session: transaction },
+      transaction ? { session: transaction } : undefined,
     );
   }
 
@@ -72,14 +72,14 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     { id: orderId }: Order,
     transaction?: ClientSession,
   ): Promise<void> {
-    this.hostCollection.updateOne(
+    await this.hostCollection.updateOne(
       { _id: entityIdToMuuid(hostId) },
       {
         $push: {
           orderIds: entityIdToMuuid(orderId),
         },
       },
-      { session: transaction },
+      transaction ? { session: transaction } : undefined,
     );
   }
 
@@ -88,7 +88,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
       {
         _id: entityIdToMuuid(hostId),
       },
-      { session: transaction },
+      transaction ? { session: transaction } : undefined,
     );
 
     if (!hostDocument) {
@@ -128,7 +128,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
           },
           { $limit: 1 },
         ],
-        { session: transaction },
+        transaction ? { session: transaction } : undefined,
       )
       .toArray();
 
