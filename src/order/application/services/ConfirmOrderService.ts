@@ -65,7 +65,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
   ): Promise<Stripe.Checkout.Session> {
     const order: Order = await this.orderRepository.findOrder(orderId);
 
-    await this.serviceAvailabileOrThrow(order).catch(error => {
+    await this.serviceAvailableOrThrow(order).catch(error => {
       // TODO: Abort transaction/session
       // TODO: Wrapper around eventEmitter
       // TODO(?): Event emitting decorator
@@ -136,8 +136,6 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     order: Order,
     session: ClientSession,
   ): Promise<EntityId> {
-    // Throws
-    // Rename to 'matchHostOrThrow'
     const matchedHost: Host = await this.hostMatcher.matchHost(
       order.originCountry,
       session,
@@ -157,7 +155,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     return matchId;
   }
 
-  private async serviceAvailabileOrThrow({
+  private async serviceAvailableOrThrow({
     originCountry,
     destination: { country: destinationCountry },
   }: Order): Promise<void> {
