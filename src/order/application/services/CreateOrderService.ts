@@ -77,16 +77,14 @@ export class CreateOrder implements CreateOrderUseCase {
 
     // Thanks to transactions, I can run these two concurrently
     await Promise.all([
+      // TODO(GLOBAL): Add rollback for order.draft
       order.draft(
-        this.shipmentCostCalculator.getRate.bind(this.shipmentCostCalculator),
-        // TODO: Bind only last argument
+        (costRequest: ShipmentCostRequest) =>
+          this.shipmentCostCalculator.getRate(costRequest),
         (order: Order) => this.orderRepository.addOrder(order, session),
       ),
-      customer.acceptOrder(
-        order,
-        // TODO: Bind only last argument
-        (customer: Customer, order: Order) =>
-          this.customerRepository.addOrderToCustomer(customer, order, session),
+      customer.acceptOrder(order, (customer: Customer, order: Order) =>
+        this.customerRepository.addOrderToCustomer(customer, order, session),
       ),
     ]);
 

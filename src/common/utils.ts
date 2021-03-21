@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { Binary } from 'mongodb';
+import { Binary, ClientSession } from 'mongodb';
 import * as MUUID from 'uuid-mongodb';
 
 import { EntityId } from './domain/EntityId';
@@ -55,4 +55,21 @@ export function TransformStringToEntityId(): PropertyDecorator {
       new EntityId(decoratedIdRaw),
     { toClassOnly: true },
   );
+}
+
+export async function withTransaction<T>(
+  fn: () => Promise<T>,
+  transaction: ClientSession,
+): Promise<T> {
+  try {
+    let result: T;
+    await transaction.withTransaction(async () => (result = await fn()));
+    return result;
+  } catch (error) {
+    console.log('transaction aborted', error, transaction);
+    await transaction.abortTransaction();
+    throw error;
+  } finally {
+    await transaction.endSession({});
+  }
 }

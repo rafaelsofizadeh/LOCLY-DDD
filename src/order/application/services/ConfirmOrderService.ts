@@ -18,6 +18,7 @@ import { MatchCache } from '../port/MatchCache';
 import { EntityId } from '../../../common/domain/EntityId';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient, TransactionOptions } from 'mongodb';
+import { withTransaction } from '../../../common/utils';
 
 export type MatchReference = Stripe.Checkout.Session['client_reference_id'];
 
@@ -37,22 +38,12 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     orderId,
   }: ConfirmOrderRequest): Promise<{ checkoutId: string }> {
     const session = this.mongoClient.startSession();
-    const transactionOptions: TransactionOptions = {
-      readPreference: 'primary',
-      readConcern: { level: 'local' },
-      writeConcern: { w: 'majority' },
-    };
 
     // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
-    let checkoutSession: Stripe.Checkout.Session;
-
-    try {
-      await session.withTransaction(async (session: ClientSession) => {
-        checkoutSession = await this.matchOrderAndCheckout(orderId, session);
-      }, transactionOptions);
-    } finally {
-      await session.endSession();
-    }
+    const checkoutSession: Stripe.Checkout.Session = await withTransaction(
+      () => this.matchOrderAndCheckout(orderId, session),
+      session,
+    );
 
     return {
       checkoutId: checkoutSession.id,
