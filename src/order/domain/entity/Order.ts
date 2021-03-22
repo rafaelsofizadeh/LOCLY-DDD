@@ -93,7 +93,7 @@ export class Order extends Identifiable(
   constructor(
     {
       id = new EntityId(),
-      status,
+      status = OrderStatus.Drafted,
       customerId,
       hostId,
       items,
@@ -106,6 +106,7 @@ export class Order extends Identifiable(
     super();
 
     this.id = id;
+    this.status = status;
     this.customerId = customerId;
     // TODO: Better way to handle optional properties
     this.hostId = hostId;
@@ -113,9 +114,6 @@ export class Order extends Identifiable(
     this.originCountry = originCountry;
     this.destination = destination;
     this.shipmentCost = shipmentCost;
-
-    // TODO: Better way to handle optional properties
-    this.updateStatus(status);
   }
 
   // TODO: Persist Customer to Order more explicitly maybe?
@@ -142,20 +140,7 @@ export class Order extends Identifiable(
     await persistAddHostToOrder(this, host);
   }
 
-  private updateStatus(newStatus?: OrderStatus): OrderStatus {
-    if (newStatus) {
-      this.status = newStatus;
-      return this.status;
-    }
 
-    const statusTuples = Object.entries(OrderStatus);
-    const currentStatusIndex: number = statusTuples.findIndex(
-      ([_, status]: [string, OrderStatus]) => this.status === status,
-    );
-    const nextStatus: OrderStatus = statusTuples[currentStatusIndex + 1][1];
-
-    this.status = nextStatus;
-    return this.status;
   }
 
   private async calculateShipmentCost(
