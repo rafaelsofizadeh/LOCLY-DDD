@@ -16,17 +16,21 @@ import { Order } from '../../domain/entity/Order';
 import { Customer } from '../../domain/entity/Customer';
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient, TransactionOptions } from 'mongodb';
+import { ClientSession, MongoClient } from 'mongodb';
 import { EntityId } from '../../../common/domain/EntityId';
 import { Country } from '../../domain/data/Country';
 import { Item } from '../../domain/entity/Item';
 import { withTransaction } from '../../../common/utils';
+import { Exception } from '../../../common/error-handling/Exception';
+import { Code } from '../../../common/error-handling/Code';
+import { HostMatcher } from '../port/HostMatcher';
 
 @Injectable()
 export class CreateOrder implements CreateOrderUseCase {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,
+    private readonly hostMatcher: HostMatcher,
     private readonly shipmentCostCalculator: ShipmentCostCalculator,
     // TODO: More general EventEmitter class, wrapper around eventEmitter
     private readonly eventEmitter: EventEmitter2,
@@ -75,6 +79,8 @@ export class CreateOrder implements CreateOrderUseCase {
       destination: customer.selectedAddress,
     });
 
+    await this.checkServiceAvailability(order);
+
     // Thanks to transactions, I can run these two concurrently
     await Promise.all([
       // TODO(GLOBAL): Add rollback for order.draft
@@ -93,5 +99,26 @@ export class CreateOrder implements CreateOrderUseCase {
     this.eventEmitter.emitAsync('order.drafted', order);
 
     return order;
+  }
+
+  private async checkServiceAvailability({
+    originCountry,
+    destination: { country: destinationCountry },
+  }: Order): Promise<void> {
+    const isServiceAvailable: boolean = await this.hostMatcher.checkServiceAvailability(
+      originCountry,
+      destinationCountry,
+    );
+
+    if (!isServiceAvailable) {
+      // TODO: Wrapper around eventEmitter
+      // TODO(?): Event emitting decorator
+      this.eventEmitter.emit('order.rejected.service_availability');
+
+      throw new Exception(
+        Code.INTERNAL_ERROR,
+        `Service not available in origin ${originCountry} or destination ${destinationCountry}`,
+      );
+    }
   }
 }

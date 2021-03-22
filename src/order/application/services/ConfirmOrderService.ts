@@ -3,10 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
-import { Code } from '../../../common/error-handling/Code';
-import { Order } from '../../domain/entity/Order';
-import { Exception } from '../../../common/error-handling/Exception';
-
 import {
   ConfirmOrderRequest,
   ConfirmOrderResult,
@@ -14,11 +10,12 @@ import {
 } from '../../domain/use-case/ConfirmOrderUseCase';
 import { HostMatcher } from '../port/HostMatcher';
 import { OrderRepository } from '../port/OrderRepository';
+import { Order } from '../../domain/entity/Order';
 import { Host } from '../../domain/entity/Host';
 import { MatchCache } from '../port/MatchCache';
 import { EntityId } from '../../../common/domain/EntityId';
 import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient, TransactionOptions } from 'mongodb';
+import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/utils';
 
 export type MatchReference = Stripe.Checkout.Session['client_reference_id'];
@@ -55,17 +52,8 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
   ): Promise<Stripe.Checkout.Session> {
     const order: Order = await this.orderRepository.findOrder(orderId, session);
 
-    await this.serviceAvailableOrThrow(order).catch(error => {
-      // TODO: Abort transaction/session
-      // TODO: Wrapper around eventEmitter
-      // TODO(?): Event emitting decorator
-      this.eventEmitter.emit('order.rejected.service_availability');
-      throw error;
-    });
-
     const matchId: EntityId = await this.matchOrderToHost(order, session).catch(
       error => {
-        // TODO: Abort transaction/session
         // TODO: Wrapper around eventEmitter
         // TODO(?): Event emitting decorator and put it on error handling
         this.eventEmitter.emit('order.rejected.host_availability');
@@ -89,7 +77,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
      *
      * 1. Customer pays Order -> Order tries to match with a Host -> no Host available
      */
-    // TODO: Error handling and abort transaction/session
+    // TODO: Error handling
     const checkoutSession: Stripe.Checkout.Session = await this.stripe.checkout.sessions.create(
       {
         payment_method_types: ['card'],
@@ -143,23 +131,5 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     );
 
     return matchId;
-  }
-
-  private async serviceAvailableOrThrow({
-    originCountry,
-    destination: { country: destinationCountry },
-  }: Order): Promise<void> {
-    const isServiceAvailable: boolean = await this.hostMatcher.checkServiceAvailability(
-      originCountry,
-      destinationCountry,
-    );
-
-    // TODO: Does this belong in the use case or in MatchHostService?
-    if (!isServiceAvailable) {
-      throw new Exception(
-        Code.INTERNAL_ERROR,
-        `Service not available in origin ${originCountry} or destination ${destinationCountry}`,
-      );
-    }
   }
 }
