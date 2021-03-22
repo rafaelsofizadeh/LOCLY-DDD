@@ -14,6 +14,7 @@ import { AppModule } from './AppModule';
 // TODO(GLOBAL): Add transaction rollbacks
 // TODO(GLOBAL): Transient session between ConfirmOrder and FinalizeOrder
 // TODO(GLOBAL): Add state transition control for Orders
+// TODO(GLOBAL): Test event emission
 
 /**
 TOOD(GLOBAL):

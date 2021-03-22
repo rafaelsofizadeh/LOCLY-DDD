@@ -52,6 +52,18 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     );
   }
 
+  async setOrderAsReceivedByHost(
+    { id: orderId }: Order,
+    receivedByHostDate: Date,
+    transaction?: ClientSession,
+  ) {
+    await this.orderCollection.updateOne(
+      { _id: entityIdToMuuid(orderId) },
+      { $set: { receivedByHostDate } },
+      transaction ? { session: transaction } : undefined,
+    );
+  }
+
   async findOrder(
     orderId: EntityId,
     transaction?: ClientSession,

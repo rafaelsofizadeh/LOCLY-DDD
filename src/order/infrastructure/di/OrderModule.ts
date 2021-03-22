@@ -22,6 +22,8 @@ import { MatchMongoCacheAdapter } from '../persistence/match/MatchMongoCacheAdap
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FinalizeOrderUseCase } from '../../domain/use-case/FinalizeOrderUseCase';
 import { FinalizeOrderWebhookHandler } from '../../application/services/FinalizeOrderWebhookHandler';
+import { ReceiveOrderHostUseCase } from '../../domain/use-case/ReceiveOrderByHostUseCase';
+import { ReceiveOrderHost } from '../../application/services/ReceiveOrderByHostService';
 
 const persistenceProviders: Provider[] = [
   { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
@@ -39,6 +41,7 @@ const useCaseProviders: Provider[] = [
   { provide: CreateOrderUseCase, useClass: CreateOrder },
   { provide: ConfirmOrderUseCase, useClass: ConfirmOrder },
   { provide: FinalizeOrderUseCase, useClass: FinalizeOrderWebhookHandler },
+  { provide: ReceiveOrderHostUseCase, useClass: ReceiveOrderHost },
 ];
 
 // TODO(NOW): find a better place to initialize testing dependencies

@@ -16,6 +16,11 @@ import {
   ConfirmOrderResult,
   ConfirmOrderUseCase,
 } from '../../domain/use-case/ConfirmOrderUseCase';
+import { ReceiveOrderHostRequestAdapter } from './ReceiveOrderByHostRequestAdapter';
+import {
+  ReceiveOrderHostResult,
+  ReceiveOrderHostUseCase,
+} from '../../domain/use-case/ReceiveOrderByHostUseCase';
 
 // TODO: Separate out to classes per each use case
 @Controller('order')
@@ -23,6 +28,7 @@ export class OrderController {
   constructor(
     private readonly createOrderUseCase: CreateOrderUseCase,
     private readonly confirmOrderUseCase: ConfirmOrderUseCase,
+    private readonly receiveOrderByHostUseCase: ReceiveOrderHostUseCase,
   ) {}
 
   @Post('create')
@@ -50,5 +56,18 @@ export class OrderController {
     );
 
     return checkoutId;
+  }
+
+  @Post('receivedByHost')
+  // Validation and transformation is performed by Nest.js global validation pipe
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async receiveOrderByHost(
+    @Body() receiveOrderByHostRequest: ReceiveOrderHostRequestAdapter,
+  ): Promise<ReceiveOrderHostResult> {
+    const receivedByHostDate = await this.receiveOrderByHostUseCase.execute(
+      receiveOrderByHostRequest,
+    );
+
+    return receivedByHostDate;
   }
 }

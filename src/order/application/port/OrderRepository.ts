@@ -21,9 +21,16 @@ export abstract class OrderRepository {
     transaction?: ClientSession,
   ): Promise<void>;
 
+  // TODO(NOW): Add status change to "addHostToOrder" IMPORTANT!!!!
   abstract addHostToOrder(
     order: Order,
     host: Host,
+    transaction?: ClientSession,
+  ): Promise<void>;
+
+  abstract setOrderAsReceivedByHost(
+    order: Order,
+    receivedByHostDate: Date,
     transaction?: ClientSession,
   ): Promise<void>;
 }
