@@ -66,8 +66,7 @@ export async function withTransaction<T>(
     await transaction.withTransaction(async () => (result = await fn()));
     return result;
   } catch (error) {
-    console.log('transaction aborted', error, transaction);
-    await transaction.abortTransaction();
+    console.log('Transaction aborted.');
     throw error;
   } finally {
     await transaction.endSession({});

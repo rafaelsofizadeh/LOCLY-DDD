@@ -9,6 +9,7 @@ import { Exception } from '../../../common/error-handling/Exception';
 
 import {
   ConfirmOrderRequest,
+  ConfirmOrderResult,
   ConfirmOrderUseCase,
 } from '../../domain/use-case/ConfirmOrderUseCase';
 import { HostMatcher } from '../port/HostMatcher';
@@ -34,9 +35,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute({
-    orderId,
-  }: ConfirmOrderRequest): Promise<{ checkoutId: string }> {
+  async execute({ orderId }: ConfirmOrderRequest): Promise<ConfirmOrderResult> {
     const session = this.mongoClient.startSession();
 
     // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
@@ -54,7 +53,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     orderId: EntityId,
     session: ClientSession,
   ): Promise<Stripe.Checkout.Session> {
-    const order: Order = await this.orderRepository.findOrder(orderId);
+    const order: Order = await this.orderRepository.findOrder(orderId, session);
 
     await this.serviceAvailableOrThrow(order).catch(error => {
       // TODO: Abort transaction/session
