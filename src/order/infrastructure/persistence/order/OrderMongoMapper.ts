@@ -7,35 +7,44 @@ import { Address, AddressProps } from '../../../domain/entity/Address';
 import { Order, OrderStatus, ShipmentCost } from '../../../domain/entity/Order';
 import { Country } from '../../../domain/data/Country';
 
+// TODO(GLOBAL): EntityIdToString type, but for EntityId->Binary
+export type ItemMongoSubdocument = Omit<ItemProps, 'id'> & {
+  _id: Binary;
+};
+
 export type OrderMongoDocument = {
   _id: Binary;
   status: OrderStatus;
   customerId: Binary;
-  hostId: Binary;
+  hostId?: Binary;
   originCountry: Country;
-  items: ItemProps[];
+  items: ItemMongoSubdocument[];
   shipmentCost: ShipmentCost;
   destination: AddressProps;
 };
 
 export function orderToMongoDocument(order: Order): OrderMongoDocument {
   // For id, see: Entity { @TransformEntityIdToString() id }
-  const { id, customerId, hostId, ...restPlainOrder } = order.serialize();
+  const {
+    id,
+    customerId,
+    hostId,
+    items,
+    ...restPlainOrder
+  } = order.serialize();
 
   const mongoBinaryId = stringToMuuid(id);
   const customerMongoBinaryId = stringToMuuid(customerId);
-  let hostMongoBinaryId: Binary;
-
-  // TODO: Better way to handle optional values
-  if (hostId) {
-    hostMongoBinaryId = stringToMuuid(hostId);
-  }
 
   return {
     ...restPlainOrder,
     _id: mongoBinaryId,
     customerId: customerMongoBinaryId,
-    hostId: hostMongoBinaryId,
+    ...(hostId ? { hostId: stringToMuuid(hostId) } : {}),
+    items: items.map(({ id, ...restItem }) => ({
+      _id: stringToMuuid(id),
+      ...restItem,
+    })),
   };
 }
 
@@ -52,7 +61,10 @@ export function mongoDocumentToOrder({
     customerId: muuidToEntityId(customerId),
     // TODO: Better way to handle optional properties
     hostId: hostId ? muuidToEntityId(hostId) : undefined,
-    items: items.map(item => new Item(item)),
+    items: items.map(
+      ({ _id, ...restItem }) =>
+        new Item({ id: muuidToEntityId(_id), ...restItem }),
+    ),
     originCountry,
     destination: new Address(destination),
   });

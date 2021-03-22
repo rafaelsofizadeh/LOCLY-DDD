@@ -4,6 +4,7 @@ import { EntityProps } from '../../../common/domain/Entity';
 import { EntityId } from '../../../common/domain/EntityId';
 import { Identifiable } from '../../../common/domain/Identifiable';
 import { Validatable } from '../../../common/domain/Validatable';
+import { EntityIdToStringId } from '../../../common/types';
 
 export const Category = {
   Art: 'art',
@@ -48,6 +49,8 @@ export class ItemProps extends EntityProps {
   @IsPositive()
   height: number;
 }
+
+export type ItemPropsPlain = EntityIdToStringId<ItemProps>;
 
 export class Item extends Identifiable(Validatable(ItemProps)) {
   constructor(

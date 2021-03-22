@@ -1,9 +1,9 @@
 import {
   ArrayMinSize,
   IsArray,
+  IsDate,
   IsEnum,
   IsISO31661Alpha3,
-  IsNumber,
   IsOptional,
   ValidateNested,
 } from 'class-validator';
@@ -16,7 +16,7 @@ import { Serializable } from '../../../common/domain/Serializable';
 import { Identifiable } from '../../../common/domain/Identifiable';
 import { EntityIdToStringId } from '../../../common/types';
 
-import { Item, ItemProps } from './Item';
+import { Item, ItemPropsPlain } from './Item';
 import { Host } from './Host';
 import { Address, AddressProps } from './Address';
 import { ShipmentCostRequest } from '../../application/port/ShipmentCostCalculator';
@@ -31,6 +31,7 @@ export type ShipmentCost = {
 export const OrderStatus = {
   Drafted: 'drafted',
   Confirmed: 'confirmed',
+  ReceivedByHost: 'host_received',
 } as const;
 
 export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
@@ -71,8 +72,13 @@ export class OrderProps extends EntityProps {
   destination: Address;
 
   @IsOptional()
-  @IsNumber()
+  @ValidateNested()
+  @Type(() => EntityId)
   shipmentCost?: ShipmentCost;
+
+  @IsOptional()
+  @IsDate()
+  receivedByHostDate?: Date;
 }
 
 export type OrderPropsPlain = Omit<
@@ -81,7 +87,7 @@ export type OrderPropsPlain = Omit<
 > & {
   customerId: string;
   hostId?: string;
-  items: ItemProps[];
+  items: ItemPropsPlain[];
   destination: AddressProps;
 };
 
@@ -123,9 +129,10 @@ export class Order extends Identifiable(
     ) => Promise<ShipmentCost>,
     persistAddOrder: (order: Order) => Promise<void>,
   ): Promise<void> {
+    this.shipmentCost = await this.calculateShipmentCost(getShipmentCostRate);
+
     // TODO: Do I need validation here?
     await this.validate();
-    this.shipmentCost = await this.calculateShipmentCost(getShipmentCostRate);
 
     await persistAddOrder(this);
   }
@@ -137,10 +144,19 @@ export class Order extends Identifiable(
     this.hostId = host.id;
     this.status = OrderStatus.Confirmed;
 
+    // TODO: Do I need validation here?
+    await this.validate();
+
     await persistAddHostToOrder(this, host);
   }
 
+  async receivedByHost(
+    persistReceivedByHost: (receivedByHostDate: Date) => Promise<void>,
+  ) {
+    this.status = OrderStatus.ReceivedByHost;
+    this.receivedByHostDate = new Date();
 
+    await persistReceivedByHost(this.receivedByHostDate);
   }
 
   private async calculateShipmentCost(
