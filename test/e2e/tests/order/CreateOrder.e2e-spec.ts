@@ -9,9 +9,16 @@ import { OrderRepository } from '../../../../src/order/application/port/OrderRep
 import { EntityId } from '../../../../src/common/domain/EntityId';
 import { OrderStatus } from '../../../../src/order/domain/entity/Order';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
-import { Address } from '../../../../src/order/domain/entity/Address';
+import {
+  Address,
+  AddressProps,
+} from '../../../../src/order/domain/entity/Address';
 import { Category } from '../../../../src/order/domain/entity/Item';
 import { Country } from '../../../../src/order/domain/data/Country';
+import {
+  destinationCountriesAvailable,
+  originCountriesAvailable,
+} from '../../../../src/order/application/services/HostMatcherService';
 
 describe('Create Order – POST /order/create', () => {
   let app: INestApplication;
@@ -41,7 +48,9 @@ describe('Create Order – POST /order/create', () => {
     // Customer shouldn't be affected from test case to test case,
     // so we initialize it once, before all tests.
     testCustomer = new Customer({
-      selectedAddress: new Address({ country: 'AUS' }),
+      selectedAddress: new Address({
+        country: destinationCountriesAvailable[1],
+      }),
       orderIds: [],
     });
 
@@ -52,8 +61,8 @@ describe('Create Order – POST /order/create', () => {
   // so we destroy it once, after all tests.
   afterAll(() =>
     Promise.all([
-      customerRepository.deleteCustomer(testCustomer.id),
-      orderRepository.deleteOrder(testOrderId),
+      //customerRepository.deleteCustomer(testCustomer.id),
+      //orderRepository.deleteOrder(testOrderId),
     ]),
   );
 
@@ -62,7 +71,7 @@ describe('Create Order – POST /order/create', () => {
       .post('/order/create')
       .send({
         customerId: testCustomer.id.value,
-        originCountry: testCustomer.selectedAddress.country,
+        originCountry: originCountriesAvailable[0],
         // TODO: Item fixture
         items: [
           {
@@ -84,12 +93,12 @@ describe('Create Order – POST /order/create', () => {
       id,
       customerId,
       status,
-      originCountry,
+      destination,
     }: {
       id: string;
       customerId: string;
       status: OrderStatus;
-      originCountry: Country;
+      destination: AddressProps;
     } = response.body;
 
     testOrderId = new EntityId(id);
@@ -104,6 +113,6 @@ describe('Create Order – POST /order/create', () => {
     expect(isUUID(id)).toBe(true);
     expect(customerId).toEqual(updatedTestCustomer.id.value);
     expect(status).toBe(OrderStatus.Drafted);
-    expect(originCountry).toBe(testCustomer.selectedAddress.country);
+    expect(destination.country).toBe(testCustomer.selectedAddress.country);
   });
 });

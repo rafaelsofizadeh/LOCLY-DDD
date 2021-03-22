@@ -1,6 +1,7 @@
 import { Code, CodeDescription } from './Code';
 import { Optional } from '../types';
 
+// TODO: Inherit from HttpException or do error mapping for Nest.js to display the exception properly
 export class Exception<TData> extends Error {
   public code: number;
   public readonly data: Optional<TData>;

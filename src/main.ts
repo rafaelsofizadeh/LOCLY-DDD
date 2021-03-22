@@ -6,14 +6,14 @@ import { AppModule } from './AppModule';
 // TODO(GLOBAL): "not found document" handling application-wide.
 // TODO(GLOBAL): Rename MatchCache to smth related to transactions
 // TODO(GLOBAL): Rename "session" and create type alias for "mongo.ClientSession"
-// TODO(GLOBAL): Abort transactions on error handling in non-mongo methods
-// TODO(GLOBAL): At what level of function call should withTransactionExplicitAbort be placed?
+// TODO(ANSWERED): At what level of function call should withTransactionExplicitAbort be placed?
 // Related: "TODO: Investigate transaction behaviour". Potential: depends on unhandled exception thrown
 // ANSWER: On the topmost level, where the session is initiated. See utils::withTransaction
 // TODO(GLOBAL): Should repo methods have sessions integrated into the methods? I think not, they should throw
 // exceptions and withTransactionExplicitAbort should catch those exceptions and abort the session
 // TODO(GLOBAL): Add transaction rollbacks
 // TODO(GLOBAL): Transient session between ConfirmOrder and FinalizeOrder
+// TODO(GLOBAL): Add state transition control for Orders
 
 /**
 TOOD(GLOBAL):
