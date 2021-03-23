@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Binary, ClientSession, Collection } from 'mongodb';
+import { Binary, ClientSession, Collection, UpdateQuery } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
 import { EntityId } from '../../../../common/domain/EntityId';
 import { Code } from '../../../../common/error-handling/Code';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { OrderRepository } from '../../../application/port/OrderRepository';
-import { Order } from '../../../domain/entity/Order';
+import { Order, OrderStatus } from '../../../domain/entity/Order';
 import {
   mongoDocumentToOrder,
   OrderMongoDocument,
@@ -39,29 +39,72 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       });
   }
 
-  // This should always be used together with HostRepository.addOrderToHost
-  async addHostToOrder(
-    { id: orderId }: Order,
+  async persistOrderConfirmation(
+    { id: orderId, status }: Order,
     { id: hostId }: Host,
     transaction?: ClientSession,
   ): Promise<void> {
-    await this.orderCollection.updateOne(
-      { _id: entityIdToMuuid(orderId) },
-      { $set: { hostId: entityIdToMuuid(hostId) } },
-      transaction ? { session: transaction } : undefined,
+    await this.update(
+      orderId,
+      this.confirmOrderQuery(status, hostId),
+      transaction,
     );
   }
 
-  async setOrderAsReceivedByHost(
-    { id: orderId }: Order,
-    receivedByHostDate: Date,
+  async persistHostReceipt(
+    { id: orderId, status, receivedByHostDate }: Order,
+    transaction?: ClientSession,
+  ): Promise<void> {
+    await this.update(
+      orderId,
+      this.receivedByHostQuery(status, receivedByHostDate),
+      transaction,
+    );
+  }
+
+  private async update(
+    orderId: EntityId,
+    query: UpdateQuery<OrderMongoDocument>,
     transaction?: ClientSession,
   ) {
     await this.orderCollection.updateOne(
       { _id: entityIdToMuuid(orderId) },
-      { $set: { receivedByHostDate } },
+      query,
       transaction ? { session: transaction } : undefined,
     );
+  }
+
+  private confirmOrderQuery(
+    status: OrderStatus,
+    hostId: EntityId,
+  ): UpdateQuery<OrderMongoDocument> {
+    return {
+      $set: {
+        ...this.updateOrderStatusQuery(status),
+        ...this.addHostToOrderQuery(hostId),
+      },
+    };
+  }
+
+  private addHostToOrderQuery(hostId: EntityId): { hostId: Binary } {
+    return { hostId: entityIdToMuuid(hostId) };
+  }
+
+  private updateOrderStatusQuery(status: OrderStatus): { status: OrderStatus } {
+    return { status };
+  }
+
+  private receivedByHostQuery(status: OrderStatus, receivedByHostDate: Date) {
+    return {
+      $set: {
+        ...this.updateOrderStatusQuery(status),
+        ...this.receivedByHostDateQuery(receivedByHostDate),
+      },
+    };
+  }
+
+  private receivedByHostDateQuery(receivedByHostDate: Date) {
+    return { receivedByHostDate };
   }
 
   async findOrder(

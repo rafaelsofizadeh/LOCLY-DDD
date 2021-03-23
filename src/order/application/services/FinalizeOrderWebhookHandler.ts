@@ -19,7 +19,7 @@ export class FinalizeOrderWebhookHandler implements FinalizeOrderUseCase {
     private readonly hostRepository: HostRepository,
   ) {}
 
-  // TODO: Transient session
+  // TODO: Transient SESSION
   @StripeWebhookHandler('checkout.session.completed')
   // TODO: Event typing
   async execute(paymentFinalizedEvent: Stripe.Event): Promise<Order> {
@@ -38,13 +38,12 @@ export class FinalizeOrderWebhookHandler implements FinalizeOrderUseCase {
       this.hostRepository.findHost(match.hostId),
     ]);
 
+    order.confirm(host);
+    host.acceptOrder(order);
+
     await Promise.all([
-      order.confirm(host, (order: Order, host: Host) =>
-        this.orderRepository.addHostToOrder(order, host),
-      ),
-      host.acceptOrder(order, (host: Host, order: Order) =>
-        this.hostRepository.addOrderToHost(host, order),
-      ),
+      this.orderRepository.persistOrderConfirmation(order, host),
+      this.hostRepository.addOrderToHost(host, order),
     ]);
 
     return order;

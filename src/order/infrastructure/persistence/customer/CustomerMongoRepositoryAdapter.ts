@@ -54,15 +54,22 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
     { id: orderId }: Order,
     transaction?: ClientSession,
   ): Promise<void> {
-    await this.customerCollection.updateOne(
-      { _id: entityIdToMuuid(customerId) },
-      {
-        $push: {
-          orderIds: entityIdToMuuid(orderId),
+    await this.customerCollection
+      .updateOne(
+        { _id: entityIdToMuuid(customerId) },
+        {
+          $push: {
+            orderIds: entityIdToMuuid(orderId),
+          },
         },
-      },
-      transaction ? { session: transaction } : undefined,
-    );
+        transaction ? { session: transaction } : undefined,
+      )
+      .catch(error => {
+        throw new Exception(
+          Code.INTERNAL_ERROR,
+          `Customer couldn't accept order and add order to consumer (orderId: ${orderId}, customerId: ${customerId}): ${error}`,
+        );
+      });
   }
 
   async findCustomer(

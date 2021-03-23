@@ -81,17 +81,16 @@ export class CreateOrder implements CreateOrderUseCase {
 
     await this.checkServiceAvailability(order);
 
+    await order.draft((costRequest: ShipmentCostRequest) =>
+      this.shipmentCostCalculator.getRate(costRequest),
+    );
+    customer.acceptOrder(order);
+
     // Thanks to transactions, I can run these two concurrently
     await Promise.all([
       // TODO(GLOBAL): Add rollback for order.draft
-      order.draft(
-        (costRequest: ShipmentCostRequest) =>
-          this.shipmentCostCalculator.getRate(costRequest),
-        (order: Order) => this.orderRepository.addOrder(order, session),
-      ),
-      customer.acceptOrder(order, (customer: Customer, order: Order) =>
-        this.customerRepository.addOrderToCustomer(customer, order, session),
-      ),
+      this.orderRepository.addOrder(order, session),
+      this.customerRepository.addOrderToCustomer(customer, order, session),
     ]);
 
     // TODO: Wrapper around eventEmitter

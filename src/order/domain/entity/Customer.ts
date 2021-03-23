@@ -50,21 +50,7 @@ export class Customer extends Identifiable(
     this.orderIds = orderIds;
   }
 
-  async acceptOrder(
-    order: Order,
-    persistAddOrderToCustomer: (
-      customer: Customer,
-      order: Order,
-    ) => Promise<void>,
-  ) {
-    await persistAddOrderToCustomer(this, order).catch(error => {
-      throw new Exception(
-        Code.INTERNAL_ERROR,
-        `Customer couldn't accept order and add order to consumer (orderId: ${order.id}, customerId: ${this.id}): ${error}`,
-        { order, customer: this },
-      );
-    });
-
+  acceptOrder(order: Order) {
     this.orderIds.push(order.id);
   }
 }

@@ -72,15 +72,22 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     { id: orderId }: Order,
     transaction?: ClientSession,
   ): Promise<void> {
-    await this.hostCollection.updateOne(
-      { _id: entityIdToMuuid(hostId) },
-      {
-        $push: {
-          orderIds: entityIdToMuuid(orderId),
+    await this.hostCollection
+      .updateOne(
+        { _id: entityIdToMuuid(hostId) },
+        {
+          $push: {
+            orderIds: entityIdToMuuid(orderId),
+          },
         },
-      },
-      transaction ? { session: transaction } : undefined,
-    );
+        transaction ? { session: transaction } : undefined,
+      )
+      .catch(error => {
+        throw new Exception(
+          Code.INTERNAL_ERROR,
+          `Host couldn't accept order and add order to host (orderId: ${orderId}, hostId: ${hostId}): ${error}`,
+        );
+      });
   }
 
   async findHost(hostId: EntityId, transaction?: ClientSession): Promise<Host> {

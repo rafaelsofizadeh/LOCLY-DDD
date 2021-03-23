@@ -37,36 +37,25 @@ export type HostPropsPlain = Omit<
 };
 
 export class Host extends Identifiable(
-         Serializable<HostPropsPlain, typeof HostProps>(HostProps),
-       ) {
-         constructor(
-           {
-             id = new EntityId(),
-             address,
-             orderIds,
-             available,
-           }: HostProps = new HostProps(), // default value is needed for class-validator plainToClass. Refer to: Order.ts
-         ) {
-           super();
+  Serializable<HostPropsPlain, typeof HostProps>(HostProps),
+) {
+  constructor(
+    {
+      id = new EntityId(),
+      address,
+      orderIds,
+      available,
+    }: HostProps = new HostProps(), // default value is needed for class-validator plainToClass. Refer to: Order.ts
+  ) {
+    super();
 
-           this.id = id;
-           this.address = address;
-           this.orderIds = orderIds;
-           this.available = available;
-         }
+    this.id = id;
+    this.address = address;
+    this.orderIds = orderIds;
+    this.available = available;
+  }
 
-         async acceptOrder(
-           order: Order,
-           persistAddOrderToHost: (host: Host, order: Order) => Promise<void>,
-         ) {
-           await persistAddOrderToHost(this, order).catch(error => {
-             throw new Exception(
-               Code.INTERNAL_ERROR,
-               `Host couldn't accept order and add order to host (orderId: ${order.id}, hostId: ${this.id}): ${error}`,
-               { order, host: this },
-             );
-           });
-
-           this.orderIds.push(order.id);
-         }
-       }
+  async acceptOrder(order: Order) {
+    this.orderIds.push(order.id);
+  }
+}

@@ -40,7 +40,7 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
 
     // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
     const receivedByHostDate: Date = await withTransaction(
-      () => this.setOrderAsReceivedByHost(orderId, session),
+      () => this.handleOrderReceiptByHost(orderId, session),
       session,
     );
 
@@ -53,15 +53,14 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
     };
   }
 
-  private async setOrderAsReceivedByHost(
+  private async handleOrderReceiptByHost(
     orderId: EntityId,
     session: ClientSession,
   ): Promise<Date> {
     const order: Order = await this.orderRepository.findOrder(orderId, session);
 
-    await order.receivedByHost((receivedByHostDate: Date) =>
-      this.orderRepository.setOrderAsReceivedByHost(order, receivedByHostDate),
-    );
+    order.receivedByHost();
+    await this.orderRepository.persistHostReceipt(order);
 
     return order.receivedByHostDate;
   }

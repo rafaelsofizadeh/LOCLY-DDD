@@ -127,36 +127,24 @@ export class Order extends Identifiable(
     getShipmentCostRate: (
       costRequest: ShipmentCostRequest,
     ) => Promise<ShipmentCost>,
-    persistAddOrder: (order: Order) => Promise<void>,
   ): Promise<void> {
     this.shipmentCost = await this.calculateShipmentCost(getShipmentCostRate);
 
-    // TODO: Do I need validation here?
+    // TODO: Do I need validation here? Answer: for now, yes, for debugging purposes
     await this.validate();
-
-    await persistAddOrder(this);
   }
 
-  async confirm(
-    host: Host,
-    persistAddHostToOrder: (order: Order, host: Host) => Promise<void>,
-  ): Promise<void> {
+  async confirm(host: Host): Promise<void> {
     this.hostId = host.id;
     this.status = OrderStatus.Confirmed;
 
-    // TODO: Do I need validation here?
+    // TODO: Do I need validation here? Answer: for now, yes, for debugging purposes
     await this.validate();
-
-    await persistAddHostToOrder(this, host);
   }
 
-  async receivedByHost(
-    persistReceivedByHost: (receivedByHostDate: Date) => Promise<void>,
-  ) {
+  receivedByHost() {
     this.status = OrderStatus.ReceivedByHost;
     this.receivedByHostDate = new Date();
-
-    await persistReceivedByHost(this.receivedByHostDate);
   }
 
   private async calculateShipmentCost(
