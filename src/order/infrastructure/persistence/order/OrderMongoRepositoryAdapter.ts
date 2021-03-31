@@ -8,12 +8,14 @@ import { Exception } from '../../../../common/error-handling/Exception';
 import { OrderRepository } from '../../../application/port/OrderRepository';
 import { Order, OrderStatus } from '../../../domain/entity/Order';
 import {
-  mongoDocumentToOrder,
   OrderMongoDocument,
   orderToMongoDocument,
+  mongoDocumentToOrder,
 } from './OrderMongoMapper';
 import { Host } from '../../../domain/entity/Host';
 import { entityIdToMuuid } from '../../../../common/utils';
+import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
+import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
 
 @Injectable()
 export class OrderMongoRepositoryAdapter implements OrderRepository {
@@ -22,7 +24,10 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     private readonly orderCollection: Collection<OrderMongoDocument>,
   ) {}
 
-  async addOrder(order: Order, transaction?: ClientSession): Promise<void> {
+  async addOrder(
+    order: DraftedOrder,
+    transaction?: ClientSession,
+  ): Promise<void> {
     const orderDocument = orderToMongoDocument(order);
 
     await this.orderCollection
@@ -40,24 +45,20 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   async persistOrderConfirmation(
-    { id: orderId, status }: Order,
+    { id: orderId }: ConfirmedOrder,
     { id: hostId }: Host,
     transaction?: ClientSession,
   ): Promise<void> {
-    await this.update(
-      orderId,
-      this.confirmOrderQuery(status, hostId),
-      transaction,
-    );
+    await this.update(orderId, this.confirmOrderQuery(hostId), transaction);
   }
 
   async persistHostReceipt(
-    { id: orderId, status, receivedByHostDate }: Order,
+    { id: orderId, receivedByHostDate }: ReceivedByHostOrder,
     transaction?: ClientSession,
   ): Promise<void> {
     await this.update(
       orderId,
-      this.receivedByHostQuery(status, receivedByHostDate),
+      this.receivedByHostQuery(receivedByHostDate),
       transaction,
     );
   }
@@ -74,23 +75,20 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     );
   }
 
-  private confirmOrderQuery(
-    status: OrderStatus,
-    hostId: EntityId,
-  ): UpdateQuery<OrderMongoDocument> {
+  private confirmOrderQuery(hostId: EntityId): UpdateQuery<OrderMongoDocument> {
     return {
       $set: {
-        ...this.updateOrderStatusQuery(status),
+        ...this.updateOrderStatusQuery(OrderStatus.Confirmed),
         ...this.addHostToOrderQuery(hostId),
       },
     };
   }
 
-  private addHostToOrderQuery(hostId: EntityId): { hostId: Binary } {
+  private addHostToOrderQuery(hostId: EntityId) {
     return { hostId: entityIdToMuuid(hostId) };
   }
 
-  private updateOrderStatusQuery(status: OrderStatus): { status: OrderStatus } {
+  private updateOrderStatusQuery(status: OrderStatus) {
     return { status };
   }
 

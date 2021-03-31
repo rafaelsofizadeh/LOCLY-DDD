@@ -2,6 +2,7 @@ import { ClientSession } from 'mongodb';
 import { EntityId } from '../../../common/domain/EntityId';
 import { Optional } from '../../../common/types';
 import { Customer } from '../../domain/entity/Customer';
+import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 import { Order } from '../../domain/entity/Order';
 
 export abstract class CustomerRepository {
@@ -18,7 +19,7 @@ export abstract class CustomerRepository {
   // This should always be used together with OrderRepository.addCustomerToOrder
   abstract addOrderToCustomer(
     customer: Customer,
-    order: Order,
+    order: DraftedOrder,
     transaction?: ClientSession,
   ): Promise<void>;
 

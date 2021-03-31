@@ -3,15 +3,12 @@ import { Type } from 'class-transformer';
 
 import { EntityProps } from '../../../common/domain/Entity';
 import { EntityId } from '../../../common/domain/EntityId';
-import { EntityIdToStringId } from '../../../common/types';
+import { EntityIdsToStringIds } from '../../../common/types';
 import { Serializable } from '../../../common/domain/Serializable';
-import { Identifiable } from '../../../common/domain/Identifiable';
 
 import { Address, AddressProps } from './Address';
-import { Order } from './Order';
-import { Exception } from '../../../common/error-handling/Exception';
-import { Code } from '../../../common/error-handling/Code';
 import { TransformEntityIdArrayToStringArray } from '../../../common/utils';
+import { ConfirmedOrder } from './ConfirmedOrder';
 
 export class HostProps extends EntityProps {
   @ValidateNested()
@@ -29,15 +26,15 @@ export class HostProps extends EntityProps {
 }
 
 export type HostPropsPlain = Omit<
-  EntityIdToStringId<Required<HostProps>>,
+  EntityIdsToStringIds<Required<HostProps>>,
   'address' | 'orderIds'
 > & {
   address: AddressProps;
   orderIds: string[];
 };
 
-export class Host extends Identifiable(
-  Serializable<HostPropsPlain, typeof HostProps>(HostProps),
+export class Host extends Serializable<HostPropsPlain, typeof HostProps>(
+  HostProps,
 ) {
   constructor(
     {
@@ -55,7 +52,7 @@ export class Host extends Identifiable(
     this.available = available;
   }
 
-  async acceptOrder(order: Order) {
+  async acceptOrder(order: ConfirmedOrder) {
     this.orderIds.push(order.id);
   }
 }

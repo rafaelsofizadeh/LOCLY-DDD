@@ -1,17 +1,14 @@
 import { IsArray, ValidateNested } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 
-import { Exception } from '../../../common/error-handling/Exception';
 import { EntityProps } from '../../../common/domain/Entity';
 import { EntityId } from '../../../common/domain/EntityId';
-import { EntityIdToStringId } from '../../../common/types';
 import { Serializable } from '../../../common/domain/Serializable';
-import { Identifiable } from '../../../common/domain/Identifiable';
 
 import { Address, AddressProps } from './Address';
-import { Order } from './Order';
-import { Code } from '../../../common/error-handling/Code';
 import { TransformEntityIdArrayToStringArray } from '../../../common/utils';
+import { EntityIdsToStringIds } from '../../../common/types';
+import { DraftedOrder } from './DraftedOrder';
 
 export class CustomerProps extends EntityProps {
   @ValidateNested()
@@ -26,16 +23,17 @@ export class CustomerProps extends EntityProps {
 }
 
 export type CustomerPropsPlain = Omit<
-  EntityIdToStringId<Required<CustomerProps>>,
+  EntityIdsToStringIds<Required<CustomerProps>>,
   'selectedAddress' | 'orderIds'
 > & {
   selectedAddress: AddressProps;
   orderIds: string[];
 };
 
-export class Customer extends Identifiable(
-  Serializable<CustomerPropsPlain, typeof CustomerProps>(CustomerProps),
-) {
+export class Customer extends Serializable<
+  CustomerPropsPlain,
+  typeof CustomerProps
+>(CustomerProps) {
   constructor(
     {
       id = new EntityId(),
@@ -50,7 +48,7 @@ export class Customer extends Identifiable(
     this.orderIds = orderIds;
   }
 
-  acceptOrder(order: Order) {
+  acceptOrder(order: DraftedOrder) {
     this.orderIds.push(order.id);
   }
 }

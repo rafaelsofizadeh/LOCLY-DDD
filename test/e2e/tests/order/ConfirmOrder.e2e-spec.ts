@@ -7,7 +7,6 @@ import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/domain/entity/Customer';
-import { Order } from '../../../../src/order/domain/entity/Order';
 import { Host } from '../../../../src/order/domain/entity/Host';
 import { Address } from '../../../../src/order/domain/entity/Address';
 
@@ -27,6 +26,7 @@ import {
   MatchCache,
 } from '../../../../src/order/application/port/MatchCache';
 import { HostRepository } from '../../../../src/order/application/port/HostRepository';
+import { DraftedOrder } from '../../../../src/order/domain/entity/DraftedOrder';
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;
@@ -39,7 +39,7 @@ describe('Confirm Order – POST /order/confirm', () => {
   let createOrderUseCase: CreateOrderUseCase;
 
   let testCustomer: Customer;
-  let testOrder: Order;
+  let testOrder: DraftedOrder;
   let testHosts: Host[];
 
   beforeAll(async () => {

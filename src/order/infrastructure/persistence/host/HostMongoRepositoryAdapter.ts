@@ -11,10 +11,10 @@ import {
 } from './HostMongoMapper';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
-import { Order } from '../../../domain/entity/Order';
 import { EntityId } from '../../../../common/domain/EntityId';
 import { entityIdToMuuid } from '../../../../common/utils';
 import { Country } from '../../../domain/data/Country';
+import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
 
 @Injectable()
 export class HostMongoRepositoryAdapter implements HostRepository {
@@ -69,7 +69,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   // This should always be used together with OrderRepository.addHostToOrder
   async addOrderToHost(
     { id: hostId }: Host,
-    { id: orderId }: Order,
+    { id: orderId }: ConfirmedOrder,
     transaction?: ClientSession,
   ): Promise<void> {
     await this.hostCollection

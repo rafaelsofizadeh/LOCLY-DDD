@@ -12,7 +12,6 @@ import {
   CreateOrderUseCase,
 } from '../../domain/use-case/CreateOrderUseCase';
 
-import { Order } from '../../domain/entity/Order';
 import { Customer } from '../../domain/entity/Customer';
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
@@ -24,6 +23,7 @@ import { withTransaction } from '../../../common/utils';
 import { Exception } from '../../../common/error-handling/Exception';
 import { Code } from '../../../common/error-handling/Code';
 import { HostMatcher } from '../port/HostMatcher';
+import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 
 @Injectable()
 export class CreateOrder implements CreateOrderUseCase {
@@ -41,11 +41,11 @@ export class CreateOrder implements CreateOrderUseCase {
     customerId,
     originCountry,
     items,
-  }: CreateOrderRequest): Promise<Order> {
+  }: CreateOrderRequest): Promise<DraftedOrder> {
     const session = this.mongoClient.startSession();
 
     // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
-    const order: Order = await withTransaction(
+    const order: DraftedOrder = await withTransaction(
       () =>
         this.createDraftOrderAndPersist(
           customerId,
@@ -65,13 +65,13 @@ export class CreateOrder implements CreateOrderUseCase {
     originCountry: Country,
     items: Item[],
     session: ClientSession,
-  ): Promise<Order> {
+  ): Promise<DraftedOrder> {
     const customer: Customer = await this.customerRepository.findCustomer(
       customerId,
       session,
     );
 
-    const order = new Order({
+    const order = new DraftedOrder({
       customerId: customer.id,
       originCountry,
       items,
@@ -99,10 +99,11 @@ export class CreateOrder implements CreateOrderUseCase {
     return order;
   }
 
+  // TODO: Remove redundancy with ShipmentCostCalculator
   private async checkServiceAvailability({
     originCountry,
     destination: { country: destinationCountry },
-  }: Order): Promise<void> {
+  }: DraftedOrder): Promise<void> {
     const isServiceAvailable: boolean = await this.hostMatcher.checkServiceAvailability(
       originCountry,
       destinationCountry,

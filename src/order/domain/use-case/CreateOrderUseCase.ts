@@ -1,7 +1,8 @@
-import { OrderUseCase } from './OrderUseCase';
 import { EntityId } from '../../../common/domain/EntityId';
 import { Country } from '../data/Country';
 import { Item } from '../entity/Item';
+import { DraftedOrder } from '../entity/DraftedOrder';
+import { UseCase } from '../../../common/domain/UseCase';
 
 export interface CreateOrderRequest {
   customerId: EntityId;
@@ -9,6 +10,7 @@ export interface CreateOrderRequest {
   items: Item[];
 }
 
-export abstract class CreateOrderUseCase extends OrderUseCase<
-  CreateOrderRequest
+export abstract class CreateOrderUseCase extends UseCase<
+  CreateOrderRequest,
+  DraftedOrder
 > {}

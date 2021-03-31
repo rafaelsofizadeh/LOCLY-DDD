@@ -2,6 +2,7 @@
 
 import { Binary } from 'mongodb';
 import { EntityProps } from './domain/Entity';
+import { EntityId } from './domain/EntityId';
 
 /**
  * 'undefinable' type.
@@ -35,6 +36,10 @@ export type MongoIdToEntityId<T extends { _id: Binary }> = Omit<T, '_id'> & {
   id: string;
 };
 
-export type EntityIdToStringId<T extends EntityProps> = Omit<T, 'id'> & {
-  id: string;
+export type EntityIdsToStringIds<T> = {
+  [K in keyof T]: T[K] extends EntityId ? string : T[K];
+};
+
+export type EntityIdsToMUUID<T> = {
+  [K in keyof T]: T[K] extends EntityId ? Binary : T[K];
 };

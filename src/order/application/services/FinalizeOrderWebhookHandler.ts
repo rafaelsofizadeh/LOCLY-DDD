@@ -1,11 +1,10 @@
 import { StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { Injectable } from '@nestjs/common';
-import { ClientSession } from 'mongodb';
 import Stripe from 'stripe';
 import { EntityId, UUID } from '../../../common/domain/EntityId';
+import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 
 import { Host } from '../../domain/entity/Host';
-import { Order } from '../../domain/entity/Order';
 import { FinalizeOrderUseCase } from '../../domain/use-case/FinalizeOrderUseCase';
 import { HostRepository } from '../port/HostRepository';
 import { Match, MatchCache } from '../port/MatchCache';
@@ -22,7 +21,7 @@ export class FinalizeOrderWebhookHandler implements FinalizeOrderUseCase {
   // TODO: Transient SESSION
   @StripeWebhookHandler('checkout.session.completed')
   // TODO: Event typing
-  async execute(paymentFinalizedEvent: Stripe.Event): Promise<Order> {
+  async execute(paymentFinalizedEvent: Stripe.Event): Promise<ConfirmedOrder> {
     // TODO: Check whether 'id' === 'checkoutSession.id'. Replace client_ref_id
     //https://stripe.com/docs/api/events/types#event_types-checkout.session.completed
     // TODO: Better typing
@@ -33,10 +32,10 @@ export class FinalizeOrderWebhookHandler implements FinalizeOrderUseCase {
 
     const match: Match = await this.matchCache.retrieveAndDeleteMatch(matchId);
 
-    const [order, host]: [Order, Host] = await Promise.all([
+    const [order, host]: [ConfirmedOrder, Host] = (await Promise.all([
       this.orderRepository.findOrder(match.orderId),
       this.hostRepository.findHost(match.hostId),
-    ]);
+    ])) as [ConfirmedOrder, Host];
 
     order.confirm(host);
     host.acceptOrder(order);

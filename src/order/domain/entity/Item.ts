@@ -1,10 +1,7 @@
-import { IsEnum, IsInt, IsPositive, IsString, Length } from 'class-validator';
-
+import { IsString, Length, IsEnum, IsPositive, IsInt } from 'class-validator';
 import { EntityProps } from '../../../common/domain/Entity';
 import { EntityId } from '../../../common/domain/EntityId';
-import { Identifiable } from '../../../common/domain/Identifiable';
-import { Validatable } from '../../../common/domain/Validatable';
-import { EntityIdToStringId } from '../../../common/types';
+import { EntityIdsToStringIds } from '../../../common/types';
 
 export const Category = {
   Art: 'art',
@@ -23,6 +20,7 @@ export type PackagePhysicalCharacteristics = {
   weight: Gram;
 };
 
+// TODO: Remove width-length-height
 export class ItemProps extends EntityProps {
   @IsString()
   @Length(5, 280)
@@ -52,9 +50,9 @@ export class ItemProps extends EntityProps {
   height: number;
 }
 
-export type ItemPropsPlain = EntityIdToStringId<ItemProps>;
+export type ItemPropsPlain = EntityIdsToStringIds<ItemProps>;
 
-export class Item extends Identifiable(Validatable(ItemProps)) {
+export class Item extends ItemProps {
   constructor(
     {
       id = new EntityId(),
@@ -85,6 +83,19 @@ export class Item extends Identifiable(Validatable(ItemProps)) {
       length: this.length,
       height: this.height,
       weight: this.weight,
+    };
+  }
+
+  serialize(): ItemPropsPlain {
+    return {
+      id: this.id.value,
+      title: this.title,
+      storeName: this.storeName,
+      category: this.category,
+      weight: this.weight,
+      width: this.width,
+      length: this.length,
+      height: this.height,
     };
   }
 }

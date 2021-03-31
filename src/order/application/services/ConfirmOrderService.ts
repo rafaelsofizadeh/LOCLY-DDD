@@ -10,13 +10,13 @@ import {
 } from '../../domain/use-case/ConfirmOrderUseCase';
 import { HostMatcher } from '../port/HostMatcher';
 import { OrderRepository } from '../port/OrderRepository';
-import { Order } from '../../domain/entity/Order';
 import { Host } from '../../domain/entity/Host';
 import { MatchCache } from '../port/MatchCache';
 import { EntityId } from '../../../common/domain/EntityId';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/utils';
+import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 
 export type MatchReference = Stripe.Checkout.Session['client_reference_id'];
 
@@ -52,7 +52,10 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     orderId: EntityId,
     session: ClientSession,
   ): Promise<Stripe.Checkout.Session> {
-    const order: Order = await this.orderRepository.findOrder(orderId, session);
+    const order: DraftedOrder = (await this.orderRepository.findOrder(
+      orderId,
+      session,
+    )) as DraftedOrder;
 
     const matchId: EntityId = await this.matchOrderToHost(order, session).catch(
       error => {
@@ -113,7 +116,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
   }
 
   private async matchOrderToHost(
-    order: Order,
+    { id: orderId, originCountry }: DraftedOrder,
     session: ClientSession,
   ): Promise<EntityId> {
     const matchedHost: Host = await this.hostMatcher.matchHost(

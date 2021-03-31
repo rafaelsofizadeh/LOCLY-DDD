@@ -10,7 +10,6 @@ import {
 
 import { CreateOrderRequestAdapter } from './CreateOrderRequestAdapter';
 import { CreateOrderUseCase } from '../../domain/use-case/CreateOrderUseCase';
-import { Order } from '../../domain/entity/Order';
 import { ConfirmOrderRequestAdapter } from './ConfirmOrderRequestAdapter';
 import {
   StripeCheckoutSession,
@@ -21,6 +20,7 @@ import {
   ReceiveOrderHostResult,
   ReceiveOrderHostUseCase,
 } from '../../domain/use-case/ReceiveOrderByHostUseCase';
+import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 
 // TODO: Separate out to classes per each use case
 @Controller('order')
@@ -37,8 +37,9 @@ export class OrderController {
   @UseInterceptors(ClassSerializerInterceptor)
   async createOrder(
     @Body() orderRequest: CreateOrderRequestAdapter,
-  ): Promise<Order> {
-    const draftedOrder: Order = await this.createOrderUseCase.execute(
+    // TODO: add
+  ): Promise<DraftedOrder> {
+    const draftedOrder: DraftedOrder = await this.createOrderUseCase.execute(
       orderRequest,
     );
 

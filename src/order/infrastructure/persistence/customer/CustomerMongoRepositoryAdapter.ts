@@ -12,8 +12,8 @@ import {
 } from './CustomerMongoMapper';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
-import { Order } from '../../../domain/entity/Order';
 import { entityIdToMuuid } from '../../../../common/utils';
+import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
 
 @Injectable()
 export class CustomerMongoRepositoryAdapter implements CustomerRepository {
@@ -51,7 +51,7 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
   // This should always be used together with OrderRepository.addCustomerToOrder
   async addOrderToCustomer(
     { id: customerId }: Customer,
-    { id: orderId }: Order,
+    { id: orderId }: DraftedOrder,
     transaction?: ClientSession,
   ): Promise<void> {
     await this.customerCollection
