@@ -215,6 +215,32 @@ describe('Confirm Order – POST /order/confirm', () => {
   });
 });
 
+function updatedStripeCheckoutSessionInTestPage(checkoutId: string) {
+  const checkoutPagePath = path.join(__dirname, './CheckoutPage.html');
+
+  readFile(checkoutPagePath, 'utf8', (error, data) => {
+    if (error) {
+      console.log(error);
+    }
+
+    const updatedStripeCheckoutSessionFileContent = data.replace(
+      /cs_test_[\w\d]+/g,
+      checkoutId,
+    );
+
+    writeFile(
+      checkoutPagePath,
+      updatedStripeCheckoutSessionFileContent,
+      'utf8',
+      error => {
+        if (error) {
+          console.log(error);
+        }
+      },
+    );
+  });
+}
+
 /*const {
       status,
       hostId,
