@@ -1,3 +1,5 @@
+import { readFile, writeFile } from 'fs';
+import * as path from 'path';
 import * as supertest from 'supertest';
 import * as MUUID from 'uuid-mongodb';
 import { INestApplication } from '@nestjs/common';
@@ -212,6 +214,8 @@ describe('Confirm Order – POST /order/confirm', () => {
     );
 
     expect(match).toBeDefined();
+
+    updatedStripeCheckoutSessionInTestPage(checkoutId);
   });
 });
 
