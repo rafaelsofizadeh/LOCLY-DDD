@@ -14,7 +14,6 @@ import {
   AddressProps,
 } from '../../../../src/order/domain/entity/Address';
 import { Category } from '../../../../src/order/domain/entity/Item';
-import { Country } from '../../../../src/order/domain/data/Country';
 import {
   destinationCountriesAvailable,
   originCountriesAvailable,
@@ -80,7 +79,7 @@ describe('Create Order – POST /order/create', () => {
             width: 100,
             height: 100,
             length: 100,
-            weight: 10,
+            weight: 1500,
             category: Category.Electronics,
           },
         ],
