@@ -13,7 +13,7 @@ import { CreateOrderUseCase } from '../../domain/use-case/CreateOrderUseCase';
 import { Order } from '../../domain/entity/Order';
 import { ConfirmOrderRequestAdapter } from './ConfirmOrderRequestAdapter';
 import {
-  ConfirmOrderResult,
+  StripeCheckoutSession,
   ConfirmOrderUseCase,
 } from '../../domain/use-case/ConfirmOrderUseCase';
 import { ReceiveOrderHostRequestAdapter } from './ReceiveOrderByHostRequestAdapter';
@@ -50,7 +50,7 @@ export class OrderController {
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async confirmOrder(
     @Body() confirmationRequest: ConfirmOrderRequestAdapter,
-  ): Promise<ConfirmOrderResult> {
+  ): Promise<StripeCheckoutSession> {
     const checkoutId = await this.confirmOrderUseCase.execute(
       confirmationRequest,
     );

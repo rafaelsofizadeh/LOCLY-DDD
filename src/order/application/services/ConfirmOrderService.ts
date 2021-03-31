@@ -5,7 +5,7 @@ import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
 import {
   ConfirmOrderRequest,
-  ConfirmOrderResult,
+  StripeCheckoutSession,
   ConfirmOrderUseCase,
 } from '../../domain/use-case/ConfirmOrderUseCase';
 import { HostMatcher } from '../port/HostMatcher';
@@ -32,7 +32,9 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute({ orderId }: ConfirmOrderRequest): Promise<ConfirmOrderResult> {
+  async execute({
+    orderId,
+  }: ConfirmOrderRequest): Promise<StripeCheckoutSession> {
     const session = this.mongoClient.startSession();
 
     // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014

@@ -5,11 +5,11 @@ export interface ConfirmOrderRequest {
   orderId: EntityId;
 }
 
-export interface ConfirmOrderResult {
+export interface StripeCheckoutSession {
   checkoutId: string;
 }
 
 export abstract class ConfirmOrderUseCase extends UseCase<
   ConfirmOrderRequest,
-  ConfirmOrderResult
+  StripeCheckoutSession
 > {}
