@@ -102,6 +102,8 @@ describe('Create Order – POST /order/create', () => {
 
     testOrderId = new EntityId(id);
 
+    // TODO(IMPORTANT): Check if order has been added to database
+
     const updatedTestCustomer: Customer = await customerRepository.findCustomer(
       testCustomer.id,
     );

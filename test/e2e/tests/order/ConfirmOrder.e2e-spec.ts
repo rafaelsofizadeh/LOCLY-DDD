@@ -185,6 +185,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
       // TODO (FUTURE): Delete through deleteOrderUseCase
       orderRepository.deleteOrder(testOrder.id),
+      // TODO: Clean up Match
     ]),
   );
 
