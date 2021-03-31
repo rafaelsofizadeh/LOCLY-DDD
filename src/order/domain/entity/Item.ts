@@ -14,11 +14,13 @@ export const Category = {
 
 export type Category = typeof Category[keyof typeof Category];
 
-export type PhysicalCharacteristics = {
+export type Gram = number;
+
+export type PackagePhysicalCharacteristics = {
   width: number;
   length: number;
   height: number;
-  weight: number;
+  weight: Gram;
 };
 
 export class ItemProps extends EntityProps {
@@ -35,7 +37,7 @@ export class ItemProps extends EntityProps {
 
   @IsInt()
   @IsPositive()
-  weight: number;
+  weight: Gram;
 
   @IsInt()
   @IsPositive()
@@ -77,7 +79,7 @@ export class Item extends Identifiable(Validatable(ItemProps)) {
     this.height = height;
   }
 
-  get physicalCharacteristics(): PhysicalCharacteristics {
+  get physicalCharacteristics(): PackagePhysicalCharacteristics {
     return {
       width: this.width,
       length: this.length,
