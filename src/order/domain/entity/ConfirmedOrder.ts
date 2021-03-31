@@ -5,6 +5,7 @@ import { EntityIdsToStringIds } from '../../../common/types';
 import { Country } from '../data/Country';
 import { Host } from './Host';
 import { OrderStatus } from './Order';
+import { ReceivedByHostOrder } from './ReceivedByHostOrder';
 
 export class ConfirmedOrderProps extends EntityProps {
   // TODO: when to set status?
@@ -29,19 +30,23 @@ export class ConfirmedOrder extends ConfirmedOrderProps {
       id = new EntityId(),
       originCountry,
     }: // default value is needed for class-validator plainToClass. Refer to: Order.ts.
-    Omit<ConfirmedOrderProps, 'status' | 'hostId'> = new ConfirmedOrderProps(),
+    Omit<ConfirmedOrderProps, 'status'> = new ConfirmedOrderProps(),
   ) {
     super();
 
-    this.id = id;
-    // TODO: when to set status?
     this.status = OrderStatus.Confirmed;
+
+    this.id = id;
     this.originCountry = originCountry;
   }
 
-  async confirm(host: Host): Promise<void> {
+  initialize(host: Host) {
     this.hostId = host.id;
     this.status = OrderStatus.Confirmed;
+  }
+
+  toReceivedByHost() {
+    return new ReceivedByHostOrder(this);
   }
 
   serialize(): ConfirmedOrderPropsPlain {

@@ -52,19 +52,20 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     orderId: EntityId,
     session: ClientSession,
   ): Promise<Stripe.Checkout.Session> {
-    const order: DraftedOrder = (await this.orderRepository.findOrder(
+    const draftedOrder = (await this.orderRepository.findOrder(
       orderId,
       session,
     )) as DraftedOrder;
 
-    const matchId: EntityId = await this.matchOrderToHost(order, session).catch(
-      error => {
-        // TODO: Wrapper around eventEmitter
-        // TODO(?): Event emitting decorator and put it on error handling
-        this.eventEmitter.emit('order.rejected.host_availability');
-        throw error;
-      },
-    );
+    const matchId: EntityId = await this.matchOrderToHost(
+      draftedOrder,
+      session,
+    ).catch(error => {
+      // TODO: Wrapper around eventEmitter
+      // TODO(?): Event emitting decorator and put it on error handling
+      this.eventEmitter.emit('order.rejected.host_availability');
+      throw error;
+    });
 
     /**
      * Scenarios:

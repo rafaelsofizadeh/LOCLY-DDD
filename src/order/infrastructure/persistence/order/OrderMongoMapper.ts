@@ -29,6 +29,7 @@ export type ConfirmedOrderMongoDocument = {
   _id: Binary;
   status: OrderStatus;
   originCountry: Country;
+  hostId: Binary;
 };
 
 export type ReceivedByHostOrderMongoDocument = {
@@ -100,10 +101,12 @@ export function mongoDocumentToDraftedOrder({
 export function mongoDocumentToConfirmedOrder({
   _id,
   originCountry,
+  hostId,
 }: ConfirmedOrderMongoDocument): ConfirmedOrder {
   return new ConfirmedOrder({
     id: muuidToEntityId(_id),
     originCountry,
+    hostId: muuidToEntityId(hostId),
   });
 }
 

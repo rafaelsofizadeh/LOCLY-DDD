@@ -5,7 +5,7 @@ import { OrderStatus } from './Order';
 
 export class ReceivedByHostOrderProps extends EntityProps {
   status: OrderStatus = 'host_received';
-  receivedByHostDate: Date;
+  receivedByHostDate?: Date;
 }
 
 export type ReceivedByHostOrderPropsPlain = EntityIdsToStringIds<
@@ -21,11 +21,12 @@ export class ReceivedByHostOrder extends ReceivedByHostOrderProps {
   ) {
     super();
 
-    this.id = id;
     this.status = OrderStatus.ReceivedByHost;
+
+    this.id = id;
   }
 
-  receivedByHost() {
+  initialize() {
     this.receivedByHostDate = new Date();
     this.status = OrderStatus.ReceivedByHost;
   }

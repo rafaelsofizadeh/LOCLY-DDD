@@ -71,32 +71,36 @@ export class CreateOrder implements CreateOrderUseCase {
       session,
     );
 
-    const order = new DraftedOrder({
+    const draftedOrder = new DraftedOrder({
       customerId: customer.id,
       originCountry,
       items,
       destination: customer.selectedAddress,
     });
 
-    await this.checkServiceAvailability(order);
+    await this.checkServiceAvailability(draftedOrder);
 
-    order.draft((costRequest: ShipmentCostRequest) =>
+    draftedOrder.initialize((costRequest: ShipmentCostRequest) =>
       getShipmentCostQuote(costRequest),
     );
-    customer.acceptOrder(order);
+    customer.acceptOrder(draftedOrder);
 
     // Thanks to transactions, I can run these two concurrently
     await Promise.all([
-      // TODO(GLOBAL): Add rollback for order.draft
-      this.orderRepository.addOrder(order, session),
-      this.customerRepository.addOrderToCustomer(customer, order, session),
+      // TODO(GLOBAL): Add rollback for draftedOrder.draft
+      this.orderRepository.addOrder(draftedOrder, session),
+      this.customerRepository.addOrderToCustomer(
+        customer,
+        draftedOrder,
+        session,
+      ),
     ]);
 
     // TODO: Wrapper around eventEmitter
     // TODO(?): Event emitting decorator
-    this.eventEmitter.emitAsync('order.drafted', order);
+    this.eventEmitter.emitAsync('order.drafted', draftedOrder);
 
-    return order;
+    return draftedOrder;
   }
 
   // TODO: Remove redundancy with ShipmentCostCalculator

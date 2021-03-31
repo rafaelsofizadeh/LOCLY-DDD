@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 import { EntityId, UUID } from '../../../common/domain/EntityId';
 import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
+import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 
 import { Host } from '../../domain/entity/Host';
 import { FinalizeOrderUseCase } from '../../domain/use-case/FinalizeOrderUseCase';
@@ -32,19 +33,21 @@ export class FinalizeOrderWebhookHandler implements FinalizeOrderUseCase {
 
     const match: Match = await this.matchCache.retrieveAndDeleteMatch(matchId);
 
-    const [order, host]: [ConfirmedOrder, Host] = (await Promise.all([
+    const [draftedOrder, host] = (await Promise.all([
       this.orderRepository.findOrder(match.orderId),
       this.hostRepository.findHost(match.hostId),
-    ])) as [ConfirmedOrder, Host];
+    ])) as [DraftedOrder, Host];
 
-    order.confirm(host);
-    host.acceptOrder(order);
+    const confirmedOrder: ConfirmedOrder = draftedOrder.toConfirmed();
+
+    confirmedOrder.initialize(host);
+    host.acceptOrder(confirmedOrder);
 
     await Promise.all([
-      this.orderRepository.persistOrderConfirmation(order, host),
-      this.hostRepository.addOrderToHost(host, order),
+      this.orderRepository.persistOrderConfirmation(confirmedOrder, host),
+      this.hostRepository.addOrderToHost(host, confirmedOrder),
     ]);
 
-    return order;
+    return confirmedOrder;
   }
 }

@@ -12,6 +12,7 @@ import {
   ReceiveOrderHostUseCase,
 } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 import { ReceivedByHostOrder } from '../../domain/entity/ReceivedByHostOrder';
+import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 
 export type MatchReference = Stripe.Checkout.Session['client_reference_id'];
 
@@ -49,14 +50,16 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
     orderId: EntityId,
     session: ClientSession,
   ): Promise<Date> {
-    const order: ReceivedByHostOrder = (await this.orderRepository.findOrder(
+    const confirmedOrder = (await this.orderRepository.findOrder(
       orderId,
       session,
-    )) as ReceivedByHostOrder;
+    )) as ConfirmedOrder;
 
-    order.receivedByHost();
-    await this.orderRepository.persistHostReceipt(order);
+    const receivedByHostOrder: ReceivedByHostOrder = confirmedOrder.toReceivedByHost();
 
-    return order.receivedByHostDate;
+    receivedByHostOrder.initialize();
+    await this.orderRepository.persistHostReceipt(receivedByHostOrder);
+
+    return receivedByHostOrder.receivedByHostDate;
   }
 }

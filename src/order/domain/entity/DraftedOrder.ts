@@ -9,6 +9,8 @@ import {
 } from '../../application/services/ShipmentCostCalculator/getShipmentCostQuote';
 import { Country } from '../data/Country';
 import { Address, AddressPropsPlain } from './Address';
+import { ConfirmedOrder } from './ConfirmedOrder';
+import { Host } from './Host';
 import { Item, ItemPropsPlain } from './Item';
 import { OrderStatus, ShipmentCost } from './Order';
 
@@ -49,26 +51,34 @@ export class DraftedOrder extends DraftedOrderProps {
       originCountry,
       destination,
     }: // default value is needed for class-validator plainToClass. Refer to: Order.ts.
-    Omit<DraftedOrderProps, 'status'> = new DraftedOrderProps(),
+    Omit<
+      DraftedOrderProps,
+      'status' | 'shipmentCost'
+    > = new DraftedOrderProps(),
   ) {
     super();
 
-    this.id = id;
     this.status = OrderStatus.Drafted;
-    this.customerId = customerId;
+
+    this.id = id;
     this.items = items;
+    this.customerId = customerId;
     this.destination = destination;
     this.originCountry = originCountry;
   }
 
   // TODO: Persist Customer to Order more explicitly maybe?
-  draft(
+  initialize(
     getShipmentCostRate: (
       costRequest: ShipmentCostRequest,
     ) => ShipmentCostQuote,
   ) {
     // TODO: Process getShipmentCost result
     this.shipmentCost = this.approximateShipmentCost(getShipmentCostRate);
+  }
+
+  toConfirmed(): ConfirmedOrder {
+    return new ConfirmedOrder(this);
   }
 
   serialize(): DraftedOrderPropsPlain {
