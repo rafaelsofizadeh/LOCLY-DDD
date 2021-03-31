@@ -14,6 +14,10 @@ import {
 } from './OrderMongoMapper';
 import { Host } from '../../../domain/entity/Host';
 import { entityIdToMuuid } from '../../../../common/utils';
+import {
+  ReceivedByHostOrder,
+  ReceivedByHostOrderProps,
+} from '../../../domain/entity/ReceivedByHostOrder';
 import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
 import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
 
@@ -92,10 +96,11 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     return { status };
   }
 
-  private receivedByHostQuery(status: OrderStatus, receivedByHostDate: Date) {
+  private receivedByHostQuery(receivedByHostDate: Date) {
     return {
       $set: {
-        ...this.updateOrderStatusQuery(status),
+        // TODO: infer the status from the Order itself
+        ...this.updateOrderStatusQuery(OrderStatus.ReceivedByHost),
         ...this.receivedByHostDateQuery(receivedByHostDate),
       },
     };

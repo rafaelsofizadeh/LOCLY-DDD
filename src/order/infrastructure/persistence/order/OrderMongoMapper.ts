@@ -8,6 +8,7 @@ import { Order, OrderStatus, ShipmentCost } from '../../../domain/entity/Order';
 import { Country } from '../../../domain/data/Country';
 import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
 import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
+import { ReceivedByHostOrder } from '../../../domain/entity/ReceivedByHostOrder';
 
 // TODO(GLOBAL): EntityIdToString type, but for EntityId->Binary
 export type ItemMongoSubdocument = Omit<ItemProps, 'id'> & {
@@ -30,10 +31,16 @@ export type ConfirmedOrderMongoDocument = {
   originCountry: Country;
 };
 
+export type ReceivedByHostOrderMongoDocument = {
+  _id: Binary;
+  status: OrderStatus;
+  receivedByHostDate: Date;
+};
 
 export type OrderMongoDocument =
   | DraftedOrderMongoDocument
-  | ConfirmedOrderMongoDocument;
+  | ConfirmedOrderMongoDocument
+  | ReceivedByHostOrderMongoDocument;
 
 export function orderToMongoDocument(
   order: DraftedOrder,
@@ -61,6 +68,10 @@ export function mongoDocumentToOrder(orderDocument: OrderMongoDocument): Order {
     case OrderStatus.Confirmed:
       return mongoDocumentToConfirmedOrder(
         orderDocument as ConfirmedOrderMongoDocument,
+      );
+    case OrderStatus.ReceivedByHost:
+      return mongoDocumentToReceivedByHostOrder(
+        orderDocument as ReceivedByHostOrderMongoDocument,
       );
     default:
       throw new Error('Invalid order status');
@@ -93,5 +104,15 @@ export function mongoDocumentToConfirmedOrder({
   return new ConfirmedOrder({
     id: muuidToEntityId(_id),
     originCountry,
+  });
+}
+
+export function mongoDocumentToReceivedByHostOrder({
+  _id,
+  receivedByHostDate,
+}: ReceivedByHostOrderMongoDocument): ReceivedByHostOrder {
+  return new ReceivedByHostOrder({
+    id: muuidToEntityId(_id),
+    receivedByHostDate,
   });
 }

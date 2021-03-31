@@ -1,16 +1,7 @@
 import Stripe from 'stripe';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InjectStripeClient } from '@golevelup/nestjs-stripe';
-
-import { Code } from '../../../common/error-handling/Code';
-import { Order } from '../../domain/entity/Order';
-import { Exception } from '../../../common/error-handling/Exception';
-
-import { HostMatcher } from '../port/HostMatcher';
 import { OrderRepository } from '../port/OrderRepository';
-import { Host } from '../../domain/entity/Host';
-import { MatchCache } from '../port/MatchCache';
 import { EntityId } from '../../../common/domain/EntityId';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
@@ -20,6 +11,7 @@ import {
   ReceiveOrderHostResult,
   ReceiveOrderHostUseCase,
 } from '../../domain/use-case/ReceiveOrderByHostUseCase';
+import { ReceivedByHostOrder } from '../../domain/entity/ReceivedByHostOrder';
 
 export type MatchReference = Stripe.Checkout.Session['client_reference_id'];
 
@@ -57,7 +49,10 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
     orderId: EntityId,
     session: ClientSession,
   ): Promise<Date> {
-    const order: Order = await this.orderRepository.findOrder(orderId, session);
+    const order: ReceivedByHostOrder = (await this.orderRepository.findOrder(
+      orderId,
+      session,
+    )) as ReceivedByHostOrder;
 
     order.receivedByHost();
     await this.orderRepository.persistHostReceipt(order);

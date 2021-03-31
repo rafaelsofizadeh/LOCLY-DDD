@@ -1,5 +1,6 @@
 import { ConfirmedOrder } from './ConfirmedOrder';
 import { DraftedOrder } from './DraftedOrder';
+import { ReceivedByHostOrder } from './ReceivedByHostOrder';
 
 export type ShipmentCost = {
   amount: number;
@@ -14,4 +15,4 @@ export const OrderStatus = {
 
 export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
 
-export type Order = DraftedOrder | ConfirmedOrder;
+export type Order = DraftedOrder | ConfirmedOrder | ReceivedByHostOrder;
