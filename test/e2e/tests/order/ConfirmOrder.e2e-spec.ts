@@ -70,8 +70,8 @@ describe('Confirm Order – POST /order/confirm', () => {
   });
 
   beforeEach(async () => {
-    const originCountry: Country = originCountriesAvailable[0] as Country;
-    const destinationCountry: Country = destinationCountriesAvailable[0] as Country;
+    const originCountry: Country = originCountriesAvailable[0];
+    const destinationCountry: Country = destinationCountriesAvailable[0];
 
     testCustomer = new Customer({
       selectedAddress: new Address({
@@ -114,7 +114,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✔ lowest number of orders (1)
       */
       {
-        country: originCountriesAvailable[1],
+        country: originCountriesAvailable[1] || ('XXX' as Country),
         available: true,
         orderCount: 1,
       },
@@ -136,7 +136,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✗ NOT available
       */
       {
-        country: originCountriesAvailable[2],
+        country: originCountriesAvailable[2] || ('ZZZ' as Country),
         available: false,
         orderCount: 3,
       },
