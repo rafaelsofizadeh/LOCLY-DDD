@@ -119,8 +119,8 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     { id: orderId, originCountry }: DraftedOrder,
     session: ClientSession,
   ): Promise<EntityId> {
-    const matchedHost: Host = await this.hostMatcher.matchHost(
-      order.originCountry,
+    const { id: matchedHostId }: Host = await this.hostMatcher.matchHost(
+      originCountry,
       session,
     );
 
@@ -129,8 +129,8 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     await this.matchRecorder.recordMatch(
       {
         id: matchId,
-        orderId: order.id,
-        hostId: matchedHost.id,
+        orderId,
+        hostId: matchedHostId,
       },
       session,
     );
