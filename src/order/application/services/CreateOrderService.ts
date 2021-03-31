@@ -3,9 +3,9 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OrderRepository } from '../port/OrderRepository';
 import { CustomerRepository } from '../port/CustomerRepository';
 import {
-  ShipmentCostCalculator,
   ShipmentCostRequest,
-} from '../port/ShipmentCostCalculator';
+  getShipmentCostQuote,
+} from '../services/ShipmentCostCalculator/getShipmentCostQuote';
 
 import {
   CreateOrderRequest,
@@ -31,7 +31,6 @@ export class CreateOrder implements CreateOrderUseCase {
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,
     private readonly hostMatcher: HostMatcher,
-    private readonly shipmentCostCalculator: ShipmentCostCalculator,
     // TODO: More general EventEmitter class, wrapper around eventEmitter
     private readonly eventEmitter: EventEmitter2,
     @InjectClient() private readonly mongoClient: MongoClient,
@@ -81,8 +80,8 @@ export class CreateOrder implements CreateOrderUseCase {
 
     await this.checkServiceAvailability(order);
 
-    await order.draft((costRequest: ShipmentCostRequest) =>
-      this.shipmentCostCalculator.getRate(costRequest),
+    order.draft((costRequest: ShipmentCostRequest) =>
+      getShipmentCostQuote(costRequest),
     );
     customer.acceptOrder(order);
 

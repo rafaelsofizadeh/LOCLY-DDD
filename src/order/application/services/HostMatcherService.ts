@@ -7,7 +7,7 @@ import { HostMatcher } from '../port/HostMatcher';
 import { HostRepository } from '../port/HostRepository';
 
 // TODO: Service'ify service availability
-export const originCountriesAvailable: Country[] = ['AUS', 'USA', 'AZE'];
+export const originCountriesAvailable: Country[] = ['GBR'];
 export const destinationCountriesAvailable: Country[] = ['AZE', 'ITA', 'CAN'];
 
 @Injectable()
