@@ -7,13 +7,12 @@ import {
 } from 'class-validator';
 
 import { EntityId } from '../../../common/domain/EntityId';
-import { Validatable } from '../../../common/domain/Validatable';
 import { TransformStringToEntityId } from '../../../common/utils';
 import { Country } from '../../domain/data/Country';
-import { Item, ItemProps } from '../../domain/entity/Item';
+import { Item } from '../../domain/entity/Item';
 import { CreateOrderRequest } from '../../domain/use-case/CreateOrderUseCase';
 
-class BaseCreateOrderRequestAdapter implements CreateOrderRequest {
+export class CreateOrderRequestAdapter implements CreateOrderRequest {
   /*
    * Nest.js first performs transformation, then validation, so, the process is like:
    * HTTP request -> customerId: "string" ->
@@ -33,14 +32,5 @@ class BaseCreateOrderRequestAdapter implements CreateOrderRequest {
   @ArrayMinSize(1)
   @IsArray()
   @Type(() => Item)
-  @Transform(
-    ({ value: items }: { value: ItemProps[] }) =>
-      items.map(item => new Item(item)),
-    { toClassOnly: true },
-  )
   readonly items: Item[];
 }
-
-export class CreateOrderRequestAdapter extends Validatable(
-  BaseCreateOrderRequestAdapter,
-) {}

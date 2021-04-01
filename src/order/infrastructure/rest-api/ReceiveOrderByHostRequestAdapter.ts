@@ -2,11 +2,10 @@ import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 
 import { EntityId } from '../../../common/domain/EntityId';
-import { Validatable } from '../../../common/domain/Validatable';
 import { TransformStringToEntityId } from '../../../common/utils';
 import { ReceiveOrderHostRequest } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 
-class BaseReceiveOrderHostRequestAdapter implements ReceiveOrderHostRequest {
+export class ReceiveOrderHostRequestAdapter implements ReceiveOrderHostRequest {
   /*
    * Nest.js first performs transformation, then validation, so, the process is like:
    * HTTP request -> customerId: "string" ->
@@ -19,7 +18,3 @@ class BaseReceiveOrderHostRequestAdapter implements ReceiveOrderHostRequest {
   @TransformStringToEntityId()
   readonly orderId: EntityId;
 }
-
-export class ReceiveOrderHostRequestAdapter extends Validatable(
-  BaseReceiveOrderHostRequestAdapter,
-) {}
