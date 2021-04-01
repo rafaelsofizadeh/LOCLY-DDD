@@ -45,7 +45,7 @@ export class CreateOrder implements CreateOrderUseCase {
     const session = this.mongoClient.startSession();
 
     // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
-    const order: DraftedOrder = await withTransaction(
+    const draftedOrder: DraftedOrder = await withTransaction(
       () =>
         this.createDraftOrderAndPersist(
           customerId,
@@ -57,7 +57,7 @@ export class CreateOrder implements CreateOrderUseCase {
     );
 
     // Serialization in Controllers (/infrastructure)
-    return order;
+    return draftedOrder;
   }
 
   private async createDraftOrderAndPersist(
@@ -80,14 +80,13 @@ export class CreateOrder implements CreateOrderUseCase {
 
     await this.checkServiceAvailability(draftedOrder);
 
-    draftedOrder.initialize((costRequest: ShipmentCostRequest) =>
-      getShipmentCostQuote(costRequest),
-    );
+    draftedOrder.initialize(getShipmentCostQuote);
     customer.acceptOrder(draftedOrder);
 
     // Thanks to transactions, I can run these two concurrently
     await Promise.all([
       // TODO(GLOBAL): Add rollback for draftedOrder.draft
+      // TODO: change to update (upstream?) for EditOrderService
       this.orderRepository.addOrder(draftedOrder, session),
       this.customerRepository.addOrderToCustomer(
         customer,
