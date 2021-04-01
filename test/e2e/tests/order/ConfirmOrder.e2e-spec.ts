@@ -196,9 +196,6 @@ describe('Confirm Order – POST /order/confirm', () => {
         orderId: testOrder.id.value,
       });
 
-    console.log('testHosts', testHosts);
-    console.log('testOrder', testOrder);
-
     expect(response.status).toBe(201);
 
     // TODO: strong typing
