@@ -39,7 +39,6 @@
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
     "stripe": "^8.137.0",
-    "typescript": "^4.1.3",
     "uuid": "^8.3.2",
     "uuid-mongodb": "^2.4.1"
   },
@@ -66,7 +65,8 @@
     "ts-loader": "^6.2.1",
     "ts-node": "9.0.0",
     "tsconfig-paths": "^3.9.0",
-    "webpack-node-externals": "^2.5.2"
+    "webpack-node-externals": "^2.5.2",
+    "typescript": "https://typescript.visualstudio.com/cf7ac146-d525-443c-b23c-0d58337efebc/_apis/build/builds/99188/artifacts?artifactName=tgz&fileId=8A4F5CF4310E72AE3F3599DB677A807009BC386229856DAD4B06C74D77071B7702&fileName=/typescript-4.3.0-insiders.20210325.tgz"
   },
   "jest": {
     "moduleFileExtensions": [
