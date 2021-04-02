@@ -10,10 +10,6 @@ import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { Host } from '../../../../src/order/domain/entity/Host';
 import { Address } from '../../../../src/order/domain/entity/Address';
 
-import {
-  destinationCountriesAvailable,
-  originCountriesAvailable,
-} from '../../../../src/order/application/services/HostMatcherService';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { muuidToEntityId } from '../../../../src/common/utils';
@@ -27,6 +23,10 @@ import {
 } from '../../../../src/order/application/port/MatchCache';
 import { HostRepository } from '../../../../src/order/application/port/HostRepository';
 import { DraftedOrder } from '../../../../src/order/domain/entity/DraftedOrder';
+import {
+  destinationCountriesAvailable,
+  originCountriesAvailable,
+} from '../../../../src/order/application/services/checkServiceAvailability';
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;

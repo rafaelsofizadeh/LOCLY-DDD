@@ -17,7 +17,7 @@ import { Category } from '../../../../src/order/domain/entity/Item';
 import {
   destinationCountriesAvailable,
   originCountriesAvailable,
-} from '../../../../src/order/application/services/HostMatcherService';
+} from '../../../../src/order/application/services/checkServiceAvailability';
 
 describe('Create Order – POST /order/create', () => {
   let app: INestApplication;
@@ -60,8 +60,8 @@ describe('Create Order – POST /order/create', () => {
   // so we destroy it once, after all tests.
   afterAll(() =>
     Promise.all([
-      //customerRepository.deleteCustomer(testCustomer.id),
-      //orderRepository.deleteOrder(testOrderId),
+      customerRepository.deleteCustomer(testCustomer.id),
+      orderRepository.deleteOrder(testOrderId),
     ]),
   );
 
