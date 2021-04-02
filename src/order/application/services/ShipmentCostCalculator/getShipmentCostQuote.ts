@@ -178,3 +178,7 @@ export function getShipmentCostQuote({
     services,
   };
 }
+
+export type ShipmentCostQuoteFn = (
+  costRequest: ShipmentCostRequest,
+) => ShipmentCostQuote;
