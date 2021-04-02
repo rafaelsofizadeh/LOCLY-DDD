@@ -20,7 +20,10 @@ import {
   ReceiveOrderHostResult,
   ReceiveOrderHostUseCase,
 } from '../../domain/use-case/ReceiveOrderByHostUseCase';
-import { DraftedOrder } from '../../domain/entity/DraftedOrder';
+import {
+  DraftedOrder,
+  DraftedOrderPropsPlain,
+} from '../../domain/entity/DraftedOrder';
 
 // TODO: Separate out to classes per each use case
 @Controller('order')
@@ -34,16 +37,14 @@ export class OrderController {
   @Post('create')
   // Validation and transformation is performed by Nest.js global validation pipe
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @UseInterceptors(ClassSerializerInterceptor)
   async createOrder(
     @Body() orderRequest: CreateOrderRequestAdapter,
-    // TODO: add
-  ): Promise<DraftedOrder> {
+  ): Promise<DraftedOrderPropsPlain> {
     const draftedOrder: DraftedOrder = await this.createOrderUseCase.execute(
       orderRequest,
     );
 
-    return draftedOrder;
+    return draftedOrder.serialize();
   }
 
   @Post('confirm')
