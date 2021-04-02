@@ -2,10 +2,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { OrderRepository } from '../port/OrderRepository';
 import { CustomerRepository } from '../port/CustomerRepository';
-import {
-  ShipmentCostRequest,
-  getShipmentCostQuote,
-} from '../services/ShipmentCostCalculator/getShipmentCostQuote';
 
 import {
   CreateOrderRequest,
@@ -20,9 +16,6 @@ import { EntityId } from '../../../common/domain/EntityId';
 import { Country } from '../../domain/data/Country';
 import { Item } from '../../domain/entity/Item';
 import { withTransaction } from '../../../common/utils';
-import { Exception } from '../../../common/error-handling/Exception';
-import { Code } from '../../../common/error-handling/Code';
-import { HostMatcher } from '../port/HostMatcher';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 
 @Injectable()
@@ -30,7 +23,6 @@ export class CreateOrder implements CreateOrderUseCase {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,
-    private readonly hostMatcher: HostMatcher,
     // TODO: More general EventEmitter class, wrapper around eventEmitter
     private readonly eventEmitter: EventEmitter2,
     @InjectClient() private readonly mongoClient: MongoClient,
@@ -71,16 +63,22 @@ export class CreateOrder implements CreateOrderUseCase {
       session,
     );
 
-    const draftedOrder = new DraftedOrder({
-      customerId: customer.id,
-      originCountry,
-      items,
-      destination: customer.selectedAddress,
-    });
+    let draftedOrder: DraftedOrder;
 
-    await this.checkServiceAvailability(draftedOrder);
+    try {
+      draftedOrder = DraftedOrder.create({
+        customerId: customer.id,
+        originCountry,
+        items,
+        destination: customer.selectedAddress,
+      });
+    } catch (exception) {
+      // TODO: Wrapper around eventEmitter
+      // TODO(?): Event emitting decorator
+      this.eventEmitter.emit('order.rejected.service_availability');
+      throw exception;
+    }
 
-    draftedOrder.initialize(getShipmentCostQuote);
     customer.acceptOrder(draftedOrder);
 
     // Thanks to transactions, I can run these two concurrently
@@ -100,27 +98,5 @@ export class CreateOrder implements CreateOrderUseCase {
     this.eventEmitter.emitAsync('order.drafted', draftedOrder);
 
     return draftedOrder;
-  }
-
-  // TODO: Remove redundancy with ShipmentCostCalculator
-  private async checkServiceAvailability({
-    originCountry,
-    destination: { country: destinationCountry },
-  }: DraftedOrder): Promise<void> {
-    const isServiceAvailable: boolean = await this.hostMatcher.checkServiceAvailability(
-      originCountry,
-      destinationCountry,
-    );
-
-    if (!isServiceAvailable) {
-      // TODO: Wrapper around eventEmitter
-      // TODO(?): Event emitting decorator
-      this.eventEmitter.emit('order.rejected.service_availability');
-
-      throw new Exception(
-        Code.INTERNAL_ERROR,
-        `Service not available in origin ${originCountry} or destination ${destinationCountry}`,
-      );
-    }
   }
 }

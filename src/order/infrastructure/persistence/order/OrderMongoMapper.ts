@@ -85,6 +85,7 @@ export function mongoDocumentToDraftedOrder({
   originCountry,
   customerId,
   destination,
+  shipmentCost,
 }: DraftedOrderMongoDocument): DraftedOrder {
   return new DraftedOrder({
     id: muuidToEntityId(_id),
@@ -95,6 +96,7 @@ export function mongoDocumentToDraftedOrder({
     ),
     originCountry,
     destination: new Address(destination),
+    shipmentCost,
   });
 }
 
