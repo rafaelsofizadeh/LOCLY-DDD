@@ -43,6 +43,10 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       session,
     );
 
+    // TODO: Wrapper around eventEmitter
+    // TODO(?): Event emitting decorator
+    this.eventEmitter.emit('order.awaiting_payment');
+
     return {
       checkoutId: checkoutSession.id,
     };
@@ -63,6 +67,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     ).catch(error => {
       // TODO: Wrapper around eventEmitter
       // TODO(?): Event emitting decorator and put it on error handling
+      // TODO(?): Move event emitting in execute()
       this.eventEmitter.emit('order.rejected.host_availability');
       throw error;
     });
@@ -91,6 +96,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
           {
             price_data: {
               // TODO(NOW): Make the service fee a method
+              // TODO(NOW): Currency type alias
               currency: 'usd',
               unit_amount: 10000, // cents
               product_data: {
@@ -109,13 +115,10 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       },
     );
 
-    // TODO: Wrapper around eventEmitter
-    // TODO(?): Event emitting decorator
-    this.eventEmitter.emit('order.awaiting_payment');
-
     return checkoutSession;
   }
 
+  // TODO(?): attach match schema to order, but deserialize it when needed
   private async matchOrderToHost(
     { id: orderId, originCountry }: DraftedOrder,
     session: ClientSession,

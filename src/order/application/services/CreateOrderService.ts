@@ -48,6 +48,10 @@ export class CreateOrder implements CreateOrderUseCase {
       session,
     );
 
+    // TODO: Wrapper around eventEmitter
+    // TODO(?): Event emitting decorator
+    this.eventEmitter.emit('order.drafted', draftedOrder);
+
     // Serialization in Controllers (/infrastructure)
     return draftedOrder;
   }
@@ -75,6 +79,7 @@ export class CreateOrder implements CreateOrderUseCase {
     } catch (exception) {
       // TODO: Wrapper around eventEmitter
       // TODO(?): Event emitting decorator
+      // TODO(?): Move event emitting to execute()
       this.eventEmitter.emit('order.rejected.service_availability');
       throw exception;
     }
@@ -92,10 +97,6 @@ export class CreateOrder implements CreateOrderUseCase {
         session,
       ),
     ]);
-
-    // TODO: Wrapper around eventEmitter
-    // TODO(?): Event emitting decorator
-    this.eventEmitter.emitAsync('order.drafted', draftedOrder);
 
     return draftedOrder;
   }
