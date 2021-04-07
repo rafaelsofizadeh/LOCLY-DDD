@@ -38,7 +38,7 @@ export type DraftedOrderPropsPlain = Omit<
 };
 
 type DraftedOrderEditProps = Partial<
-  Omit<DraftedOrderProps, 'id' | 'status' | 'shipmentOrder' | 'customerId'>
+  Omit<DraftedOrderProps, 'id' | 'status' | 'shipmentCost' | 'customerId'>
 >;
 
 // TODO(FUTURE): optimizations, e.g. "has this property changed?". Proxies, more elegant connection between
