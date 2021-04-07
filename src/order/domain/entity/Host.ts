@@ -52,7 +52,7 @@ export class Host extends Serializable<HostPropsPlain, typeof HostProps>(
     this.available = available;
   }
 
-  async acceptOrder(order: ConfirmedOrder) {
-    this.orderIds.push(order.id);
+  async acceptOrder({ id: orderId }: ConfirmedOrder) {
+    this.orderIds.push(orderId);
   }
 }

@@ -48,7 +48,7 @@ export class Customer extends Serializable<
     this.orderIds = orderIds;
   }
 
-  acceptOrder(order: DraftedOrder) {
-    this.orderIds.push(order.id);
+  acceptOrder({ id: orderId }: DraftedOrder) {
+    this.orderIds.push(orderId);
   }
 }
