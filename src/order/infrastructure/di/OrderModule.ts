@@ -18,8 +18,8 @@ import { OrderController } from '../rest-api/OrderController';
 import { MatchCache } from '../../application/port/MatchCache';
 import { MatchMongoCacheAdapter } from '../persistence/match/MatchMongoCacheAdapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { FinalizeOrderUseCase } from '../../domain/use-case/FinalizeOrderUseCase';
-import { FinalizeOrderWebhookHandler } from '../../application/services/FinalizeOrderWebhookHandler';
+import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUseCaseService';
+import { ConfirmOrderWebhookHandler } from '../../application/services/ConfirmOrderWebhookHandler';
 import { ReceiveOrderHostUseCase } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 import { ReceiveOrderHost } from '../../application/services/ReceiveOrderByHostService';
 
@@ -37,7 +37,7 @@ const infrastructureProviders: Provider[] = [
 const useCaseProviders: Provider[] = [
   { provide: CreateOrderUseCase, useClass: CreateOrder },
   { provide: ConfirmOrderUseCase, useClass: ConfirmOrder },
-  { provide: FinalizeOrderUseCase, useClass: FinalizeOrderWebhookHandler },
+  { provide: ConfirmOrderUseCaseService, useClass: ConfirmOrderWebhookHandler },
   { provide: ReceiveOrderHostUseCase, useClass: ReceiveOrderHost },
 ];
 

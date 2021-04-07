@@ -1,22 +1,24 @@
 import { StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import Stripe from 'stripe';
 import { EntityId, UUID } from '../../../common/domain/EntityId';
 import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 
 import { Host } from '../../domain/entity/Host';
-import { FinalizeOrderUseCase } from '../../domain/use-case/FinalizeOrderUseCase';
+import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUseCaseService';
 import { HostRepository } from '../port/HostRepository';
 import { Match, MatchCache } from '../port/MatchCache';
 import { OrderRepository } from '../port/OrderRepository';
 
 @Injectable()
-export class FinalizeOrderWebhookHandler implements FinalizeOrderUseCase {
+export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
   constructor(
     private readonly matchCache: MatchCache,
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // TODO: Transient SESSION
@@ -38,15 +40,15 @@ export class FinalizeOrderWebhookHandler implements FinalizeOrderUseCase {
       this.hostRepository.findHost(match.hostId),
     ])) as [DraftedOrder, Host];
 
-    const confirmedOrder: ConfirmedOrder = draftedOrder.toConfirmed();
-
-    confirmedOrder.initialize(host);
+    const confirmedOrder: ConfirmedOrder = draftedOrder.toConfirmed(host);
     host.acceptOrder(confirmedOrder);
 
     await Promise.all([
       this.orderRepository.persistOrderConfirmation(confirmedOrder, host),
       this.hostRepository.addOrderToHost(host, confirmedOrder),
     ]);
+
+    this.eventEmitter.emit('order.confirmed');
 
     return confirmedOrder;
   }
