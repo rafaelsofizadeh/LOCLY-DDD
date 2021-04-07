@@ -46,6 +46,8 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
     };
   }
 
+  // TODO(IMPORTANT): Streamline the find-transform_to_entity-update pipeline. This should be a simple DB update
+  // method. Or should it?
   private async handleOrderReceiptByHost(
     orderId: EntityId,
     session: ClientSession,
@@ -56,8 +58,6 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
     )) as ConfirmedOrder;
 
     const receivedByHostOrder: ReceivedByHostOrder = confirmedOrder.toReceivedByHost();
-
-    receivedByHostOrder.initialize();
     await this.orderRepository.persistHostReceipt(receivedByHostOrder);
 
     return receivedByHostOrder.receivedByHostDate;

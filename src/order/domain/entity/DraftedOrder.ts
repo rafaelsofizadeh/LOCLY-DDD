@@ -15,10 +15,10 @@ import {
 import { Country } from '../data/Country';
 import { Address, AddressPropsPlain } from './Address';
 import { ConfirmedOrder } from './ConfirmedOrder';
-import { Category, Item, ItemPropsPlain } from './Item';
+import { Host } from './Host';
+import { Item, ItemPropsPlain } from './Item';
 import { OrderStatus, ShipmentCost } from './Order';
 
-// class-transformer type annotations are used for serialization in CreateOrderUseCase
 export interface DraftedOrderProps extends EntityProps {
   status: OrderStatus;
   customerId: EntityId;
@@ -37,12 +37,18 @@ export type DraftedOrderPropsPlain = Omit<
   shipmentCost: ShipmentCost;
 };
 
+type DraftedOrderEditProps = Partial<
+  Omit<DraftedOrderProps, 'id' | 'status' | 'shipmentOrder' | 'customerId'>
+>;
+
+// TODO(FUTURE): optimizations, e.g. "has this property changed?". Proxies, more elegant connection between
+// originCountry, destination, items.weight and shipmentCost
 export class DraftedOrder implements DraftedOrderProps {
-  private _id: EntityId;
+  readonly id: EntityId;
 
-  private _status: OrderStatus = OrderStatus.Drafted;
+  readonly status: OrderStatus = OrderStatus.Drafted;
 
-  private _customerId: EntityId;
+  readonly customerId: EntityId;
 
   private _items: Item[];
 
@@ -52,69 +58,19 @@ export class DraftedOrder implements DraftedOrderProps {
 
   private _shipmentCost: ShipmentCost;
 
-  private shipmentCostQuoteFn: ShipmentCostQuoteFn;
+  private readonly shipmentCostQuoteFn: ShipmentCostQuoteFn;
 
-  private serviceAvailabilityFn: ServiceAvailabilityFn;
-
-  get id(): EntityId {
-    return this._id;
-  }
-
-  get status(): OrderStatus {
-    return this._status;
-  }
-
-  get customerId(): EntityId {
-    return this._customerId;
-  }
+  private readonly serviceAvailabilityFn: ServiceAvailabilityFn;
 
   get items(): Item[] {
     return this._items;
   }
 
-  private setItems(items: Item[]) {
-    //if (this.haveItemPhysicalCharsChanged(items)) { }
+  private setItems(items: Item[]): Array<keyof this> {
     this._items = items;
     this._shipmentCost = this.approximateShipmentCost();
-  }
 
-  private haveItemPhysicalCharsChanged(newItems: Item[]): boolean {
-    if (this._items === undefined) {
-      return false;
-    }
-
-    if (this._items.length !== newItems.length) {
-      return false;
-    }
-
-    const oldItemPhysicalChars = this._items.map(
-      ({ id, physicalCharacteristics }) => ({
-        id,
-        ...physicalCharacteristics,
-      }),
-    );
-
-    const newItemPhysicalChars = newItems.map(
-      ({ id, physicalCharacteristics }) => ({
-        id,
-        ...physicalCharacteristics,
-      }),
-    );
-
-    return newItemPhysicalChars.some(newItem =>
-      Object.keys(newItem).some(newKey => {
-        const sameItemButOld = oldItemPhysicalChars.find(
-          oldItem => oldItem.id.value === newItem.id.value,
-        );
-
-        if (!sameItemButOld) {
-          // "true" -> some discrepancy between old and new items
-          return true;
-        }
-
-        return sameItemButOld[newKey] !== newItem[newKey];
-      }),
-    );
+    return ['items', 'shipmentCost'];
   }
 
   private approximateShipmentCost(items: Item[] = this._items): ShipmentCost {
@@ -136,7 +92,7 @@ export class DraftedOrder implements DraftedOrderProps {
     return this._originCountry;
   }
 
-  private setOriginCountry(originCountry: Country) {
+  private setOriginCountry(originCountry: Country): Array<keyof this> {
     const isServiceAvailable: boolean = this.serviceAvailabilityFn(
       originCountry,
       this._destination.country,
@@ -151,13 +107,16 @@ export class DraftedOrder implements DraftedOrderProps {
     }
 
     this._originCountry = originCountry || this._originCountry;
+    this._shipmentCost = this.approximateShipmentCost();
+
+    return ['originCountry', 'shipmentCost'];
   }
 
   get destination(): Address {
     return this._destination;
   }
 
-  private setDestination(destination: Address) {
+  private setDestination(destination: Address): Array<keyof this> {
     const isServiceAvailable: boolean = this.serviceAvailabilityFn(
       this._originCountry,
       destination.country,
@@ -172,13 +131,15 @@ export class DraftedOrder implements DraftedOrderProps {
     }
 
     this._destination = destination || this._destination;
+    this._shipmentCost = this.approximateShipmentCost();
+
+    return ['destination', 'shipmentCost'];
   }
 
   get shipmentCost(): ShipmentCost {
     return this._shipmentCost;
   }
 
-  // TODO(RN): private constructor, create() method?
   constructor({
     id,
     customerId,
@@ -190,8 +151,8 @@ export class DraftedOrder implements DraftedOrderProps {
     this.shipmentCostQuoteFn = getShipmentCostQuote;
     this.serviceAvailabilityFn = checkServiceAvailability;
 
-    this._id = id;
-    this._customerId = customerId;
+    this.id = id;
+    this.customerId = customerId;
     this._items = items;
     this._destination = destination;
     this._shipmentCost = shipmentCost;
@@ -203,9 +164,9 @@ export class DraftedOrder implements DraftedOrderProps {
     items,
     originCountry,
     destination,
-  }: Omit<DraftedOrderProps, 'id' | 'status' | 'shipmentCost'>) {
+  }: Omit<DraftedOrderProps, 'id' | 'status' | 'shipmentCost'>): DraftedOrder {
     // Placeholder values for further redundancy checks in set__() methods
-    const draftedOrder = new this({
+    const draftedOrder: DraftedOrder = new this({
       id: new EntityId(),
       customerId: customerId,
       items,
@@ -221,8 +182,6 @@ export class DraftedOrder implements DraftedOrderProps {
     return draftedOrder;
   }
 
-  toConfirmed(): ConfirmedOrder {
-    return new ConfirmedOrder(this);
   }
 
   serialize(): DraftedOrderPropsPlain {

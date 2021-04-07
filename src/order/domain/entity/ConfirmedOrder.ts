@@ -1,52 +1,43 @@
-import { Type } from 'class-transformer';
 import { EntityProps } from '../../../common/domain/Entity';
 import { EntityId } from '../../../common/domain/EntityId';
 import { EntityIdsToStringIds } from '../../../common/types';
 import { Country } from '../data/Country';
-import { Host } from './Host';
 import { OrderStatus } from './Order';
 import { ReceivedByHostOrder } from './ReceivedByHostOrder';
 
-export class ConfirmedOrderProps extends EntityProps {
-  // TODO: when to set status?
-  status: OrderStatus = 'confirmed';
-
+export interface ConfirmedOrderProps extends EntityProps {
+  status: OrderStatus;
   originCountry: Country;
-
-  @Type(() => EntityId)
-  hostId?: EntityId;
+  hostId: EntityId;
 }
 
-export type ConfirmedOrderPropsPlain = Omit<
-  EntityIdsToStringIds<ConfirmedOrderProps>,
-  'hostId'
-> & {
-  hostId: string;
-};
+export type ConfirmedOrderPropsPlain = EntityIdsToStringIds<
+  ConfirmedOrderProps
+>;
 
-export class ConfirmedOrder extends ConfirmedOrderProps {
-  constructor(
-    {
-      id = new EntityId(),
-      originCountry,
-    }: // default value is needed for class-validator plainToClass. Refer to: Order.ts.
-    Omit<ConfirmedOrderProps, 'status'> = new ConfirmedOrderProps(),
-  ) {
-    super();
+export class ConfirmedOrder implements ConfirmedOrderProps {
+  readonly id: EntityId;
 
-    this.status = OrderStatus.Confirmed;
+  readonly status: OrderStatus = OrderStatus.Confirmed;
 
+  readonly originCountry: Country;
+
+  readonly hostId: EntityId;
+
+  constructor({
+    id,
+    originCountry,
+    hostId,
+  }: Omit<ConfirmedOrderProps, 'status'>) {
     this.id = id;
     this.originCountry = originCountry;
+    this.hostId = hostId;
   }
 
-  initialize(host: Host) {
-    this.hostId = host.id;
-    this.status = OrderStatus.Confirmed;
-  }
+  // TODO: Should I add a "create" alias method for the constructor?
 
   toReceivedByHost() {
-    return new ReceivedByHostOrder(this);
+    return ReceivedByHostOrder.create(this);
   }
 
   serialize(): ConfirmedOrderPropsPlain {
