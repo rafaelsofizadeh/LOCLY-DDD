@@ -72,3 +72,44 @@ export async function withTransaction<T>(
     await transaction.endSession({});
   }
 }
+
+// https://gist.github.com/penguinboy/762197
+// TODO(NOW, IMPORTANT): "id" gets set on documents (when "_id" exists)
+export function flattenObject<T extends Record<string, any>>(
+  object: T,
+  path?: string,
+  keyFilter?: (k: string) => boolean,
+  valueFilter: (v: any) => boolean = (v: any) => v === undefined || v === null,
+  separator: string = '.',
+): T {
+  return Object.keys(object).reduce((flatObjectAcc: T, key: string): T => {
+    if (keyFilter && keyFilter(key)) {
+      return flatObjectAcc;
+    }
+
+    const value = object[key];
+
+    // Filter out values (e.g. undefined or null)
+    if (valueFilter && valueFilter(value)) {
+      return flatObjectAcc;
+    }
+
+    const newPath = [path, key].filter(Boolean).join(separator);
+
+    const isObject = [
+      typeof value === 'object',
+      value !== null, // as typeof null === 'object'
+      !(value instanceof Date),
+      !(value instanceof RegExp),
+      !(value instanceof Binary),
+      !(Array.isArray(value) && value.length === 0),
+    ].every(Boolean);
+
+    return isObject
+      ? {
+          ...flatObjectAcc,
+          ...flattenObject(value, newPath, keyFilter, valueFilter, separator),
+        }
+      : { ...flatObjectAcc, [newPath]: value };
+  }, {} as T);
+}

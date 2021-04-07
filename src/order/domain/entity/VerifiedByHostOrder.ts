@@ -1,0 +1,150 @@
+import { EntityProps } from '../../../common/domain/Entity';
+import { EntityId } from '../../../common/domain/EntityId';
+import { Code } from '../../../common/error-handling/Code';
+import { Exception } from '../../../common/error-handling/Exception';
+import { EntityIdsToStringIds } from '../../../common/types';
+import {
+  getShipmentCostQuote,
+  ShipmentCostQuote,
+  ShipmentCostQuoteFn,
+} from '../../application/services/ShipmentCostCalculator/getShipmentCostQuote';
+import { Country } from '../data/Country';
+import { Address, AddressPropsPlain } from './Address';
+import { OrderStatus, ShipmentCost } from './Order';
+import { PhysicalItem, PhysicalItemPropsPlain } from './PhysicalItem';
+
+export interface VerifiedByHostOrderProps extends EntityProps {
+  status: OrderStatus;
+  physicalItems: PhysicalItem[];
+  originCountry: Country;
+  destination: Address;
+  shipmentCost: ShipmentCost;
+}
+
+export type VerifiedByHostOrderPropsPlain = Omit<
+  EntityIdsToStringIds<VerifiedByHostOrderProps>,
+  'physicalItems' | 'destination' | 'shipmentCost'
+> & {
+  physicalItems: PhysicalItemPropsPlain[];
+  destination: AddressPropsPlain;
+  shipmentCost: ShipmentCost;
+};
+
+export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
+  readonly id: EntityId;
+
+  readonly status: OrderStatus = OrderStatus.VerifiedByHost;
+
+  readonly originCountry: Country;
+
+  readonly destination: Address;
+
+  private _physicalItems: PhysicalItem[];
+
+  private _shipmentCost: ShipmentCost;
+
+  private readonly shipmentCostQuoteFn: ShipmentCostQuoteFn;
+
+  get physicalItems(): PhysicalItem[] {
+    return this._physicalItems;
+  }
+
+  private setPhysicalItems(physicalItems: PhysicalItem[]) {
+    this._physicalItems = physicalItems;
+    this._shipmentCost = this.approximateShipmentCost();
+  }
+
+  get shipmentCost(): ShipmentCost {
+    return this._shipmentCost;
+  }
+
+  private approximateShipmentCost(
+    physicalItems: PhysicalItem[] = this._physicalItems,
+  ): ShipmentCost {
+    const { currency, services }: ShipmentCostQuote = this.shipmentCostQuoteFn({
+      originCountry: this.originCountry,
+      destinationCountry: this.destination.country,
+      packages: physicalItems.map(
+        ({ physicalCharacteristics }) => physicalCharacteristics,
+      ),
+    });
+
+    // TODO: Service choice logic
+    const { price: amount } = services[0];
+
+    return { amount, currency };
+  }
+
+  constructor({
+    id,
+    physicalItems,
+    originCountry,
+    destination,
+    shipmentCost,
+  }: Omit<VerifiedByHostOrderProps, 'status'>) {
+    this.shipmentCostQuoteFn = getShipmentCostQuote;
+
+    this.id = id;
+    this._physicalItems = physicalItems;
+    this.destination = destination;
+    this._shipmentCost = shipmentCost;
+    this.originCountry = originCountry;
+  }
+
+  static create({
+    physicalItems,
+    originCountry,
+    destination,
+  }: Omit<
+    VerifiedByHostOrderProps,
+    'id' | 'status' | 'shipmentCost'
+  >): VerifiedByHostOrder {
+    // Placeholder values for further redundancy checks in set__() methods
+    const verifiedByHostOrder: VerifiedByHostOrder = new this({
+      id: new EntityId(),
+      physicalItems,
+      originCountry,
+      destination,
+      shipmentCost: { amount: -999, currency: '---' },
+    });
+
+    verifiedByHostOrder.setPhysicalItems(physicalItems);
+
+    return verifiedByHostOrder;
+  }
+
+  edit({ physicalItems }: Pick<VerifiedByHostOrderProps, 'physicalItems'>) {
+    if (!this.areItemsAssignable(physicalItems)) {
+      throw new Exception(
+        Code.INTERNAL_ERROR,
+        "Host cannot add or remove any items from the list, only update existing items's properties.",
+      );
+    }
+
+    this.setPhysicalItems(physicalItems);
+  }
+
+  private areItemsAssignable(comparateItems: PhysicalItem[]): boolean {
+    return (
+      this._physicalItems.length == comparateItems.length &&
+      this._physicalItems.every(({ id: itemId }) =>
+        comparateItems.some(
+          ({ id: comparateItemId }) => itemId === comparateItemId,
+        ),
+      )
+    );
+  }
+
+  serialize(): VerifiedByHostOrderPropsPlain {
+    return {
+      id: this.id.value,
+      status: this.status,
+      physicalItems: this.physicalItems.map(physicalItem =>
+        physicalItem.serialize(),
+      ),
+      destination: this.destination.serialize(),
+      originCountry: this.originCountry,
+      shipmentCost: this.shipmentCost,
+    };
+  }
+}

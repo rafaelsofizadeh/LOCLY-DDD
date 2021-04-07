@@ -1,9 +1,7 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Post,
-  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -24,6 +22,8 @@ import {
   DraftedOrder,
   DraftedOrderPropsPlain,
 } from '../../domain/entity/DraftedOrder';
+import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
+import { UserEditOrderRequestAdapter } from './EditOrderRequestAdapter';
 
 // TODO: Separate out to classes per each use case
 @Controller('order')
@@ -32,8 +32,10 @@ export class OrderController {
     private readonly createOrderUseCase: CreateOrderUseCase,
     private readonly confirmOrderUseCase: ConfirmOrderUseCase,
     private readonly receiveOrderByHostUseCase: ReceiveOrderHostUseCase,
+    private readonly editOrderUseCase: EditOrderUseCase,
   ) {}
 
+  // TODO(GLOBAL): Serialization
   @Post('create')
   // Validation and transformation is performed by Nest.js global validation pipe
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
@@ -71,5 +73,18 @@ export class OrderController {
     );
 
     return receivedByHostDate;
+  }
+
+  @Post('edit')
+  // Validation and transformation is performed by Nest.js global validation pipe
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async editOrderByUser(
+    @Body() userEditOrderProps: UserEditOrderRequestAdapter,
+  ): Promise<DraftedOrderPropsPlain> {
+    const editedDraftOrder: DraftedOrder = await this.editOrderUseCase.execute(
+      userEditOrderProps,
+    );
+
+    return editedDraftOrder.serialize();
   }
 }

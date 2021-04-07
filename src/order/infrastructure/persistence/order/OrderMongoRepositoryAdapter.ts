@@ -6,20 +6,28 @@ import { EntityId } from '../../../../common/domain/EntityId';
 import { Code } from '../../../../common/error-handling/Code';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { OrderRepository } from '../../../application/port/OrderRepository';
-import { Order, OrderStatus } from '../../../domain/entity/Order';
+import {
+  isDraftedOrder,
+  isVerifiedByHostOrder,
+  Order,
+  OrderStatus,
+} from '../../../domain/entity/Order';
 import {
   OrderMongoDocument,
-  orderToMongoDocument,
+  draftedOrderToMongoDocument,
   mongoDocumentToOrder,
+  DraftedOrderMongoDocument,
+  VerifiedByHostOrderMongoDocumentProps,
+  serializeVerifiedByHostOrderToMongoDocumentProps,
 } from './OrderMongoMapper';
 import { Host } from '../../../domain/entity/Host';
-import { entityIdToMuuid } from '../../../../common/utils';
-import {
-  ReceivedByHostOrder,
-  ReceivedByHostOrderProps,
-} from '../../../domain/entity/ReceivedByHostOrder';
+import { entityIdToMuuid, flattenObject } from '../../../../common/utils';
+import { ReceivedByHostOrder } from '../../../domain/entity/ReceivedByHostOrder';
 import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
 import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
+import { UserEditOrderRequest } from '../../../domain/use-case/EditOrderUseCase';
+import { VerifiedByHostOrder } from '../../../domain/entity/VerifiedByHostOrder';
+import { HostEditOrderRequest } from '../../../domain/use-case/VerifyByHostOrderUseCase';
 
 @Injectable()
 export class OrderMongoRepositoryAdapter implements OrderRepository {
@@ -28,24 +36,74 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     private readonly orderCollection: Collection<OrderMongoDocument>,
   ) {}
 
+  // TODO(FUTURE): Unify update (editOrder) and add (createOrder)
+  // https://docs.mongodb.com/manual/reference/method/db.collection.save/
   async addOrder(
-    order: DraftedOrder,
+    draftedOrder: DraftedOrder,
     transaction?: ClientSession,
   ): Promise<void> {
-    const orderDocument = orderToMongoDocument(order);
+    const draftedOrderDocument = draftedOrderToMongoDocument(draftedOrder);
 
     await this.orderCollection
       .insertOne(
-        orderDocument,
+        draftedOrderDocument,
         transaction ? { session: transaction } : undefined,
       )
       .catch(error => {
         throw new Exception(
           Code.INTERNAL_ERROR,
-          `Error creating a new order in the database. ${error.name}: ${error.message}`,
-          { order, orderDocument },
+          `Error creating a new draftedOrder in the database. ${error.name}: ${error.message}`,
+          { draftedOrder, draftedOrderDocument },
         );
       });
+  }
+
+  // TODO(FUTURE): Replace all granular "persist____" methods with a single general updateOrder call.
+  // TODO(FUTURE)^: Connect updateOrder with Order classes, automatically inferring changed properties.
+  async updateOrder(
+    order: DraftedOrder,
+    editedKeys: (keyof DraftedOrder)[],
+    transaction?: ClientSession,
+  ): Promise<void>;
+  async updateOrder(
+    order: VerifiedByHostOrder,
+    editedKeys: (keyof VerifiedByHostOrder)[],
+    transaction?: ClientSession,
+  ): Promise<void>;
+  async updateOrder(
+    order: DraftedOrder | VerifiedByHostOrder,
+    editedKeys: Array<keyof DraftedOrder | keyof VerifiedByHostOrder>,
+    transaction?: ClientSession,
+  ): Promise<void> {
+    let orderDocument:
+      | DraftedOrderMongoDocument
+      | VerifiedByHostOrderMongoDocumentProps;
+
+    // TODO: more validation?
+    if (isDraftedOrder(order)) {
+      orderDocument = draftedOrderToMongoDocument(order);
+    } else if (isVerifiedByHostOrder(order)) {
+      orderDocument = serializeVerifiedByHostOrderToMongoDocumentProps(order);
+    } else {
+      throw new Error('Invalid order status.');
+    }
+
+    // TODO: key/value typing
+    const editedPlainOrder = editedKeys.reduce(
+      (objAcc, key) => ({
+        ...objAcc,
+        [key]: orderDocument[key],
+      }),
+      {},
+    ) as
+      | Partial<DraftedOrderMongoDocument>
+      | Partial<VerifiedByHostOrderMongoDocumentProps>;
+
+    await this.update(
+      order.id,
+      this.editOrderQuery(editedPlainOrder),
+      transaction,
+    );
   }
 
   async persistOrderConfirmation(
@@ -77,6 +135,29 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       query,
       transaction ? { session: transaction } : undefined,
     );
+  }
+
+  // TODO: function signature typing and keyFilter typing
+  private editOrderQuery(
+    editOrderPropsPlain:
+      | Partial<
+          Pick<
+            DraftedOrderMongoDocument,
+            keyof Omit<UserEditOrderRequest, 'orderId'>
+          >
+        >
+      | Partial<
+          Pick<
+            VerifiedByHostOrderMongoDocumentProps,
+            keyof Omit<HostEditOrderRequest, 'orderId'>
+          >
+        >,
+  ) {
+    const mongoFlattenedObjectAccessors = flattenObject(editOrderPropsPlain);
+
+    return {
+      $set: mongoFlattenedObjectAccessors,
+    };
   }
 
   private confirmOrderQuery(hostId: EntityId): UpdateQuery<OrderMongoDocument> {

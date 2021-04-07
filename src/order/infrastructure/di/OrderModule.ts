@@ -22,6 +22,8 @@ import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUs
 import { ConfirmOrderWebhookHandler } from '../../application/services/ConfirmOrderWebhookHandler';
 import { ReceiveOrderHostUseCase } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 import { ReceiveOrderHost } from '../../application/services/ReceiveOrderByHostService';
+import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
+import { EditOrder } from '../../application/services/EditOrderService';
 
 const persistenceProviders: Provider[] = [
   { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
@@ -36,6 +38,7 @@ const infrastructureProviders: Provider[] = [
 
 const useCaseProviders: Provider[] = [
   { provide: CreateOrderUseCase, useClass: CreateOrder },
+  { provide: EditOrderUseCase, useClass: EditOrder },
   { provide: ConfirmOrderUseCase, useClass: ConfirmOrder },
   { provide: ConfirmOrderUseCaseService, useClass: ConfirmOrderWebhookHandler },
   { provide: ReceiveOrderHostUseCase, useClass: ReceiveOrderHost },

@@ -9,9 +9,18 @@ import { Country } from '../../../domain/data/Country';
 import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
 import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
 import { ReceivedByHostOrder } from '../../../domain/entity/ReceivedByHostOrder';
+import { VerifiedByHostOrder } from '../../../domain/entity/VerifiedByHostOrder';
+import {
+  PhysicalItem,
+  PhysicalItemProps,
+} from '../../../domain/entity/PhysicalItem';
 
 // TODO(GLOBAL): EntityIdToString type, but for EntityId->Binary
 export type ItemMongoSubdocument = Omit<ItemProps, 'id'> & {
+  _id: Binary;
+};
+
+export type PhysicalItemMongoSubdocument = Omit<PhysicalItemProps, 'id'> & {
   _id: Binary;
 };
 
@@ -38,16 +47,60 @@ export type ReceivedByHostOrderMongoDocument = {
   receivedByHostDate: Date;
 };
 
+export type VerifiedByHostOrderMongoDocument = {
+  _id: Binary;
+  status: OrderStatus;
+  originCountry: Country;
+  items: ItemMongoSubdocument[];
+  shipmentCost: ShipmentCost;
+  destination: AddressProps;
+};
+
+export type VerifiedByHostOrderMongoDocumentProps = {
+  _id: Binary;
+  status: OrderStatus;
+  originCountry: Country;
+  physicalItems: PhysicalItemMongoSubdocument[];
+  shipmentCost: ShipmentCost;
+  destination: AddressProps;
+};
+
 export type OrderMongoDocument =
   | DraftedOrderMongoDocument
   | ConfirmedOrderMongoDocument
-  | ReceivedByHostOrderMongoDocument;
+  | ReceivedByHostOrderMongoDocument
+  | VerifiedByHostOrderMongoDocument;
 
-export function orderToMongoDocument(
-  order: DraftedOrder,
+// TODO: instanceof-based order type guards
+export function isDraftedOrderMongoDocument(
+  orderMongoDocument: OrderMongoDocument,
+): orderMongoDocument is DraftedOrderMongoDocument {
+  return orderMongoDocument.status === OrderStatus.Drafted;
+}
+
+export function isConfirmedOrderMongoDocument(
+  orderMongoDocument: OrderMongoDocument,
+): orderMongoDocument is ConfirmedOrderMongoDocument {
+  return orderMongoDocument.status === OrderStatus.Confirmed;
+}
+
+export function isReceivedByHostOrderMongoDocument(
+  orderMongoDocument: OrderMongoDocument,
+): orderMongoDocument is ReceivedByHostOrderMongoDocument {
+  return orderMongoDocument.status === OrderStatus.ReceivedByHost;
+}
+
+export function isVerifiedByHostOrderMongoDocument(
+  orderMongoDocument: OrderMongoDocument,
+): orderMongoDocument is VerifiedByHostOrderMongoDocument {
+  return orderMongoDocument.status === OrderStatus.VerifiedByHost;
+}
+
+export function draftedOrderToMongoDocument(
+  draftedOrder: DraftedOrder,
 ): DraftedOrderMongoDocument {
   // For id, see: Entity { @TransformEntityIdToString() id }
-  const { id, customerId, items, ...restPlainOrder } = order.serialize();
+  const { id, customerId, items, ...restPlainOrder } = draftedOrder.serialize();
 
   return {
     ...restPlainOrder,
@@ -60,23 +113,38 @@ export function orderToMongoDocument(
   };
 }
 
+export function serializeVerifiedByHostOrderToMongoDocumentProps(
+  verifiedByHostOrder: VerifiedByHostOrder,
+): VerifiedByHostOrderMongoDocumentProps {
+  // For id, see: Entity { @TransformEntityIdToString() id }
+  const {
+    id,
+    physicalItems,
+    ...restPlainOrder
+  } = verifiedByHostOrder.serialize();
+
+  return {
+    ...restPlainOrder,
+    _id: stringToMuuid(id),
+    physicalItems: physicalItems.map(({ id, ...restPhysicalItem }) => ({
+      _id: stringToMuuid(id),
+      ...restPhysicalItem,
+    })),
+  };
+}
+
 export function mongoDocumentToOrder(orderDocument: OrderMongoDocument): Order {
-  switch (orderDocument.status) {
-    case OrderStatus.Drafted:
-      return mongoDocumentToDraftedOrder(
-        orderDocument as DraftedOrderMongoDocument,
-      );
-    case OrderStatus.Confirmed:
-      return mongoDocumentToConfirmedOrder(
-        orderDocument as ConfirmedOrderMongoDocument,
-      );
-    case OrderStatus.ReceivedByHost:
-      return mongoDocumentToReceivedByHostOrder(
-        orderDocument as ReceivedByHostOrderMongoDocument,
-      );
-    default:
-      throw new Error('Invalid order status');
+  if (isDraftedOrderMongoDocument(orderDocument)) {
+    return mongoDocumentToDraftedOrder(orderDocument);
+  } else if (isConfirmedOrderMongoDocument(orderDocument)) {
+    return mongoDocumentToConfirmedOrder(orderDocument);
+  } else if (isReceivedByHostOrderMongoDocument(orderDocument)) {
+    return mongoDocumentToReceivedByHostOrder(orderDocument);
+  } else if (isVerifiedByHostOrderMongoDocument(orderDocument)) {
+    return mongoDocumentToVerifiedByHostOrder(orderDocument);
   }
+
+  throw new Error('Invalid order status');
 }
 
 export function mongoDocumentToDraftedOrder({
@@ -119,5 +187,24 @@ export function mongoDocumentToReceivedByHostOrder({
   return new ReceivedByHostOrder({
     id: muuidToEntityId(_id),
     receivedByHostDate,
+  });
+}
+
+export function mongoDocumentToVerifiedByHostOrder({
+  _id,
+  items,
+  originCountry,
+  destination,
+  shipmentCost,
+}: VerifiedByHostOrderMongoDocument): VerifiedByHostOrder {
+  return new VerifiedByHostOrder({
+    id: muuidToEntityId(_id),
+    physicalItems: items.map(
+      ({ _id, title, storeName, category, ...restPhysicalItem }) =>
+        new PhysicalItem({ id: muuidToEntityId(_id), ...restPhysicalItem }),
+    ),
+    originCountry,
+    destination: new Address(destination),
+    shipmentCost,
   });
 }

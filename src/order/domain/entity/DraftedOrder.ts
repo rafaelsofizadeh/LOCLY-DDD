@@ -182,6 +182,31 @@ export class DraftedOrder implements DraftedOrderProps {
     return draftedOrder;
   }
 
+  edit(editOrderProps: DraftedOrderEditProps): (keyof this)[] {
+    const inputEditedKeys = <(keyof DraftedOrderEditProps & keyof this)[]>(
+      // TODO: Should user be able to edit only defined properties (!!this[key])?
+      Object.keys(editOrderProps).filter(key => key in this && !!this[key])
+    );
+
+    const totalEditedKeys = [...inputEditedKeys];
+
+    for (const key of inputEditedKeys) {
+      const editValue = editOrderProps[key];
+      const setterFnName = 'set' + key.charAt(0).toUpperCase() + key.slice(1);
+      const editedKeys = this[setterFnName](editValue);
+
+      totalEditedKeys.push(...editedKeys);
+    }
+
+    const uniqueEditedKeys = [...new Set(totalEditedKeys)];
+
+    return uniqueEditedKeys; /*.map(key => ({
+      [key]: this[key],
+    })) as DraftedOrderEditProps*/
+  }
+
+  toConfirmed({ id: hostId }: Host): ConfirmedOrder {
+    return new ConfirmedOrder({ ...this, hostId });
   }
 
   serialize(): DraftedOrderPropsPlain {

@@ -4,6 +4,9 @@ import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 import { Host } from '../../domain/entity/Host';
 import { Order } from '../../domain/entity/Order';
+import { VerifiedByHostOrder } from '../../domain/entity/VerifiedByHostOrder';
+import { UserEditOrderRequest } from '../../domain/use-case/EditOrderUseCase';
+import { HostEditOrderRequest } from '../../domain/use-case/VerifyByHostOrderUseCase';
 
 export abstract class OrderRepository {
   abstract addOrder(
@@ -23,6 +26,12 @@ export abstract class OrderRepository {
 
   abstract deleteOrder(
     orderId: EntityId,
+    transaction?: ClientSession,
+  ): Promise<void>;
+
+  abstract updateOrder(
+    order: DraftedOrder | VerifiedByHostOrder,
+    editedKeys: (keyof DraftedOrder)[] | (keyof VerifiedByHostOrder)[],
     transaction?: ClientSession,
   ): Promise<void>;
 
