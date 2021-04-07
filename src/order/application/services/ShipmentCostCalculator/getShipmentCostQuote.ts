@@ -2,7 +2,7 @@ import { Country } from '../../../domain/data/Country';
 import {
   Gram,
   PackagePhysicalCharacteristics,
-} from '../../../domain/entity/Item';
+} from '../../../domain/entity/PhysicalItem';
 import countryIsoList from './data/CountryIsoCodes';
 import priceGuide from './data/PriceGuide';
 

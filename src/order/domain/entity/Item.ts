@@ -1,7 +1,10 @@
-import { IsString, Length, IsEnum, IsPositive, IsInt } from 'class-validator';
-import { EntityProps } from '../../../common/domain/Entity';
+import { IsString, Length, IsEnum } from 'class-validator';
 import { EntityId } from '../../../common/domain/EntityId';
 import { EntityIdsToStringIds } from '../../../common/types';
+import {
+  PackagePhysicalCharacteristics,
+  PhysicalItemProps,
+} from './PhysicalItem';
 
 export const Category = {
   Art: 'art',
@@ -11,17 +14,7 @@ export const Category = {
 
 export type Category = typeof Category[keyof typeof Category];
 
-export type Gram = number;
-
-export type PackagePhysicalCharacteristics = {
-  width: number;
-  length: number;
-  height: number;
-  weight: Gram;
-};
-
-// TODO: Remove width-length-height
-export class ItemProps extends EntityProps {
+export class ItemProps extends PhysicalItemProps {
   @IsString()
   @Length(5, 280)
   title: string;
@@ -32,22 +25,6 @@ export class ItemProps extends EntityProps {
 
   @IsEnum(Category)
   category: Category;
-
-  @IsInt()
-  @IsPositive()
-  weight: Gram;
-
-  @IsInt()
-  @IsPositive()
-  width: number;
-
-  @IsInt()
-  @IsPositive()
-  length: number;
-
-  @IsInt()
-  @IsPositive()
-  height: number;
 }
 
 export type ItemPropsPlain = EntityIdsToStringIds<ItemProps>;
@@ -88,7 +65,7 @@ export class Item extends ItemProps {
 
   serialize(): ItemPropsPlain {
     return {
-      id: this.id.value,
+      id: this.id?.value,
       title: this.title,
       storeName: this.storeName,
       category: this.category,
