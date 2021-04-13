@@ -1,4 +1,3 @@
-import { Transform } from 'class-transformer';
 import { Binary, ClientSession } from 'mongodb';
 import * as MUUID from 'uuid-mongodb';
 
@@ -13,11 +12,11 @@ export function muuidToString(id: Binary): string {
   return MUUID.from(id).toString();
 }
 
-export function muuidToEntityId(id: Binary): UUID {
+export function muuidToUuid(id: Binary): UUID {
   return UUID(muuidToString(id));
 }
 
-export function entityIdToMuuid(id: UUID): Binary {
+export function uuidToMuuid(id: UUID): Binary {
   return MUUID.from(id);
 }
 

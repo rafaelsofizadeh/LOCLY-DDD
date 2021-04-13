@@ -4,7 +4,7 @@ import { InjectCollection } from 'nest-mongodb';
 import { UUID } from '../../../../common/domain/UUID';
 import { Code } from '../../../../common/error-handling/Code';
 import { Exception } from '../../../../common/error-handling/Exception';
-import { entityIdToMuuid } from '../../../../common/utils';
+import { uuidToMuuid } from '../../../../common/utils';
 
 // TODO(NOW(IMPORTANT)): Remove MatchRepository, record the match in Stripe metadata
 // ^ No: https://stackoverflow.com/questions/55744094/stripe-checkout-wont-accept-metadata
@@ -35,7 +35,7 @@ export class MatchMongoCacheAdapter implements MatchCache {
     matchId: UUID,
     transaction?: ClientSession,
   ): Promise<Match> {
-    const matchMongoBinaryId: Binary = entityIdToMuuid(matchId);
+    const matchMongoBinaryId: Binary = uuidToMuuid(matchId);
     const matchDocument: MatchMongoDocument = await this.matchCollection.findOne(
       { _id: matchMongoBinaryId },
       transaction ? { session: transaction } : undefined,
@@ -57,8 +57,8 @@ export class MatchMongoCacheAdapter implements MatchCache {
     hostId: UUID,
     transaction?: ClientSession,
   ): Promise<Match> {
-    const orderMongoBinaryId: Binary = entityIdToMuuid(orderId);
-    const hostMongoBinaryId: Binary = entityIdToMuuid(hostId);
+    const orderMongoBinaryId: Binary = uuidToMuuid(orderId);
+    const hostMongoBinaryId: Binary = uuidToMuuid(hostId);
 
     const matchDocument: MatchMongoDocument = await this.matchCollection.findOne(
       {

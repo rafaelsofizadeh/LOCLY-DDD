@@ -1,6 +1,6 @@
 import { Binary } from 'mongodb';
 
-import { muuidToEntityId, stringToMuuid } from '../../../../common/utils';
+import { muuidToUuid, stringToMuuid } from '../../../../common/utils';
 
 import { Customer } from '../../../domain/entity/Customer';
 import { Address, AddressProps } from '../../../domain/entity/Address';
@@ -20,9 +20,9 @@ export function mongoDocumentToCustomer({
   orderIds,
 }: CustomerMongoDocument): Customer {
   return new Customer({
-    id: muuidToEntityId(_id),
+    id: muuidToUuid(_id),
     selectedAddress: new Address(addresses.find(({ selected }) => selected)),
-    orderIds: orderIds.map(muuidToEntityId),
+    orderIds: orderIds.map(muuidToUuid),
   });
 }
 

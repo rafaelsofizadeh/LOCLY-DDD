@@ -21,7 +21,7 @@ import {
   serializeVerifiedByHostOrderToMongoDocumentProps,
 } from './OrderMongoMapper';
 import { Host } from '../../../domain/entity/Host';
-import { entityIdToMuuid, flattenObject } from '../../../../common/utils';
+import { uuidToMuuid } from '../../../../common/utils';
 import { ReceivedByHostOrder } from '../../../domain/entity/ReceivedByHostOrder';
 import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
 import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
@@ -131,8 +131,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     transaction?: ClientSession,
   ) {
     await this.orderCollection.updateOne(
-      { _id: entityIdToMuuid(orderId) },
-      query,
+      { _id: uuidToMuuid(order.id) },
+      orderUpdateQuery,
       transaction ? { session: transaction } : undefined,
     );
   }
@@ -194,7 +194,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   async findOrder(orderId: UUID, transaction?: ClientSession): Promise<Order> {
     const orderDocument: OrderMongoDocument = await this.orderCollection.findOne(
       {
-        _id: entityIdToMuuid(orderId),
+        _id: uuidToMuuid(orderId),
       },
       transaction ? { session: transaction } : undefined,
     );
@@ -215,7 +215,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     transaction?: ClientSession,
   ): Promise<Order[]> {
     const orderMongoBinaryIds: Binary[] = orderIds.map(orderId =>
-      entityIdToMuuid(orderId),
+      uuidToMuuid(orderId),
     );
 
     const orderDocuments: OrderMongoDocument[] = await this.orderCollection
@@ -230,7 +230,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       const failedOrderIds: UUID[] = orderIds.filter(
         orderId =>
           orderDocuments.findIndex(
-            orderDocument => entityIdToMuuid(orderId) === orderDocument._id,
+            orderDocument => uuidToMuuid(orderId) === orderDocument._id,
           ) === -1,
       );
 
@@ -248,7 +248,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
 
   async deleteOrder(orderId: UUID, transaction?: ClientSession): Promise<void> {
     await this.orderCollection.deleteOne(
-      { _id: entityIdToMuuid(orderId) },
+      { _id: uuidToMuuid(orderId) },
       transaction ? { session: transaction } : undefined,
     );
   }

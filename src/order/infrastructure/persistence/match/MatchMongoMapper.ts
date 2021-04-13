@@ -1,5 +1,5 @@
 import { Binary } from 'mongodb';
-import { entityIdToMuuid, muuidToEntityId } from '../../../../common/utils';
+import { uuidToMuuid, muuidToUuid } from '../../../../common/utils';
 
 import { Match } from '../../../application/port/MatchCache';
 
@@ -15,9 +15,9 @@ export function mongoDocumentToMatch({
   hostId,
 }: MatchMongoDocument): Match {
   return {
-    id: muuidToEntityId(_id),
-    orderId: muuidToEntityId(orderId),
-    hostId: muuidToEntityId(hostId),
+    id: muuidToUuid(_id),
+    orderId: muuidToUuid(orderId),
+    hostId: muuidToUuid(hostId),
   };
 }
 
@@ -26,9 +26,9 @@ export function matchToMongoDocument({
   orderId,
   hostId,
 }: Match): MatchMongoDocument {
-  const mongoBinaryId = entityIdToMuuid(id);
-  const orderMongoBinaryId = entityIdToMuuid(orderId);
-  const hostMongoBinaryId = entityIdToMuuid(hostId);
+  const mongoBinaryId = uuidToMuuid(id);
+  const orderMongoBinaryId = uuidToMuuid(orderId);
+  const hostMongoBinaryId = uuidToMuuid(hostId);
 
   return {
     _id: mongoBinaryId,

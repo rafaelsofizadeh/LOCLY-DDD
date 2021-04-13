@@ -12,7 +12,7 @@ import {
 import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
 import { UUID } from '../../../../common/domain/UUID';
-import { entityIdToMuuid } from '../../../../common/utils';
+import { uuidToMuuid } from '../../../../common/utils';
 import { Country } from '../../../domain/data/Country';
 import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
 
@@ -47,7 +47,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     await this.hostCollection.deleteMany(
       {
         _id: {
-          $in: hostIds.map(hostId => entityIdToMuuid(hostId)),
+          $in: hostIds.map(hostId => uuidToMuuid(hostId)),
         },
       },
       transaction ? { session: transaction } : undefined,
@@ -57,7 +57,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   async deleteHost(hostId: UUID, transaction?: ClientSession): Promise<void> {
     await this.hostCollection.deleteOne(
       {
-        _id: entityIdToMuuid(hostId),
+        _id: uuidToMuuid(hostId),
       },
       transaction ? { session: transaction } : undefined,
     );
@@ -71,10 +71,10 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   ): Promise<void> {
     await this.hostCollection
       .updateOne(
-        { _id: entityIdToMuuid(hostId) },
+        { _id: uuidToMuuid(hostId) },
         {
           $push: {
-            orderIds: entityIdToMuuid(orderId),
+            orderIds: uuidToMuuid(orderId),
           },
         },
         transaction ? { session: transaction } : undefined,
@@ -90,7 +90,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   async findHost(hostId: UUID, transaction?: ClientSession): Promise<Host> {
     const hostDocument: HostMongoDocument = await this.hostCollection.findOne(
       {
-        _id: entityIdToMuuid(hostId),
+        _id: uuidToMuuid(hostId),
       },
       transaction ? { session: transaction } : undefined,
     );

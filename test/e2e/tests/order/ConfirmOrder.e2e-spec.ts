@@ -12,7 +12,7 @@ import { Address } from '../../../../src/order/domain/entity/Address';
 
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
-import { muuidToEntityId } from '../../../../src/common/utils';
+import { muuidToUuid } from '../../../../src/common/utils';
 import { DraftOrderUseCase } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
 import { Category, Item } from '../../../../src/order/domain/entity/Item';
 import { Country } from '../../../../src/order/domain/data/Country';
@@ -147,9 +147,7 @@ describe('Confirm Order – POST /order/confirm', () => {
         new Host({
           address: new Address({ country }),
           available,
-          orderIds: [...Array(orderCount)].map(_ =>
-            muuidToEntityId(MUUID.v4()),
-          ),
+          orderIds: [...Array(orderCount)].map(_ => muuidToUuid(MUUID.v4())),
         }),
     );
 

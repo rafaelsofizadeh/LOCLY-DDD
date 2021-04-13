@@ -1,6 +1,6 @@
 import { Binary } from 'mongodb';
 
-import { muuidToEntityId, stringToMuuid } from '../../../../common/utils';
+import { muuidToUuid, stringToMuuid } from '../../../../common/utils';
 
 import { Item, ItemProps } from '../../../domain/entity/Item';
 import { Address, AddressProps } from '../../../domain/entity/Address';
@@ -154,11 +154,10 @@ export function mongoDocumentToDraftedOrder({
   shipmentCost,
 }: DraftedOrderMongoDocument): DraftedOrder {
   return new DraftedOrder({
-    id: muuidToEntityId(_id),
-    customerId: muuidToEntityId(customerId),
+    id: muuidToUuid(_id),
+    customerId: muuidToUuid(customerId),
     items: items.map(
-      ({ _id, ...restItem }) =>
-        new Item({ id: muuidToEntityId(_id), ...restItem }),
+      ({ _id, ...restItem }) => new Item({ id: muuidToUuid(_id), ...restItem }),
     ),
     originCountry,
     destination: new Address(destination),
@@ -172,9 +171,9 @@ export function mongoDocumentToConfirmedOrder({
   hostId,
 }: ConfirmedOrderMongoDocument): ConfirmedOrder {
   return new ConfirmedOrder({
-    id: muuidToEntityId(_id),
+    id: muuidToUuid(_id),
     originCountry,
-    hostId: muuidToEntityId(hostId),
+    hostId: muuidToUuid(hostId),
   });
 }
 
@@ -183,7 +182,7 @@ export function mongoDocumentToReceivedByHostOrder({
   receivedByHostDate,
 }: ReceivedByHostOrderMongoDocument): ReceivedByHostOrder {
   return new ReceivedByHostOrder({
-    id: muuidToEntityId(_id),
+    id: muuidToUuid(_id),
     receivedByHostDate,
   });
 }
@@ -196,10 +195,10 @@ export function mongoDocumentToVerifiedByHostOrder({
   shipmentCost,
 }: VerifiedByHostOrderMongoDocument): VerifiedByHostOrder {
   return new VerifiedByHostOrder({
-    id: muuidToEntityId(_id),
+    id: muuidToUuid(_id),
     physicalItems: items.map(
       ({ _id, title, storeName, category, ...restPhysicalItem }) =>
-        new PhysicalItem({ id: muuidToEntityId(_id), ...restPhysicalItem }),
+        new PhysicalItem({ id: muuidToUuid(_id), ...restPhysicalItem }),
     ),
     originCountry,
     destination: new Address(destination),

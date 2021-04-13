@@ -1,6 +1,6 @@
 import { Binary } from 'mongodb';
 
-import { muuidToEntityId, stringToMuuid } from '../../../../common/utils';
+import { muuidToUuid, stringToMuuid } from '../../../../common/utils';
 
 import { Host } from '../../../domain/entity/Host';
 import { Address, AddressProps } from '../../../domain/entity/Address';
@@ -19,10 +19,10 @@ export function mongoDocumentToHost({
   orderIds,
 }: HostMongoDocument): Host {
   return new Host({
-    id: muuidToEntityId(_id),
+    id: muuidToUuid(_id),
     address: new Address(address),
     available,
-    orderIds: orderIds.map(muuidToEntityId),
+    orderIds: orderIds.map(muuidToUuid),
   });
 }
 

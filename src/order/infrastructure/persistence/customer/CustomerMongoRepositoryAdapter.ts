@@ -12,7 +12,7 @@ import {
 } from './CustomerMongoMapper';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
-import { entityIdToMuuid } from '../../../../common/utils';
+import { uuidToMuuid } from '../../../../common/utils';
 import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
 
 @Injectable()
@@ -42,7 +42,7 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
   ): Promise<void> {
     await this.customerCollection.deleteOne(
       {
-        _id: entityIdToMuuid(customerId),
+        _id: uuidToMuuid(customerId),
       },
       transaction ? { session: transaction } : undefined,
     );
@@ -56,10 +56,10 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
   ): Promise<void> {
     await this.customerCollection
       .updateOne(
-        { _id: entityIdToMuuid(customerId) },
+        { _id: uuidToMuuid(customerId) },
         {
           $push: {
-            orderIds: entityIdToMuuid(orderId),
+            orderIds: uuidToMuuid(orderId),
           },
         },
         transaction ? { session: transaction } : undefined,
@@ -77,7 +77,7 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
     transaction?: ClientSession,
   ): Promise<Customer> {
     const customerDocument: CustomerMongoDocument = await this.customerCollection.findOne(
-      { _id: entityIdToMuuid(customerId) },
+      { _id: uuidToMuuid(customerId) },
       transaction ? { session: transaction } : undefined,
     );
 
