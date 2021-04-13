@@ -12,7 +12,7 @@ import { Customer } from '../../domain/entity/Customer';
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { Country } from '../../domain/data/Country';
 import { Item } from '../../domain/entity/Item';
 import { withTransaction } from '../../../common/utils';
@@ -57,7 +57,7 @@ export class CreateOrder implements CreateOrderUseCase {
   }
 
   private async createDraftOrderAndPersist(
-    customerId: EntityId,
+    customerId: UUID,
     originCountry: Country,
     items: Item[],
     session: ClientSession,

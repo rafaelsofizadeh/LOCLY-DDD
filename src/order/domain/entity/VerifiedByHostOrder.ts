@@ -1,8 +1,6 @@
-import { EntityProps } from '../../../common/domain/Entity';
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { Code } from '../../../common/error-handling/Code';
 import { Exception } from '../../../common/error-handling/Exception';
-import { EntityIdsToStringIds } from '../../../common/types';
 import {
   getShipmentCostQuote,
   ShipmentCostQuote,
@@ -13,7 +11,8 @@ import { Address, AddressPropsPlain } from './Address';
 import { OrderStatus, ShipmentCost } from './Order';
 import { PhysicalItem, PhysicalItemPropsPlain } from './PhysicalItem';
 
-export interface VerifiedByHostOrderProps extends EntityProps {
+export interface VerifiedByHostOrderProps {
+  id: UUID;
   status: OrderStatus;
   physicalItems: PhysicalItem[];
   originCountry: Country;
@@ -22,7 +21,7 @@ export interface VerifiedByHostOrderProps extends EntityProps {
 }
 
 export type VerifiedByHostOrderPropsPlain = Omit<
-  EntityIdsToStringIds<VerifiedByHostOrderProps>,
+  VerifiedByHostOrderProps,
   'physicalItems' | 'destination' | 'shipmentCost'
 > & {
   physicalItems: PhysicalItemPropsPlain[];
@@ -31,7 +30,7 @@ export type VerifiedByHostOrderPropsPlain = Omit<
 };
 
 export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
-  readonly id: EntityId;
+  readonly id: UUID;
 
   readonly status: OrderStatus = OrderStatus.VerifiedByHost;
 
@@ -101,7 +100,7 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
   >): VerifiedByHostOrder {
     // Placeholder values for further redundancy checks in set__() methods
     const verifiedByHostOrder: VerifiedByHostOrder = new this({
-      id: new EntityId(),
+      id: UUID(),
       physicalItems,
       originCountry,
       destination,
@@ -137,7 +136,7 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
 
   serialize(): VerifiedByHostOrderPropsPlain {
     return {
-      id: this.id.value,
+      id: this.id,
       status: this.status,
       physicalItems: this.physicalItems.map(physicalItem =>
         physicalItem.serialize(),

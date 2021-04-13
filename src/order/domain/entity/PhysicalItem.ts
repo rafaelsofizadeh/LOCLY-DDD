@@ -1,7 +1,5 @@
 import { IsPositive, IsInt } from 'class-validator';
-import { EntityProps } from '../../../common/domain/Entity';
-import { EntityId } from '../../../common/domain/EntityId';
-import { EntityIdsToStringIds } from '../../../common/types';
+import { IsUUID, UUID } from '../../../common/domain/UUID';
 
 export type Gram = number;
 
@@ -13,7 +11,10 @@ export type PackagePhysicalCharacteristics = {
 };
 
 // TODO: Remove width-length-height
-export class PhysicalItemProps extends EntityProps {
+export class PhysicalItemProps {
+  @IsUUID()
+  id?: UUID;
+
   @IsInt()
   @IsPositive()
   weight: Gram;
@@ -31,12 +32,12 @@ export class PhysicalItemProps extends EntityProps {
   height: number;
 }
 
-export type PhysicalItemPropsPlain = EntityIdsToStringIds<PhysicalItemProps>;
+export type PhysicalItemPropsPlain = PhysicalItemProps;
 
 export class PhysicalItem extends PhysicalItemProps {
   constructor(
     {
-      id = new EntityId(),
+      id = UUID(),
       weight,
       width,
       length,
@@ -63,7 +64,7 @@ export class PhysicalItem extends PhysicalItemProps {
 
   serialize(): PhysicalItemPropsPlain {
     return {
-      id: this.id.value,
+      id: this.id,
       weight: this.weight,
       width: this.width,
       length: this.length,

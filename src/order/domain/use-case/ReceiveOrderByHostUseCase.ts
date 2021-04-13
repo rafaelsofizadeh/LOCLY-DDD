@@ -1,8 +1,8 @@
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { UseCase } from '../../../common/domain/UseCase';
 
 export interface ReceiveOrderHostRequest {
-  orderId: EntityId;
+  orderId: UUID;
 }
 
 export interface ReceiveOrderHostResult {

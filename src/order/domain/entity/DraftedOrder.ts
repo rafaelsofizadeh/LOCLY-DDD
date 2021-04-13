@@ -1,8 +1,6 @@
-import { EntityProps } from '../../../common/domain/Entity';
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { Code } from '../../../common/error-handling/Code';
 import { Exception } from '../../../common/error-handling/Exception';
-import { EntityIdsToStringIds } from '../../../common/types';
 import {
   checkServiceAvailability,
   ServiceAvailabilityFn,
@@ -19,9 +17,10 @@ import { Host } from './Host';
 import { Item, ItemPropsPlain } from './Item';
 import { OrderStatus, ShipmentCost } from './Order';
 
-export interface DraftedOrderProps extends EntityProps {
+export interface DraftedOrderProps {
+  id: UUID;
   status: OrderStatus;
-  customerId: EntityId;
+  customerId: UUID;
   items: Item[];
   originCountry: Country;
   destination: Address;
@@ -29,7 +28,7 @@ export interface DraftedOrderProps extends EntityProps {
 }
 
 export type DraftedOrderPropsPlain = Omit<
-  EntityIdsToStringIds<DraftedOrderProps>,
+  DraftedOrderProps,
   'items' | 'destination' | 'shipmentCost'
 > & {
   items: ItemPropsPlain[];
@@ -44,11 +43,11 @@ type DraftedOrderEditProps = Partial<
 // TODO(FUTURE): optimizations, e.g. "has this property changed?". Proxies, more elegant connection between
 // originCountry, destination, items.weight and shipmentCost
 export class DraftedOrder implements DraftedOrderProps {
-  readonly id: EntityId;
+  readonly id: UUID;
 
   readonly status: OrderStatus = OrderStatus.Drafted;
 
-  readonly customerId: EntityId;
+  readonly customerId: UUID;
 
   private _items: Item[];
 
@@ -167,7 +166,7 @@ export class DraftedOrder implements DraftedOrderProps {
   }: Omit<DraftedOrderProps, 'id' | 'status' | 'shipmentCost'>): DraftedOrder {
     // Placeholder values for further redundancy checks in set__() methods
     const draftedOrder: DraftedOrder = new this({
-      id: new EntityId(),
+      id: UUID(),
       customerId: customerId,
       items,
       originCountry,
@@ -211,9 +210,9 @@ export class DraftedOrder implements DraftedOrderProps {
 
   serialize(): DraftedOrderPropsPlain {
     return {
-      id: this.id.value,
+      id: this.id,
       status: this.status,
-      customerId: this.customerId.value,
+      customerId: this.customerId,
       items: this.items.map(item => item.serialize()),
       destination: this.destination.serialize(),
       originCountry: this.originCountry,

@@ -1,5 +1,5 @@
 import { ClientSession } from 'mongodb';
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { Optional } from '../../../common/types';
 import { Customer } from '../../domain/entity/Customer';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
@@ -12,7 +12,7 @@ export abstract class CustomerRepository {
   ): Promise<void>;
 
   abstract deleteCustomer(
-    customerId: EntityId,
+    customerId: UUID,
     transaction?: ClientSession,
   ): Promise<void>;
 
@@ -24,7 +24,7 @@ export abstract class CustomerRepository {
   ): Promise<void>;
 
   abstract findCustomer(
-    customerId: EntityId,
+    customerId: UUID,
     transaction?: ClientSession,
   ): Promise<Optional<Customer>>; // throws new Exception(Code.ENTITY_NOT_FOUND_ERROR, 'Customer not found.')
 }

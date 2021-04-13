@@ -1,9 +1,9 @@
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { PhysicalItem } from '../entity/PhysicalItem';
 import { VerifiedByHostOrder } from '../entity/VerifiedByHostOrder';
 
 export interface HostEditOrderRequest {
-  orderId: EntityId;
+  orderId: UUID;
   physicalItems: PhysicalItem[];
 }
 

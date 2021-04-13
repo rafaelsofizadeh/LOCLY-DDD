@@ -193,7 +193,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     const response: supertest.Response = await supertest(app.getHttpServer())
       .post('/order/confirm')
       .send({
-        orderId: testOrder.id.value,
+        orderId: testOrder.id,
       });
 
     expect(response.status).toBe(201);
@@ -249,14 +249,14 @@ function updatedStripeCheckoutSessionInTestPage(checkoutId: string) {
     }: { status: OrderStatus; hostId: string } = response.body;
 
     expect(status).toBe(OrderStatus.Confirmed);
-    expect(hostId).toBe(testHosts[0].id.value);
+    expect(hostId).toBe(testHosts[0].id);
 
     const updatedTestHost: Host = await hostRepository.findHost(
-      new EntityId(hostId),
+      UUID(hostId),
     );
 
     console.log('updatedTestHost', updatedTestHost);
 
-    expect(updatedTestHost.orderIds.map(({ value }) => value)).toContain(
-      testOrder.id.value,
+    expect(updatedTestHost.orderIds.toContain(
+      testOrder.id,
     );*/

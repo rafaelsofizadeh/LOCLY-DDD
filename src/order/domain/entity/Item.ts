@@ -1,6 +1,5 @@
 import { IsString, Length, IsEnum } from 'class-validator';
-import { EntityId } from '../../../common/domain/EntityId';
-import { EntityIdsToStringIds } from '../../../common/types';
+import { UUID } from '../../../common/domain/UUID';
 import {
   PackagePhysicalCharacteristics,
   PhysicalItemProps,
@@ -27,12 +26,12 @@ export class ItemProps extends PhysicalItemProps {
   category: Category;
 }
 
-export type ItemPropsPlain = EntityIdsToStringIds<ItemProps>;
+export type ItemPropsPlain = ItemProps;
 
 export class Item extends ItemProps {
   constructor(
     {
-      id = new EntityId(),
+      id = UUID(),
       title,
       storeName,
       category,
@@ -65,7 +64,7 @@ export class Item extends ItemProps {
 
   serialize(): ItemPropsPlain {
     return {
-      id: this.id?.value,
+      id: this.id,
       title: this.title,
       storeName: this.storeName,
       category: this.category,

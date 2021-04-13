@@ -1,29 +1,28 @@
 import { IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { EntityProps } from '../../../common/domain/Entity';
-import { EntityId } from '../../../common/domain/EntityId';
+import { IsUUID, UUID } from '../../../common/domain/UUID';
 import { Serializable } from '../../../common/domain/Serializable';
 
 import { Address, AddressProps } from './Address';
-import { TransformEntityIdArrayToStringArray } from '../../../common/utils';
-import { EntityIdsToStringIds } from '../../../common/types';
 import { DraftedOrder } from './DraftedOrder';
 
-export class CustomerProps extends EntityProps {
+export class CustomerProps {
+  @IsUUID()
+  id?: UUID;
+
   @ValidateNested()
   @Type(() => Address)
   selectedAddress: Address;
 
   @ValidateNested({ each: true })
   @IsArray()
-  @Type(() => EntityId)
-  @TransformEntityIdArrayToStringArray()
-  orderIds: EntityId[];
+  @Type(() => UUID)
+  orderIds: UUID[];
 }
 
 export type CustomerPropsPlain = Omit<
-  EntityIdsToStringIds<Required<CustomerProps>>,
+  Required<CustomerProps>,
   'selectedAddress' | 'orderIds'
 > & {
   selectedAddress: AddressProps;
@@ -36,7 +35,7 @@ export class Customer extends Serializable<
 >(CustomerProps) {
   constructor(
     {
-      id = new EntityId(),
+      id = UUID(),
       selectedAddress,
       orderIds,
     }: CustomerProps = new CustomerProps(), // default value is needed for class-validator plainToClass. Refer to: Order.ts

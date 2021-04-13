@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OrderRepository } from '../port/OrderRepository';
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/utils';
@@ -49,7 +49,7 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
   // TODO(IMPORTANT): Streamline the find-transform_to_entity-update pipeline. This should be a simple DB update
   // method. Or should it?
   private async handleOrderReceiptByHost(
-    orderId: EntityId,
+    orderId: UUID,
     session: ClientSession,
   ): Promise<Date> {
     const confirmedOrder = (await this.orderRepository.findOrder(

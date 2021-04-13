@@ -1,28 +1,25 @@
-import { EntityProps } from '../../../common/domain/Entity';
-import { EntityId } from '../../../common/domain/EntityId';
-import { EntityIdsToStringIds } from '../../../common/types';
+import { UUID } from '../../../common/domain/UUID';
 import { Country } from '../data/Country';
 import { OrderStatus } from './Order';
 import { ReceivedByHostOrder } from './ReceivedByHostOrder';
 
-export interface ConfirmedOrderProps extends EntityProps {
+export interface ConfirmedOrderProps {
   status: OrderStatus;
+  id: UUID;
   originCountry: Country;
-  hostId: EntityId;
+  hostId: UUID;
 }
 
-export type ConfirmedOrderPropsPlain = EntityIdsToStringIds<
-  ConfirmedOrderProps
->;
+export type ConfirmedOrderPropsPlain = ConfirmedOrderProps;
 
 export class ConfirmedOrder implements ConfirmedOrderProps {
-  readonly id: EntityId;
+  readonly id: UUID;
 
   readonly status: OrderStatus = OrderStatus.Confirmed;
 
   readonly originCountry: Country;
 
-  readonly hostId: EntityId;
+  readonly hostId: UUID;
 
   constructor({
     id,
@@ -42,10 +39,10 @@ export class ConfirmedOrder implements ConfirmedOrderProps {
 
   serialize(): ConfirmedOrderPropsPlain {
     return {
-      id: this.id.value,
+      id: this.id,
       status: this.status,
       originCountry: this.originCountry,
-      hostId: this.hostId.value,
+      hostId: this.hostId,
     };
   }
 }

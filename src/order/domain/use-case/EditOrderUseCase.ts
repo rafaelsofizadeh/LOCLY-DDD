@@ -1,11 +1,11 @@
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { Country } from '../data/Country';
 import { Item } from '../entity/Item';
 import { DraftedOrder } from '../entity/DraftedOrder';
 import { Address } from '../entity/Address';
 
 export interface UserEditOrderRequest {
-  orderId: EntityId;
+  orderId: UUID;
   originCountry?: Country;
   destination?: Address;
   items?: Item[];

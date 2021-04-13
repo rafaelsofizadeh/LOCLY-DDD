@@ -1,12 +1,12 @@
 import { ClientSession } from 'mongodb';
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 
 // TODO/DECIDE: id is specifically a string (Stripe.Checkout.Session['client_reference_id']),
-// and not an EntityId, because Match is a simple data object with no behaviour.
+// and not an UUID, because Match is a simple data object with no behaviour.
 export type Match = {
-  id: EntityId;
-  orderId: EntityId;
-  hostId: EntityId;
+  id: UUID;
+  orderId: UUID;
+  hostId: UUID;
 };
 
 export abstract class MatchCache {
@@ -16,13 +16,13 @@ export abstract class MatchCache {
   ): Promise<void>;
 
   abstract retrieveAndDeleteMatch(
-    matchId: EntityId,
+    matchId: UUID,
     transaction?: ClientSession,
   ): Promise<Match>;
 
   abstract findMatch(
-    orderId: EntityId,
-    hostId: EntityId,
+    orderId: UUID,
+    hostId: UUID,
     transaction?: ClientSession,
   ): Promise<Match>;
 }

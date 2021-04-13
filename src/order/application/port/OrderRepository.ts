@@ -1,5 +1,5 @@
 import { ClientSession } from 'mongodb';
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 import { Host } from '../../domain/entity/Host';
@@ -15,17 +15,17 @@ export abstract class OrderRepository {
   ): Promise<void>;
 
   abstract findOrder(
-    orderId: EntityId,
+    orderId: UUID,
     transaction?: ClientSession,
   ): Promise<Order>;
 
   abstract findOrders(
-    orderIds: EntityId[],
+    orderIds: UUID[],
     transaction?: ClientSession,
   ): Promise<Order[]>;
 
   abstract deleteOrder(
-    orderId: EntityId,
+    orderId: UUID,
     transaction?: ClientSession,
   ): Promise<void>;
 

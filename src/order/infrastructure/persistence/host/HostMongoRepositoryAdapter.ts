@@ -11,7 +11,7 @@ import {
 } from './HostMongoMapper';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
-import { EntityId } from '../../../../common/domain/EntityId';
+import { UUID } from '../../../../common/domain/UUID';
 import { entityIdToMuuid } from '../../../../common/utils';
 import { Country } from '../../../domain/data/Country';
 import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
@@ -41,7 +41,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
 
   // For testing
   async deleteManyHosts(
-    hostIds: EntityId[],
+    hostIds: UUID[],
     transaction?: ClientSession,
   ): Promise<void> {
     await this.hostCollection.deleteMany(
@@ -54,10 +54,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     );
   }
 
-  async deleteHost(
-    hostId: EntityId,
-    transaction?: ClientSession,
-  ): Promise<void> {
+  async deleteHost(hostId: UUID, transaction?: ClientSession): Promise<void> {
     await this.hostCollection.deleteOne(
       {
         _id: entityIdToMuuid(hostId),
@@ -90,7 +87,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
       });
   }
 
-  async findHost(hostId: EntityId, transaction?: ClientSession): Promise<Host> {
+  async findHost(hostId: UUID, transaction?: ClientSession): Promise<Host> {
     const hostDocument: HostMongoDocument = await this.hostCollection.findOne(
       {
         _id: entityIdToMuuid(hostId),
@@ -101,7 +98,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     if (!hostDocument) {
       throw new Exception(
         Code.ENTITY_NOT_FOUND_ERROR,
-        `Order (id: ${hostId.value}) not found`,
+        `Order (id: ${hostId}) not found`,
         { hostId },
       );
     }

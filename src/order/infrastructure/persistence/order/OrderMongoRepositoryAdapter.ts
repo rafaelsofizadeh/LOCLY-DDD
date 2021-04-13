@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Binary, ClientSession, Collection, UpdateQuery } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
-import { EntityId } from '../../../../common/domain/EntityId';
+import { UUID } from '../../../../common/domain/UUID';
 import { Code } from '../../../../common/error-handling/Code';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { OrderRepository } from '../../../application/port/OrderRepository';
@@ -126,7 +126,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   private async update(
-    orderId: EntityId,
+    orderId: UUID,
     query: UpdateQuery<OrderMongoDocument>,
     transaction?: ClientSession,
   ) {
@@ -160,7 +160,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     };
   }
 
-  private confirmOrderQuery(hostId: EntityId): UpdateQuery<OrderMongoDocument> {
+  private confirmOrderQuery(hostId: UUID): UpdateQuery<OrderMongoDocument> {
     return {
       $set: {
         ...this.updateOrderStatusQuery(OrderStatus.Confirmed),
@@ -169,7 +169,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     };
   }
 
-  private addHostToOrderQuery(hostId: EntityId) {
+  private addHostToOrderQuery(hostId: UUID) {
     return { hostId: entityIdToMuuid(hostId) };
   }
 
@@ -191,10 +191,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     return { receivedByHostDate };
   }
 
-  async findOrder(
-    orderId: EntityId,
-    transaction?: ClientSession,
-  ): Promise<Order> {
+  async findOrder(orderId: UUID, transaction?: ClientSession): Promise<Order> {
     const orderDocument: OrderMongoDocument = await this.orderCollection.findOne(
       {
         _id: entityIdToMuuid(orderId),
@@ -205,7 +202,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     if (!orderDocument) {
       throw new Exception(
         Code.ENTITY_NOT_FOUND_ERROR,
-        `Order (id: ${orderId.value}) not found`,
+        `Order (id: ${orderId}) not found`,
         { orderId },
       );
     }
@@ -214,7 +211,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   async findOrders(
-    orderIds: EntityId[],
+    orderIds: UUID[],
     transaction?: ClientSession,
   ): Promise<Order[]> {
     const orderMongoBinaryIds: Binary[] = orderIds.map(orderId =>
@@ -230,7 +227,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
 
     // To access all orderIds and failedOrderIds, catch the exception and access its 'data' property
     if (orderDocuments.length !== orderIds.length) {
-      const failedOrderIds: EntityId[] = orderIds.filter(
+      const failedOrderIds: UUID[] = orderIds.filter(
         orderId =>
           orderDocuments.findIndex(
             orderDocument => entityIdToMuuid(orderId) === orderDocument._id,
@@ -239,9 +236,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
 
       throw new Exception(
         Code.ENTITY_NOT_FOUND_ERROR,
-        `Orders (ids: ${failedOrderIds
-          .map(({ value }) => value)
-          .join(', ')}) not found`,
+        `Orders (ids: ${failedOrderIds.join(', ')}) not found`,
         { orderIds, failedOrderIds },
       );
     }
@@ -251,10 +246,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     );
   }
 
-  async deleteOrder(
-    orderId: EntityId,
-    transaction?: ClientSession,
-  ): Promise<void> {
+  async deleteOrder(orderId: UUID, transaction?: ClientSession): Promise<void> {
     await this.orderCollection.deleteOne(
       { _id: entityIdToMuuid(orderId) },
       transaction ? { session: transaction } : undefined,

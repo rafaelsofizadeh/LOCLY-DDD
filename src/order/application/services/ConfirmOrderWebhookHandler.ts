@@ -2,7 +2,7 @@ import { StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import Stripe from 'stripe';
-import { EntityId, UUID } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 
@@ -28,7 +28,7 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
     // TODO: Check whether 'id' === 'checkoutSession.id'. Replace client_ref_id
     //https://stripe.com/docs/api/events/types#event_types-checkout.session.completed
     // TODO: Better typing
-    const matchId: EntityId = new EntityId(
+    const matchId: UUID = UUID(
       (paymentFinalizedEvent.data.object as Stripe.Checkout.Session)
         .client_reference_id as UUID,
     );

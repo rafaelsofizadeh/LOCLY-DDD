@@ -15,7 +15,7 @@ import {
   PhysicalItemProps,
 } from '../../../domain/entity/PhysicalItem';
 
-// TODO(GLOBAL): EntityIdToString type, but for EntityId->Binary
+// TODO(GLOBAL): EntityIdToString type, but for UUID->Binary
 export type ItemMongoSubdocument = Omit<ItemProps, 'id'> & {
   _id: Binary;
 };
@@ -99,7 +99,6 @@ export function isVerifiedByHostOrderMongoDocument(
 export function draftedOrderToMongoDocument(
   draftedOrder: DraftedOrder,
 ): DraftedOrderMongoDocument {
-  // For id, see: Entity { @TransformEntityIdToString() id }
   const { id, customerId, items, ...restPlainOrder } = draftedOrder.serialize();
 
   return {
@@ -116,7 +115,6 @@ export function draftedOrderToMongoDocument(
 export function serializeVerifiedByHostOrderToMongoDocumentProps(
   verifiedByHostOrder: VerifiedByHostOrder,
 ): VerifiedByHostOrderMongoDocumentProps {
-  // For id, see: Entity { @TransformEntityIdToString() id }
   const {
     id,
     physicalItems,

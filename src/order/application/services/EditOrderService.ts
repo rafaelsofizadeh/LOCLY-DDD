@@ -10,7 +10,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { withTransaction } from '../../../common/utils';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 import { OrderStatus } from '../../domain/entity/Order';
@@ -46,7 +46,7 @@ export class EditOrder implements EditOrderUseCase {
   }
 
   private async editDraftOrderAndPersist(
-    orderId: EntityId,
+    orderId: UUID,
     editOrderProps: Omit<UserEditOrderRequest, 'orderId'>,
     session: ClientSession,
   ): Promise<DraftedOrder> {

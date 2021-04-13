@@ -6,7 +6,7 @@ import { isUUID } from 'class-validator';
 import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
-import { EntityId } from '../../../../src/common/domain/EntityId';
+import { UUID } from '../../../../src/common/domain/UUID';
 import { OrderStatus } from '../../../../src/order/domain/entity/Order';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import {
@@ -25,7 +25,7 @@ describe('Create Order – POST /order/create', () => {
   let customerRepository: CustomerRepository;
   let orderRepository: OrderRepository;
 
-  let testOrderId: EntityId;
+  let testOrderId: UUID;
   let testCustomer: Customer;
 
   beforeAll(async () => {
@@ -69,7 +69,7 @@ describe('Create Order – POST /order/create', () => {
     const response: supertest.Response = await supertest(app.getHttpServer())
       .post('/order/create')
       .send({
-        customerId: testCustomer.id.value,
+        customerId: testCustomer.id,
         originCountry: originCountriesAvailable[0],
         // TODO: Item fixture
         items: [
@@ -100,7 +100,7 @@ describe('Create Order – POST /order/create', () => {
       destination: AddressProps;
     } = response.body;
 
-    testOrderId = new EntityId(id);
+    testOrderId = UUID(id);
 
     // TODO(IMPORTANT): Check if order has been added to database
 
@@ -108,11 +108,9 @@ describe('Create Order – POST /order/create', () => {
       testCustomer.id,
     );
 
-    expect(updatedTestCustomer.orderIds.map(({ value }) => value)).toContain(
-      testOrderId.value,
-    );
+    expect(updatedTestCustomer.orderIds).toContain(testOrderId);
     expect(isUUID(id)).toBe(true);
-    expect(customerId).toEqual(updatedTestCustomer.id.value);
+    expect(customerId).toEqual(updatedTestCustomer.id);
     expect(status).toBe(OrderStatus.Drafted);
     expect(destination.country).toBe(testCustomer.selectedAddress.country);
   });

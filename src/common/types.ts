@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 import { Binary } from 'mongodb';
-import { EntityProps } from './domain/Entity';
-import { EntityId } from './domain/EntityId';
+import { UUID } from './domain/UUID';
 
 /**
  * 'undefinable' type.
@@ -36,10 +35,6 @@ export type MongoIdToEntityId<T extends { _id: Binary }> = Omit<T, '_id'> & {
   id: string;
 };
 
-export type EntityIdsToStringIds<T> = {
-  [K in keyof T]: T[K] extends EntityId ? string : T[K];
-};
-
-export type EntityIdsToMUUID<T> = {
-  [K in keyof T]: T[K] extends EntityId ? Binary : T[K];
+export type UUIDToMUUID<T> = {
+  [K in keyof T]: T[K] extends UUID ? Binary : T[K];
 };

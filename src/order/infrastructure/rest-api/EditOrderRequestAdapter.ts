@@ -11,8 +11,7 @@ import {
   Length,
   ValidateNested,
 } from 'class-validator';
-import { EntityId } from '../../../common/domain/EntityId';
-import { TransformStringToEntityId } from '../../../common/utils';
+import { IsUUID, UUID } from '../../../common/domain/UUID';
 import { Country } from '../../domain/data/Country';
 import { Address } from '../../domain/entity/Address';
 import { Category, Item } from '../../domain/entity/Item';
@@ -24,10 +23,8 @@ import { HostEditOrderRequest } from '../../domain/use-case/VerifyByHostOrderUse
 // Maybe dynamically add @IsOptional() decorator?
 // TODO(NOW): class-validator (ValidationPipe) setting to remove undefined properties
 class EditPhysicalItem extends PhysicalItem {
-  @ValidateNested()
-  @Type(() => EntityId)
-  @TransformStringToEntityId()
-  readonly id: EntityId;
+  @IsUUID()
+  readonly id: UUID;
 
   @IsOptional()
   @IsInt()
@@ -51,10 +48,8 @@ class EditPhysicalItem extends PhysicalItem {
 }
 
 class EditItem extends Item {
-  @ValidateNested()
-  @Type(() => EntityId)
-  @TransformStringToEntityId()
-  readonly id: EntityId;
+  @IsUUID()
+  readonly id: UUID;
 
   @IsOptional()
   @IsString()
@@ -95,14 +90,12 @@ export class UserEditOrderRequestAdapter implements UserEditOrderRequest {
   /*
    * Nest.js first performs transformation, then validation, so, the process is like:
    * HTTP request -> customerId: "string" ->
-   * class-transformer Transform() -> EntityId ->
+   * class-transformer Transform() -> UUID ->
    * class-validator Validate()
    * https://github.com/nestjs/nest/blob/fa494041c8705dc0600ddf623fb5e1e676932221/packages/common/pipes/validation.pipe.ts#L96
    */
-  @ValidateNested()
-  @Type(() => EntityId)
-  @TransformStringToEntityId()
-  readonly orderId: EntityId;
+  @IsUUID()
+  readonly orderId: UUID;
 
   @IsOptional()
   @IsISO31661Alpha3()
@@ -125,14 +118,12 @@ export class HostEditOrderRequestAdapter implements HostEditOrderRequest {
   /*
    * Nest.js first performs transformation, then validation, so, the process is like:
    * HTTP request -> customerId: "string" ->
-   * class-transformer Transform() -> EntityId ->
+   * class-transformer Transform() -> UUID ->
    * class-validator Validate()
    * https://github.com/nestjs/nest/blob/fa494041c8705dc0600ddf623fb5e1e676932221/packages/common/pipes/validation.pipe.ts#L96
    */
-  @ValidateNested()
-  @Type(() => EntityId)
-  @TransformStringToEntityId()
-  orderId: EntityId;
+  @IsUUID()
+  orderId: UUID;
 
   // TODO(VERY IMPORTANT): Host should only update items' physical characteristics
   @ValidateNested({ each: true })

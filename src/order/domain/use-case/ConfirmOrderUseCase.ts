@@ -1,8 +1,8 @@
 import { UseCase } from '../../../common/domain/UseCase';
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 
 export interface ConfirmOrderRequest {
-  orderId: EntityId;
+  orderId: UUID;
 }
 
 export interface StripeCheckoutSession {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Binary, ClientSession, Collection } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
-import { EntityId } from '../../../../common/domain/EntityId';
+import { UUID } from '../../../../common/domain/UUID';
 import { Code } from '../../../../common/error-handling/Code';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { entityIdToMuuid } from '../../../../common/utils';
@@ -32,7 +32,7 @@ export class MatchMongoCacheAdapter implements MatchCache {
   }
 
   async retrieveAndDeleteMatch(
-    matchId: EntityId,
+    matchId: UUID,
     transaction?: ClientSession,
   ): Promise<Match> {
     const matchMongoBinaryId: Binary = entityIdToMuuid(matchId);
@@ -53,8 +53,8 @@ export class MatchMongoCacheAdapter implements MatchCache {
 
   // TODO: Make orderId and hostId mutually optional
   async findMatch(
-    orderId: EntityId,
-    hostId: EntityId,
+    orderId: UUID,
+    hostId: UUID,
     transaction?: ClientSession,
   ): Promise<Match> {
     const orderMongoBinaryId: Binary = entityIdToMuuid(orderId);
@@ -70,7 +70,7 @@ export class MatchMongoCacheAdapter implements MatchCache {
     if (!matchDocument) {
       throw new Exception(
         Code.ENTITY_NOT_FOUND_ERROR,
-        `Match (orderId: ${orderId.value}, hostId: ${hostId.value}) not found`,
+        `Match (orderId: ${orderId}, hostId: ${hostId}) not found`,
         { orderId, hostId },
       );
     }

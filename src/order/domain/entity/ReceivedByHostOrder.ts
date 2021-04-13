@@ -1,19 +1,16 @@
-import { EntityProps } from '../../../common/domain/Entity';
-import { EntityId } from '../../../common/domain/EntityId';
-import { EntityIdsToStringIds } from '../../../common/types';
+import { UUID } from '../../../common/domain/UUID';
 import { OrderStatus } from './Order';
 
-export interface ReceivedByHostOrderProps extends EntityProps {
+export interface ReceivedByHostOrderProps {
+  id: UUID;
   status: OrderStatus;
   receivedByHostDate: Date;
 }
 
-export type ReceivedByHostOrderPropsPlain = EntityIdsToStringIds<
-  ReceivedByHostOrderProps
->;
+export type ReceivedByHostOrderPropsPlain = ReceivedByHostOrderProps;
 
 export class ReceivedByHostOrder implements ReceivedByHostOrderProps {
-  readonly id: EntityId;
+  readonly id: UUID;
 
   readonly status: OrderStatus = OrderStatus.ReceivedByHost;
 
@@ -39,7 +36,7 @@ export class ReceivedByHostOrder implements ReceivedByHostOrderProps {
 
   serialize(): ReceivedByHostOrderPropsPlain {
     return {
-      id: this.id.value,
+      id: this.id,
       status: this.status,
       receivedByHostDate: this.receivedByHostDate,
     };

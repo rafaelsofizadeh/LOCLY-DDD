@@ -1,5 +1,5 @@
 import { ClientSession } from 'mongodb';
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { Country } from '../../domain/data/Country';
 import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 import { Host } from '../../domain/entity/Host';
@@ -19,18 +19,12 @@ export abstract class HostRepository {
     transaction?: ClientSession,
   ): Promise<void>;
 
-  abstract findHost(
-    hostId: EntityId,
-    transaction?: ClientSession,
-  ): Promise<Host>;
+  abstract findHost(hostId: UUID, transaction?: ClientSession): Promise<Host>;
 
-  abstract deleteHost(
-    hostId: EntityId,
-    transaction?: ClientSession,
-  ): Promise<void>;
+  abstract deleteHost(hostId: UUID, transaction?: ClientSession): Promise<void>;
 
   abstract deleteManyHosts(
-    hostIds: EntityId[],
+    hostIds: UUID[],
     transaction?: ClientSession,
   ): Promise<void>;
 

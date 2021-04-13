@@ -12,7 +12,7 @@ import { HostMatcher } from '../port/HostMatcher';
 import { OrderRepository } from '../port/OrderRepository';
 import { Host } from '../../domain/entity/Host';
 import { MatchCache } from '../port/MatchCache';
-import { EntityId } from '../../../common/domain/EntityId';
+import { UUID } from '../../../common/domain/UUID';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/utils';
@@ -53,7 +53,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
   }
 
   private async matchOrderAndCheckout(
-    orderId: EntityId,
+    orderId: UUID,
     session: ClientSession,
   ): Promise<Stripe.Checkout.Session> {
     const draftedOrder = (await this.orderRepository.findOrder(
@@ -61,7 +61,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       session,
     )) as DraftedOrder;
 
-    const matchId: EntityId = await this.matchOrderToHost(
+    const matchId: UUID = await this.matchOrderToHost(
       draftedOrder,
       session,
     ).catch(error => {
@@ -108,7 +108,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
         ],
         // ! IMPORTANT !
         // TODO: Idk?
-        client_reference_id: matchId.value,
+        client_reference_id: matchId,
         mode: 'payment',
         success_url: 'https://news.ycombinator.com',
         cancel_url: 'https://reddit.com',
@@ -122,13 +122,13 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
   private async matchOrderToHost(
     { id: orderId, originCountry }: DraftedOrder,
     session: ClientSession,
-  ): Promise<EntityId> {
+  ): Promise<UUID> {
     const { id: matchedHostId }: Host = await this.hostMatcher.matchHost(
       originCountry,
       session,
     );
 
-    const matchId = new EntityId();
+    const matchId = UUID();
 
     await this.matchRecorder.recordMatch(
       {

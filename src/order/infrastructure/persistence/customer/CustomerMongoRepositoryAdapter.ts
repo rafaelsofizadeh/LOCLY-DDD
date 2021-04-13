@@ -2,7 +2,7 @@ import { ClientSession, Collection } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
-import { EntityId } from '../../../../common/domain/EntityId';
+import { UUID } from '../../../../common/domain/UUID';
 import { CustomerRepository } from '../../../application/port/CustomerRepository';
 import { Customer } from '../../../domain/entity/Customer';
 import {
@@ -37,7 +37,7 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
   }
 
   async deleteCustomer(
-    customerId: EntityId,
+    customerId: UUID,
     transaction?: ClientSession,
   ): Promise<void> {
     await this.customerCollection.deleteOne(
@@ -73,7 +73,7 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
   }
 
   async findCustomer(
-    customerId: EntityId,
+    customerId: UUID,
     transaction?: ClientSession,
   ): Promise<Customer> {
     const customerDocument: CustomerMongoDocument = await this.customerCollection.findOne(
@@ -84,7 +84,7 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
     if (!customerDocument) {
       throw new Exception(
         Code.ENTITY_NOT_FOUND_ERROR,
-        `Customer (id: ${customerId.value}) not found`,
+        `Customer (id: ${customerId}) not found`,
         { customerId },
       );
     }

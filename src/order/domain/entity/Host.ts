@@ -1,16 +1,17 @@
 import { IsArray, IsBoolean, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { EntityProps } from '../../../common/domain/Entity';
-import { EntityId } from '../../../common/domain/EntityId';
-import { EntityIdsToStringIds } from '../../../common/types';
+import { IsUUID, UUID } from '../../../common/domain/UUID';
 import { Serializable } from '../../../common/domain/Serializable';
 
 import { Address, AddressProps } from './Address';
-import { TransformEntityIdArrayToStringArray } from '../../../common/utils';
 import { ConfirmedOrder } from './ConfirmedOrder';
 
-export class HostProps extends EntityProps {
+export class HostProps {
+  // TODO: Optional id?
+  @IsUUID()
+  id?: UUID;
+
   @ValidateNested()
   @Type(() => Address)
   address: Address;
@@ -20,13 +21,12 @@ export class HostProps extends EntityProps {
 
   @ValidateNested({ each: true })
   @IsArray()
-  @Type(() => EntityId)
-  @TransformEntityIdArrayToStringArray()
-  orderIds: EntityId[];
+  @Type(() => UUID)
+  orderIds: UUID[];
 }
 
 export type HostPropsPlain = Omit<
-  EntityIdsToStringIds<Required<HostProps>>,
+  Required<HostProps>,
   'address' | 'orderIds'
 > & {
   address: AddressProps;
@@ -37,12 +37,7 @@ export class Host extends Serializable<HostPropsPlain, typeof HostProps>(
   HostProps,
 ) {
   constructor(
-    {
-      id = new EntityId(),
-      address,
-      orderIds,
-      available,
-    }: HostProps = new HostProps(), // default value is needed for class-validator plainToClass. Refer to: Order.ts
+    { id = UUID(), address, orderIds, available }: HostProps = new HostProps(), // default value is needed for class-validator plainToClass. Refer to: Order.ts
   ) {
     super();
 
