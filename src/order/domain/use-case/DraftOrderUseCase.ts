@@ -4,13 +4,13 @@ import { Item } from '../entity/Item';
 import { DraftedOrder } from '../entity/DraftedOrder';
 import { UseCase } from '../../../common/domain/UseCase';
 
-export interface CreateOrderRequest {
+export interface DraftOrderRequest {
   customerId: UUID;
   originCountry: Country;
   items: Item[];
 }
 
-export abstract class CreateOrderUseCase extends UseCase<
-  CreateOrderRequest,
+export abstract class DraftOrderUseCase extends UseCase<
+  DraftOrderRequest,
   DraftedOrder
 > {}

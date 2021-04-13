@@ -4,9 +4,9 @@ import { OrderRepository } from '../port/OrderRepository';
 import { CustomerRepository } from '../port/CustomerRepository';
 
 import {
-  CreateOrderRequest,
-  CreateOrderUseCase,
-} from '../../domain/use-case/CreateOrderUseCase';
+  DraftOrderRequest,
+  DraftOrderUseCase,
+} from '../../domain/use-case/DraftOrderUseCase';
 
 import { Customer } from '../../domain/entity/Customer';
 import { Injectable } from '@nestjs/common';
@@ -19,7 +19,7 @@ import { withTransaction } from '../../../common/utils';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 
 @Injectable()
-export class CreateOrder implements CreateOrderUseCase {
+export class DraftOrder implements DraftOrderUseCase {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,
@@ -33,7 +33,7 @@ export class CreateOrder implements CreateOrderUseCase {
     customerId,
     originCountry,
     items,
-  }: CreateOrderRequest): Promise<DraftedOrder> {
+  }: DraftOrderRequest): Promise<DraftedOrder> {
     const session = this.mongoClient.startSession();
 
     // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014

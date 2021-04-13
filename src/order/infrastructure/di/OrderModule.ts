@@ -7,10 +7,10 @@ import { HostMatcher } from '../../application/port/HostMatcher';
 import { HostRepository } from '../../application/port/HostRepository';
 import { OrderRepository } from '../../application/port/OrderRepository';
 import { ConfirmOrder } from '../../application/services/ConfirmOrderService';
-import { CreateOrder } from '../../application/services/CreateOrderService';
+import { DraftOrder } from '../../application/services/DraftOrderService';
 import { HostMatcherService } from '../../application/services/HostMatcherService';
 import { ConfirmOrderUseCase } from '../../domain/use-case/ConfirmOrderUseCase';
-import { CreateOrderUseCase } from '../../domain/use-case/CreateOrderUseCase';
+import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
 import { CustomerMongoRepositoryAdapter } from '../persistence/customer/CustomerMongoRepositoryAdapter';
 import { HostMongoRepositoryAdapter } from '../persistence/host/HostMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from '../persistence/order/OrderMongoRepositoryAdapter';
@@ -37,7 +37,7 @@ const infrastructureProviders: Provider[] = [
 ];
 
 const useCaseProviders: Provider[] = [
-  { provide: CreateOrderUseCase, useClass: CreateOrder },
+  { provide: DraftOrderUseCase, useClass: DraftOrder },
   { provide: EditOrderUseCase, useClass: EditOrder },
   { provide: ConfirmOrderUseCase, useClass: ConfirmOrder },
   { provide: ConfirmOrderUseCaseService, useClass: ConfirmOrderWebhookHandler },

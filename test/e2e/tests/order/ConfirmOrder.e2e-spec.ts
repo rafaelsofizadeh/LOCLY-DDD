@@ -13,7 +13,7 @@ import { Address } from '../../../../src/order/domain/entity/Address';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { muuidToEntityId } from '../../../../src/common/utils';
-import { CreateOrderUseCase } from '../../../../src/order/domain/use-case/CreateOrderUseCase';
+import { DraftOrderUseCase } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
 import { Category, Item } from '../../../../src/order/domain/entity/Item';
 import { Country } from '../../../../src/order/domain/data/Country';
 import { isString } from 'class-validator';
@@ -36,7 +36,7 @@ describe('Confirm Order – POST /order/confirm', () => {
   let hostRepository: HostRepository;
   let matchCache: MatchCache;
 
-  let createOrderUseCase: CreateOrderUseCase;
+  let draftOrderUseCase: DraftOrderUseCase;
 
   let testCustomer: Customer;
   let testOrder: DraftedOrder;
@@ -64,9 +64,9 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     matchCache = (await moduleRef.resolve(MatchCache)) as MatchCache;
 
-    createOrderUseCase = (await moduleRef.resolve(
-      CreateOrderUseCase,
-    )) as CreateOrderUseCase;
+    draftOrderUseCase = (await moduleRef.resolve(
+      DraftOrderUseCase,
+    )) as DraftOrderUseCase;
   });
 
   beforeEach(async () => {
@@ -158,7 +158,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       hostRepository.addManyHosts(testHosts),
     ]);
 
-    testOrder = await createOrderUseCase.execute({
+    testOrder = await draftOrderUseCase.execute({
       customerId: testCustomer.id,
       // TODO: Item fixture
       items: [

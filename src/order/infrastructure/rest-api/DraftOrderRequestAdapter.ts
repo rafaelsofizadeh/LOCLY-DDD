@@ -9,9 +9,9 @@ import {
 import { IsUUID, UUID } from '../../../common/domain/UUID';
 import { Country } from '../../domain/data/Country';
 import { Item } from '../../domain/entity/Item';
-import { CreateOrderRequest } from '../../domain/use-case/CreateOrderUseCase';
+import { DraftOrderRequest } from '../../domain/use-case/DraftOrderUseCase';
 
-export class CreateOrderRequestAdapter implements CreateOrderRequest {
+export class DraftOrderRequestAdapter implements DraftOrderRequest {
   /*
    * Nest.js first performs transformation, then validation, so, the process is like:
    * HTTP request -> customerId: "string" ->

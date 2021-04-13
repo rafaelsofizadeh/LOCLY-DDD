@@ -6,8 +6,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 
-import { CreateOrderRequestAdapter } from './CreateOrderRequestAdapter';
-import { CreateOrderUseCase } from '../../domain/use-case/CreateOrderUseCase';
+import { DraftOrderRequestAdapter } from './DraftOrderRequestAdapter';
+import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
 import { ConfirmOrderRequestAdapter } from './ConfirmOrderRequestAdapter';
 import {
   StripeCheckoutSession,
@@ -29,7 +29,7 @@ import { UserEditOrderRequestAdapter } from './EditOrderRequestAdapter';
 @Controller('order')
 export class OrderController {
   constructor(
-    private readonly createOrderUseCase: CreateOrderUseCase,
+    private readonly draftOrderUseCase: DraftOrderUseCase,
     private readonly confirmOrderUseCase: ConfirmOrderUseCase,
     private readonly receiveOrderByHostUseCase: ReceiveOrderHostUseCase,
     private readonly editOrderUseCase: EditOrderUseCase,
@@ -39,10 +39,10 @@ export class OrderController {
   @Post('create')
   // Validation and transformation is performed by Nest.js global validation pipe
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  async createOrder(
-    @Body() orderRequest: CreateOrderRequestAdapter,
+  async draftOrder(
+    @Body() orderRequest: DraftOrderRequestAdapter,
   ): Promise<DraftedOrderPropsPlain> {
-    const draftedOrder: DraftedOrder = await this.createOrderUseCase.execute(
+    const draftedOrder: DraftedOrder = await this.draftOrderUseCase.execute(
       orderRequest,
     );
 
