@@ -99,11 +99,11 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       | Partial<DraftedOrderMongoDocument>
       | Partial<VerifiedByHostOrderMongoDocumentProps>;
 
-    await this.update(
+    /*await this.update(
       order.id,
       this.editOrderQuery(editedPlainOrder),
       transaction,
-    );
+    );*/
   }
 
   async persistOrderConfirmation(
@@ -131,8 +131,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     transaction?: ClientSession,
   ) {
     await this.orderCollection.updateOne(
-      { _id: uuidToMuuid(order.id) },
-      orderUpdateQuery,
+      { _id: uuidToMuuid(orderId) },
+      query,
       transaction ? { session: transaction } : undefined,
     );
   }
@@ -153,11 +153,11 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
           >
         >,
   ) {
-    const mongoFlattenedObjectAccessors = flattenObject(editOrderPropsPlain);
+    /*const mongoFlattenedObjectAccessors = flattenObject(editOrderPropsPlain);
 
     return {
       $set: mongoFlattenedObjectAccessors,
-    };
+    };*/
   }
 
   private confirmOrderQuery(hostId: UUID): UpdateQuery<OrderMongoDocument> {
@@ -170,7 +170,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   private addHostToOrderQuery(hostId: UUID) {
-    return { hostId: entityIdToMuuid(hostId) };
+    return { hostId: uuidToMuuid(hostId) };
   }
 
   private updateOrderStatusQuery(status: OrderStatus) {
