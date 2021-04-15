@@ -153,7 +153,7 @@ export function mongoDocumentToDraftedOrder({
   destination,
   shipmentCost,
 }: DraftedOrderMongoDocument): DraftedOrder {
-  return new DraftedOrder({
+  return DraftedOrder.fromData({
     id: muuidToUuid(_id),
     customerId: muuidToUuid(customerId),
     items: items.map(

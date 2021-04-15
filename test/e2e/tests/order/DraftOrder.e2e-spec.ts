@@ -71,6 +71,7 @@ describe('Create Order – POST /order/create', () => {
       .send({
         customerId: testCustomer.id,
         originCountry: originCountriesAvailable[0],
+        destination: testCustomer.selectedAddress,
         // TODO: Item fixture
         items: [
           {

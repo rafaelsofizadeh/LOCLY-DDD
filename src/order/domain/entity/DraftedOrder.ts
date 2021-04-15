@@ -1,12 +1,8 @@
 import { UUID } from '../../../common/domain/UUID';
 import { Code } from '../../../common/error-handling/Code';
 import { Exception } from '../../../common/error-handling/Exception';
+import { ServiceAvailabilityFn } from '../../application/services/checkServiceAvailability';
 import {
-  checkServiceAvailability,
-  ServiceAvailabilityFn,
-} from '../../application/services/checkServiceAvailability';
-import {
-  getShipmentCostQuote,
   ShipmentCostQuote,
   ShipmentCostQuoteFn,
 } from '../../application/services/ShipmentCostCalculator/getShipmentCostQuote';
@@ -57,89 +53,23 @@ export class DraftedOrder implements DraftedOrderProps {
 
   private _shipmentCost: ShipmentCost;
 
-  private readonly shipmentCostQuoteFn: ShipmentCostQuoteFn;
-
-  private readonly serviceAvailabilityFn: ServiceAvailabilityFn;
-
   get items(): Item[] {
     return this._items;
-  }
-
-  private setItems(items: Item[]): Array<keyof this> {
-    this._items = items;
-    this._shipmentCost = this.approximateShipmentCost();
-
-    return ['items', 'shipmentCost'];
-  }
-
-  private approximateShipmentCost(items: Item[] = this._items): ShipmentCost {
-    const { currency, services }: ShipmentCostQuote = this.shipmentCostQuoteFn({
-      originCountry: this.originCountry,
-      destinationCountry: this.destination.country,
-      packages: items.map(
-        ({ physicalCharacteristics }) => physicalCharacteristics,
-      ),
-    });
-
-    // TODO: Service choice logic
-    const { price: amount } = services[0];
-
-    return { amount, currency };
   }
 
   get originCountry(): Country {
     return this._originCountry;
   }
 
-  private setOriginCountry(originCountry: Country): Array<keyof this> {
-    const isServiceAvailable: boolean = this.serviceAvailabilityFn(
-      originCountry,
-      this._destination.country,
-    );
-
-    if (!isServiceAvailable) {
-      throw new Exception(
-        Code.VALIDATION_ERROR,
-        'Origin country not available.',
-        originCountry,
-      );
-    }
-
-    this._originCountry = originCountry || this._originCountry;
-    this._shipmentCost = this.approximateShipmentCost();
-
-    return ['originCountry', 'shipmentCost'];
-  }
-
   get destination(): Address {
     return this._destination;
-  }
-
-  private setDestination(destination: Address): Array<keyof this> {
-    const isServiceAvailable: boolean = this.serviceAvailabilityFn(
-      this._originCountry,
-      destination.country,
-    );
-
-    if (!isServiceAvailable) {
-      throw new Exception(
-        Code.VALIDATION_ERROR,
-        'Destination country not available.',
-        destination,
-      );
-    }
-
-    this._destination = destination || this._destination;
-    this._shipmentCost = this.approximateShipmentCost();
-
-    return ['destination', 'shipmentCost'];
   }
 
   get shipmentCost(): ShipmentCost {
     return this._shipmentCost;
   }
 
-  constructor({
+  private constructor({
     id,
     customerId,
     items,
@@ -147,9 +77,6 @@ export class DraftedOrder implements DraftedOrderProps {
     destination,
     shipmentCost,
   }: Omit<DraftedOrderProps, 'status'>) {
-    this.shipmentCostQuoteFn = getShipmentCostQuote;
-    this.serviceAvailabilityFn = checkServiceAvailability;
-
     this.id = id;
     this.customerId = customerId;
     this._items = items;
@@ -158,34 +85,50 @@ export class DraftedOrder implements DraftedOrderProps {
     this._originCountry = originCountry;
   }
 
-  static create({
-    customerId,
-    items,
-    originCountry,
-    destination,
-  }: Omit<DraftedOrderProps, 'id' | 'status' | 'shipmentCost'>): DraftedOrder {
-    // Placeholder values for further redundancy checks in set__() methods
+  static fromData(payload: Omit<DraftedOrderProps, 'status'>) {
+    return new this(payload);
+  }
+
+  static async create(
+    {
+      customerId,
+      items,
+      originCountry,
+      destination,
+    }: Omit<DraftedOrderProps, 'id' | 'status' | 'shipmentCost'>,
+    shipmentCostQuoteFn: ShipmentCostQuoteFn,
+    serviceAvailabilityFn: ServiceAvailabilityFn,
+    persist: (draftedOrder: DraftedOrder) => Promise<unknown>,
+  ): Promise<DraftedOrder> {
+    this.validateOriginDestination(
+      originCountry,
+      destination,
+      serviceAvailabilityFn,
+    );
+
     const draftedOrder: DraftedOrder = new this({
       id: UUID(),
       customerId: customerId,
       items,
       originCountry,
       destination,
-      shipmentCost: { amount: -999, currency: '---' },
+      shipmentCost: this.approximateShipmentCost(
+        originCountry,
+        destination,
+        items,
+        shipmentCostQuoteFn,
+      ),
     });
 
-    draftedOrder.setItems(items);
-    draftedOrder.setDestination(destination);
-    draftedOrder.setOriginCountry(originCountry);
+    await persist(draftedOrder);
 
     return draftedOrder;
   }
 
   edit(editOrderProps: DraftedOrderEditProps): (keyof this)[] {
-    const inputEditedKeys = <(keyof DraftedOrderEditProps & keyof this)[]>(
-      // TODO: Should user be able to edit only defined properties (!!this[key])?
-      Object.keys(editOrderProps).filter(key => key in this && !!this[key])
-    );
+    const inputEditedKeys = <
+      (keyof DraftedOrderEditProps & keyof this)[] // TODO: Should user be able to edit only defined properties (!!this[key])?
+    >Object.keys(editOrderProps).filter(key => key in this && !!this[key]);
 
     const totalEditedKeys = [...inputEditedKeys];
 
@@ -218,5 +161,44 @@ export class DraftedOrder implements DraftedOrderProps {
       originCountry: this.originCountry,
       shipmentCost: this.shipmentCost,
     };
+  }
+
+  private static validateOriginDestination(
+    originCountry: Country,
+    { country: destinationCountry }: Address,
+    checkServiceAvailability: ServiceAvailabilityFn,
+  ) {
+    const isServiceAvailable: boolean = checkServiceAvailability(
+      originCountry,
+      destinationCountry,
+    );
+
+    if (!isServiceAvailable) {
+      throw new Exception(
+        Code.VALIDATION_ERROR,
+        `Service unavailable for origin: ${originCountry} & destination: ${destinationCountry}.`,
+        { originCountry, destinationCountry },
+      );
+    }
+  }
+
+  private static approximateShipmentCost(
+    originCountry: Country,
+    { country: destinationCountry }: Address,
+    items: Item[],
+    getShipmentCostQuote: ShipmentCostQuoteFn,
+  ): ShipmentCost {
+    const { currency, services }: ShipmentCostQuote = getShipmentCostQuote({
+      originCountry,
+      destinationCountry,
+      packages: items.map(
+        ({ physicalCharacteristics }) => physicalCharacteristics,
+      ),
+    });
+
+    // TODO: Service choice logic
+    const { price: amount } = services[0];
+
+    return { amount, currency };
   }
 }

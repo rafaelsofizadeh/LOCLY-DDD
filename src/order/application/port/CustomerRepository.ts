@@ -18,8 +18,7 @@ export abstract class CustomerRepository {
 
   // This should always be used together with OrderRepository.addCustomerToOrder
   abstract addOrderToCustomer(
-    customer: Customer,
-    order: DraftedOrder,
+    draftedOrder: DraftedOrder,
     transaction?: ClientSession,
   ): Promise<void>;
 

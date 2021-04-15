@@ -151,14 +151,16 @@ describe('Confirm Order – POST /order/confirm', () => {
         }),
     );
 
-    await Promise.all([
-      customerRepository.addCustomer(testCustomer),
-      hostRepository.addManyHosts(testHosts),
-    ]);
+    // TODO(?): Promise.all()'ing this leads to an ERROR. Apparently a write conflict between
+    // 1. customerRepository.addCustomer (insert)
+    // 2. draftOrderUseCase.execute > customerRepository.addOrderToCustomer (update)
+    await hostRepository.addManyHosts(testHosts);
+    await customerRepository.addCustomer(testCustomer);
 
     testOrder = await draftOrderUseCase.execute({
       customerId: testCustomer.id,
-      // TODO: Item fixture
+      originCountry,
+      destination: testCustomer.selectedAddress,
       items: [
         new Item({
           title: 'Laptop',
@@ -170,7 +172,6 @@ describe('Confirm Order – POST /order/confirm', () => {
           category: Category.Electronics,
         }),
       ],
-      originCountry,
     });
   });
 

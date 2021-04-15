@@ -8,6 +8,7 @@ import {
 
 import { IsUUID, UUID } from '../../../common/domain/UUID';
 import { Country } from '../../domain/data/Country';
+import { Address } from '../../domain/entity/Address';
 import { Item } from '../../domain/entity/Item';
 import { DraftOrderRequest } from '../../domain/use-case/DraftOrderUseCase';
 
@@ -24,6 +25,10 @@ export class DraftOrderRequestAdapter implements DraftOrderRequest {
 
   @IsISO31661Alpha3()
   readonly originCountry: Country;
+
+  @ValidateNested()
+  @Type(() => Address)
+  readonly destination: Address;
 
   @ValidateNested({ each: true })
   @ArrayMinSize(1)

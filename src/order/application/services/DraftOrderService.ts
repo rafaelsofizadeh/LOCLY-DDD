@@ -8,7 +8,6 @@ import {
   DraftOrderUseCase,
 } from '../../domain/use-case/DraftOrderUseCase';
 
-import { Customer } from '../../domain/entity/Customer';
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
@@ -17,6 +16,9 @@ import { Country } from '../../domain/data/Country';
 import { Item } from '../../domain/entity/Item';
 import { withTransaction } from '../../../common/utils';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
+import { getShipmentCostQuote } from './ShipmentCostCalculator/getShipmentCostQuote';
+import { checkServiceAvailability } from './checkServiceAvailability';
+import { Address } from '../../domain/entity/Address';
 
 @Injectable()
 export class DraftOrder implements DraftOrderUseCase {
@@ -32,6 +34,7 @@ export class DraftOrder implements DraftOrderUseCase {
   async execute({
     customerId,
     originCountry,
+    destination,
     items,
   }: DraftOrderRequest): Promise<DraftedOrder> {
     const session = this.mongoClient.startSession();
@@ -39,9 +42,10 @@ export class DraftOrder implements DraftOrderUseCase {
     // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
     const draftedOrder: DraftedOrder = await withTransaction(
       () =>
-        this.createDraftOrderAndPersist(
+        this.draftOrderAndPersist(
           customerId,
           originCountry,
+          destination,
           items,
           session,
         ),
@@ -56,26 +60,35 @@ export class DraftOrder implements DraftOrderUseCase {
     return draftedOrder;
   }
 
-  private async createDraftOrderAndPersist(
+  private async draftOrderAndPersist(
     customerId: UUID,
     originCountry: Country,
+    destination: Address,
     items: Item[],
     session: ClientSession,
   ): Promise<DraftedOrder> {
-    const customer: Customer = await this.customerRepository.findCustomer(
-      customerId,
-      session,
-    );
-
     let draftedOrder: DraftedOrder;
 
     try {
-      draftedOrder = DraftedOrder.create({
-        customerId: customer.id,
-        originCountry,
-        items,
-        destination: customer.selectedAddress,
-      });
+      draftedOrder = await DraftedOrder.create(
+        {
+          customerId,
+          originCountry,
+          items,
+          destination,
+        },
+        getShipmentCostQuote,
+        checkServiceAvailability,
+        (newlyDraftedOrder: DraftedOrder) =>
+          Promise.all([
+            // TODO: change to update (upstream?) for EditOrderService
+            this.orderRepository.addOrder(newlyDraftedOrder, session),
+            this.customerRepository.addOrderToCustomer(
+              newlyDraftedOrder,
+              session,
+            ),
+          ]),
+      );
     } catch (exception) {
       // TODO: Wrapper around eventEmitter
       // TODO(?): Event emitting decorator
@@ -83,20 +96,6 @@ export class DraftOrder implements DraftOrderUseCase {
       this.eventEmitter.emit('order.rejected.service_availability');
       throw exception;
     }
-
-    customer.acceptOrder(draftedOrder);
-
-    // Thanks to transactions, I can run these two concurrently
-    await Promise.all([
-      // TODO(GLOBAL): Add rollback for draftedOrder.draft
-      // TODO: change to update (upstream?) for EditOrderService
-      this.orderRepository.addOrder(draftedOrder, session),
-      this.customerRepository.addOrderToCustomer(
-        customer,
-        draftedOrder,
-        session,
-      ),
-    ]);
 
     return draftedOrder;
   }

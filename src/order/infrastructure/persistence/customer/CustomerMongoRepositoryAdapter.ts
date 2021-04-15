@@ -48,10 +48,8 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
     );
   }
 
-  // This should always be used together with OrderRepository.addCustomerToOrder
   async addOrderToCustomer(
-    { id: customerId }: Customer,
-    { id: orderId }: DraftedOrder,
+    { id: orderId, customerId }: DraftedOrder,
     transaction?: ClientSession,
   ): Promise<void> {
     await this.customerCollection
