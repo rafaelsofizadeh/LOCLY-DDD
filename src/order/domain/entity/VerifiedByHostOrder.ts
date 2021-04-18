@@ -8,12 +8,11 @@ import {
 } from '../../application/services/ShipmentCostCalculator/getShipmentCostQuote';
 import { Country } from '../data/Country';
 import { Address, AddressPropsPlain } from './Address';
-import { OrderStatus, ShipmentCost } from './Order';
+import { ShipmentCost } from './Order';
 import { PhysicalItem, PhysicalItemPropsPlain } from './PhysicalItem';
 
 export interface VerifiedByHostOrderProps {
   id: UUID;
-  status: OrderStatus;
   physicalItems: PhysicalItem[];
   originCountry: Country;
   destination: Address;
@@ -31,8 +30,6 @@ export type VerifiedByHostOrderPropsPlain = Omit<
 
 export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
   readonly id: UUID;
-
-  readonly status: OrderStatus = OrderStatus.VerifiedByHost;
 
   readonly originCountry: Country;
 
@@ -80,7 +77,7 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
     originCountry,
     destination,
     shipmentCost,
-  }: Omit<VerifiedByHostOrderProps, 'status'>) {
+  }: VerifiedByHostOrderProps) {
     this.shipmentCostQuoteFn = getShipmentCostQuote;
 
     this.id = id;
@@ -90,7 +87,7 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
     this.originCountry = originCountry;
   }
 
-  static fromData(payload: Omit<VerifiedByHostOrderProps, 'status'>) {
+  static fromData(payload: VerifiedByHostOrderProps) {
     return new this(payload);
   }
 
@@ -100,7 +97,7 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
     destination,
   }: Omit<
     VerifiedByHostOrderProps,
-    'id' | 'status' | 'shipmentCost'
+    'id' | 'shipmentCost'
   >): VerifiedByHostOrder {
     // Placeholder values for further redundancy checks in set__() methods
     const verifiedByHostOrder: VerifiedByHostOrder = new this({
@@ -141,7 +138,6 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
   serialize(): VerifiedByHostOrderPropsPlain {
     return {
       id: this.id,
-      status: this.status,
       physicalItems: this.physicalItems.map(physicalItem =>
         physicalItem.serialize(),
       ),

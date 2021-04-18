@@ -9,7 +9,7 @@ import {
   VerifiedByHostOrderProps,
 } from './VerifiedByHostOrder';
 
-// TODO(GLOBAL): Inheritance between OrderTypes
+// TODO(GLOBAL): Inheritance between OrderTypes (what?)
 
 export type ShipmentCost = {
   amount: number;
@@ -36,23 +36,3 @@ export type EditableOrderProps =
   | Omit<ConfirmedOrderProps, 'id'>
   | Omit<ReceivedByHostOrderProps, 'id'>
   | Omit<VerifiedByHostOrderProps, 'id'>;
-
-export function isDraftedOrder(order: Order): order is DraftedOrder {
-  return order.status === OrderStatus.Drafted;
-}
-
-export function isConfirmedOrder(order: Order): order is ConfirmedOrder {
-  return order.status === OrderStatus.Confirmed;
-}
-
-export function isReceivedByHostOrder(
-  order: Order,
-): order is ReceivedByHostOrder {
-  return order.status === OrderStatus.ReceivedByHost;
-}
-
-export function isVerifiedByHostOrder(
-  order: Order,
-): order is VerifiedByHostOrder {
-  return order.status === OrderStatus.VerifiedByHost;
-}

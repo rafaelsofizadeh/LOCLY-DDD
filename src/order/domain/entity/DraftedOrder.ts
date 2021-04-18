@@ -8,13 +8,11 @@ import {
 } from '../../application/services/ShipmentCostCalculator/getShipmentCostQuote';
 import { Country } from '../data/Country';
 import { Address, AddressPropsPlain } from './Address';
-import { ConfirmedOrder } from './ConfirmedOrder';
 import { Item, ItemPropsPlain } from './Item';
-import { OrderStatus, ShipmentCost } from './Order';
+import { ShipmentCost } from './Order';
 
 export interface DraftedOrderProps {
   id: UUID;
-  status: OrderStatus;
   customerId: UUID;
   items: Item[];
   originCountry: Country;
@@ -32,15 +30,13 @@ export type DraftedOrderPropsPlain = Omit<
 };
 
 type DraftedOrderEditProps = Partial<
-  Omit<DraftedOrderProps, 'id' | 'status' | 'shipmentCost' | 'customerId'>
+  Omit<DraftedOrderProps, 'id' | 'shipmentCost' | 'customerId'>
 >;
 
 // TODO(FUTURE): optimizations, e.g. "has this property changed?". Proxies, more elegant connection between
 // originCountry, destination, items.weight and shipmentCost
 export class DraftedOrder implements DraftedOrderProps {
   readonly id: UUID;
-
-  readonly status: OrderStatus = OrderStatus.Drafted;
 
   readonly customerId: UUID;
 
@@ -75,7 +71,7 @@ export class DraftedOrder implements DraftedOrderProps {
     originCountry,
     destination,
     shipmentCost,
-  }: Omit<DraftedOrderProps, 'status'>) {
+  }: DraftedOrderProps) {
     this.id = id;
     this.customerId = customerId;
     this._items = items;
@@ -84,7 +80,7 @@ export class DraftedOrder implements DraftedOrderProps {
     this._originCountry = originCountry;
   }
 
-  static fromData(payload: Omit<DraftedOrderProps, 'status'>) {
+  static fromData(payload: DraftedOrderProps) {
     return new this(payload);
   }
 
@@ -94,7 +90,7 @@ export class DraftedOrder implements DraftedOrderProps {
       items,
       originCountry,
       destination,
-    }: Omit<DraftedOrderProps, 'id' | 'status' | 'shipmentCost'>,
+    }: Omit<DraftedOrderProps, 'id' | 'shipmentCost'>,
     shipmentCostQuoteFn: ShipmentCostQuoteFn,
     serviceAvailabilityFn: ServiceAvailabilityFn,
     saveOrder: (draftedOrder: DraftedOrder) => Promise<unknown>,
@@ -142,7 +138,6 @@ export class DraftedOrder implements DraftedOrderProps {
   serialize(): DraftedOrderPropsPlain {
     return {
       id: this.id,
-      status: this.status,
       customerId: this.customerId,
       items: this.items.map(item => item.serialize()),
       destination: this.destination.serialize(),

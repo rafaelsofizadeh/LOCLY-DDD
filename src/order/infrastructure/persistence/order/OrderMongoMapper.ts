@@ -105,6 +105,7 @@ export function draftedOrderToMongoDocument(
   return {
     ...restPlainOrder,
     _id: stringToMuuid(id),
+    status: OrderStatus.Drafted,
     customerId: stringToMuuid(customerId),
     items: items.map(({ id, ...restItem }) => ({
       _id: stringToMuuid(id),
@@ -125,6 +126,7 @@ export function serializeVerifiedByHostOrderToMongoDocumentProps(
   return {
     ...restPlainOrder,
     _id: stringToMuuid(id),
+    status: OrderStatus.Confirmed,
     physicalItems: physicalItems.map(({ id, ...restPhysicalItem }) => ({
       _id: stringToMuuid(id),
       ...restPhysicalItem,

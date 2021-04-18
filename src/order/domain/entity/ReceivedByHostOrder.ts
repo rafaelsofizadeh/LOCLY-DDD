@@ -1,9 +1,7 @@
 import { UUID } from '../../../common/domain/UUID';
-import { OrderStatus } from './Order';
 
 export interface ReceivedByHostOrderProps {
   id: UUID;
-  status: OrderStatus;
   receivedByHostDate: Date;
 }
 
@@ -12,20 +10,14 @@ export type ReceivedByHostOrderPropsPlain = ReceivedByHostOrderProps;
 export class ReceivedByHostOrder implements ReceivedByHostOrderProps {
   readonly id: UUID;
 
-  readonly status: OrderStatus = OrderStatus.ReceivedByHost;
-
   readonly receivedByHostDate: Date;
 
-  private constructor({
-    id,
-    receivedByHostDate,
-  }: Omit<ReceivedByHostOrderProps, 'status'>) {
+  private constructor({ id, receivedByHostDate }: ReceivedByHostOrderProps) {
     this.id = id;
-    this.status = OrderStatus.ReceivedByHost;
     this.receivedByHostDate = receivedByHostDate;
   }
 
-  static fromData(payload: Omit<ReceivedByHostOrder, 'status'>) {
+  static fromData(payload: ReceivedByHostOrder) {
     return new this(payload);
   }
 
@@ -41,7 +33,6 @@ export class ReceivedByHostOrder implements ReceivedByHostOrderProps {
   serialize(): ReceivedByHostOrderPropsPlain {
     return {
       id: this.id,
-      status: this.status,
       receivedByHostDate: this.receivedByHostDate,
     };
   }

@@ -89,6 +89,7 @@ describe('Create Order – POST /order/create', () => {
     expect(response.status).toBe(201);
 
     // TODO: strong typing
+    // TODO(GLOBAL): Serialization of Order types with status fill-in
     const {
       id,
       customerId,

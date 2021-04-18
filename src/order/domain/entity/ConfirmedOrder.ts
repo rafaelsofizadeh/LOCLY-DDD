@@ -1,11 +1,9 @@
 import { UUID } from '../../../common/domain/UUID';
 import { Country } from '../data/Country';
 import { DraftedOrder } from './DraftedOrder';
-import { OrderStatus } from './Order';
 import { ReceivedByHostOrder } from './ReceivedByHostOrder';
 
 export interface ConfirmedOrderProps {
-  status: OrderStatus;
   id: UUID;
   originCountry: Country;
   hostId: UUID;
@@ -16,23 +14,17 @@ export type ConfirmedOrderPropsPlain = ConfirmedOrderProps;
 export class ConfirmedOrder implements ConfirmedOrderProps {
   readonly id: UUID;
 
-  readonly status: OrderStatus = OrderStatus.Confirmed;
-
   readonly originCountry: Country;
 
   readonly hostId: UUID;
 
-  private constructor({
-    id,
-    originCountry,
-    hostId,
-  }: Omit<ConfirmedOrderProps, 'status'>) {
+  private constructor({ id, originCountry, hostId }: ConfirmedOrderProps) {
     this.id = id;
     this.originCountry = originCountry;
     this.hostId = hostId;
   }
 
-  static fromData(payload: Omit<ConfirmedOrderProps, 'status'>) {
+  static fromData(payload: ConfirmedOrderProps) {
     return new this(payload);
   }
 
@@ -45,7 +37,6 @@ export class ConfirmedOrder implements ConfirmedOrderProps {
   serialize(): ConfirmedOrderPropsPlain {
     return {
       id: this.id,
-      status: this.status,
       originCountry: this.originCountry,
       hostId: this.hostId,
     };
