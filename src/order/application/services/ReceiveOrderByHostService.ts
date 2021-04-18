@@ -37,8 +37,6 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
       session,
     );
 
-    // TODO: Wrapper around eventEmitter
-    // TODO(?): Event emitting decorator
     this.eventEmitter.emit('order.received_by_host');
 
     return {

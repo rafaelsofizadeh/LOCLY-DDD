@@ -49,12 +49,16 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       });
   }
 
-  async persistOrderConfirmation(
-    { id: orderId }: ConfirmedOrder,
-    { id: hostId }: Host,
+  async setProperties(
+    orderId: UUID,
+    properties: Partial<EditableOrderProps>,
     transaction?: ClientSession,
-  ): Promise<void> {
-    await this.update(orderId, this.confirmOrderQuery(hostId), transaction);
+  ) {
+    await this.orderCollection.updateOne(
+      { _id: uuidToMuuid(orderId) },
+      { $set: properties },
+      transaction ? { session: transaction } : undefined,
+    );
   }
 
   async persistHostReceipt(
@@ -68,6 +72,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     );
   }
 
+  // TODO(FUTURE): Replace all granular "persist____" methods with a single general update call.
   private async update(
     orderId: UUID,
     query: UpdateQuery<OrderMongoDocument>,

@@ -16,13 +16,17 @@ export class ReceivedByHostOrder implements ReceivedByHostOrderProps {
 
   readonly receivedByHostDate: Date;
 
-  constructor({
+  private constructor({
     id,
     receivedByHostDate,
   }: Omit<ReceivedByHostOrderProps, 'status'>) {
     this.id = id;
     this.status = OrderStatus.ReceivedByHost;
     this.receivedByHostDate = receivedByHostDate;
+  }
+
+  static fromData(payload: Omit<ReceivedByHostOrder, 'status'>) {
+    return new this(payload);
   }
 
   static create({ id }: Pick<ReceivedByHostOrder, 'id'>): ReceivedByHostOrder {

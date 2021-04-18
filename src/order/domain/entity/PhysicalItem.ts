@@ -13,7 +13,7 @@ export type PackagePhysicalCharacteristics = {
 // TODO: Remove width-length-height
 export class PhysicalItemProps {
   @IsUUID()
-  id?: UUID;
+  id: UUID;
 
   @IsInt()
   @IsPositive()

@@ -1,12 +1,15 @@
 import { StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ClientSession, MongoClient } from 'mongodb';
+import { InjectClient } from 'nest-mongodb';
 import Stripe from 'stripe';
 import { UUID } from '../../../common/domain/UUID';
+import { withTransaction } from '../../../common/utils';
 import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 
-import { Host } from '../../domain/entity/Host';
+import { OrderStatus } from '../../domain/entity/Order';
 import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUseCaseService';
 import { HostRepository } from '../port/HostRepository';
 import { MatchRecorder } from '../port/MatchRecorder';
@@ -19,36 +22,55 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
     private readonly hostRepository: HostRepository,
     private readonly matchRecorder: MatchRecorder,
     private readonly eventEmitter: EventEmitter2,
+    @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  // TODO: Transient SESSION
+  // TODO: Transient SESSION that is connected to ConfirmOrderService
   @StripeWebhookHandler('checkout.session.completed')
   // TODO: Event typing
-  async execute(paymentFinalizedEvent: Stripe.Event): Promise<ConfirmedOrder> {
-    // TODO: Check whether 'id' === 'checkoutSession.id'. Replace client_ref_id
-    //https://stripe.com/docs/api/events/types#event_types-checkout.session.completed
-    // TODO: Better typing
-    const matchId: UUID = UUID(
+  async execute(
+    paymentFinalizedEvent: Stripe.Event,
+  ): Promise<{ hostId: UUID }> {
+    // TODO: Better Stripe typing
+    const orderAndMatchId: UUID = UUID(
       (paymentFinalizedEvent.data.object as Stripe.Checkout.Session)
         .client_reference_id as UUID,
     );
 
+    const session: ClientSession = this.mongoClient.startSession();
 
-    const [draftedOrder, host] = (await Promise.all([
-      this.orderRepository.findOrder(match.orderId),
-      this.hostRepository.findHost(match.hostId),
-    ])) as [DraftedOrder, Host];
-
-    const confirmedOrder: ConfirmedOrder = draftedOrder.toConfirmed(host);
-    host.acceptOrder(confirmedOrder);
-
-    await Promise.all([
-      this.orderRepository.persistOrderConfirmation(confirmedOrder, host),
-      this.hostRepository.addOrderToHost(host, confirmedOrder),
-    ]);
+    const { hostId } = await withTransaction(
+      () => this.confirmOrder(orderAndMatchId, session),
+      session,
+    );
 
     this.eventEmitter.emit('order.confirmed');
 
-    return confirmedOrder;
+    return { hostId };
+  }
+
+  private async confirmOrder(
+    matchId: UUID,
+    session: ClientSession,
+  ): Promise<{ orderId: UUID; hostId: UUID }> {
+    const { orderId, hostId } = await this.matchRecorder.retrieveAndDeleteMatch(
+      matchId,
+    );
+
+    console.log(orderId, hostId);
+
+    await Promise.all([
+      this.orderRepository.setProperties(
+        orderId,
+        {
+          status: OrderStatus.Confirmed,
+          hostId,
+        },
+        session,
+      ),
+      this.hostRepository.addOrderToHost(hostId, orderId, session),
+    ]);
+
+    return { orderId, hostId };
   }
 }

@@ -33,13 +33,6 @@ export type ShipmentCostSpecification = {
   };
 };
 
-// TODO(NOW): move
-export type ShipmentCostRequest = {
-  originCountry: Country;
-  destinationCountry: Country;
-  packages: PackagePhysicalCharacteristics[];
-};
-
 export type ShipmentCostQuote = {
   postalServiceName: string;
   currency: string;
@@ -109,11 +102,11 @@ function validatePackageDimensions(
   return weightIntervalIndex;
 }
 
-export function getShipmentCostQuote({
-  originCountry,
-  destinationCountry,
-  packages,
-}: ShipmentCostRequest): ShipmentCostQuote {
+export function getShipmentCostQuote(
+  originCountry: Country,
+  destinationCountry: Country,
+  packages: PackagePhysicalCharacteristics[],
+): ShipmentCostQuote {
   validateCountry(originCountry);
   validateCountry(destinationCountry);
   validateOriginCountry(originCountry);
@@ -180,5 +173,7 @@ export function getShipmentCostQuote({
 }
 
 export type ShipmentCostQuoteFn = (
-  costRequest: ShipmentCostRequest,
+  originCountry: Country,
+  destinationCountry: Country,
+  packages: PackagePhysicalCharacteristics[],
 ) => ShipmentCostQuote;

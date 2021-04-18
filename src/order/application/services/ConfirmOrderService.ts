@@ -8,7 +8,6 @@ import {
   StripeCheckoutSession,
   ConfirmOrderUseCase,
 } from '../../domain/use-case/ConfirmOrderUseCase';
-import { HostMatcher } from '../port/HostMatcher';
 import { OrderRepository } from '../port/OrderRepository';
 import { Host } from '../../domain/entity/Host';
 import { MatchRecorder } from '../port/MatchRecorder';
@@ -17,6 +16,7 @@ import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/utils';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
+import { HostRepository } from '../port/HostRepository';
 
 export type MatchReference = Stripe.Checkout.Session['client_reference_id'];
 
@@ -24,7 +24,7 @@ export type MatchReference = Stripe.Checkout.Session['client_reference_id'];
 export class ConfirmOrder implements ConfirmOrderUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
-    private readonly hostMatcher: HostMatcher,
+    private readonly hostRepository: HostRepository,
     // TODO: More general EventEmitter class, wrapper around eventEmitter
     private readonly eventEmitter: EventEmitter2,
     @InjectStripeClient() private readonly stripe: Stripe,
@@ -43,8 +43,6 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       session,
     );
 
-    // TODO: Wrapper around eventEmitter
-    // TODO(?): Event emitting decorator
     this.eventEmitter.emit('order.awaiting_payment');
 
     return {
@@ -52,6 +50,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     };
   }
 
+  // TODO: Error handling and rejection events
   private async matchOrderAndCheckout(
     orderId: UUID,
     session: ClientSession,
@@ -60,17 +59,14 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       orderId,
       session,
     )) as DraftedOrder;
+    console.log({ draftedOrder });
 
-    const matchId: UUID = await this.matchOrderToHost(
-      draftedOrder,
-      session,
-    ).catch(error => {
-      // TODO: Wrapper around eventEmitter
-      // TODO(?): Event emitting decorator and put it on error handling
-      // TODO(?): Move event emitting in execute()
-      this.eventEmitter.emit('order.rejected.host_availability');
-      throw error;
-    });
+    await draftedOrder.matchHost(
+      async (draftedOrderToMatchHostTo: DraftedOrder) =>
+        this.findMatchingHost(draftedOrderToMatchHostTo, session),
+      async (newlyMatchedOrder: DraftedOrder, matchedHostId: UUID) =>
+        this.assignHostToOrder(newlyMatchedOrder, matchedHostId, session),
+    );
 
     /**
      * Scenarios:
@@ -88,7 +84,6 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
      *
      * 1. Customer pays Order -> Order tries to match with a Host -> no Host available
      */
-    // TODO: Error handling
     const checkoutSession: Stripe.Checkout.Session = await this.stripe.checkout.sessions.create(
       {
         payment_method_types: ['card'],
@@ -107,8 +102,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
           },
         ],
         // ! IMPORTANT !
-        // TODO: Idk?
-        client_reference_id: matchId,
+        client_reference_id: draftedOrder.id,
         mode: 'payment',
         success_url: 'https://news.ycombinator.com',
         cancel_url: 'https://reddit.com',
@@ -118,27 +112,29 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     return checkoutSession;
   }
 
-  // TODO(?): attach match schema to order, but deserialize it when needed
-  private async matchOrderToHost(
-    { id: orderId, originCountry }: DraftedOrder,
+  private async assignHostToOrder(
+    { id: orderId }: DraftedOrder,
+    hostId: UUID,
+    session: ClientSession,
+  ) {
+    await this.matchRecorder.recordMatch(orderId, hostId, session);
+  }
+
+  private async findMatchingHost(
+    { originCountry }: DraftedOrder,
     session: ClientSession,
   ): Promise<UUID> {
-    const { id: matchedHostId }: Host = await this.hostMatcher.matchHost(
-      originCountry,
-      session,
-    );
+    const matchedHost: Host = await this.hostRepository
+      .findHostAvailableInCountryWithMinimumNumberOfOrders(
+        originCountry,
+        session,
+      )
+      .catch(error => {
+        // TODO(?): Move event emitting in execute()
+        this.eventEmitter.emit('order.rejected.host_availability');
+        throw error;
+      });
 
-    const matchId = UUID();
-
-    await this.matchRecorder.recordMatch(
-      {
-        id: matchId,
-        orderId,
-        hostId: matchedHostId,
-      },
-      session,
-    );
-
-    return matchId;
+    return matchedHost.id;
   }
 }

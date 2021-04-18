@@ -60,13 +60,13 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
   private approximateShipmentCost(
     physicalItems: PhysicalItem[] = this._physicalItems,
   ): ShipmentCost {
-    const { currency, services }: ShipmentCostQuote = this.shipmentCostQuoteFn({
-      originCountry: this.originCountry,
-      destinationCountry: this.destination.country,
-      packages: physicalItems.map(
+    const { currency, services }: ShipmentCostQuote = this.shipmentCostQuoteFn(
+      this.originCountry,
+      this.destination.country,
+      physicalItems.map(
         ({ physicalCharacteristics }) => physicalCharacteristics,
       ),
-    });
+    );
 
     // TODO: Service choice logic
     const { price: amount } = services[0];
@@ -74,7 +74,7 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
     return { amount, currency };
   }
 
-  constructor({
+  private constructor({
     id,
     physicalItems,
     originCountry,
@@ -88,6 +88,10 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
     this.destination = destination;
     this._shipmentCost = shipmentCost;
     this.originCountry = originCountry;
+  }
+
+  static fromData(payload: Omit<VerifiedByHostOrderProps, 'status'>) {
+    return new this(payload);
   }
 
   static create({

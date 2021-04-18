@@ -3,12 +3,10 @@ import { MongoModule } from 'nest-mongodb';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 
 import { CustomerRepository } from '../../application/port/CustomerRepository';
-import { HostMatcher } from '../../application/port/HostMatcher';
 import { HostRepository } from '../../application/port/HostRepository';
 import { OrderRepository } from '../../application/port/OrderRepository';
 import { ConfirmOrder } from '../../application/services/ConfirmOrderService';
 import { DraftOrder } from '../../application/services/DraftOrderService';
-import { HostMatcherService } from '../../application/services/HostMatcherService';
 import { ConfirmOrderUseCase } from '../../domain/use-case/ConfirmOrderUseCase';
 import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
 import { CustomerMongoRepositoryAdapter } from '../persistence/customer/CustomerMongoRepositoryAdapter';
@@ -27,10 +25,6 @@ const persistenceProviders: Provider[] = [
   { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
   { provide: CustomerRepository, useClass: CustomerMongoRepositoryAdapter },
   { provide: HostRepository, useClass: HostMongoRepositoryAdapter },
-];
-
-const infrastructureProviders: Provider[] = [
-  { provide: HostMatcher, useClass: HostMatcherService },
   { provide: MatchRecorder, useClass: MatchMongoRecorderAdapter },
 ];
 
@@ -63,11 +57,6 @@ const testProviders: Provider[] = [];
     }),
   ],
   controllers: [OrderController],
-  providers: [
-    ...persistenceProviders,
-    ...useCaseProviders,
-    ...infrastructureProviders,
-    ...testProviders,
-  ],
+  providers: [...persistenceProviders, ...useCaseProviders, ...testProviders],
 })
 export class OrderModule {}

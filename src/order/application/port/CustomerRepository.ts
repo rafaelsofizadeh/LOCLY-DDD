@@ -3,7 +3,6 @@ import { UUID } from '../../../common/domain/UUID';
 import { Optional } from '../../../common/types';
 import { Customer } from '../../domain/entity/Customer';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
-import { Order } from '../../domain/entity/Order';
 
 export abstract class CustomerRepository {
   abstract addCustomer(
@@ -16,9 +15,8 @@ export abstract class CustomerRepository {
     transaction?: ClientSession,
   ): Promise<void>;
 
-  // This should always be used together with OrderRepository.addCustomerToOrder
   abstract addOrderToCustomer(
-    draftedOrder: DraftedOrder,
+    order: DraftedOrder,
     transaction?: ClientSession,
   ): Promise<void>;
 

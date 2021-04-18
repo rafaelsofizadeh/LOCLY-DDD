@@ -9,7 +9,6 @@ import {
 import { Country } from '../data/Country';
 import { Address, AddressPropsPlain } from './Address';
 import { ConfirmedOrder } from './ConfirmedOrder';
-import { Host } from './Host';
 import { Item, ItemPropsPlain } from './Item';
 import { OrderStatus, ShipmentCost } from './Order';
 
@@ -98,7 +97,7 @@ export class DraftedOrder implements DraftedOrderProps {
     }: Omit<DraftedOrderProps, 'id' | 'status' | 'shipmentCost'>,
     shipmentCostQuoteFn: ShipmentCostQuoteFn,
     serviceAvailabilityFn: ServiceAvailabilityFn,
-    persist: (draftedOrder: DraftedOrder) => Promise<unknown>,
+    saveOrder: (draftedOrder: DraftedOrder) => Promise<unknown>,
   ): Promise<DraftedOrder> {
     this.validateOriginDestination(
       originCountry,
@@ -106,23 +105,38 @@ export class DraftedOrder implements DraftedOrderProps {
       serviceAvailabilityFn,
     );
 
+    const shipmentCost = this.approximateShipmentCost(
+      originCountry,
+      destination,
+      items,
+      shipmentCostQuoteFn,
+    );
+
     const draftedOrder: DraftedOrder = new this({
       id: UUID(),
-      customerId: customerId,
+      customerId,
       items,
       originCountry,
       destination,
-      shipmentCost: this.approximateShipmentCost(
-        originCountry,
-        destination,
-        items,
-        shipmentCostQuoteFn,
-      ),
+      shipmentCost,
     });
 
-    await persist(draftedOrder);
+    await saveOrder(draftedOrder);
 
     return draftedOrder;
+  }
+
+  async matchHost(
+    findMatchingHostFn: (
+      draftedOrderToMatchHostTo: DraftedOrder,
+    ) => Promise<UUID>,
+    persistHostMatch: (
+      matchedOrder: DraftedOrder,
+      matchedHostId: UUID,
+    ) => Promise<unknown>,
+  ): Promise<void> {
+    const matchedHostId: UUID = await findMatchingHostFn(this);
+    await persistHostMatch(this, matchedHostId);
   }
 
   serialize(): DraftedOrderPropsPlain {
@@ -162,13 +176,11 @@ export class DraftedOrder implements DraftedOrderProps {
     items: Item[],
     getShipmentCostQuote: ShipmentCostQuoteFn,
   ): ShipmentCost {
-    const { currency, services }: ShipmentCostQuote = getShipmentCostQuote({
+    const { currency, services }: ShipmentCostQuote = getShipmentCostQuote(
       originCountry,
       destinationCountry,
-      packages: items.map(
-        ({ physicalCharacteristics }) => physicalCharacteristics,
-      ),
-    });
+      items.map(({ physicalCharacteristics }) => physicalCharacteristics),
+    );
 
     // TODO: Service choice logic
     const { price: amount } = services[0];

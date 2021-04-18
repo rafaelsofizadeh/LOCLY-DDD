@@ -19,8 +19,8 @@ import { Country } from '../../../../src/order/domain/data/Country';
 import { isString } from 'class-validator';
 import {
   Match,
-  MatchCache,
-} from '../../../../src/order/application/port/MatchCache';
+  MatchRecorder,
+} from '../../../../src/order/application/port/MatchRecorder';
 import { HostRepository } from '../../../../src/order/application/port/HostRepository';
 import { DraftedOrder } from '../../../../src/order/domain/entity/DraftedOrder';
 import {
@@ -34,7 +34,7 @@ describe('Confirm Order – POST /order/confirm', () => {
   let customerRepository: CustomerRepository;
   let orderRepository: OrderRepository;
   let hostRepository: HostRepository;
-  let matchCache: MatchCache;
+  let matchRecorder: MatchRecorder;
 
   let draftOrderUseCase: DraftOrderUseCase;
 
@@ -62,7 +62,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       HostRepository,
     )) as HostRepository;
 
-    matchCache = (await moduleRef.resolve(MatchCache)) as MatchCache;
+    matchRecorder = (await moduleRef.resolve(MatchRecorder)) as MatchRecorder;
 
     draftOrderUseCase = (await moduleRef.resolve(
       DraftOrderUseCase,
@@ -178,7 +178,6 @@ describe('Confirm Order – POST /order/confirm', () => {
   // IMPORTANT: ALWAYS clean up the database after commenting out the cleanup in afterEach
   // (usually done for testing purposes)
   afterEach(() =>
-    // TODO: Hosts and orders don't get deleted
     Promise.all([
       customerRepository.deleteCustomer(testCustomer.id),
       hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
@@ -204,7 +203,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     expect(isString(checkoutId)).toBe(true);
     expect(checkoutId.slice(0, 2)).toBe('cs'); // "Checkout Session"
 
-    const match: Match = await matchCache.findMatch(
+    const match: Match = await matchRecorder.findMatch(
       testOrder.id,
       // testOrder SHOULD be matched with the first testHost
       testHosts[0].id,

@@ -14,8 +14,8 @@ export abstract class HostRepository {
 
   // This should always be used together with OrderRepository.addHostToOrder
   abstract addOrderToHost(
-    host: Host,
-    order: ConfirmedOrder,
+    hostId: UUID,
+    orderId: UUID,
     transaction?: ClientSession,
   ): Promise<void>;
 

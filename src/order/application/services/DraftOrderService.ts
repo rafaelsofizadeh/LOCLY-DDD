@@ -11,14 +11,10 @@ import {
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { UUID } from '../../../common/domain/UUID';
-import { Country } from '../../domain/data/Country';
-import { Item } from '../../domain/entity/Item';
 import { withTransaction } from '../../../common/utils';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 import { getShipmentCostQuote } from './ShipmentCostCalculator/getShipmentCostQuote';
 import { checkServiceAvailability } from './checkServiceAvailability';
-import { Address } from '../../domain/entity/Address';
 
 @Injectable()
 export class DraftOrder implements DraftOrderUseCase {
@@ -30,72 +26,50 @@ export class DraftOrder implements DraftOrderUseCase {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
+  // TODO(GLOBAL): Event emitting decorator
   // Input validation in Controllers (/infrastructure)
-  async execute({
-    customerId,
-    originCountry,
-    destination,
-    items,
-  }: DraftOrderRequest): Promise<DraftedOrder> {
+  async execute(draftOrderRequest: DraftOrderRequest): Promise<DraftedOrder> {
+    // TODO(NOW)(GLOBAL): session initialization to withTransaction
     const session = this.mongoClient.startSession();
 
-    // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
-    const draftedOrder: DraftedOrder = await withTransaction(
-      () =>
-        this.draftOrderAndPersist(
-          customerId,
-          originCountry,
-          destination,
-          items,
-          session,
-        ),
-      session,
-    );
-
-    // TODO: Wrapper around eventEmitter
-    // TODO(?): Event emitting decorator
-    this.eventEmitter.emit('order.drafted', draftedOrder);
-
-    // Serialization in Controllers (/infrastructure)
-    return draftedOrder;
-  }
-
-  private async draftOrderAndPersist(
-    customerId: UUID,
-    originCountry: Country,
-    destination: Address,
-    items: Item[],
-    session: ClientSession,
-  ): Promise<DraftedOrder> {
-    let draftedOrder: DraftedOrder;
-
     try {
-      draftedOrder = await DraftedOrder.create(
-        {
-          customerId,
-          originCountry,
-          items,
-          destination,
-        },
-        getShipmentCostQuote,
-        checkServiceAvailability,
-        (newlyDraftedOrder: DraftedOrder) =>
-          Promise.all([
-            // TODO: change to update (upstream?) for EditOrderService
-            this.orderRepository.addOrder(newlyDraftedOrder, session),
-            this.customerRepository.addOrderToCustomer(
-              newlyDraftedOrder,
-              session,
-            ),
-          ]),
+      const draftedOrder: DraftedOrder = await withTransaction(
+        () => this.draftOrderAndPersist(draftOrderRequest, session),
+        session,
       );
+
+      this.eventEmitter.emit('order.drafted', draftedOrder);
+
+      // Serialization in Controllers (/infrastructure)
+      return draftedOrder;
     } catch (exception) {
-      // TODO: Wrapper around eventEmitter
-      // TODO(?): Event emitting decorator
-      // TODO(?): Move event emitting to execute()
       this.eventEmitter.emit('order.rejected.service_availability');
       throw exception;
     }
+  }
+
+  private async draftOrderAndPersist(
+    { customerId, originCountry, items, destination }: DraftOrderRequest,
+    session: ClientSession,
+  ): Promise<DraftedOrder> {
+    const draftedOrder: DraftedOrder = await DraftedOrder.create(
+      {
+        customerId,
+        originCountry,
+        items,
+        destination,
+      },
+      getShipmentCostQuote,
+      checkServiceAvailability,
+      async (newlyDraftedOrder: DraftedOrder) => {
+        // TODO: change to update (upstream?) for EditOrderService
+        await this.orderRepository.addOrder(newlyDraftedOrder, session);
+        await this.customerRepository.addOrderToCustomer(
+          newlyDraftedOrder,
+          session,
+        );
+      },
+    );
 
     return draftedOrder;
   }

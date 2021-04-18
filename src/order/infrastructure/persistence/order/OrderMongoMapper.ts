@@ -14,6 +14,7 @@ import {
   PhysicalItem,
   PhysicalItemProps,
 } from '../../../domain/entity/PhysicalItem';
+import { UUID } from '../../../../common/domain/UUID';
 
 // TODO(GLOBAL): EntityIdToString type, but for UUID->Binary
 export type ItemMongoSubdocument = Omit<ItemProps, 'id'> & {
@@ -132,76 +133,101 @@ export function serializeVerifiedByHostOrderToMongoDocumentProps(
 }
 
 export function mongoDocumentToOrder(orderDocument: OrderMongoDocument): Order {
+  const entries = Object.entries(orderDocument).map(([key, value]) => {
+    if (value instanceof Binary) {
+      return serializeBinaryValues(key, value);
+    }
+
+    if (key === 'destination') {
+      return ['destination', new Address(value)];
+    }
+
+    if (key === 'items') {
+      return [
+        'items',
+        (value as ItemMongoSubdocument[]).map(itemMongoSubdocumentToItem),
+      ];
+    }
+
+    if (key === 'physicalItems') {
+      return [
+        'physicalItems',
+        (value as ItemMongoSubdocument[]).map(
+          itemMongoSubdocumentToPhysicalItem,
+        ),
+      ];
+    }
+
+    return [key, value];
+  }, {} as OrderMongoDocument);
+
+  const payload = Object.fromEntries(entries);
+
   if (isDraftedOrderMongoDocument(orderDocument)) {
-    return mongoDocumentToDraftedOrder(orderDocument);
+    return DraftedOrder.fromData(payload);
   } else if (isConfirmedOrderMongoDocument(orderDocument)) {
-    return mongoDocumentToConfirmedOrder(orderDocument);
+    return ConfirmedOrder.fromData(payload);
   } else if (isReceivedByHostOrderMongoDocument(orderDocument)) {
-    return mongoDocumentToReceivedByHostOrder(orderDocument);
+    return ReceivedByHostOrder.fromData(payload);
   } else if (isVerifiedByHostOrderMongoDocument(orderDocument)) {
-    return mongoDocumentToVerifiedByHostOrder(orderDocument);
+    return VerifiedByHostOrder.fromData(payload);
   }
 
   throw new Error('Invalid order status');
 }
 
-export function mongoDocumentToDraftedOrder({
-  _id,
-  items,
-  originCountry,
-  customerId,
-  destination,
-  shipmentCost,
-}: DraftedOrderMongoDocument): DraftedOrder {
-  return DraftedOrder.fromData({
-    id: muuidToUuid(_id),
-    customerId: muuidToUuid(customerId),
-    items: items.map(
-      ({ _id, ...restItem }) => new Item({ id: muuidToUuid(_id), ...restItem }),
-    ),
-    originCountry,
-    destination: new Address(destination),
-    shipmentCost,
-  });
+function serializeBinaryValues(key: '_id', value: Binary): ['id', UUID];
+function serializeBinaryValues(
+  key: string,
+  value: Binary,
+): [string, UUID | Binary];
+function serializeBinaryValues(
+  key: string,
+  value: Binary,
+): [string, UUID | Binary] {
+  const binaryValue = value;
+
+  const uuidValue = muuidToUuid(binaryValue);
+
+  if (key === '_id') {
+    return ['id', uuidValue];
+  }
+
+  if (typeof key === 'string' && key.includes('Id')) {
+    return [key, uuidValue];
+  }
+
+  return [key, binaryValue];
 }
 
-export function mongoDocumentToConfirmedOrder({
-  _id,
-  originCountry,
-  hostId,
-}: ConfirmedOrderMongoDocument): ConfirmedOrder {
-  return new ConfirmedOrder({
-    id: muuidToUuid(_id),
-    originCountry,
-    hostId: muuidToUuid(hostId),
-  });
+function itemMongoSubdocumentToItem(
+  itemSubdocument: ItemMongoSubdocument,
+): Item {
+  const entries = Object.entries(itemSubdocument).map(([key, value]) => {
+    if (isBinary(value)) {
+      return serializeBinaryValues(key, value);
+    }
+
+    return [key, value];
+  }, {} as ItemProps);
+
+  return new Item(Object.fromEntries(entries) as ItemProps);
 }
 
-export function mongoDocumentToReceivedByHostOrder({
-  _id,
-  receivedByHostDate,
-}: ReceivedByHostOrderMongoDocument): ReceivedByHostOrder {
-  return new ReceivedByHostOrder({
-    id: muuidToUuid(_id),
-    receivedByHostDate,
-  });
+function itemMongoSubdocumentToPhysicalItem(
+  itemSubdocument: ItemMongoSubdocument,
+): PhysicalItem {
+  const entries = Object.entries(itemSubdocument).map(([key, value]) => {
+    if (isBinary(value)) {
+      return serializeBinaryValues(key, value);
+    }
+
+    return [key, value];
+  }, {} as ItemProps);
+
+  return new PhysicalItem(Object.fromEntries(entries) as PhysicalItemProps);
 }
 
-export function mongoDocumentToVerifiedByHostOrder({
-  _id,
-  items,
-  originCountry,
-  destination,
-  shipmentCost,
-}: VerifiedByHostOrderMongoDocument): VerifiedByHostOrder {
-  return new VerifiedByHostOrder({
-    id: muuidToUuid(_id),
-    physicalItems: items.map(
-      ({ _id, title, storeName, category, ...restPhysicalItem }) =>
-        new PhysicalItem({ id: muuidToUuid(_id), ...restPhysicalItem }),
-    ),
-    originCountry,
-    destination: new Address(destination),
-    shipmentCost,
-  });
+function isBinary(value: any): value is Binary {
+  return value instanceof Binary;
 }

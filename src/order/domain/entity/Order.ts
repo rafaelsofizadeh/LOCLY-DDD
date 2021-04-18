@@ -1,7 +1,13 @@
-import { ConfirmedOrder } from './ConfirmedOrder';
-import { DraftedOrder } from './DraftedOrder';
-import { ReceivedByHostOrder } from './ReceivedByHostOrder';
-import { VerifiedByHostOrder } from './VerifiedByHostOrder';
+import { ConfirmedOrder, ConfirmedOrderProps } from './ConfirmedOrder';
+import { DraftedOrder, DraftedOrderProps } from './DraftedOrder';
+import {
+  ReceivedByHostOrder,
+  ReceivedByHostOrderProps,
+} from './ReceivedByHostOrder';
+import {
+  VerifiedByHostOrder,
+  VerifiedByHostOrderProps,
+} from './VerifiedByHostOrder';
 
 // TODO(GLOBAL): Inheritance between OrderTypes
 
@@ -24,6 +30,12 @@ export type Order =
   | ConfirmedOrder
   | ReceivedByHostOrder
   | VerifiedByHostOrder;
+
+export type EditableOrderProps =
+  | Omit<DraftedOrderProps, 'id'>
+  | Omit<ConfirmedOrderProps, 'id'>
+  | Omit<ReceivedByHostOrderProps, 'id'>
+  | Omit<VerifiedByHostOrderProps, 'id'>;
 
 export function isDraftedOrder(order: Order): order is DraftedOrder {
   return order.status === OrderStatus.Drafted;

@@ -1,5 +1,6 @@
 import { UUID } from '../../../common/domain/UUID';
 import { Country } from '../data/Country';
+import { DraftedOrder } from './DraftedOrder';
 import { OrderStatus } from './Order';
 import { ReceivedByHostOrder } from './ReceivedByHostOrder';
 
@@ -21,7 +22,7 @@ export class ConfirmedOrder implements ConfirmedOrderProps {
 
   readonly hostId: UUID;
 
-  constructor({
+  private constructor({
     id,
     originCountry,
     hostId,
@@ -31,7 +32,11 @@ export class ConfirmedOrder implements ConfirmedOrderProps {
     this.hostId = hostId;
   }
 
-  // TODO: Should I add a "create" alias method for the constructor?
+  static fromData(payload: Omit<ConfirmedOrderProps, 'status'>) {
+    return new this(payload);
+  }
+
+  async create({ id, originCountry }: DraftedOrder) {}
 
   toReceivedByHost() {
     return ReceivedByHostOrder.create(this);

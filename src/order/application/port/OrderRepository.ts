@@ -1,12 +1,7 @@
 import { ClientSession } from 'mongodb';
 import { UUID } from '../../../common/domain/UUID';
-import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
-import { Host } from '../../domain/entity/Host';
-import { Order } from '../../domain/entity/Order';
-import { VerifiedByHostOrder } from '../../domain/entity/VerifiedByHostOrder';
-import { UserEditOrderRequest } from '../../domain/use-case/EditOrderUseCase';
-import { HostEditOrderRequest } from '../../domain/use-case/VerifyByHostOrderUseCase';
+import { EditableOrderProps, Order } from '../../domain/entity/Order';
 
 export abstract class OrderRepository {
   abstract addOrder(
@@ -29,15 +24,9 @@ export abstract class OrderRepository {
     transaction?: ClientSession,
   ): Promise<void>;
 
-  abstract updateOrder(
-    order: DraftedOrder | VerifiedByHostOrder,
-    editedKeys: (keyof DraftedOrder)[] | (keyof VerifiedByHostOrder)[],
-    transaction?: ClientSession,
-  ): Promise<void>;
-
-  abstract persistOrderConfirmation(
-    order: ConfirmedOrder,
-    host: Host,
+  abstract setProperties(
+    orderId: UUID,
+    properties: Partial<EditableOrderProps>,
     transaction?: ClientSession,
   ): Promise<void>;
 

@@ -1,38 +1,33 @@
 import { Binary } from 'mongodb';
-import { uuidToMuuid, muuidToUuid } from '../../../../common/utils';
+import { muuidToUuid, uuidToMuuid } from '../../../../common/utils';
 
-import { Match } from '../../../application/port/MatchCache';
+import { Match } from '../../../application/port/MatchRecorder';
 
+// _id === orderId
 export type MatchMongoDocument = {
   _id: Binary;
-  orderId: Binary;
   hostId: Binary;
 };
 
 export function mongoDocumentToMatch({
   _id,
-  orderId,
   hostId,
 }: MatchMongoDocument): Match {
   return {
-    id: muuidToUuid(_id),
-    orderId: muuidToUuid(orderId),
+    orderId: muuidToUuid(_id),
     hostId: muuidToUuid(hostId),
   };
 }
 
 export function matchToMongoDocument({
-  id,
   orderId,
   hostId,
 }: Match): MatchMongoDocument {
-  const mongoBinaryId = uuidToMuuid(id);
   const orderMongoBinaryId = uuidToMuuid(orderId);
   const hostMongoBinaryId = uuidToMuuid(hostId);
 
   return {
-    _id: mongoBinaryId,
-    orderId: orderMongoBinaryId,
+    _id: orderMongoBinaryId,
     hostId: hostMongoBinaryId,
   };
 }

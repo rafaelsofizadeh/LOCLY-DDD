@@ -65,8 +65,8 @@ export class HostMongoRepositoryAdapter implements HostRepository {
 
   // This should always be used together with OrderRepository.addHostToOrder
   async addOrderToHost(
-    { id: hostId }: Host,
-    { id: orderId }: ConfirmedOrder,
+    hostId: UUID,
+    orderId: UUID,
     transaction?: ClientSession,
   ): Promise<void> {
     await this.hostCollection
@@ -117,7 +117,12 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     const hostDocuments: HostMongoDocument[] = await this.hostCollection
       .aggregate(
         [
-          { $match: this.hostAvailableInCountryQuery(country) },
+          {
+            $match: {
+              'address.country': country,
+              available: true,
+            },
+          },
           {
             $addFields: {
               orderCount: {
@@ -136,9 +141,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
       )
       .toArray();
 
-    const hostDocument = hostDocuments[0];
-
-    if (!hostDocument) {
+    if (!hostDocuments.length) {
       throw new Exception(
         Code.ENTITY_NOT_FOUND_ERROR,
         `No available host (country: ${country})`,
@@ -146,13 +149,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
       );
     }
 
+    const hostDocument = hostDocuments[0];
     return mongoDocumentToHost(hostDocument);
-  }
-
-  private hostAvailableInCountryQuery(country: Country) {
-    return {
-      'address.country': country,
-      available: true,
-    };
   }
 }
