@@ -9,15 +9,15 @@ import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 import { Host } from '../../domain/entity/Host';
 import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUseCaseService';
 import { HostRepository } from '../port/HostRepository';
-import { Match, MatchCache } from '../port/MatchCache';
+import { MatchRecorder } from '../port/MatchRecorder';
 import { OrderRepository } from '../port/OrderRepository';
 
 @Injectable()
 export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
   constructor(
-    private readonly matchCache: MatchCache,
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,
+    private readonly matchRecorder: MatchRecorder,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -33,7 +33,6 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
         .client_reference_id as UUID,
     );
 
-    const match: Match = await this.matchCache.retrieveAndDeleteMatch(matchId);
 
     const [draftedOrder, host] = (await Promise.all([
       this.orderRepository.findOrder(match.orderId),

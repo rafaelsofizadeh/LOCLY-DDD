@@ -4,7 +4,6 @@ import { AppModule } from './AppModule';
 // TODO(GLOBAL): https://github.com/microsoft/TypeScript/issues/2845
 // TODO(GLOBAL): https://stackoverflow.com/a/37300663/6539857 !!!
 // TODO(GLOBAL): "not found document" handling application-wide.
-// TODO(GLOBAL): Rename MatchCache to smth related to transactions
 // TODO(GLOBAL): Rename "session" and create type alias for "mongo.ClientSession"
 // TODO(ANSWERED): At what level of function call should withTransactionExplicitAbort be placed?
 // Related: "TODO: Investigate transaction behaviour". Potential: depends on unhandled exception thrown

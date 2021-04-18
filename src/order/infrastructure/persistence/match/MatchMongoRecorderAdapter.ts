@@ -11,7 +11,7 @@ import { uuidToMuuid } from '../../../../common/utils';
 // Doesn't work properly
 // https://support.stripe.com/questions/using-metadata-with-checkout-sessions
 
-import { Match, MatchCache } from '../../../application/port/MatchCache';
+import { Match, MatchRecorder } from '../../../application/port/MatchRecorder';
 import {
   MatchMongoDocument,
   matchToMongoDocument,
@@ -19,16 +19,23 @@ import {
 } from './MatchMongoMapper';
 
 @Injectable()
-export class MatchMongoCacheAdapter implements MatchCache {
+export class MatchMongoRecorderAdapter implements MatchRecorder {
   constructor(
     @InjectCollection('matches')
     private readonly matchCollection: Collection<MatchMongoDocument>,
   ) {}
 
-  async recordMatch(match: Match, transaction?: ClientSession): Promise<void> {
-    await this.matchCollection.insertOne(matchToMongoDocument(match), {
-      session: transaction,
-    });
+  async recordMatch(
+    orderId: UUID,
+    hostId: UUID,
+    transaction?: ClientSession,
+  ): Promise<void> {
+    await this.matchCollection.insertOne(
+      matchToMongoDocument({ orderId, hostId }),
+      {
+        session: transaction,
+      },
+    );
   }
 
   async retrieveAndDeleteMatch(
@@ -62,7 +69,7 @@ export class MatchMongoCacheAdapter implements MatchCache {
 
     const matchDocument: MatchMongoDocument = await this.matchCollection.findOne(
       {
-        $and: [{ orderId: orderMongoBinaryId }, { hostId: hostMongoBinaryId }],
+        $and: [{ _id: orderMongoBinaryId }, { hostId: hostMongoBinaryId }],
       },
       transaction ? { session: transaction } : undefined,
     );

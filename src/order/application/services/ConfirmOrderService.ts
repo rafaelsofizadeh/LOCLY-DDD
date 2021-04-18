@@ -11,7 +11,7 @@ import {
 import { HostMatcher } from '../port/HostMatcher';
 import { OrderRepository } from '../port/OrderRepository';
 import { Host } from '../../domain/entity/Host';
-import { MatchCache } from '../port/MatchCache';
+import { MatchRecorder } from '../port/MatchRecorder';
 import { UUID } from '../../../common/domain/UUID';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
@@ -28,7 +28,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     // TODO: More general EventEmitter class, wrapper around eventEmitter
     private readonly eventEmitter: EventEmitter2,
     @InjectStripeClient() private readonly stripe: Stripe,
-    private readonly matchRecorder: MatchCache,
+    private readonly matchRecorder: MatchRecorder,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 

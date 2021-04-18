@@ -15,8 +15,8 @@ import { CustomerMongoRepositoryAdapter } from '../persistence/customer/Customer
 import { HostMongoRepositoryAdapter } from '../persistence/host/HostMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from '../persistence/order/OrderMongoRepositoryAdapter';
 import { OrderController } from '../rest-api/OrderController';
-import { MatchCache } from '../../application/port/MatchCache';
-import { MatchMongoCacheAdapter } from '../persistence/match/MatchMongoCacheAdapter';
+import { MatchRecorder } from '../../application/port/MatchRecorder';
+import { MatchMongoRecorderAdapter } from '../persistence/match/MatchMongoRecorderAdapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUseCaseService';
 import { ConfirmOrderWebhookHandler } from '../../application/services/ConfirmOrderWebhookHandler';
@@ -27,11 +27,11 @@ const persistenceProviders: Provider[] = [
   { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
   { provide: CustomerRepository, useClass: CustomerMongoRepositoryAdapter },
   { provide: HostRepository, useClass: HostMongoRepositoryAdapter },
-  { provide: MatchCache, useClass: MatchMongoCacheAdapter },
 ];
 
 const infrastructureProviders: Provider[] = [
   { provide: HostMatcher, useClass: HostMatcherService },
+  { provide: MatchRecorder, useClass: MatchMongoRecorderAdapter },
 ];
 
 const useCaseProviders: Provider[] = [

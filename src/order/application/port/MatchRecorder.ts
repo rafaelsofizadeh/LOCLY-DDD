@@ -4,14 +4,14 @@ import { UUID } from '../../../common/domain/UUID';
 // TODO/DECIDE: id is specifically a string (Stripe.Checkout.Session['client_reference_id']),
 // and not an UUID, because Match is a simple data object with no behaviour.
 export type Match = {
-  id: UUID;
   orderId: UUID;
   hostId: UUID;
 };
 
-export abstract class MatchCache {
+export abstract class MatchRecorder {
   abstract recordMatch(
-    match: Match,
+    orderId: UUID,
+    hostId: UUID,
     transaction?: ClientSession,
   ): Promise<void>;
 
