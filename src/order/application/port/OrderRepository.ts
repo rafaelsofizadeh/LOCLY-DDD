@@ -1,7 +1,11 @@
 import { ClientSession } from 'mongodb';
 import { UUID } from '../../../common/domain/UUID';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
-import { EditableOrderProps, Order } from '../../domain/entity/Order';
+import {
+  EditableOrderProps,
+  Order,
+  OrderStatus,
+} from '../../domain/entity/Order';
 
 export abstract class OrderRepository {
   abstract addOrder(
@@ -26,7 +30,7 @@ export abstract class OrderRepository {
 
   abstract setProperties(
     orderId: UUID,
-    properties: Partial<EditableOrderProps>,
+    properties: Partial<EditableOrderProps> & { status: OrderStatus },
     transaction?: ClientSession,
   ): Promise<void>;
 
