@@ -213,7 +213,7 @@ function itemMongoSubdocumentToItem(
     return [key, value];
   }, {} as ItemProps);
 
-  return new Item(Object.fromEntries(entries) as ItemProps);
+  return Item.fromData(Object.fromEntries(entries) as ItemProps);
 }
 
 function itemMongoSubdocumentToPhysicalItem(

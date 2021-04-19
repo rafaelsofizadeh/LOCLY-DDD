@@ -162,7 +162,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       originCountry,
       destination: testCustomer.selectedAddress,
       items: [
-        new Item({
+        Item.create({
           title: 'Laptop',
           storeName: 'Amazon',
           width: 100,

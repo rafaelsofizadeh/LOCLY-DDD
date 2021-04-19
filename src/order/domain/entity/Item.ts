@@ -29,9 +29,9 @@ export class ItemProps extends PhysicalItemProps {
 export type ItemPropsPlain = ItemProps;
 
 export class Item extends ItemProps {
-  constructor(
+  private constructor(
     {
-      id = UUID(),
+      id,
       title,
       storeName,
       category,
@@ -51,6 +51,14 @@ export class Item extends ItemProps {
     this.width = width;
     this.length = length;
     this.height = height;
+  }
+
+  static fromData(payload: ItemProps) {
+    return new this(payload);
+  }
+
+  static create(payload: Omit<ItemProps, 'id'>) {
+    return new this({ ...payload, id: UUID() });
   }
 
   get physicalCharacteristics(): PackagePhysicalCharacteristics {
