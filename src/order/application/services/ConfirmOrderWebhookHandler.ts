@@ -6,8 +6,6 @@ import { InjectClient } from 'nest-mongodb';
 import Stripe from 'stripe';
 import { UUID } from '../../../common/domain/UUID';
 import { withTransaction } from '../../../common/utils';
-import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
-import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 
 import { OrderStatus } from '../../domain/entity/Order';
 import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUseCaseService';
