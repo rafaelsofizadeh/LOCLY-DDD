@@ -1,50 +1,37 @@
-import { IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-
-import { IsUUID, UUID } from '../../../common/domain/UUID';
-import { Serializable } from '../../../common/domain/Serializable';
+import { UUID } from '../../../common/domain/UUID';
 
 import { Address, AddressProps } from './Address';
 import { DraftedOrder } from './DraftedOrder';
 
-export class CustomerProps {
-  @IsUUID()
-  id?: UUID;
-
-  @ValidateNested()
-  @Type(() => Address)
+export interface CustomerProps {
+  id: UUID;
   selectedAddress: Address;
-
-  @ValidateNested({ each: true })
-  @IsArray()
-  @Type(() => UUID)
   orderIds: UUID[];
 }
 
-export type CustomerPropsPlain = Omit<
-  Required<CustomerProps>,
-  'selectedAddress' | 'orderIds'
-> & {
+export type CustomerPropsPlain = Omit<CustomerProps, 'selectedAddress'> & {
   selectedAddress: AddressProps;
-  orderIds: string[];
 };
 
-export class Customer extends Serializable<
-  CustomerPropsPlain,
-  typeof CustomerProps
->(CustomerProps) {
-  constructor(
-    {
-      id = UUID(),
-      selectedAddress,
-      orderIds,
-    }: CustomerProps = new CustomerProps(), // default value is needed for class-validator plainToClass. Refer to: Order.ts
-  ) {
-    super();
+export class Customer implements CustomerProps {
+  readonly id: UUID;
 
+  readonly selectedAddress: Address;
+
+  readonly orderIds: UUID[];
+
+  private constructor({ id, selectedAddress, orderIds }: CustomerProps) {
     this.id = id;
     this.selectedAddress = selectedAddress;
     this.orderIds = orderIds;
+  }
+
+  static fromData(payload: CustomerProps) {
+    return new this(payload);
+  }
+
+  static create(payload: Omit<CustomerProps, 'id'>) {
+    return new this({ ...payload, id: UUID() });
   }
 
   acceptOrder({ id: orderId }: DraftedOrder) {
