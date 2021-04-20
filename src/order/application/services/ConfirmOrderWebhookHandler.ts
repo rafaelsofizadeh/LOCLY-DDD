@@ -55,8 +55,6 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
       matchId,
     );
 
-    console.log(orderId, hostId);
-
     await Promise.all([
       this.orderRepository.setProperties(
         orderId,

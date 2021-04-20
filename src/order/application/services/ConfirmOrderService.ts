@@ -59,7 +59,6 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       orderId,
       session,
     )) as DraftedOrder;
-    console.log({ draftedOrder });
 
     await draftedOrder.matchHost(
       async (draftedOrderToMatchHostTo: DraftedOrder) =>
