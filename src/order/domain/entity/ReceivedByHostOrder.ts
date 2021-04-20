@@ -27,11 +27,4 @@ export class ReceivedByHostOrder implements ReceivedByHostOrderProps {
 
     return receivedByHostOrder;
   }
-
-  serialize(): ReceivedByHostOrderPropsPlain {
-    return {
-      id: this.id,
-      receivedByHostDate: this.receivedByHostDate,
-    };
-  }
 }

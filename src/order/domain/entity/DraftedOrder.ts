@@ -1,3 +1,4 @@
+import { Modify, WithoutId } from '../../../common/domain/types';
 import { UUID } from '../../../common/domain/UUID';
 import { Code } from '../../../common/error-handling/Code';
 import { Exception } from '../../../common/error-handling/Exception';
@@ -7,6 +8,7 @@ import {
   ShipmentCostQuoteFn,
 } from '../../application/services/ShipmentCostCalculator/getShipmentCostQuote';
 import { Country } from '../data/Country';
+import { DraftOrderRequest } from '../use-case/DraftOrderUseCase';
 import { Address } from './Address';
 import { Item, ItemProps } from './Item';
 import { ShipmentCost } from './Order';
@@ -67,17 +69,20 @@ export class DraftedOrder implements DraftedOrderProps {
     this._originCountry = originCountry;
   }
 
-  static fromData(payload: DraftedOrderProps) {
-    return new this(payload);
+  static fromData(payload: Modify<DraftedOrderProps, { items: ItemProps[] }>) {
+    return new this({
+      ...payload,
+      items: payload.items.map(Item.fromData.bind(Item)),
+    });
   }
 
   static async create(
     {
       customerId,
-      items,
+      items: itemProps,
       originCountry,
       destination,
-    }: Omit<DraftedOrderProps, 'id' | 'shipmentCost'>,
+    }: DraftOrderRequest,
     shipmentCostQuoteFn: ShipmentCostQuoteFn,
     serviceAvailabilityFn: ServiceAvailabilityFn,
     saveOrder: (draftedOrder: DraftedOrder) => Promise<unknown>,
@@ -86,6 +91,10 @@ export class DraftedOrder implements DraftedOrderProps {
       originCountry,
       destination,
       serviceAvailabilityFn,
+    );
+
+    const items = itemProps.map((subitemProps: ItemProps) =>
+      Item.create(subitemProps),
     );
 
     const shipmentCost = this.approximateShipmentCost(
@@ -120,17 +129,6 @@ export class DraftedOrder implements DraftedOrderProps {
   ): Promise<void> {
     const matchedHostId: UUID = await findMatchingHostFn(this);
     await persistHostMatch(this, matchedHostId);
-  }
-
-  serialize(): DraftedOrderPropsPlain {
-    return {
-      id: this.id,
-      customerId: this.customerId,
-      items: this.items.map(item => item.serialize()),
-      destination: this.destination.serialize(),
-      originCountry: this.originCountry,
-      shipmentCost: this.shipmentCost,
-    };
   }
 
   private static validateOriginDestination(

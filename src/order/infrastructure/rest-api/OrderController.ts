@@ -13,6 +13,7 @@ import {
   ReceiveOrderHostUseCase,
 } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
+import { SerializePrivatePropertiesInterceptor } from './SerializePrivatePropertiesInterceptor';
 
 // TODO: Separate out to classes per each use case
 @Controller('order')
@@ -25,6 +26,7 @@ export class OrderController {
 
   // TODO(GLOBAL): Serialization
   @Post('create')
+  @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async draftOrder(
     @Body() orderRequest: DraftOrderRequestAdapter,
   ): Promise<DraftedOrder> {
@@ -32,28 +34,28 @@ export class OrderController {
       orderRequest,
     );
 
-    return draftedOrder.serialize();
+    return draftedOrder;
   }
 
   @Post('confirm')
   async confirmOrder(
     @Body() confirmationRequest: ConfirmOrderRequestAdapter,
   ): Promise<StripeCheckoutSession> {
-    const checkoutId = await this.confirmOrderUseCase.execute(
+    const stripeCheckoutSession = await this.confirmOrderUseCase.execute(
       confirmationRequest,
     );
 
-    return checkoutId;
+    return stripeCheckoutSession;
   }
 
   @Post('receivedByHost')
   async receiveOrderByHost(
     @Body() receiveOrderByHostRequest: ReceiveOrderHostRequestAdapter,
   ): Promise<ReceiveOrderHostResult> {
-    const receivedByHostDate = await this.receiveOrderByHostUseCase.execute(
+    const receivedByHostDateResult = await this.receiveOrderByHostUseCase.execute(
       receiveOrderByHostRequest,
     );
 
-    return receivedByHostDate;
+    return receivedByHostDateResult;
   }
 }

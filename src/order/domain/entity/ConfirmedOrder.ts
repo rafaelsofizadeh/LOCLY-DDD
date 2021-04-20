@@ -31,12 +31,4 @@ export class ConfirmedOrder implements ConfirmedOrderProps {
   toReceivedByHost() {
     return ReceivedByHostOrder.create(this);
   }
-
-  serialize(): ConfirmedOrderPropsPlain {
-    return {
-      id: this.id,
-      originCountry: this.originCountry,
-      hostId: this.hostId,
-    };
-  }
 }

@@ -102,17 +102,6 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
     return verifiedByHostOrder;
   }
 
-  serialize(): VerifiedByHostOrderPropsPlain {
-    return {
-      id: this.id,
-      physicalItems: this.physicalItems.map(physicalItem =>
-        physicalItem.serialize(),
-      ),
-      destination: this.destination.serialize(),
-      originCountry: this.originCountry,
-      shipmentCost: this.shipmentCost,
-    };
-  }
   // edit({ physicalItems }: Pick<VerifiedByHostOrderProps, 'physicalItems'>) {
   //   if (!this.areItemsAssignable(physicalItems)) {
   //     throw new Exception(

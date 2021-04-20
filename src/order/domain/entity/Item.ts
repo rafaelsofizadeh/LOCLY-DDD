@@ -80,17 +80,4 @@ export class Item implements ItemProps {
       weight: this.weight,
     };
   }
-
-  serialize(): ItemPropsPlain {
-    return {
-      id: this.id,
-      title: this.title,
-      storeName: this.storeName,
-      category: this.category,
-      weight: this.weight,
-      width: this.width,
-      length: this.length,
-      height: this.height,
-    };
-  }
 }
