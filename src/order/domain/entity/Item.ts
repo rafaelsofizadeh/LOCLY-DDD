@@ -1,9 +1,9 @@
-import { IsString, Length, IsEnum } from 'class-validator';
+import { WithoutId } from '../../../common/domain/types';
 import { UUID } from '../../../common/domain/UUID';
-import {
-  PackagePhysicalCharacteristics,
-  PhysicalItemProps,
-} from './PhysicalItem';
+
+export type Gram = number;
+
+// TODO(GLOBAL): Replace ___Props interfaces with plain ___
 
 export const Category = {
   Art: 'art',
@@ -13,36 +13,47 @@ export const Category = {
 
 export type Category = typeof Category[keyof typeof Category];
 
-export class ItemProps extends PhysicalItemProps {
-  @IsString()
-  @Length(5, 280)
+export type PhysicalItemProps = {
+  width: number;
+  length: number;
+  height: number;
+  weight: Gram;
+};
+
+export interface ItemProps extends PhysicalItemProps {
+  id: UUID;
   title: string;
-
-  @IsString()
-  @Length(2, 50)
   storeName: string;
-
-  @IsEnum(Category)
   category: Category;
 }
 
-export type ItemPropsPlain = ItemProps;
+export class Item implements ItemProps {
+  readonly id: UUID;
 
-export class Item extends ItemProps {
-  private constructor(
-    {
-      id,
-      title,
-      storeName,
-      category,
-      weight,
-      width,
-      length,
-      height,
-    }: ItemProps = new ItemProps(), // default value is needed for class-validator plainToClass. Refer to: Order.ts
-  ) {
-    super();
+  readonly title: string;
 
+  readonly storeName: string;
+
+  readonly category: Category;
+
+  readonly width: number;
+
+  readonly length: number;
+
+  readonly height: number;
+
+  readonly weight: Gram;
+
+  private constructor({
+    id,
+    title,
+    storeName,
+    category,
+    weight,
+    width,
+    length,
+    height,
+  }: ItemProps) {
     this.id = id;
     this.title = title;
     this.storeName = storeName;
@@ -57,11 +68,11 @@ export class Item extends ItemProps {
     return new this(payload);
   }
 
-  static create(payload: Omit<ItemProps, 'id'>) {
+  static create(payload: WithoutId<ItemProps>) {
     return new this({ ...payload, id: UUID() });
   }
 
-  get physicalCharacteristics(): PackagePhysicalCharacteristics {
+  get physicalCharacteristics(): PhysicalItemProps {
     return {
       width: this.width,
       length: this.length,

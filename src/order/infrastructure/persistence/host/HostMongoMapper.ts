@@ -1,13 +1,13 @@
 import { Binary } from 'mongodb';
 
-import { muuidToUuid, stringToMuuid } from '../../../../common/utils';
+import { muuidToUuid, uuidToMuuid } from '../../../../common/utils';
 
 import { Host } from '../../../domain/entity/Host';
-import { Address, AddressProps } from '../../../domain/entity/Address';
+import { Address } from '../../../domain/entity/Address';
 
 export type HostMongoDocument = {
   _id: Binary;
-  address: AddressProps;
+  address: Address;
   available: boolean;
   orderIds: Binary[];
 };
@@ -18,18 +18,18 @@ export function mongoDocumentToHost({
   available,
   orderIds,
 }: HostMongoDocument): Host {
-  return new Host({
+  return Host.fromData({
     id: muuidToUuid(_id),
-    address: new Address(address),
+    address,
     available,
     orderIds: orderIds.map(muuidToUuid),
   });
 }
 
 export function hostToMongoDocument(host: Host): HostMongoDocument {
-  const { id, orderIds, ...restPlainHost } = host.serialize();
-  const mongoBinaryId = stringToMuuid(id);
-  const orderMongoBinaryIds = orderIds.map(stringToMuuid);
+  const { id, orderIds, ...restPlainHost } = host;
+  const mongoBinaryId = uuidToMuuid(id);
+  const orderMongoBinaryIds = orderIds.map(uuidToMuuid);
 
   return {
     ...restPlainHost,

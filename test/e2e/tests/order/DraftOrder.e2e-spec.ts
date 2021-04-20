@@ -9,10 +9,7 @@ import { OrderRepository } from '../../../../src/order/application/port/OrderRep
 import { UUID } from '../../../../src/common/domain/UUID';
 import { OrderStatus } from '../../../../src/order/domain/entity/Order';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
-import {
-  Address,
-  AddressProps,
-} from '../../../../src/order/domain/entity/Address';
+import { Address } from '../../../../src/order/domain/entity/Address';
 import { Category } from '../../../../src/order/domain/entity/Item';
 import {
   destinationCountriesAvailable,
@@ -46,10 +43,8 @@ describe('Create Order – POST /order/create', () => {
 
     // Customer shouldn't be affected from test case to test case,
     // so we initialize it once, before all tests.
-    testCustomer = new Customer({
-      selectedAddress: new Address({
-        country: destinationCountriesAvailable[1],
-      }),
+    testCustomer = Customer.create({
+      selectedAddress: { country: destinationCountriesAvailable[1] },
       orderIds: [],
     });
 
@@ -99,7 +94,7 @@ describe('Create Order – POST /order/create', () => {
       id: string;
       customerId: string;
       status: OrderStatus;
-      destination: AddressProps;
+      destination: Address;
     } = response.body;
 
     testOrderId = UUID(id);
@@ -113,7 +108,7 @@ describe('Create Order – POST /order/create', () => {
     expect(updatedTestCustomer.orderIds).toContain(testOrderId);
     expect(isUUID(id)).toBe(true);
     expect(customerId).toEqual(updatedTestCustomer.id);
-    expect(status).toBe(OrderStatus.Drafted);
+    // Test for order's status (which is stored only in DB and serialized out)
     expect(destination.country).toBe(testCustomer.selectedAddress.country);
   });
 });

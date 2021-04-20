@@ -1,19 +1,16 @@
 import { Binary } from 'mongodb';
 
-import { muuidToUuid, stringToMuuid } from '../../../../common/utils';
+import { muuidToUuid, uuidToMuuid } from '../../../../common/utils';
 
 import { Item, ItemProps } from '../../../domain/entity/Item';
-import { Address, AddressProps } from '../../../domain/entity/Address';
+import { Address } from '../../../domain/entity/Address';
 import { Order, OrderStatus, ShipmentCost } from '../../../domain/entity/Order';
 import { Country } from '../../../domain/data/Country';
 import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
 import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
 import { ReceivedByHostOrder } from '../../../domain/entity/ReceivedByHostOrder';
 import { VerifiedByHostOrder } from '../../../domain/entity/VerifiedByHostOrder';
-import {
-  PhysicalItem,
-  PhysicalItemProps,
-} from '../../../domain/entity/PhysicalItem';
+import { PhysicalItemProps } from '../../../domain/entity/Item';
 import { UUID } from '../../../../common/domain/UUID';
 
 // TODO(GLOBAL): EntityIdToString type, but for UUID->Binary
@@ -32,7 +29,7 @@ export type DraftedOrderMongoDocument = {
   originCountry: Country;
   items: ItemMongoSubdocument[];
   shipmentCost: ShipmentCost;
-  destination: AddressProps;
+  destination: Address;
 };
 
 export type ConfirmedOrderMongoDocument = {
@@ -54,7 +51,7 @@ export type VerifiedByHostOrderMongoDocument = {
   originCountry: Country;
   items: ItemMongoSubdocument[];
   shipmentCost: ShipmentCost;
-  destination: AddressProps;
+  destination: Address;
 };
 
 export type VerifiedByHostOrderMongoDocumentProps = {
@@ -63,7 +60,7 @@ export type VerifiedByHostOrderMongoDocumentProps = {
   originCountry: Country;
   physicalItems: PhysicalItemMongoSubdocument[];
   shipmentCost: ShipmentCost;
-  destination: AddressProps;
+  destination: Address;
 };
 
 export type OrderMongoDocument =
@@ -97,20 +94,25 @@ export function isVerifiedByHostOrderMongoDocument(
   return orderMongoDocument.status === OrderStatus.VerifiedByHost;
 }
 
-export function draftedOrderToMongoDocument(
-  draftedOrder: DraftedOrder,
-): DraftedOrderMongoDocument {
-  const { id, customerId, items, ...restPlainOrder } = draftedOrder.serialize();
-
+export function draftedOrderToMongoDocument({
+  id,
+  customerId,
+  items,
+  originCountry,
+  destination,
+  shipmentCost,
+}: DraftedOrder): DraftedOrderMongoDocument {
   return {
-    ...restPlainOrder,
-    _id: stringToMuuid(id),
+    _id: uuidToMuuid(id),
     status: OrderStatus.Drafted,
-    customerId: stringToMuuid(customerId),
+    customerId: uuidToMuuid(customerId),
     items: items.map(({ id, ...restItem }) => ({
-      _id: stringToMuuid(id),
+      _id: uuidToMuuid(id),
       ...restItem,
     })),
+    originCountry,
+    destination,
+    shipmentCost,
   };
 }
 
@@ -120,17 +122,19 @@ export function serializeVerifiedByHostOrderToMongoDocumentProps(
   const {
     id,
     physicalItems,
+    shipmentCost,
     ...restPlainOrder
-  } = verifiedByHostOrder.serialize();
+  } = verifiedByHostOrder;
 
   return {
     ...restPlainOrder,
-    _id: stringToMuuid(id),
+    _id: uuidToMuuid(id),
     status: OrderStatus.Confirmed,
-    physicalItems: physicalItems.map(({ id, ...restPhysicalItem }) => ({
-      _id: stringToMuuid(id),
-      ...restPhysicalItem,
+    physicalItems: physicalItems.map(physicalItem => ({
+      _id: uuidToMuuid(id),
+      ...physicalItem,
     })),
+    shipmentCost,
   };
 }
 
@@ -141,7 +145,7 @@ export function mongoDocumentToOrder(orderDocument: OrderMongoDocument): Order {
     }
 
     if (key === 'destination') {
-      return ['destination', new Address(value)];
+      return ['destination', value];
     }
 
     if (key === 'items') {
@@ -218,7 +222,7 @@ function itemMongoSubdocumentToItem(
 
 function itemMongoSubdocumentToPhysicalItem(
   itemSubdocument: ItemMongoSubdocument,
-): PhysicalItem {
+): PhysicalItemProps {
   const entries = Object.entries(itemSubdocument).map(([key, value]) => {
     if (isBinary(value)) {
       return serializeBinaryValues(key, value);
@@ -227,7 +231,7 @@ function itemMongoSubdocumentToPhysicalItem(
     return [key, value];
   }, {} as ItemProps);
 
-  return new PhysicalItem(Object.fromEntries(entries) as PhysicalItemProps);
+  return Object.fromEntries(entries) as PhysicalItemProps;
 }
 
 function isBinary(value: any): value is Binary {

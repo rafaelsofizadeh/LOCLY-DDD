@@ -1,10 +1,10 @@
 import { UUID } from '../../../common/domain/UUID';
-import { PhysicalItem } from '../entity/PhysicalItem';
+import { PhysicalItemProps } from '../entity/Item';
 import { VerifiedByHostOrder } from '../entity/VerifiedByHostOrder';
 
 export interface HostEditOrderRequest {
   orderId: UUID;
-  physicalItems: PhysicalItem[];
+  physicalItems: PhysicalItemProps[];
 }
 
 export abstract class VerifiedByHostOrderUseCase {

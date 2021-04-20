@@ -7,26 +7,17 @@ import {
   ShipmentCostQuoteFn,
 } from '../../application/services/ShipmentCostCalculator/getShipmentCostQuote';
 import { Country } from '../data/Country';
-import { Address, AddressPropsPlain } from './Address';
+import { Address } from './Address';
 import { ShipmentCost } from './Order';
-import { PhysicalItem, PhysicalItemPropsPlain } from './PhysicalItem';
+import { PhysicalItemProps } from './Item';
 
 export interface VerifiedByHostOrderProps {
   id: UUID;
-  physicalItems: PhysicalItem[];
+  physicalItems: PhysicalItemProps[];
   originCountry: Country;
   destination: Address;
   shipmentCost: ShipmentCost;
 }
-
-export type VerifiedByHostOrderPropsPlain = Omit<
-  VerifiedByHostOrderProps,
-  'physicalItems' | 'destination' | 'shipmentCost'
-> & {
-  physicalItems: PhysicalItemPropsPlain[];
-  destination: AddressPropsPlain;
-  shipmentCost: ShipmentCost;
-};
 
 export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
   readonly id: UUID;
@@ -35,17 +26,17 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
 
   readonly destination: Address;
 
-  private _physicalItems: PhysicalItem[];
+  private _physicalItems: PhysicalItemProps[];
 
   private _shipmentCost: ShipmentCost;
 
   private readonly shipmentCostQuoteFn: ShipmentCostQuoteFn;
 
-  get physicalItems(): PhysicalItem[] {
+  get physicalItems(): PhysicalItemProps[] {
     return this._physicalItems;
   }
 
-  private setPhysicalItems(physicalItems: PhysicalItem[]) {
+  private setPhysicalItems(physicalItems: PhysicalItemProps[]) {
     this._physicalItems = physicalItems;
     this._shipmentCost = this.approximateShipmentCost();
   }
@@ -55,14 +46,12 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
   }
 
   private approximateShipmentCost(
-    physicalItems: PhysicalItem[] = this._physicalItems,
+    physicalItems: PhysicalItemProps[] = this._physicalItems,
   ): ShipmentCost {
     const { currency, services }: ShipmentCostQuote = this.shipmentCostQuoteFn(
       this.originCountry,
       this.destination.country,
-      physicalItems.map(
-        ({ physicalCharacteristics }) => physicalCharacteristics,
-      ),
+      physicalItems,
     );
 
     // TODO: Service choice logic
@@ -113,28 +102,6 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
     return verifiedByHostOrder;
   }
 
-  edit({ physicalItems }: Pick<VerifiedByHostOrderProps, 'physicalItems'>) {
-    if (!this.areItemsAssignable(physicalItems)) {
-      throw new Exception(
-        Code.INTERNAL_ERROR,
-        "Host cannot add or remove any items from the list, only update existing items's properties.",
-      );
-    }
-
-    this.setPhysicalItems(physicalItems);
-  }
-
-  private areItemsAssignable(comparateItems: PhysicalItem[]): boolean {
-    return (
-      this._physicalItems.length == comparateItems.length &&
-      this._physicalItems.every(({ id: itemId }) =>
-        comparateItems.some(
-          ({ id: comparateItemId }) => itemId === comparateItemId,
-        ),
-      )
-    );
-  }
-
   serialize(): VerifiedByHostOrderPropsPlain {
     return {
       id: this.id,
@@ -146,4 +113,25 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
       shipmentCost: this.shipmentCost,
     };
   }
+  // edit({ physicalItems }: Pick<VerifiedByHostOrderProps, 'physicalItems'>) {
+  //   if (!this.areItemsAssignable(physicalItems)) {
+  //     throw new Exception(
+  //       Code.INTERNAL_ERROR,
+  //       "Host cannot add or remove any items from the list, only update existing items's properties.",
+  //     );
+  //   }
+
+  //   this.setPhysicalItems(physicalItems);
+  // }
+  //
+  // private areItemsAssignable(comparateItems: PhysicalItemProps[]): boolean {
+  //   return (
+  //     this._physicalItems.length == comparateItems.length &&
+  //     this._physicalItems.every(({ id: itemId }) =>
+  //       comparateItems.some(
+  //         ({ id: comparateItemId }) => itemId === comparateItemId,
+  //       ),
+  //     )
+  //   );
+  // }
 }

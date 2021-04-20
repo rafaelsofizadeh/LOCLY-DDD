@@ -7,8 +7,8 @@ import {
   ShipmentCostQuoteFn,
 } from '../../application/services/ShipmentCostCalculator/getShipmentCostQuote';
 import { Country } from '../data/Country';
-import { Address, AddressPropsPlain } from './Address';
-import { Item, ItemPropsPlain } from './Item';
+import { Address } from './Address';
+import { Item, ItemProps } from './Item';
 import { ShipmentCost } from './Order';
 
 export interface DraftedOrderProps {
@@ -19,19 +19,6 @@ export interface DraftedOrderProps {
   destination: Address;
   shipmentCost: ShipmentCost;
 }
-
-export type DraftedOrderPropsPlain = Omit<
-  DraftedOrderProps,
-  'items' | 'destination' | 'shipmentCost'
-> & {
-  items: ItemPropsPlain[];
-  destination: AddressPropsPlain;
-  shipmentCost: ShipmentCost;
-};
-
-type DraftedOrderEditProps = Partial<
-  Omit<DraftedOrderProps, 'id' | 'shipmentCost' | 'customerId'>
->;
 
 // TODO(FUTURE): optimizations, e.g. "has this property changed?". Proxies, more elegant connection between
 // originCountry, destination, items.weight and shipmentCost

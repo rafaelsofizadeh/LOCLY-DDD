@@ -5,8 +5,6 @@ export interface ReceivedByHostOrderProps {
   receivedByHostDate: Date;
 }
 
-export type ReceivedByHostOrderPropsPlain = ReceivedByHostOrderProps;
-
 export class ReceivedByHostOrder implements ReceivedByHostOrderProps {
   readonly id: UUID;
 

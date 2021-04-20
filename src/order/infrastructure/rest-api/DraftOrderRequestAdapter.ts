@@ -1,15 +1,53 @@
 import {
   ArrayMinSize,
   IsArray,
+  IsEnum,
+  IsInt,
   IsISO31661Alpha3,
+  IsPositive,
+  IsString,
+  Length,
   ValidateNested,
 } from 'class-validator';
 
 import { IsUUID, UUID } from '../../../common/domain/UUID';
 import { Country } from '../../domain/data/Country';
-import { Address } from '../../domain/entity/Address';
-import { Item } from '../../domain/entity/Item';
+import { Category, Gram } from '../../domain/entity/Item';
 import { DraftOrderRequest } from '../../domain/use-case/DraftOrderUseCase';
+
+class ItemValidationSchema {
+  @IsString()
+  @Length(5, 280)
+  title: string;
+
+  @IsString()
+  @Length(2, 50)
+  storeName: string;
+
+  @IsEnum(Category)
+  category: Category;
+
+  @IsInt()
+  @IsPositive()
+  weight: Gram;
+
+  @IsInt()
+  @IsPositive()
+  width: number;
+
+  @IsInt()
+  @IsPositive()
+  length: number;
+
+  @IsInt()
+  @IsPositive()
+  height: number;
+}
+
+class AddressValidationSchema {
+  @IsISO31661Alpha3()
+  country: Country;
+}
 
 export class DraftOrderRequestAdapter implements DraftOrderRequest {
   @IsUUID()
@@ -19,10 +57,10 @@ export class DraftOrderRequestAdapter implements DraftOrderRequest {
   readonly originCountry: Country;
 
   @ValidateNested()
-  readonly destination: Address;
+  readonly destination: AddressValidationSchema;
 
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @IsArray()
-  readonly items: Item[];
+  readonly items: ItemValidationSchema[];
 }

@@ -12,10 +12,7 @@ import {
   ReceiveOrderHostResult,
   ReceiveOrderHostUseCase,
 } from '../../domain/use-case/ReceiveOrderByHostUseCase';
-import {
-  DraftedOrder,
-  DraftedOrderPropsPlain,
-} from '../../domain/entity/DraftedOrder';
+import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 
 // TODO: Separate out to classes per each use case
 @Controller('order')
@@ -30,7 +27,7 @@ export class OrderController {
   @Post('create')
   async draftOrder(
     @Body() orderRequest: DraftOrderRequestAdapter,
-  ): Promise<DraftedOrderPropsPlain> {
+  ): Promise<DraftedOrder> {
     const draftedOrder: DraftedOrder = await this.draftOrderUseCase.execute(
       orderRequest,
     );

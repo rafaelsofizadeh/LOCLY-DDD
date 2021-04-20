@@ -8,7 +8,6 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { Host } from '../../../../src/order/domain/entity/Host';
-import { Address } from '../../../../src/order/domain/entity/Address';
 
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
@@ -73,10 +72,8 @@ describe('Confirm Order – POST /order/confirm', () => {
     const originCountry: Country = originCountriesAvailable[0];
     const destinationCountry: Country = destinationCountriesAvailable[0];
 
-    testCustomer = new Customer({
-      selectedAddress: new Address({
-        country: destinationCountry,
-      }),
+    testCustomer = Customer.create({
+      selectedAddress: { country: destinationCountry },
       orderIds: [],
     });
 
@@ -142,13 +139,12 @@ describe('Confirm Order – POST /order/confirm', () => {
       },
     ];
 
-    testHosts = testHostConfigs.map(
-      ({ country, available, orderCount }) =>
-        new Host({
-          address: new Address({ country }),
-          available,
-          orderIds: [...Array(orderCount)].map(_ => muuidToUuid(MUUID.v4())),
-        }),
+    testHosts = testHostConfigs.map(({ country, available, orderCount }) =>
+      Host.create({
+        address: { country },
+        available,
+        orderIds: [...Array(orderCount)].map(_ => muuidToUuid(MUUID.v4())),
+      }),
     );
 
     // TODO(?): Promise.all()'ing this leads to an ERROR. Apparently a write conflict between

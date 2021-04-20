@@ -1,6 +1,6 @@
 import { UUID } from '../../../common/domain/UUID';
 
-import { Address, AddressProps } from './Address';
+import { Address } from './Address';
 import { DraftedOrder } from './DraftedOrder';
 
 export interface CustomerProps {
@@ -8,10 +8,6 @@ export interface CustomerProps {
   selectedAddress: Address;
   orderIds: UUID[];
 }
-
-export type CustomerPropsPlain = Omit<CustomerProps, 'selectedAddress'> & {
-  selectedAddress: AddressProps;
-};
 
 export class Customer implements CustomerProps {
   readonly id: UUID;

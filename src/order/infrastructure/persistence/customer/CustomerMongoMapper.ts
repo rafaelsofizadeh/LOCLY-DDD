@@ -1,11 +1,11 @@
 import { Binary } from 'mongodb';
 
-import { muuidToUuid, stringToMuuid } from '../../../../common/utils';
+import { muuidToUuid, uuidToMuuid } from '../../../../common/utils';
 
 import { Customer } from '../../../domain/entity/Customer';
-import { Address, AddressProps } from '../../../domain/entity/Address';
+import { Address } from '../../../domain/entity/Address';
 
-type CustomerAddress = AddressProps & { selected: boolean };
+type CustomerAddress = Address & { selected: boolean };
 
 export type CustomerMongoDocument = {
   _id: Binary;
@@ -19,9 +19,13 @@ export function mongoDocumentToCustomer({
   addresses,
   orderIds,
 }: CustomerMongoDocument): Customer {
-  return new Customer({
+  const { selected, ...selectedAddress } = addresses.find(
+    ({ selected }) => selected,
+  );
+
+  return Customer.fromData({
     id: muuidToUuid(_id),
-    selectedAddress: new Address(addresses.find(({ selected }) => selected)),
+    selectedAddress,
     orderIds: orderIds.map(muuidToUuid),
   });
 }
@@ -29,21 +33,15 @@ export function mongoDocumentToCustomer({
 export function customerToMongoDocument(
   customer: Customer,
 ): CustomerMongoDocument {
-  const {
-    id,
-    selectedAddress,
-    orderIds,
-    ...restPlainCustomer
-  } = customer.serialize();
+  const { id, selectedAddress, orderIds } = customer;
 
-  const mongoBinaryId = stringToMuuid(id);
+  const mongoBinaryId = uuidToMuuid(id);
   const mongoCustomerSelectedAddress = { ...selectedAddress, selected: true };
-  const orderMongoBinaryIds = orderIds.map(orderId => stringToMuuid(orderId));
+  const orderMongoBinaryIds = orderIds.map(orderId => uuidToMuuid(orderId));
 
   return {
     _id: mongoBinaryId,
     addresses: [mongoCustomerSelectedAddress],
     orderIds: orderMongoBinaryIds,
-    ...restPlainCustomer,
   };
 }

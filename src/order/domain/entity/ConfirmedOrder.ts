@@ -9,8 +9,6 @@ export interface ConfirmedOrderProps {
   hostId: UUID;
 }
 
-export type ConfirmedOrderPropsPlain = ConfirmedOrderProps;
-
 export class ConfirmedOrder implements ConfirmedOrderProps {
   readonly id: UUID;
 

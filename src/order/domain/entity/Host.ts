@@ -1,6 +1,6 @@
 import { UUID } from '../../../common/domain/UUID';
 
-import { Address, AddressProps } from './Address';
+import { Address } from './Address';
 import { ConfirmedOrder } from './ConfirmedOrder';
 
 export interface HostProps {
@@ -9,10 +9,6 @@ export interface HostProps {
   available: boolean;
   orderIds: UUID[];
 }
-
-export type HostPropsPlain = Omit<HostProps, 'address'> & {
-  address: AddressProps;
-};
 
 export class Host implements HostProps {
   readonly id: UUID;
