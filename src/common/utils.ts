@@ -20,10 +20,6 @@ export function uuidToMuuid(id: UUID): Binary {
   return MUUID.from(id);
 }
 
-export function stringToMuuid(id: string): Binary {
-  return MUUID.from(id);
-}
-
 export function getRandomElement<T>(array: T[]): T {
   const elementCount = array.length;
   return array[Math.floor(Math.random() * elementCount)];
