@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
 
 import { DraftOrderRequestAdapter } from './DraftOrderRequestAdapter';
 import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
@@ -34,8 +28,6 @@ export class OrderController {
 
   // TODO(GLOBAL): Serialization
   @Post('create')
-  // Validation and transformation is performed by Nest.js global validation pipe
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async draftOrder(
     @Body() orderRequest: DraftOrderRequestAdapter,
   ): Promise<DraftedOrderPropsPlain> {
@@ -47,8 +39,6 @@ export class OrderController {
   }
 
   @Post('confirm')
-  // Validation and transformation is performed by Nest.js global validation pipe
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async confirmOrder(
     @Body() confirmationRequest: ConfirmOrderRequestAdapter,
   ): Promise<StripeCheckoutSession> {
@@ -60,8 +50,6 @@ export class OrderController {
   }
 
   @Post('receivedByHost')
-  // Validation and transformation is performed by Nest.js global validation pipe
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async receiveOrderByHost(
     @Body() receiveOrderByHostRequest: ReceiveOrderHostRequestAdapter,
   ): Promise<ReceiveOrderHostResult> {
