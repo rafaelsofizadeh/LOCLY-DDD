@@ -1,8 +1,8 @@
 import { Binary } from 'mongodb';
 
-import { muuidToUuid, uuidToMuuid } from '../../../../common/utils';
+import { uuidToMuuid } from '../../../../common/utils';
 
-import { Item, ItemProps } from '../../../domain/entity/Item';
+import { ItemProps } from '../../../domain/entity/Item';
 import { Address } from '../../../domain/entity/Address';
 import { Order, OrderStatus, ShipmentCost } from '../../../domain/entity/Order';
 import { Country } from '../../../domain/data/Country';
@@ -11,7 +11,7 @@ import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
 import { ReceivedByHostOrder } from '../../../domain/entity/ReceivedByHostOrder';
 import { VerifiedByHostOrder } from '../../../domain/entity/VerifiedByHostOrder';
 import { PhysicalItemProps } from '../../../domain/entity/Item';
-import { UUID } from '../../../../common/domain/UUID';
+import { SerializedMongoDocument, serializeMongoData } from '../utils';
 
 // TODO(GLOBAL): EntityIdToString type, but for UUID->Binary
 export type ItemMongoSubdocument = Omit<ItemProps, 'id'> & {
@@ -22,46 +22,48 @@ export type PhysicalItemMongoSubdocument = Omit<PhysicalItemProps, 'id'> & {
   _id: Binary;
 };
 
-export type DraftedOrderMongoDocument = {
+type AnyOrderMongoDocument = {
   _id: Binary;
   status: OrderStatus;
   customerId: Binary;
+  hostId: Binary;
   originCountry: Country;
   items: ItemMongoSubdocument[];
   shipmentCost: ShipmentCost;
   destination: Address;
-};
-
-export type ConfirmedOrderMongoDocument = {
-  _id: Binary;
-  status: OrderStatus;
-  originCountry: Country;
-  hostId: Binary;
-};
-
-export type ReceivedByHostOrderMongoDocument = {
-  _id: Binary;
-  status: OrderStatus;
   receivedByHostDate: Date;
 };
 
-export type VerifiedByHostOrderMongoDocument = {
-  _id: Binary;
-  status: OrderStatus;
-  originCountry: Country;
-  items: ItemMongoSubdocument[];
-  shipmentCost: ShipmentCost;
-  destination: Address;
-};
+export type DraftedOrderMongoDocument = Pick<
+  AnyOrderMongoDocument,
+  | '_id'
+  | 'status'
+  | 'customerId'
+  | 'originCountry'
+  | 'items'
+  | 'shipmentCost'
+  | 'destination'
+>;
 
-export type VerifiedByHostOrderMongoDocumentProps = {
-  _id: Binary;
-  status: OrderStatus;
-  originCountry: Country;
-  physicalItems: PhysicalItemMongoSubdocument[];
-  shipmentCost: ShipmentCost;
-  destination: Address;
-};
+export type ConfirmedOrderMongoDocument = Pick<
+  AnyOrderMongoDocument,
+  '_id' | 'status' | 'originCountry' | 'hostId'
+>;
+
+export type ReceivedByHostOrderMongoDocument = Pick<
+  AnyOrderMongoDocument,
+  '_id' | 'status' | 'receivedByHostDate'
+>;
+
+export type VerifiedByHostOrderMongoDocument = Pick<
+  AnyOrderMongoDocument,
+  '_id' | 'status' | 'originCountry' | 'items' | 'shipmentCost' | 'destination'
+>;
+
+export type VerifiedByHostOrderMongoDocumentProps = Omit<
+  VerifiedByHostOrderMongoDocument,
+  'items'
+> & { physicalItems: PhysicalItemMongoSubdocument[] };
 
 export type OrderMongoDocument =
   | DraftedOrderMongoDocument
@@ -69,7 +71,6 @@ export type OrderMongoDocument =
   | ReceivedByHostOrderMongoDocument
   | VerifiedByHostOrderMongoDocument;
 
-// TODO: instanceof-based order type guards
 export function isDraftedOrderMongoDocument(
   orderMongoDocument: OrderMongoDocument,
 ): orderMongoDocument is DraftedOrderMongoDocument {
@@ -139,101 +140,34 @@ export function serializeVerifiedByHostOrderToMongoDocumentProps(
 }
 
 export function mongoDocumentToOrder(orderDocument: OrderMongoDocument): Order {
-  const entries = Object.entries(orderDocument).map(([key, value]) => {
-    if (value instanceof Binary) {
-      return serializeBinaryValues(key, value);
-    }
-
-    if (key === 'destination') {
-      return ['destination', value];
-    }
-
-    if (key === 'items') {
-      return [
-        'items',
-        (value as ItemMongoSubdocument[]).map(itemMongoSubdocumentToItem),
-      ];
-    }
-
-    if (key === 'physicalItems') {
-      return [
-        'physicalItems',
-        (value as ItemMongoSubdocument[]).map(
-          itemMongoSubdocumentToPhysicalItem,
-        ),
-      ];
-    }
-
-    return [key, value];
-  }, {} as OrderMongoDocument);
-
-  const payload = Object.fromEntries(entries);
+  const payload = serializeMongoData(orderDocument);
 
   if (isDraftedOrderMongoDocument(orderDocument)) {
-    return DraftedOrder.fromData(payload);
+    return DraftedOrder.fromData(
+      payload as SerializedMongoDocument<DraftedOrderMongoDocument>,
+    );
   } else if (isConfirmedOrderMongoDocument(orderDocument)) {
-    return ConfirmedOrder.fromData(payload);
+    return ConfirmedOrder.fromData(
+      payload as SerializedMongoDocument<ConfirmedOrderMongoDocument>,
+    );
   } else if (isReceivedByHostOrderMongoDocument(orderDocument)) {
-    return ReceivedByHostOrder.fromData(payload);
+    return ReceivedByHostOrder.fromData(
+      payload as SerializedMongoDocument<ReceivedByHostOrderMongoDocument>,
+    );
   } else if (isVerifiedByHostOrderMongoDocument(orderDocument)) {
-    return VerifiedByHostOrder.fromData(payload);
+    const { items, ...restPayload } = payload as SerializedMongoDocument<
+      VerifiedByHostOrderMongoDocument
+    >;
+
+    const physicalItems = items.map(
+      ({ title, storeName, category, ...physicalItem }) => physicalItem,
+    );
+
+    return VerifiedByHostOrder.fromData({
+      ...restPayload,
+      physicalItems,
+    } as SerializedMongoDocument<VerifiedByHostOrderMongoDocumentProps>);
   }
 
   throw new Error('Invalid order status');
-}
-
-function serializeBinaryValues(key: '_id', value: Binary): ['id', UUID];
-function serializeBinaryValues(
-  key: string,
-  value: Binary,
-): [string, UUID | Binary];
-function serializeBinaryValues(
-  key: string,
-  value: Binary,
-): [string, UUID | Binary] {
-  const binaryValue = value;
-
-  const uuidValue = muuidToUuid(binaryValue);
-
-  if (key === '_id') {
-    return ['id', uuidValue];
-  }
-
-  if (typeof key === 'string' && key.includes('Id')) {
-    return [key, uuidValue];
-  }
-
-  return [key, binaryValue];
-}
-
-function itemMongoSubdocumentToItem(
-  itemSubdocument: ItemMongoSubdocument,
-): Item {
-  const entries = Object.entries(itemSubdocument).map(([key, value]) => {
-    if (isBinary(value)) {
-      return serializeBinaryValues(key, value);
-    }
-
-    return [key, value];
-  }, {} as ItemProps);
-
-  return Item.fromData(Object.fromEntries(entries) as ItemProps);
-}
-
-function itemMongoSubdocumentToPhysicalItem(
-  itemSubdocument: ItemMongoSubdocument,
-): PhysicalItemProps {
-  const entries = Object.entries(itemSubdocument).map(([key, value]) => {
-    if (isBinary(value)) {
-      return serializeBinaryValues(key, value);
-    }
-
-    return [key, value];
-  }, {} as ItemProps);
-
-  return Object.fromEntries(entries) as PhysicalItemProps;
-}
-
-function isBinary(value: any): value is Binary {
-  return value instanceof Binary;
 }

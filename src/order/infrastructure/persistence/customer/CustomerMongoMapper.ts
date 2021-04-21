@@ -1,9 +1,10 @@
 import { Binary } from 'mongodb';
 
-import { muuidToUuid, uuidToMuuid } from '../../../../common/utils';
+import { uuidToMuuid } from '../../../../common/utils';
 
 import { Customer } from '../../../domain/entity/Customer';
 import { Address } from '../../../domain/entity/Address';
+import { serializeMongoData } from '../utils';
 
 type CustomerAddress = Address & { selected: boolean };
 
@@ -15,19 +16,19 @@ export type CustomerMongoDocument = {
 };
 
 export function mongoDocumentToCustomer({
-  _id,
   addresses,
-  orderIds,
+  ...restCustomerMongoDocument
 }: CustomerMongoDocument): Customer {
   const { selected, ...selectedAddress } = addresses.find(
     ({ selected }) => selected,
   );
 
-  return Customer.fromData({
-    id: muuidToUuid(_id),
+  const serializedCustomerMongoDocument = serializeMongoData({
+    ...restCustomerMongoDocument,
     selectedAddress,
-    orderIds: orderIds.map(muuidToUuid),
   });
+
+  return Customer.fromData(serializedCustomerMongoDocument);
 }
 
 export function customerToMongoDocument(

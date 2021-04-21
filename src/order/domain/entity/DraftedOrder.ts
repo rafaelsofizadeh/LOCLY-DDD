@@ -1,4 +1,4 @@
-import { Modify, WithoutId } from '../../../common/domain/types';
+import { Modify } from '../../../common/domain/types';
 import { UUID } from '../../../common/domain/UUID';
 import { Code } from '../../../common/error-handling/Code';
 import { Exception } from '../../../common/error-handling/Exception';

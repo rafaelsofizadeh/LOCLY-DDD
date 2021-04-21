@@ -15,7 +15,7 @@ export class ReceivedByHostOrder implements ReceivedByHostOrderProps {
     this.receivedByHostDate = receivedByHostDate;
   }
 
-  static fromData(payload: ReceivedByHostOrder) {
+  static fromData(payload: ReceivedByHostOrderProps) {
     return new this(payload);
   }
 
