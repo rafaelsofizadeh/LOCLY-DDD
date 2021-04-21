@@ -29,9 +29,4 @@ export abstract class OrderRepository {
     properties: Partial<EditableOrderProps> & { status: OrderStatus },
     transaction?: ClientSession,
   ): Promise<void>;
-
-  abstract persistHostReceipt(
-    order: Order,
-    transaction?: ClientSession,
-  ): Promise<void>;
 }

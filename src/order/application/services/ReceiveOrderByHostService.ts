@@ -1,4 +1,3 @@
-import Stripe from 'stripe';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OrderRepository } from '../port/order/OrderRepository';
@@ -12,7 +11,7 @@ import {
   ReceiveOrderHostUseCase,
 } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 import { ReceivedByHostOrder } from '../../domain/entity/ReceivedByHostOrder';
-import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
+import { OrderStatus } from '../../domain/entity/Order';
 
 @Injectable()
 export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
@@ -42,20 +41,23 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
     };
   }
 
-  // TODO(IMPORTANT): Streamline the find-transform_to_entity-update pipeline. This should be a simple DB update
-  // method. Or should it?
   private async handleOrderReceiptByHost(
     orderId: UUID,
     session: ClientSession,
   ): Promise<Date> {
-    const confirmedOrder = (await this.orderRepository.findOrder(
+    const receivedByHostDate: Date = await ReceivedByHostOrder.receiveByHost(
       orderId,
-      session,
-    )) as ConfirmedOrder;
+      (toBeReceivedByHostOrderId: UUID, receivedByHostDate: Date) =>
+        this.orderRepository.setProperties(
+          toBeReceivedByHostOrderId,
+          {
+            status: OrderStatus.ReceivedByHost,
+            receivedByHostDate,
+          },
+          session,
+        ),
+    );
 
-    const receivedByHostOrder: ReceivedByHostOrder = confirmedOrder.toReceivedByHost();
-    await this.orderRepository.persistHostReceipt(receivedByHostOrder);
-
-    return receivedByHostOrder.receivedByHostDate;
+    return receivedByHostDate;
   }
 }

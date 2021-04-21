@@ -27,4 +27,18 @@ export class ReceivedByHostOrder implements ReceivedByHostOrderProps {
 
     return receivedByHostOrder;
   }
+
+  static async receiveByHost(
+    orderId: UUID,
+    persistHostReceipt: (
+      toBeReceivedByHostOrderId: UUID,
+      receivedByHostDate: Date,
+    ) => Promise<unknown>,
+  ): Promise<Date> {
+    const receivedByHostDate: Date = new Date();
+
+    await persistHostReceipt(orderId, receivedByHostDate);
+
+    return receivedByHostDate;
+  }
 }

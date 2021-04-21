@@ -1,23 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { Binary, ClientSession, Collection, UpdateQuery } from 'mongodb';
+import { ClientSession, Collection } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
 import { UUID } from '../../../../common/domain/UUID';
 import { Code } from '../../../../common/error-handling/Code';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { OrderRepository } from '../../../application/port/order/OrderRepository';
-import {
-  EditableOrderProps,
-  Order,
-  OrderStatus,
-} from '../../../domain/entity/Order';
+import { EditableOrderProps, Order } from '../../../domain/entity/Order';
 import {
   OrderMongoDocument,
   draftedOrderToMongoDocument,
   mongoDocumentToOrder,
 } from './OrderMongoMapper';
 import { uuidToMuuid } from '../../../../common/utils';
-import { ReceivedByHostOrder } from '../../../domain/entity/ReceivedByHostOrder';
 import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
 
 @Injectable()
@@ -27,8 +22,6 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     private readonly orderCollection: Collection<OrderMongoDocument>,
   ) {}
 
-  // TODO(FUTURE): Unify update (editOrder) and add (draftOrder)
-  // https://docs.mongodb.com/manual/reference/method/db.collection.save/
   async addOrder(
     draftedOrder: DraftedOrder,
     transaction?: ClientSession,
@@ -57,30 +50,6 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     await this.orderCollection.updateOne(
       { _id: uuidToMuuid(orderId) },
       { $set: properties },
-      transaction ? { session: transaction } : undefined,
-    );
-  }
-
-  async persistHostReceipt(
-    { id: orderId, receivedByHostDate }: ReceivedByHostOrder,
-    transaction?: ClientSession,
-  ): Promise<void> {
-    await this.update(
-      orderId,
-      { $set: { status: OrderStatus.ReceivedByHost, receivedByHostDate } },
-      transaction,
-    );
-  }
-
-  // TODO(FUTURE): Replace all granular "persist____" methods with a single general update call.
-  private async update(
-    orderId: UUID,
-    query: UpdateQuery<OrderMongoDocument>,
-    transaction?: ClientSession,
-  ) {
-    await this.orderCollection.updateOne(
-      { _id: uuidToMuuid(orderId) },
-      query,
       transaction ? { session: transaction } : undefined,
     );
   }
