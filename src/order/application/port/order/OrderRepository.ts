@@ -7,6 +7,7 @@ import {
   OrderStatus,
 } from '../../../domain/entity/Order';
 
+// TODO(NOW): Use customerId in methods and check document count for security
 export abstract class OrderRepository {
   abstract addOrder(
     order: DraftedOrder,

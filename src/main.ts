@@ -6,7 +6,7 @@ import { AppModule } from './AppModule';
 // TODO(GLOBAL): Rename "session" and create type alias for "mongo.ClientSession"
 // TODO(GLOBAL): Should repo methods have sessions integrated into the methods? I think not, they should throw
 // exceptions and withTransactionExplicitAbort should catch those exceptions and abort the session
-// TODO(GLOBAL): Transient session between ConfirmOrder and FinalizeOrder
+// TODO: rename to PreConfirm and Confirm
 // TODO(GLOBAL): Add state transition control for Orders
 // TODO(GLOBAL): Test event emission
 

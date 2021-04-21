@@ -6,8 +6,8 @@ import { Code } from '../../../../common/error-handling/Code';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { uuidToMuuid } from '../../../../common/utils';
 
-// UNTODO: Remove MatchRepository, record the match in Stripe metadata
-// ^ No: https://stackoverflow.com/questions/55744094/stripe-checkout-wont-accept-metadata
+// TODO: Remove MatchRepository, record the match in Stripe metadata
+// ^ NO: https://stackoverflow.com/questions/55744094/stripe-checkout-wont-accept-metadata
 // Doesn't work properly
 // https://support.stripe.com/questions/using-metadata-with-checkout-sessions
 

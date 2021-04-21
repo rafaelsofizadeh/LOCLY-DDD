@@ -23,7 +23,6 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  // TODO: Transient SESSION that is connected to ConfirmOrderService
   @StripeWebhookHandler('checkout.session.completed')
   // TODO: Better Stripe typing
   async execute(
