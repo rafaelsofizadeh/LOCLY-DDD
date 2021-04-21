@@ -6,9 +6,13 @@ import { InjectClient } from 'nest-mongodb';
 import Stripe from 'stripe';
 import { UUID } from '../../../common/domain/UUID';
 import { withTransaction } from '../../../common/utils';
+import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 
 import { OrderStatus } from '../../domain/entity/Order';
-import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUseCaseService';
+import {
+  ConfirmOrderUseCaseService,
+  HostMatchResult,
+} from '../../domain/use-case/ConfirmOrderUseCaseService';
 import { HostRepository } from '../port/host/HostRepository';
 import { MatchRecorder } from '../port/match/MatchRecorder';
 import { OrderRepository } from '../port/order/OrderRepository';
@@ -25,9 +29,7 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
 
   @StripeWebhookHandler('checkout.session.completed')
   // TODO: Better Stripe typing
-  async execute(
-    paymentFinalizedEvent: Stripe.Event,
-  ): Promise<{ hostId: UUID }> {
+  async execute(paymentFinalizedEvent: Stripe.Event): Promise<HostMatchResult> {
     const orderAndMatchId: UUID = UUID(
       (paymentFinalizedEvent.data.object as Stripe.Checkout.Session)
         .client_reference_id as UUID,
@@ -42,7 +44,7 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
 
     this.eventEmitter.emit('order.confirmed');
 
-    return { hostId };
+    return { matchedHostId: hostId };
   }
 
   private async confirmOrder(
@@ -53,17 +55,25 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
       matchId,
     );
 
-    await Promise.all([
-      this.orderRepository.setProperties(
-        orderId,
-        {
-          status: OrderStatus.Confirmed,
-          hostId,
-        },
-        session,
-      ),
-      this.hostRepository.addOrderToHost(hostId, orderId, session),
-    ]);
+    await ConfirmedOrder.confirm(
+      orderId,
+      hostId,
+      (toConfirmOrderId: UUID, confirmedHostId: UUID) =>
+        this.orderRepository.setProperties(
+          toConfirmOrderId,
+          {
+            status: OrderStatus.Confirmed,
+            hostId: confirmedHostId,
+          },
+          session,
+        ),
+      (toAddOrderToHostId: UUID, toAddOrderId: UUID) =>
+        this.hostRepository.addOrderToHost(
+          toAddOrderToHostId,
+          toAddOrderId,
+          session,
+        ),
+    );
 
     return { orderId, hostId };
   }

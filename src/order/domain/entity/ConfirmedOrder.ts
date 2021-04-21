@@ -1,6 +1,5 @@
 import { UUID } from '../../../common/domain/UUID';
 import { Country } from '../data/Country';
-import { DraftedOrder } from './DraftedOrder';
 import { ReceivedByHostOrder } from './ReceivedByHostOrder';
 
 export interface ConfirmedOrderProps {
@@ -26,7 +25,23 @@ export class ConfirmedOrder implements ConfirmedOrderProps {
     return new this(payload);
   }
 
-  async create({ id, originCountry }: DraftedOrder) {}
+  static async confirm(
+    orderId: UUID,
+    hostId: UUID,
+    persistConfirmationFn: (
+      toConfirmOrderId: UUID,
+      confirmedHostId: UUID,
+    ) => Promise<unknown>,
+    addOrderToHostFn: (
+      toAddOrderToHostId: UUID,
+      toAddOrderId: UUID,
+    ) => Promise<unknown>,
+  ): Promise<void> {
+    await Promise.all([
+      persistConfirmationFn(orderId, hostId),
+      addOrderToHostFn(hostId, orderId),
+    ]);
+  }
 
   toReceivedByHost() {
     return ReceivedByHostOrder.create(this);

@@ -4,7 +4,7 @@ import { DraftOrderRequestAdapter } from './DraftOrderRequestAdapter';
 import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
 import { ConfirmOrderRequestAdapter } from './ConfirmOrderRequestAdapter';
 import {
-  StripeCheckoutSession,
+  StripeCheckoutSessionResult,
   ConfirmOrderUseCase,
 } from '../../domain/use-case/ConfirmOrderUseCase';
 import { ReceiveOrderHostRequestAdapter } from './ReceiveOrderByHostRequestAdapter';
@@ -39,7 +39,7 @@ export class OrderController {
   @Post('confirm')
   async confirmOrder(
     @Body() confirmationRequest: ConfirmOrderRequestAdapter,
-  ): Promise<StripeCheckoutSession> {
+  ): Promise<StripeCheckoutSessionResult> {
     const stripeCheckoutSession = await this.confirmOrderUseCase.execute(
       confirmationRequest,
     );
