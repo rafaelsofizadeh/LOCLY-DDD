@@ -8,10 +8,16 @@ import {
   ShipmentCostQuoteFn,
 } from '../../application/services/ShipmentCostCalculator/getShipmentCostQuote';
 import { Country } from '../data/Country';
+import { Currency } from '../data/Currency';
 import { DraftOrderRequest } from '../use-case/DraftOrderUseCase';
 import { Address } from './Address';
 import { Item, ItemProps } from './Item';
 import { ShipmentCost } from './Order';
+
+export type ServiceFee = {
+  currency: Currency;
+  amount: number;
+};
 
 export interface DraftedOrderProps {
   id: UUID;
@@ -123,10 +129,12 @@ export class DraftedOrder implements DraftedOrderProps {
     persistHostMatch: (
       matchedOrder: DraftedOrder,
       matchedHostId: UUID,
-    ) => Promise<unknown>,
-  ): Promise<void> {
+    ) => Promise<UUID>,
+  ): Promise<UUID> {
     const matchedHostId: UUID = await findMatchingHostFn(this);
-    await persistHostMatch(this, matchedHostId);
+    const matchId: UUID = await persistHostMatch(this, matchedHostId);
+
+    return matchId;
   }
 
   private static validateOriginDestination(
@@ -164,5 +172,12 @@ export class DraftedOrder implements DraftedOrderProps {
     const { price: amount } = services[0];
 
     return { amount, currency };
+  }
+
+  async calculateServiceFee(): Promise<ServiceFee> {
+    return {
+      currency: 'USD',
+      amount: 100,
+    };
   }
 }

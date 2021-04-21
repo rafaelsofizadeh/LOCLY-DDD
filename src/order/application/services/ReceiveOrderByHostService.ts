@@ -14,8 +14,6 @@ import {
 import { ReceivedByHostOrder } from '../../domain/entity/ReceivedByHostOrder';
 import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 
-export type MatchReference = Stripe.Checkout.Session['client_reference_id'];
-
 @Injectable()
 export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
   constructor(

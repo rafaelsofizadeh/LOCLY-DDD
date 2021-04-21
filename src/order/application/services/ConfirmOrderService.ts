@@ -5,7 +5,7 @@ import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
 import {
   ConfirmOrderRequest,
-  StripeCheckoutSession,
+  StripeCheckoutSessionResult,
   ConfirmOrderUseCase,
 } from '../../domain/use-case/ConfirmOrderUseCase';
 import { OrderRepository } from '../port/order/OrderRepository';
@@ -15,10 +15,11 @@ import { UUID } from '../../../common/domain/UUID';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/utils';
-import { DraftedOrder } from '../../domain/entity/DraftedOrder';
+import { DraftedOrder, ServiceFee } from '../../domain/entity/DraftedOrder';
 import { HostRepository } from '../port/host/HostRepository';
 
-export type MatchReference = Stripe.Checkout.Session['client_reference_id'];
+type StripeCheckoutSession = Stripe.Checkout.Session;
+type MatchReference = StripeCheckoutSession['client_reference_id'];
 
 @Injectable()
 export class ConfirmOrder implements ConfirmOrderUseCase {
@@ -34,7 +35,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
 
   async execute({
     orderId,
-  }: ConfirmOrderRequest): Promise<StripeCheckoutSession> {
+  }: ConfirmOrderRequest): Promise<StripeCheckoutSessionResult> {
     const session = this.mongoClient.startSession();
 
     // Transaction TODOs:
@@ -57,58 +58,22 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
   private async matchOrderAndCheckout(
     orderId: UUID,
     session: ClientSession,
-  ): Promise<Stripe.Checkout.Session> {
+  ): Promise<StripeCheckoutSession> {
     const draftedOrder = (await this.orderRepository.findOrder(
       orderId,
       session,
     )) as DraftedOrder;
 
-    await draftedOrder.matchHost(
+    const matchId: UUID = await draftedOrder.matchHost(
       async (draftedOrderToMatchHostTo: DraftedOrder) =>
         this.findMatchingHost(draftedOrderToMatchHostTo, session),
       async (newlyMatchedOrder: DraftedOrder, matchedHostId: UUID) =>
         this.recordMatch(newlyMatchedOrder, matchedHostId, session),
     );
 
-    /**
-     * Scenarios:
-     *
-     * I. Match Order with Host, store hostId on Order BEFORE Payment:
-     *
-     * 1. Host matched to Order -> Customer didn't finalize Payment -> Customer requests Order info,
-     *    sees Order.Host(Id), requests Host info -> gets Host address without Paying.
-     * 2. CURRENT:  Host matched to Order -> while Customer finalizes Payment, Host decides to set their status to
-     *    "unavailable" -> Customer payed, but Order couldn't be matched to/executed by Host
-     *    TODO: Potential solution: prohibit Host from setting status as "unavailable" while the Host has unfinalized
-     *    Orders. I.e. "book" the host while the payment is being processed.
-     *
-     * II. Payment BEFORE matching Host:
-     *
-     * 1. Customer pays Order -> Order tries to match with a Host -> no Host available
-     */
-    const checkoutSession: Stripe.Checkout.Session = await this.stripe.checkout.sessions.create(
-      {
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price_data: {
-              // TODO(NOW): Make the service fee a method
-              // TODO(NOW): Currency type alias
-              currency: 'usd',
-              unit_amount: 10000, // cents
-              product_data: {
-                name: 'Locly and Host Service Fee',
-              },
-            },
-            quantity: 1,
-          },
-        ],
-        // ! IMPORTANT !
-        client_reference_id: draftedOrder.id,
-        mode: 'payment',
-        success_url: 'https://news.ycombinator.com',
-        cancel_url: 'https://reddit.com',
-      },
+    const checkoutSession: StripeCheckoutSession = await this.createStripeCheckoutSession(
+      draftedOrder,
+      matchId,
     );
 
     return checkoutSession;
@@ -118,8 +83,14 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     { id: orderId }: DraftedOrder,
     hostId: UUID,
     session: ClientSession,
-  ) {
-    await this.matchRecorder.recordMatch(orderId, hostId, session);
+  ): Promise<UUID> {
+    const matchId: UUID = await this.matchRecorder.recordMatch(
+      orderId,
+      hostId,
+      session,
+    );
+
+    return matchId;
   }
 
   private async findMatchingHost(
@@ -138,5 +109,59 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       });
 
     return matchedHost.id;
+  }
+
+  private async createStripeCheckoutSession(
+    draftedOrder: DraftedOrder,
+    matchId: UUID & MatchReference,
+  ): Promise<StripeCheckoutSession> {
+    const serviceFee: ServiceFee = await draftedOrder.calculateServiceFee();
+    const stripeFee: Pick<
+      Stripe.Checkout.SessionCreateParams.LineItem.PriceData,
+      'currency' | 'unit_amount_decimal'
+    > = {
+      currency: serviceFee.currency,
+      unit_amount_decimal: serviceFee.amount.toString(),
+    };
+
+    /**
+     * Scenarios:
+     *
+     * I. Match Order with Host, store hostId on Order BEFORE Payment:
+     *
+     * 1. Host matched to Order -> Customer didn't finalize Payment -> Customer requests Order info,
+     *    sees Order.Host(Id), requests Host info -> gets Host address without Paying.
+     * 2. CURRENT:  Host matched to Order -> while Customer finalizes Payment, Host decides to set their status to
+     *    "unavailable" -> Customer payed, but Order couldn't be matched to/executed by Host
+     *    TODO: Potential solution: prohibit Host from setting status as "unavailable" while the Host has unfinalized
+     *    Orders. I.e. "book" the host while the payment is being processed.
+     *
+     * II. Payment BEFORE matching Host:
+     *
+     * 1. Customer pays Order -> Order tries to match with a Host -> no Host available
+     */
+    const checkoutSession: StripeCheckoutSession = await this.stripe.checkout.sessions.create(
+      {
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              ...stripeFee,
+              product_data: {
+                name: 'Locly and Host Service Fee',
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        // ! IMPORTANT !
+        client_reference_id: matchId,
+        mode: 'payment',
+        success_url: 'https://news.ycombinator.com',
+        cancel_url: 'https://reddit.com',
+      },
+    );
+
+    return checkoutSession;
   }
 }

@@ -11,7 +11,7 @@ export abstract class MatchRecorder {
     orderId: UUID,
     hostId: UUID,
     transaction?: ClientSession,
-  ): Promise<void>;
+  ): Promise<UUID>;
 
   abstract retrieveAndDeleteMatch(
     matchId: UUID,

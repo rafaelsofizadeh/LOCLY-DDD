@@ -1,4 +1,5 @@
 import { Country } from '../../../domain/data/Country';
+import { Currency } from '../../../domain/data/Currency';
 import { Gram, PhysicalItemProps } from '../../../domain/entity/Item';
 import countryIsoList from './data/CountryIsoCodes';
 import priceGuide from './data/PriceGuide';
@@ -10,7 +11,7 @@ type PriceTableSpecification = {
   deliveryZoneNames: string[];
   weightIntervals: Gram[];
   // TODO: Type alias for currency
-  currency: string;
+  currency: Currency;
 };
 
 export type ShipmentCostSpecification = {
@@ -32,7 +33,7 @@ export type ShipmentCostSpecification = {
 
 export type ShipmentCostQuote = {
   postalServiceName: string;
-  currency: string;
+  currency: Currency;
   services: { name: string; tracked: boolean; price: number }[];
 };
 

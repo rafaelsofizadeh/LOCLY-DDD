@@ -32,13 +32,17 @@ export class MatchMongoRecorderAdapter implements MatchRecorder {
     orderId: UUID,
     hostId: UUID,
     transaction?: ClientSession,
-  ): Promise<void> {
+  ): Promise<UUID> {
+    const matchId = orderId;
+
     await this.matchCollection.insertOne(
       matchToMongoDocument({ orderId, hostId }),
       {
         session: transaction,
       },
     );
+
+    return matchId;
   }
 
   async retrieveAndDeleteMatch(
