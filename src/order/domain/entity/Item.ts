@@ -3,8 +3,6 @@ import { UUID } from '../../../common/domain/UUID';
 
 export type Gram = number;
 
-// TODO(GLOBAL): Replace ___Props interfaces with plain ___ (same-named interfaces and classes can be different)
-
 export const Category = {
   Art: 'art',
   Games: 'games',
