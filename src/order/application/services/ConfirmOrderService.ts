@@ -67,7 +67,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       async (draftedOrderToMatchHostTo: DraftedOrder) =>
         this.findMatchingHost(draftedOrderToMatchHostTo, session),
       async (newlyMatchedOrder: DraftedOrder, matchedHostId: UUID) =>
-        this.assignHostToOrder(newlyMatchedOrder, matchedHostId, session),
+        this.recordMatch(newlyMatchedOrder, matchedHostId, session),
     );
 
     /**
@@ -114,7 +114,7 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     return checkoutSession;
   }
 
-  private async assignHostToOrder(
+  private async recordMatch(
     { id: orderId }: DraftedOrder,
     hostId: UUID,
     session: ClientSession,
