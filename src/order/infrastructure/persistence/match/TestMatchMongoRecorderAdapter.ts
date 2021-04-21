@@ -11,7 +11,8 @@ import { uuidToMuuid } from '../../../../common/utils';
 // Doesn't work properly
 // https://support.stripe.com/questions/using-metadata-with-checkout-sessions
 
-import { Match, MatchRecorder } from '../../../application/port/match/MatchRecorder';
+import { Match } from '../../../application/port/match/MatchRecorder';
+import { TestMatchRecorder } from '../../../application/port/match/TestMatchRecorder';
 import {
   MatchMongoDocument,
   matchToMongoDocument,
@@ -19,9 +20,9 @@ import {
 } from './MatchMongoMapper';
 
 @Injectable()
-export class MatchMongoRecorderAdapter implements MatchRecorder {
+export class TestMatchMongoRecorderAdapter implements TestMatchRecorder {
   constructor(
-    @InjectCollection('matches')
+    @InjectCollection('test_matches')
     private readonly matchCollection: Collection<MatchMongoDocument>,
   ) {}
 

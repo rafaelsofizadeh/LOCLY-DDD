@@ -10,7 +10,7 @@ import { withTransaction } from '../../../common/utils';
 import { OrderStatus } from '../../domain/entity/Order';
 import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUseCaseService';
 import { HostRepository } from '../port/host/HostRepository';
-import { MatchRecorder } from '../port/MatchRecorder';
+import { MatchRecorder } from '../port/match/MatchRecorder';
 import { OrderRepository } from '../port/order/OrderRepository';
 
 @Injectable()
