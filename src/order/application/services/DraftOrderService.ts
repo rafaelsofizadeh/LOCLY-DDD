@@ -29,7 +29,6 @@ export class DraftOrder implements DraftOrderUseCase {
   // TODO(GLOBAL): Event emitting decorator
   // Input validation in Controllers (/infrastructure)
   async execute(draftOrderRequest: DraftOrderRequest): Promise<DraftedOrder> {
-    // TODO(NOW)(GLOBAL): session initialization to withTransaction
     const session = this.mongoClient.startSession();
 
     try {
@@ -62,7 +61,6 @@ export class DraftOrder implements DraftOrderUseCase {
       getShipmentCostQuote,
       checkServiceAvailability,
       async (newlyDraftedOrder: DraftedOrder) => {
-        // TODO: change to update (upstream?) for EditOrderService
         await this.orderRepository.addOrder(newlyDraftedOrder, session);
         await this.customerRepository.addOrderToCustomer(
           newlyDraftedOrder,

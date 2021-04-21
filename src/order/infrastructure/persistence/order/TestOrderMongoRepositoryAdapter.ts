@@ -22,8 +22,6 @@ export class TestOrderMongoRepositoryAdapter implements TestOrderRepository {
     private readonly orderCollection: Collection<OrderMongoDocument>,
   ) {}
 
-  // TODO(FUTURE): Unify update (editOrder) and add (draftOrder)
-  // https://docs.mongodb.com/manual/reference/method/db.collection.save/
   async addOrder(
     draftedOrder: DraftedOrder,
     transaction?: ClientSession,

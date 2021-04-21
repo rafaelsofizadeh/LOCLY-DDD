@@ -6,12 +6,15 @@ import { Code } from '../../../../common/error-handling/Code';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { uuidToMuuid } from '../../../../common/utils';
 
-// TODO(NOW(IMPORTANT)): Remove MatchRepository, record the match in Stripe metadata
+// UNTODO: Remove MatchRepository, record the match in Stripe metadata
 // ^ No: https://stackoverflow.com/questions/55744094/stripe-checkout-wont-accept-metadata
 // Doesn't work properly
 // https://support.stripe.com/questions/using-metadata-with-checkout-sessions
 
-import { Match, MatchRecorder } from '../../../application/port/match/MatchRecorder';
+import {
+  Match,
+  MatchRecorder,
+} from '../../../application/port/match/MatchRecorder';
 import {
   MatchMongoDocument,
   matchToMongoDocument,
@@ -48,8 +51,6 @@ export class MatchMongoRecorderAdapter implements MatchRecorder {
       transaction ? { session: transaction } : undefined,
     );
 
-    // TODO(GLOBAL): "not found document" handling application-wide.
-
     await this.matchCollection.deleteOne(
       { _id: matchMongoBinaryId },
       transaction ? { session: transaction } : undefined,
@@ -58,7 +59,6 @@ export class MatchMongoRecorderAdapter implements MatchRecorder {
     return mongoDocumentToMatch(matchDocument);
   }
 
-  // TODO: Make orderId and hostId mutually optional
   async findMatch(
     orderId: UUID,
     hostId: UUID,

@@ -22,8 +22,6 @@ export interface DraftedOrderProps {
   shipmentCost: ShipmentCost;
 }
 
-// TODO(FUTURE): optimizations, e.g. "has this property changed?". Proxies, more elegant connection between
-// originCountry, destination, items.weight and shipmentCost
 export class DraftedOrder implements DraftedOrderProps {
   readonly id: UUID;
 

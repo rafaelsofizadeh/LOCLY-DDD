@@ -42,7 +42,6 @@ export async function withTransaction<T>(
 }
 
 // https://gist.github.com/penguinboy/762197
-// TODO(NOW, IMPORTANT): "id" gets set on documents (when "_id" exists)
 export function flattenObject<T extends Record<string, any>>(
   object: T,
   path?: string,

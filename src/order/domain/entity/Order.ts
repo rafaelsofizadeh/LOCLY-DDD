@@ -9,8 +9,6 @@ import {
   VerifiedByHostOrderProps,
 } from './VerifiedByHostOrder';
 
-// TODO(GLOBAL): Inheritance between OrderTypes (what?)
-
 export type ShipmentCost = {
   amount: number;
   currency: string;

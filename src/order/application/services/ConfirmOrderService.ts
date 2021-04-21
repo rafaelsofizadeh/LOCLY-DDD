@@ -37,7 +37,10 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
   }: ConfirmOrderRequest): Promise<StripeCheckoutSession> {
     const session = this.mongoClient.startSession();
 
-    // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
+    // Transaction TODOs:
+    // TODO(GLOBAL): Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
+    // TOOD(GLOBAL): Session initialization to withTransaction
+    // TODO(GLOBAL): Transaction decorator
     const checkoutSession: Stripe.Checkout.Session = await withTransaction(
       () => this.matchOrderAndCheckout(orderId, session),
       session,

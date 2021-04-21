@@ -43,7 +43,7 @@ const useCaseProviders: Provider[] = [
   { provide: ReceiveOrderHostUseCase, useClass: ReceiveOrderHost },
 ];
 
-// TODO(NOW): find a better place to initialize testing dependencies
+// TODO(NOW): find a better place to initialize testing dependencies (through .env? npm scripts?)
 // ATTENTION: Cool thing. Polymorphism (?) through interface injections.
 const testProviders: Provider[] = [
   { provide: TestOrderRepository, useClass: TestOrderMongoRepositoryAdapter },

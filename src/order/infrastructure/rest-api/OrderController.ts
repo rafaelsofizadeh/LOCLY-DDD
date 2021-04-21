@@ -24,7 +24,6 @@ export class OrderController {
     private readonly receiveOrderByHostUseCase: ReceiveOrderHostUseCase,
   ) {}
 
-  // TODO(GLOBAL): Serialization
   @Post('create')
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async draftOrder(

@@ -49,8 +49,6 @@ export class TestMatchMongoRecorderAdapter implements TestMatchRecorder {
       transaction ? { session: transaction } : undefined,
     );
 
-    // TODO(GLOBAL): "not found document" handling application-wide.
-
     await this.matchCollection.deleteOne(
       { _id: matchMongoBinaryId },
       transaction ? { session: transaction } : undefined,
@@ -59,7 +57,6 @@ export class TestMatchMongoRecorderAdapter implements TestMatchRecorder {
     return mongoDocumentToMatch(matchDocument);
   }
 
-  // TODO: Make orderId and hostId mutually optional
   async findMatch(
     orderId: UUID,
     hostId: UUID,

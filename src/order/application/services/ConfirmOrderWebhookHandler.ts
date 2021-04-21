@@ -25,11 +25,10 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
 
   // TODO: Transient SESSION that is connected to ConfirmOrderService
   @StripeWebhookHandler('checkout.session.completed')
-  // TODO: Event typing
+  // TODO: Better Stripe typing
   async execute(
     paymentFinalizedEvent: Stripe.Event,
   ): Promise<{ hostId: UUID }> {
-    // TODO: Better Stripe typing
     const orderAndMatchId: UUID = UUID(
       (paymentFinalizedEvent.data.object as Stripe.Checkout.Session)
         .client_reference_id as UUID,
