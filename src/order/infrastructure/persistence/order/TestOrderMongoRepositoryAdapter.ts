@@ -1,29 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { Binary, ClientSession, Collection, UpdateQuery } from 'mongodb';
+import { Binary, ClientSession, Collection } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
 import { UUID } from '../../../../common/domain/UUID';
 import { Code } from '../../../../common/error-handling/Code';
 import { Exception } from '../../../../common/error-handling/Exception';
-import { OrderRepository } from '../../../application/port/order/OrderRepository';
-import {
-  EditableOrderProps,
-  Order,
-  OrderStatus,
-} from '../../../domain/entity/Order';
+import { Order } from '../../../domain/entity/Order';
 import {
   OrderMongoDocument,
   draftedOrderToMongoDocument,
   mongoDocumentToOrder,
 } from './OrderMongoMapper';
 import { uuidToMuuid } from '../../../../common/utils';
-import { ReceivedByHostOrder } from '../../../domain/entity/ReceivedByHostOrder';
 import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
+import { TestOrderRepository } from '../../../application/port/order/TestOrderRepository';
 
 @Injectable()
-export class OrderMongoRepositoryAdapter implements OrderRepository {
+export class TestOrderMongoRepositoryAdapter implements TestOrderRepository {
   constructor(
-    @InjectCollection('orders')
+    @InjectCollection('test_orders')
     private readonly orderCollection: Collection<OrderMongoDocument>,
   ) {}
 
@@ -49,42 +44,6 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       });
   }
 
-  async setProperties(
-    orderId: UUID,
-    properties: Partial<EditableOrderProps>,
-    transaction?: ClientSession,
-  ) {
-    await this.orderCollection.updateOne(
-      { _id: uuidToMuuid(orderId) },
-      { $set: properties },
-      transaction ? { session: transaction } : undefined,
-    );
-  }
-
-  async persistHostReceipt(
-    { id: orderId, receivedByHostDate }: ReceivedByHostOrder,
-    transaction?: ClientSession,
-  ): Promise<void> {
-    await this.update(
-      orderId,
-      { $set: { status: OrderStatus.ReceivedByHost, receivedByHostDate } },
-      transaction,
-    );
-  }
-
-  // TODO(FUTURE): Replace all granular "persist____" methods with a single general update call.
-  private async update(
-    orderId: UUID,
-    query: UpdateQuery<OrderMongoDocument>,
-    transaction?: ClientSession,
-  ) {
-    await this.orderCollection.updateOne(
-      { _id: uuidToMuuid(orderId) },
-      query,
-      transaction ? { session: transaction } : undefined,
-    );
-  }
-
   async findOrder(orderId: UUID, transaction?: ClientSession): Promise<Order> {
     const orderDocument: OrderMongoDocument = await this.orderCollection.findOne(
       {
@@ -102,6 +61,42 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     }
 
     return mongoDocumentToOrder(orderDocument);
+  }
+
+  async findOrders(
+    orderIds: UUID[],
+    transaction?: ClientSession,
+  ): Promise<Order[]> {
+    const orderMongoBinaryIds: Binary[] = orderIds.map(orderId =>
+      uuidToMuuid(orderId),
+    );
+
+    const orderDocuments: OrderMongoDocument[] = await this.orderCollection
+      .find(
+        { _id: { $in: orderMongoBinaryIds } },
+        transaction ? { session: transaction } : undefined,
+      )
+      .toArray();
+
+    // To access all orderIds and failedOrderIds, catch the exception and access its 'data' property
+    if (orderDocuments.length !== orderIds.length) {
+      const failedOrderIds: UUID[] = orderIds.filter(
+        orderId =>
+          orderDocuments.findIndex(
+            orderDocument => uuidToMuuid(orderId) === orderDocument._id,
+          ) === -1,
+      );
+
+      throw new Exception(
+        Code.ENTITY_NOT_FOUND_ERROR,
+        `Orders (ids: ${failedOrderIds.join(', ')}) not found`,
+        { orderIds, failedOrderIds },
+      );
+    }
+
+    return orderDocuments.map(orderDocument =>
+      mongoDocumentToOrder(orderDocument),
+    );
   }
 
   async deleteOrder(orderId: UUID, transaction?: ClientSession): Promise<void> {

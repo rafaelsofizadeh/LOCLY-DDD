@@ -8,7 +8,7 @@ import {
   StripeCheckoutSession,
   ConfirmOrderUseCase,
 } from '../../domain/use-case/ConfirmOrderUseCase';
-import { OrderRepository } from '../port/OrderRepository';
+import { OrderRepository } from '../port/order/OrderRepository';
 import { Host } from '../../domain/entity/Host';
 import { MatchRecorder } from '../port/MatchRecorder';
 import { UUID } from '../../../common/domain/UUID';
@@ -16,7 +16,7 @@ import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/utils';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
-import { HostRepository } from '../port/HostRepository';
+import { HostRepository } from '../port/host/HostRepository';
 
 export type MatchReference = Stripe.Checkout.Session['client_reference_id'];
 

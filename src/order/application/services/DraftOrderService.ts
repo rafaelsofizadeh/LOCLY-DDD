@@ -1,7 +1,7 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-import { OrderRepository } from '../port/OrderRepository';
-import { CustomerRepository } from '../port/CustomerRepository';
+import { OrderRepository } from '../port/order/OrderRepository';
+import { CustomerRepository } from '../port/customer/CustomerRepository';
 
 import {
   DraftOrderRequest,

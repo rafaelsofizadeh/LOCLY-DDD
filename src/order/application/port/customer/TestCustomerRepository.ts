@@ -1,9 +1,8 @@
 import { ClientSession } from 'mongodb';
-import { UUID } from '../../../common/domain/UUID';
-import { Customer } from '../../domain/entity/Customer';
-import { DraftedOrder } from '../../domain/entity/DraftedOrder';
+import { UUID } from '../../../../common/domain/UUID';
+import { Customer } from '../../../domain/entity/Customer';
 
-export abstract class CustomerRepository {
+export abstract class TestCustomerRepository {
   abstract addCustomer(
     customer: Customer,
     transaction?: ClientSession,
@@ -11,11 +10,6 @@ export abstract class CustomerRepository {
 
   abstract deleteCustomer(
     customerId: UUID,
-    transaction?: ClientSession,
-  ): Promise<void>;
-
-  abstract addOrderToCustomer(
-    order: DraftedOrder,
     transaction?: ClientSession,
   ): Promise<void>;
 

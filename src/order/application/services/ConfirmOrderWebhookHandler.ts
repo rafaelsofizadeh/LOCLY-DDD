@@ -9,9 +9,9 @@ import { withTransaction } from '../../../common/utils';
 
 import { OrderStatus } from '../../domain/entity/Order';
 import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUseCaseService';
-import { HostRepository } from '../port/HostRepository';
+import { HostRepository } from '../port/host/HostRepository';
 import { MatchRecorder } from '../port/MatchRecorder';
-import { OrderRepository } from '../port/OrderRepository';
+import { OrderRepository } from '../port/order/OrderRepository';
 
 @Injectable()
 export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
