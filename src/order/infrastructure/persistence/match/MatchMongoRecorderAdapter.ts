@@ -69,9 +69,7 @@ export class MatchMongoRecorderAdapter implements MatchRecorder {
     const hostMongoBinaryId: Binary = uuidToMuuid(hostId);
 
     const matchDocument: MatchMongoDocument = await this.matchCollection.findOne(
-      {
-        $and: [{ _id: orderMongoBinaryId }, { hostId: hostMongoBinaryId }],
-      },
+      { _id: orderMongoBinaryId, hostId: hostMongoBinaryId },
       transaction ? { session: transaction } : undefined,
     );
 

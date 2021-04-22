@@ -4,7 +4,7 @@ import { uuidToMuuid } from '../../../../common/utils';
 
 import { Customer } from '../../../domain/entity/Customer';
 import { Address } from '../../../domain/entity/Address';
-import { serializeMongoData } from '../utils';
+import { serializeMongoData, convertToMongoDocument } from '../utils';
 
 type CustomerAddress = Address & { selected: boolean };
 
@@ -34,15 +34,11 @@ export function mongoDocumentToCustomer({
 export function customerToMongoDocument(
   customer: Customer,
 ): CustomerMongoDocument {
-  const { id, selectedAddress, orderIds } = customer;
-
-  const mongoBinaryId = uuidToMuuid(id);
-  const mongoCustomerSelectedAddress = { ...selectedAddress, selected: true };
-  const orderMongoBinaryIds = orderIds.map(orderId => uuidToMuuid(orderId));
+  const { _id, selectedAddress, orderIds } = convertToMongoDocument(customer);
 
   return {
-    _id: mongoBinaryId,
-    addresses: [mongoCustomerSelectedAddress],
-    orderIds: orderMongoBinaryIds,
+    _id,
+    orderIds,
+    addresses: [{ ...selectedAddress, selected: true }],
   };
 }

@@ -16,6 +16,8 @@ import {
   originCountriesAvailable,
 } from '../../../../src/order/application/services/checkServiceAvailability';
 
+// TODO(GLOBAL)(TESTING): Substitute database name in tests
+
 describe('Create Order – POST /order/create', () => {
   let app: INestApplication;
 

@@ -14,6 +14,7 @@ import {
 } from './OrderMongoMapper';
 import { uuidToMuuid } from '../../../../common/utils';
 import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
+import { convertToMongoDocument } from '../utils';
 
 @Injectable()
 export class OrderMongoRepositoryAdapter implements OrderRepository {
@@ -49,7 +50,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   ) {
     await this.orderCollection.updateOne(
       { _id: uuidToMuuid(orderId) },
-      { $set: properties },
+      { $set: convertToMongoDocument(properties) },
       transaction ? { session: transaction } : undefined,
     );
   }

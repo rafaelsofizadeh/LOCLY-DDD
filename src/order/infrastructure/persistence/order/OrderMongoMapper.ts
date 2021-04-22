@@ -1,7 +1,5 @@
 import { Binary } from 'mongodb';
 
-import { uuidToMuuid } from '../../../../common/utils';
-
 import { ItemProps } from '../../../domain/entity/Item';
 import { Address } from '../../../domain/entity/Address';
 import { Order, OrderStatus, ShipmentCost } from '../../../domain/entity/Order';
@@ -11,9 +9,12 @@ import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
 import { ReceivedByHostOrder } from '../../../domain/entity/ReceivedByHostOrder';
 import { VerifiedByHostOrder } from '../../../domain/entity/VerifiedByHostOrder';
 import { PhysicalItemProps } from '../../../domain/entity/Item';
-import { SerializedMongoDocument, serializeMongoData } from '../utils';
+import {
+  convertToMongoDocument,
+  SerializedMongoDocument,
+  serializeMongoData,
+} from '../utils';
 
-// TODO(GLOBAL): EntityIdToString type, but for UUID->Binary
 export type ItemMongoSubdocument = Omit<ItemProps, 'id'> & {
   _id: Binary;
 };
@@ -95,47 +96,21 @@ export function isVerifiedByHostOrderMongoDocument(
   return orderMongoDocument.status === OrderStatus.VerifiedByHost;
 }
 
-export function draftedOrderToMongoDocument({
-  id,
-  customerId,
-  items,
-  originCountry,
-  destination,
-  shipmentCost,
-}: DraftedOrder): DraftedOrderMongoDocument {
+export function draftedOrderToMongoDocument(
+  draftedOrder: DraftedOrder,
+): DraftedOrderMongoDocument {
   return {
-    _id: uuidToMuuid(id),
+    ...convertToMongoDocument(draftedOrder),
     status: OrderStatus.Drafted,
-    customerId: uuidToMuuid(customerId),
-    items: items.map(({ id, ...restItem }) => ({
-      _id: uuidToMuuid(id),
-      ...restItem,
-    })),
-    originCountry,
-    destination,
-    shipmentCost,
   };
 }
 
 export function serializeVerifiedByHostOrderToMongoDocumentProps(
   verifiedByHostOrder: VerifiedByHostOrder,
 ): VerifiedByHostOrderMongoDocumentProps {
-  const {
-    id,
-    physicalItems,
-    shipmentCost,
-    ...restPlainOrder
-  } = verifiedByHostOrder;
-
   return {
-    ...restPlainOrder,
-    _id: uuidToMuuid(id),
+    ...convertToMongoDocument(verifiedByHostOrder),
     status: OrderStatus.Confirmed,
-    physicalItems: physicalItems.map(physicalItem => ({
-      _id: uuidToMuuid(id),
-      ...physicalItem,
-    })),
-    shipmentCost,
   };
 }
 

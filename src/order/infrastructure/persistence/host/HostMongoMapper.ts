@@ -1,10 +1,8 @@
 import { Binary } from 'mongodb';
 
-import { uuidToMuuid } from '../../../../common/utils';
-
 import { Host } from '../../../domain/entity/Host';
 import { Address } from '../../../domain/entity/Address';
-import { serializeMongoData } from '../utils';
+import { serializeMongoData, convertToMongoDocument } from '../utils';
 
 export type HostMongoDocument = {
   _id: Binary;
@@ -22,13 +20,10 @@ export function mongoDocumentToHost(
 }
 
 export function hostToMongoDocument(host: Host): HostMongoDocument {
-  const { id, orderIds, ...restPlainHost } = host;
-  const mongoBinaryId = uuidToMuuid(id);
-  const orderMongoBinaryIds = orderIds.map(uuidToMuuid);
+  const { _id, ...restHost } = convertToMongoDocument(host);
 
   return {
-    ...restPlainHost,
-    _id: mongoBinaryId,
-    orderIds: orderMongoBinaryIds,
+    ...restHost,
+    _id,
   };
 }

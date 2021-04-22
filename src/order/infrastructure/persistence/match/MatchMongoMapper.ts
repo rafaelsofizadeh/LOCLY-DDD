@@ -1,8 +1,7 @@
 import { Binary } from 'mongodb';
-import { uuidToMuuid } from '../../../../common/utils';
 
 import { Match } from '../../../application/port/MatchRecorder';
-import { serializeMongoData } from '../utils';
+import { convertToMongoDocument, serializeMongoData } from '../utils';
 
 // _id === orderId
 export type MatchMongoDocument = {
@@ -13,25 +12,19 @@ export type MatchMongoDocument = {
 export function mongoDocumentToMatch(
   matchMongoDocument: MatchMongoDocument,
 ): Match {
-  const { id, ...serializedMatchMongoDocument } = serializeMongoData(
-    matchMongoDocument,
-  );
+  const { id: orderId, hostId } = serializeMongoData(matchMongoDocument);
 
   return {
-    ...serializedMatchMongoDocument,
-    orderId: id,
+    orderId,
+    hostId,
   };
 }
 
-export function matchToMongoDocument({
-  orderId,
-  hostId,
-}: Match): MatchMongoDocument {
-  const orderMongoBinaryId = uuidToMuuid(orderId);
-  const hostMongoBinaryId = uuidToMuuid(hostId);
+export function matchToMongoDocument(match: Match): MatchMongoDocument {
+  const { orderId: _id, hostId } = convertToMongoDocument(match);
 
   return {
-    _id: orderMongoBinaryId,
-    hostId: hostMongoBinaryId,
+    _id,
+    hostId,
   };
 }
