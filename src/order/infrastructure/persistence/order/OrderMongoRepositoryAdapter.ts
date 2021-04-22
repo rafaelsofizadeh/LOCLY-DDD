@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Binary, ClientSession, Collection } from 'mongodb';
+import {
+  Binary,
+  ClientSession,
+  Collection,
+  DeleteWriteOpResultObject,
+} from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
 import { UUID } from '../../../../common/domain/UUID';
@@ -111,9 +116,17 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   async deleteOrder(orderId: UUID, transaction?: ClientSession): Promise<void> {
-    await this.orderCollection.deleteOne(
+    const deleteResult: DeleteWriteOpResultObject = await this.orderCollection.deleteOne(
       { _id: uuidToMuuid(orderId) },
       transaction ? { session: transaction } : undefined,
     );
+
+    if (deleteResult.deletedCount !== 1) {
+      throw new Exception(
+        Code.ENTITY_NOT_FOUND_ERROR,
+        `Cannot delete, order (id: ${orderId}}) not found`,
+        { orderId },
+      );
+    }
   }
 }

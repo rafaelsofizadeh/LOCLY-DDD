@@ -14,12 +14,15 @@ import {
 } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 import { SerializePrivatePropertiesInterceptor } from './SerializePrivatePropertiesInterceptor';
+import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
+import { EditOrderRequestAdapter } from './EditOrderRequestAdapter';
 
 // TODO: Separate out to classes per each use case
 @Controller('order')
 export class OrderController {
   constructor(
     private readonly draftOrderUseCase: DraftOrderUseCase,
+    private readonly editOrderUseCase: EditOrderUseCase,
     private readonly confirmOrderUseCase: ConfirmOrderUseCase,
     private readonly receiveOrderByHostUseCase: ReceiveOrderHostUseCase,
   ) {}
@@ -34,6 +37,18 @@ export class OrderController {
     );
 
     return draftedOrder;
+  }
+
+  @Post('edit')
+  @UseInterceptors(SerializePrivatePropertiesInterceptor)
+  async editOrder(
+    @Body() editOrderRequest: EditOrderRequestAdapter,
+  ): Promise<DraftedOrder> {
+    const editedDraftedOrder: DraftedOrder = await this.editOrderUseCase.execute(
+      editOrderRequest,
+    );
+
+    return editedDraftedOrder;
   }
 
   @Post('confirm')

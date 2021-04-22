@@ -12,7 +12,7 @@ export abstract class OrderRepository {
   abstract addOrder(
     order: DraftedOrder,
     transaction?: ClientSession,
-  ): Promise<void>;
+  ): Promise<void>; // throws Code.ENTITY_NOT_FOUND
 
   abstract findOrder(
     orderId: UUID,

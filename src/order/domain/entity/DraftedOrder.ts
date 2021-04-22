@@ -10,6 +10,7 @@ import {
 import { Country } from '../data/Country';
 import { Currency } from '../data/Currency';
 import { DraftOrderRequest } from '../use-case/DraftOrderUseCase';
+import { EditOrderRequest } from '../use-case/EditOrderUseCase';
 import { Address } from './Address';
 import { Item, ItemProps } from './Item';
 import { ShipmentCost } from './Order';
@@ -179,5 +180,19 @@ export class DraftedOrder implements DraftedOrderProps {
       currency: 'USD',
       amount: 100,
     };
+  }
+
+  static async edit(
+    { orderId, ...draftOrderRequest }: EditOrderRequest,
+    deleteOldOrder: (toBeDeletedOrderId: UUID) => Promise<unknown>,
+    draftNewOrder: (
+      draftOrderRequest: DraftOrderRequest,
+    ) => Promise<DraftedOrder>,
+  ): Promise<DraftedOrder> {
+    await deleteOldOrder(orderId);
+
+    const draftedOrder: DraftedOrder = await draftNewOrder(draftOrderRequest);
+
+    return draftedOrder;
   }
 }
