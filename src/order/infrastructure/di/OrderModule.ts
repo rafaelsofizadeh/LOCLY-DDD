@@ -2,9 +2,9 @@ import { Module, Provider } from '@nestjs/common';
 import { MongoModule } from 'nest-mongodb';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 
-import { CustomerRepository } from '../../application/port/customer/CustomerRepository';
-import { HostRepository } from '../../application/port/host/HostRepository';
-import { OrderRepository } from '../../application/port/order/OrderRepository';
+import { CustomerRepository } from '../../application/port/CustomerRepository';
+import { HostRepository } from '../../application/port/HostRepository';
+import { OrderRepository } from '../../application/port/OrderRepository';
 import { ConfirmOrder } from '../../application/services/ConfirmOrderService';
 import { DraftOrder } from '../../application/services/DraftOrderService';
 import { ConfirmOrderUseCase } from '../../domain/use-case/ConfirmOrderUseCase';

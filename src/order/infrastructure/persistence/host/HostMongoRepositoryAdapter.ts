@@ -2,14 +2,19 @@ import { ClientSession, Collection } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
-import { HostRepository } from '../../../application/port/host/HostRepository';
+import { HostRepository } from '../../../application/port/HostRepository';
 import { Host } from '../../../domain/entity/Host';
-import { mongoDocumentToHost, HostMongoDocument } from './HostMongoMapper';
+import {
+  mongoDocumentToHost,
+  HostMongoDocument,
+  hostToMongoDocument,
+} from './HostMongoMapper';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
 import { UUID } from '../../../../common/domain/UUID';
 import { uuidToMuuid } from '../../../../common/utils';
 import { Country } from '../../../domain/data/Country';
+import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
 
 @Injectable()
 export class HostMongoRepositoryAdapter implements HostRepository {
@@ -17,6 +22,46 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     @InjectCollection('hosts')
     private readonly hostCollection: Collection<HostMongoDocument>,
   ) {}
+
+  // For testing
+  async addManyHosts(
+    hosts: Host[],
+    transaction?: ClientSession,
+  ): Promise<void> {
+    await this.hostCollection.insertMany(hosts.map(hostToMongoDocument), {
+      session: transaction,
+    });
+  }
+
+  async addHost(host: Host, transaction?: ClientSession): Promise<void> {
+    await this.hostCollection.insertOne(hostToMongoDocument(host), {
+      session: transaction,
+    });
+  }
+
+  // For testing
+  async deleteManyHosts(
+    hostIds: UUID[],
+    transaction?: ClientSession,
+  ): Promise<void> {
+    await this.hostCollection.deleteMany(
+      {
+        _id: {
+          $in: hostIds.map(hostId => uuidToMuuid(hostId)),
+        },
+      },
+      transaction ? { session: transaction } : undefined,
+    );
+  }
+
+  async deleteHost(hostId: UUID, transaction?: ClientSession): Promise<void> {
+    await this.hostCollection.deleteOne(
+      {
+        _id: uuidToMuuid(hostId),
+      },
+      transaction ? { session: transaction } : undefined,
+    );
+  }
 
   // This should always be used together with OrderRepository.addHostToOrder
   async addOrderToHost(

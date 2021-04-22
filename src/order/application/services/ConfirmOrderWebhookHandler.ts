@@ -13,9 +13,9 @@ import {
   ConfirmOrderUseCaseService,
   HostMatchResult,
 } from '../../domain/use-case/ConfirmOrderUseCaseService';
-import { HostRepository } from '../port/host/HostRepository';
+import { HostRepository } from '../port/HostRepository';
 import { MatchRecorder } from '../port/MatchRecorder';
-import { OrderRepository } from '../port/order/OrderRepository';
+import { OrderRepository } from '../port/OrderRepository';
 
 @Injectable()
 export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {

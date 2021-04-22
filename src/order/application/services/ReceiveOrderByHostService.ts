@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { OrderRepository } from '../port/order/OrderRepository';
+import { OrderRepository } from '../port/OrderRepository';
 import { UUID } from '../../../common/domain/UUID';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';

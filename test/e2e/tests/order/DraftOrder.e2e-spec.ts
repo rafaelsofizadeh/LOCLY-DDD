@@ -5,21 +5,22 @@ import { isUUID } from 'class-validator';
 
 import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/domain/entity/Customer';
+import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { UUID } from '../../../../src/common/domain/UUID';
+import { OrderStatus } from '../../../../src/order/domain/entity/Order';
+import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { Address } from '../../../../src/order/domain/entity/Address';
 import { Category } from '../../../../src/order/domain/entity/Item';
 import {
   destinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../../src/order/application/services/checkServiceAvailability';
-import { TestCustomerRepository } from '../../../../src/order/application/port/customer/TestCustomerRepository';
-import { TestOrderRepository } from '../../../../src/order/application/port/order/TestOrderRepository';
 
 describe('Create Order – POST /order/create', () => {
   let app: INestApplication;
 
-  let testCustomerRepository: TestCustomerRepository;
-  let testOrderRepository: TestOrderRepository;
+  let customerRepository: CustomerRepository;
+  let orderRepository: OrderRepository;
 
   let testOrderId: UUID;
   let testCustomer: Customer;
@@ -32,13 +33,13 @@ describe('Create Order – POST /order/create', () => {
     app = moduleRef.createNestApplication();
     await app.init();
 
-    testCustomerRepository = (await moduleRef.resolve(
-      TestCustomerRepository,
-    )) as TestCustomerRepository;
+    customerRepository = (await moduleRef.resolve(
+      CustomerRepository,
+    )) as CustomerRepository;
 
-    testOrderRepository = (await moduleRef.resolve(
-      TestOrderRepository,
-    )) as TestOrderRepository;
+    orderRepository = (await moduleRef.resolve(
+      OrderRepository,
+    )) as OrderRepository;
 
     // Customer shouldn't be affected from test case to test case,
     // so we initialize it once, before all tests.
@@ -47,15 +48,15 @@ describe('Create Order – POST /order/create', () => {
       orderIds: [],
     });
 
-    await testCustomerRepository.addCustomer(testCustomer);
+    await customerRepository.addCustomer(testCustomer);
   });
 
   // Customer shouldn't be affected from test case to test case,
   // so we destroy it once, after all tests.
   afterAll(() =>
     Promise.all([
-      testCustomerRepository.deleteCustomer(testCustomer.id),
-      testOrderRepository.deleteOrder(testOrderId),
+      customerRepository.deleteCustomer(testCustomer.id),
+      orderRepository.deleteOrder(testOrderId),
     ]),
   );
 
@@ -87,10 +88,12 @@ describe('Create Order – POST /order/create', () => {
     const {
       id,
       customerId,
+      status,
       destination,
     }: {
       id: string;
       customerId: string;
+      status: OrderStatus;
       destination: Address;
     } = response.body;
 
@@ -98,7 +101,7 @@ describe('Create Order – POST /order/create', () => {
 
     // TODO(IMPORTANT): Check if order has been added to database
 
-    const updatedTestCustomer: Customer = await testCustomerRepository.findCustomer(
+    const updatedTestCustomer: Customer = await customerRepository.findCustomer(
       testCustomer.id,
     );
 

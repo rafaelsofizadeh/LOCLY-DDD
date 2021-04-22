@@ -3,11 +3,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
 import { UUID } from '../../../../common/domain/UUID';
-import { CustomerRepository } from '../../../application/port/customer/CustomerRepository';
+import { CustomerRepository } from '../../../application/port/CustomerRepository';
 import { Customer } from '../../../domain/entity/Customer';
 import {
   mongoDocumentToCustomer,
   CustomerMongoDocument,
+  customerToMongoDocument,
 } from './CustomerMongoMapper';
 import { Exception } from '../../../../common/error-handling/Exception';
 import { Code } from '../../../../common/error-handling/Code';
@@ -20,6 +21,32 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
     @InjectCollection('customers')
     private readonly customerCollection: Collection<CustomerMongoDocument>,
   ) {}
+
+  async addCustomer(
+    customer: Customer,
+    transaction?: ClientSession,
+  ): Promise<void> {
+    await this.customerCollection.insertOne(
+      customerToMongoDocument(customer),
+      transaction
+        ? {
+            session: transaction,
+          }
+        : undefined,
+    );
+  }
+
+  async deleteCustomer(
+    customerId: UUID,
+    transaction?: ClientSession,
+  ): Promise<void> {
+    await this.customerCollection.deleteOne(
+      {
+        _id: uuidToMuuid(customerId),
+      },
+      transaction ? { session: transaction } : undefined,
+    );
+  }
 
   async addOrderToCustomer(
     { id: orderId, customerId }: DraftedOrder,

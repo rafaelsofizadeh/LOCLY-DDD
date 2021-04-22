@@ -9,8 +9,8 @@ import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { Host } from '../../../../src/order/domain/entity/Host';
 
-import { TestCustomerRepository } from '../../../../src/order/application/port/customer/TestCustomerRepository';
-import { TestOrderRepository } from '../../../../src/order/application/port/order/TestOrderRepository';
+import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
+import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { muuidToUuid } from '../../../../src/common/utils';
 import { DraftOrderUseCase } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
 import { Category, Item } from '../../../../src/order/domain/entity/Item';
@@ -20,19 +20,19 @@ import {
   Match,
   MatchRecorder,
 } from '../../../../src/order/application/port/MatchRecorder';
+import { HostRepository } from '../../../../src/order/application/port/HostRepository';
 import { DraftedOrder } from '../../../../src/order/domain/entity/DraftedOrder';
 import {
   destinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../../src/order/application/services/checkServiceAvailability';
-import { TestHostRepository } from '../../../../src/order/application/port/host/TestHostRepository';
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;
 
-  let testCustomerRepository: TestCustomerRepository;
-  let testOrderRepository: TestOrderRepository;
-  let testHostRepository: TestHostRepository;
+  let customerRepository: CustomerRepository;
+  let orderRepository: OrderRepository;
+  let hostRepository: HostRepository;
   let matchRecorder: MatchRecorder;
 
   let draftOrderUseCase: DraftOrderUseCase;
@@ -49,17 +49,17 @@ describe('Confirm Order – POST /order/confirm', () => {
     app = moduleRef.createNestApplication();
     await app.init();
 
-    testCustomerRepository = (await moduleRef.resolve(
-      TestCustomerRepository,
-    )) as TestCustomerRepository;
+    customerRepository = (await moduleRef.resolve(
+      CustomerRepository,
+    )) as CustomerRepository;
 
-    testOrderRepository = (await moduleRef.resolve(
-      TestOrderRepository,
-    )) as TestOrderRepository;
+    orderRepository = (await moduleRef.resolve(
+      OrderRepository,
+    )) as OrderRepository;
 
-    testHostRepository = (await moduleRef.resolve(
-      TestHostRepository,
-    )) as TestHostRepository;
+    hostRepository = (await moduleRef.resolve(
+      HostRepository,
+    )) as HostRepository;
 
     matchRecorder = (await moduleRef.resolve(MatchRecorder)) as MatchRecorder;
 
@@ -148,10 +148,10 @@ describe('Confirm Order – POST /order/confirm', () => {
     );
 
     // TODO(?): Promise.all()'ing this leads to an ERROR. Apparently a write conflict between
-    // 1. testCustomerRepository.addCustomer (insert)
-    // 2. draftOrderUseCase.execute > testCustomerRepository.addOrderToCustomer (update)
-    await testHostRepository.addManyHosts(testHosts);
-    await testCustomerRepository.addCustomer(testCustomer);
+    // 1. customerRepository.addCustomer (insert)
+    // 2. draftOrderUseCase.execute > customerRepository.addOrderToCustomer (update)
+    await hostRepository.addManyHosts(testHosts);
+    await customerRepository.addCustomer(testCustomer);
 
     testOrder = await draftOrderUseCase.execute({
       customerId: testCustomer.id,
@@ -175,10 +175,11 @@ describe('Confirm Order – POST /order/confirm', () => {
   // (usually done for testing purposes)
   afterEach(() =>
     Promise.all([
-      testCustomerRepository.deleteCustomer(testCustomer.id),
-      testHostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
+      customerRepository.deleteCustomer(testCustomer.id),
+      hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
       // TODO (FUTURE): Delete through deleteOrderUseCase
-      testOrderRepository.deleteOrder(testOrder.id),
+      orderRepository.deleteOrder(testOrder.id),
+      // TODO: Clean up Match
     ]),
   );
 
@@ -244,7 +245,7 @@ function updatedStripeCheckoutSessionInTestPage(checkoutId: string) {
     expect(status).toBe(OrderStatus.Confirmed);
     expect(hostId).toBe(testHosts[0].id);
 
-    const updatedTestHost: Host = await testHostRepository.findHost(
+    const updatedTestHost: Host = await hostRepository.findHost(
       UUID(hostId),
     );
 
