@@ -9,12 +9,13 @@ import { AppModule } from './AppModule';
 // TODO: rename to PreConfirm and Confirm
 // TODO(GLOBAL): Add state transition control for Orders
 // TODO(GLOBAL): Test event emission
+// TODO(GLOBAL): Error handling in all repo methods
 
 declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: false });
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   await app.listen(3000);
 
   if (module.hot) {

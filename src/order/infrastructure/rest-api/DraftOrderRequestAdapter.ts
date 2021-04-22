@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
@@ -15,7 +16,7 @@ import { Country } from '../../domain/data/Country';
 import { Category, Gram } from '../../domain/entity/Item';
 import { DraftOrderRequest } from '../../domain/use-case/DraftOrderUseCase';
 
-class ItemValidationSchema {
+export class ItemValidationSchema {
   @IsString()
   @Length(5, 280)
   title: string;
@@ -44,7 +45,7 @@ class ItemValidationSchema {
   height: number;
 }
 
-class AddressValidationSchema {
+export class AddressValidationSchema {
   @IsISO31661Alpha3()
   country: Country;
 }
@@ -57,10 +58,12 @@ export class DraftOrderRequestAdapter implements DraftOrderRequest {
   readonly originCountry: Country;
 
   @ValidateNested()
+  @Type(() => AddressValidationSchema)
   readonly destination: AddressValidationSchema;
 
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @IsArray()
+  @Type(() => ItemValidationSchema)
   readonly items: ItemValidationSchema[];
 }
