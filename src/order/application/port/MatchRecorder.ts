@@ -1,13 +1,17 @@
 import { ClientSession } from 'mongodb';
-import { UUID } from '../../../../common/domain/UUID';
-import { Match } from './MatchRecorder';
+import { UUID } from '../../../common/domain/UUID';
 
-export abstract class TestMatchRecorder {
+export type Match = {
+  orderId: UUID;
+  hostId: UUID;
+};
+
+export abstract class MatchRecorder {
   abstract recordMatch(
     orderId: UUID,
     hostId: UUID,
     transaction?: ClientSession,
-  ): Promise<void>;
+  ): Promise<UUID>;
 
   abstract retrieveAndDeleteMatch(
     matchId: UUID,

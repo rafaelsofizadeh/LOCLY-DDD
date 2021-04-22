@@ -1,7 +1,7 @@
 import { Binary } from 'mongodb';
 import { uuidToMuuid } from '../../../../common/utils';
 
-import { Match } from '../../../application/port/match/MatchRecorder';
+import { Match } from '../../../application/port/MatchRecorder';
 import { serializeMongoData } from '../utils';
 
 // _id === orderId

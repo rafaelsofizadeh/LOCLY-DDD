@@ -14,7 +14,7 @@ import {
   HostMatchResult,
 } from '../../domain/use-case/ConfirmOrderUseCaseService';
 import { HostRepository } from '../port/host/HostRepository';
-import { MatchRecorder } from '../port/match/MatchRecorder';
+import { MatchRecorder } from '../port/MatchRecorder';
 import { OrderRepository } from '../port/order/OrderRepository';
 
 @Injectable()

@@ -13,21 +13,13 @@ import { CustomerMongoRepositoryAdapter } from '../persistence/customer/Customer
 import { HostMongoRepositoryAdapter } from '../persistence/host/HostMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from '../persistence/order/OrderMongoRepositoryAdapter';
 import { OrderController } from '../rest-api/OrderController';
-import { MatchRecorder } from '../../application/port/match/MatchRecorder';
+import { MatchRecorder } from '../../application/port/MatchRecorder';
 import { MatchMongoRecorderAdapter } from '../persistence/match/MatchMongoRecorderAdapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUseCaseService';
 import { ConfirmOrderWebhookHandler } from '../../application/services/ConfirmOrderWebhookHandler';
 import { ReceiveOrderHostUseCase } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 import { ReceiveOrderHost } from '../../application/services/ReceiveOrderByHostService';
-import { TestOrderMongoRepositoryAdapter } from '../persistence/order/TestOrderMongoRepositoryAdapter';
-import { TestCustomerMongoRepositoryAdapter } from '../persistence/customer/TestCustomerMongoRepositoryAdapter';
-import { TestHostMongoRepositoryAdapter } from '../persistence/host/TestHostMongoRepositoryAdapter';
-import { TestMatchMongoRecorderAdapter } from '../persistence/match/TestMatchMongoRecorderAdapter';
-import { TestMatchRecorder } from '../../application/port/match/TestMatchRecorder';
-import { TestCustomerRepository } from '../../application/port/customer/TestCustomerRepository';
-import { TestHostRepository } from '../../application/port/host/TestHostRepository';
-import { TestOrderRepository } from '../../application/port/order/TestOrderRepository';
 
 const persistenceProviders: Provider[] = [
   { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
@@ -45,15 +37,7 @@ const useCaseProviders: Provider[] = [
 
 // TODO(NOW): find a better place to initialize testing dependencies (through .env? npm scripts?)
 // ATTENTION: Cool thing. Polymorphism (?) through interface injections.
-const testProviders: Provider[] = [
-  { provide: TestOrderRepository, useClass: TestOrderMongoRepositoryAdapter },
-  {
-    provide: TestCustomerRepository,
-    useClass: TestCustomerMongoRepositoryAdapter,
-  },
-  { provide: TestHostRepository, useClass: TestHostMongoRepositoryAdapter },
-  { provide: TestMatchRecorder, useClass: TestMatchMongoRecorderAdapter },
-];
+const testProviders: Provider[] = [];
 
 @Module({
   imports: [

@@ -11,10 +11,7 @@ import { uuidToMuuid } from '../../../../common/utils';
 // Doesn't work properly
 // https://support.stripe.com/questions/using-metadata-with-checkout-sessions
 
-import {
-  Match,
-  MatchRecorder,
-} from '../../../application/port/match/MatchRecorder';
+import { Match, MatchRecorder } from '../../../application/port/MatchRecorder';
 import {
   MatchMongoDocument,
   matchToMongoDocument,
@@ -73,8 +70,7 @@ export class MatchMongoRecorderAdapter implements MatchRecorder {
 
     const matchDocument: MatchMongoDocument = await this.matchCollection.findOne(
       {
-        _id: orderMongoBinaryId,
-        hostId: hostMongoBinaryId,
+        $and: [{ _id: orderMongoBinaryId }, { hostId: hostMongoBinaryId }],
       },
       transaction ? { session: transaction } : undefined,
     );

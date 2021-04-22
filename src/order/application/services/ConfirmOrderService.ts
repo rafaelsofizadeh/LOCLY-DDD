@@ -10,7 +10,7 @@ import {
 } from '../../domain/use-case/ConfirmOrderUseCase';
 import { OrderRepository } from '../port/order/OrderRepository';
 import { Host } from '../../domain/entity/Host';
-import { MatchRecorder } from '../port/match/MatchRecorder';
+import { MatchRecorder } from '../port/MatchRecorder';
 import { UUID } from '../../../common/domain/UUID';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';

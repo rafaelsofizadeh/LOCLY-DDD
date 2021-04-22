@@ -19,7 +19,7 @@ import { isString } from 'class-validator';
 import {
   Match,
   MatchRecorder,
-} from '../../../../src/order/application/port/match/MatchRecorder';
+} from '../../../../src/order/application/port/MatchRecorder';
 import { DraftedOrder } from '../../../../src/order/domain/entity/DraftedOrder';
 import {
   destinationCountriesAvailable,
