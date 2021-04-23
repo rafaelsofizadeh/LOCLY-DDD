@@ -118,10 +118,10 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     const serviceFee: ServiceFee = await draftedOrder.calculateServiceFee();
     const stripeFee: Pick<
       Stripe.Checkout.SessionCreateParams.LineItem.PriceData,
-      'currency' | 'unit_amount_decimal'
+      'currency' | 'unit_amount'
     > = {
       currency: serviceFee.currency,
-      unit_amount_decimal: serviceFee.amount.toString(),
+      unit_amount: Math.floor(serviceFee.amount * 100),
     };
 
     /**
@@ -151,11 +151,9 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
                 name: 'Locly and Host Service Fee',
               },
             },
-            quantity: 1,
           },
         ],
-        // ! IMPORTANT !
-        client_reference_id: matchId,
+        client_reference_id: matchId, // ! IMPORTANT !
         mode: 'payment',
         success_url: 'https://news.ycombinator.com',
         cancel_url: 'https://reddit.com',
