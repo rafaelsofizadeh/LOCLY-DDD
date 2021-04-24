@@ -1,6 +1,5 @@
 import Stripe from 'stripe';
 import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
 import {
@@ -26,8 +25,6 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,
-    // TODO: More general EventEmitter class, wrapper around eventEmitter
-    private readonly eventEmitter: EventEmitter2,
     @InjectStripeClient() private readonly stripe: Stripe,
     private readonly matchRecorder: MatchRecorder,
     @InjectClient() private readonly mongoClient: MongoClient,
@@ -46,8 +43,6 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
       () => this.matchOrderAndCheckout(orderId, session),
       session,
     );
-
-    this.eventEmitter.emit('order.awaiting_payment');
 
     return {
       checkoutId: checkoutSession.id,
@@ -97,16 +92,10 @@ export class ConfirmOrder implements ConfirmOrderUseCase {
     { originCountry }: DraftedOrder,
     session: ClientSession,
   ): Promise<UUID> {
-    const matchedHost: Host = await this.hostRepository
-      .findHostAvailableInCountryWithMinimumNumberOfOrders(
-        originCountry,
-        session,
-      )
-      .catch(error => {
-        // TODO(?): Move event emitting in execute()
-        this.eventEmitter.emit('order.rejected.host_availability');
-        throw error;
-      });
+    const matchedHost: Host = await this.hostRepository.findHostAvailableInCountryWithMinimumNumberOfOrders(
+      originCountry,
+      session,
+    );
 
     return matchedHost.id;
   }

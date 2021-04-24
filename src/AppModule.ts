@@ -13,7 +13,6 @@ import {
 
 import { OrderModule } from './order/infrastructure/di/OrderModule';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -27,7 +26,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       }),
       inject: [ConfigService],
     }),
-    EventEmitterModule.forRoot(),
     OrderModule,
     JsonBodyMiddleware,
     RawBodyMiddleware,

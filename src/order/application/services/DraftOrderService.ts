@@ -1,5 +1,3 @@
-import { EventEmitter2 } from '@nestjs/event-emitter';
-
 import { OrderRepository } from '../port/OrderRepository';
 import { CustomerRepository } from '../port/CustomerRepository';
 
@@ -21,30 +19,20 @@ export class DraftOrder implements DraftOrderUseCase {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,
-    // TODO: More general EventEmitter class, wrapper around eventEmitter
-    private readonly eventEmitter: EventEmitter2,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  // TODO(GLOBAL): Event emitting decorator
   // Input validation in Controllers (/infrastructure)
   async execute(draftOrderRequest: DraftOrderRequest): Promise<DraftedOrder> {
     const session = this.mongoClient.startSession();
 
-    try {
-      const draftedOrder: DraftedOrder = await withTransaction(
-        () => this.draftOrderAndPersist(draftOrderRequest, session),
-        session,
-      );
+    const draftedOrder: DraftedOrder = await withTransaction(
+      () => this.draftOrder(draftOrderRequest, session),
+      session,
+    );
 
-      this.eventEmitter.emit('order.drafted', draftedOrder);
-
-      // Serialization in Controllers (/infrastructure)
-      return draftedOrder;
-    } catch (exception) {
-      this.eventEmitter.emit('order.rejected.service_availability');
-      throw exception;
-    }
+    // Serialization in Controllers (/infrastructure)
+    return draftedOrder;
   }
 
   private async draftOrderAndPersist(

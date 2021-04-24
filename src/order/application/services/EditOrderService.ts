@@ -1,5 +1,3 @@
-import { EventEmitter2 } from '@nestjs/event-emitter';
-
 import { OrderRepository } from '../port/OrderRepository';
 
 import {
@@ -22,7 +20,6 @@ export class EditOrder implements EditOrderUseCase {
   constructor(
     private readonly draftOrderUseCase: DraftOrderUseCase,
     private readonly orderRepository: OrderRepository,
-    private readonly eventEmitter: EventEmitter2,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
@@ -36,8 +33,6 @@ export class EditOrder implements EditOrderUseCase {
       editOrderRequest,
       session,
     );
-
-    this.eventEmitter.emit('order.edited', draftedOrder);
 
     // Serialization in Controllers (/infrastructure)
     return draftedOrder;

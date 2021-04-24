@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OrderRepository } from '../port/OrderRepository';
 import { UUID } from '../../../common/domain/UUID';
 import { InjectClient } from 'nest-mongodb';
@@ -17,8 +16,6 @@ import { OrderStatus } from '../../domain/entity/Order';
 export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
-    // TODO: More general EventEmitter class, wrapper around eventEmitter
-    private readonly eventEmitter: EventEmitter2,
     // TODO(GLOBAL): MongoClient dependency in withTransaction wrapper class
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
@@ -33,8 +30,6 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
       () => this.handleOrderReceiptByHost(orderId, session),
       session,
     );
-
-    this.eventEmitter.emit('order.received_by_host');
 
     return {
       receivedByHostDate,

@@ -1,6 +1,5 @@
 import { StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
 import Stripe from 'stripe';
@@ -23,7 +22,6 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,
     private readonly matchRecorder: MatchRecorder,
-    private readonly eventEmitter: EventEmitter2,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
@@ -41,8 +39,6 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCaseService {
       () => this.confirmOrder(orderAndMatchId, session),
       session,
     );
-
-    this.eventEmitter.emit('order.confirmed');
 
     return { matchedHostId: hostId };
   }
