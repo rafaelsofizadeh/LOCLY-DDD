@@ -25,7 +25,6 @@ export class EditOrder implements EditOrderUseCase {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  // Input validation in Controllers (/infrastructure)
   async execute(editOrderRequest: EditOrderRequest): Promise<DraftedOrder> {
     const session = this.mongoClient.startSession();
 
@@ -36,7 +35,6 @@ export class EditOrder implements EditOrderUseCase {
       session,
     );
 
-    // Serialization in Controllers (/infrastructure)
     return draftedOrder;
   }
 

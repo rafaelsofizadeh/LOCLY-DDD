@@ -22,7 +22,6 @@ export class DraftOrder implements DraftOrderUseCase {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  // Input validation in Controllers (/infrastructure)
   async execute(draftOrderRequest: DraftOrderRequest): Promise<DraftedOrder> {
     const session = this.mongoClient.startSession();
 
@@ -31,7 +30,6 @@ export class DraftOrder implements DraftOrderUseCase {
       session,
     );
 
-    // Serialization in Controllers (/infrastructure)
     return draftedOrder;
   }
 

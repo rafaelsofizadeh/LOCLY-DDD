@@ -19,7 +19,6 @@ export class DeleteOrder implements DeleteOrderUseCase {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  // Input validation in Controllers (/infrastructure)
   async execute(deleteOrderRequest: DeleteOrderRequest): Promise<void> {
     const session = this.mongoClient.startSession();
 
