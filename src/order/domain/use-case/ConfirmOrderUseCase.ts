@@ -1,15 +1,14 @@
+import Stripe from 'stripe';
 import { UseCase } from '../../../common/domain/UseCase';
 import { UUID } from '../../../common/domain/UUID';
 
-export interface ConfirmOrderRequest {
-  orderId: UUID;
-}
-
-export interface StripeCheckoutSessionResult {
-  checkoutId: string;
+export interface HostMatchResult {
+  matchedHostId: UUID;
 }
 
 export abstract class ConfirmOrderUseCase extends UseCase<
-  ConfirmOrderRequest,
-  StripeCheckoutSessionResult
+  Omit<Stripe.Event, 'type'> & {
+    type: Stripe.WebhookEndpointCreateParams.EnabledEvent;
+  },
+  HostMatchResult
 > {}

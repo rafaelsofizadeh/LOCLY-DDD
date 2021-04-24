@@ -2,11 +2,11 @@ import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
 
 import { DraftOrderRequestAdapter } from './DraftOrderRequestAdapter';
 import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
-import { ConfirmOrderRequestAdapter } from './ConfirmOrderRequestAdapter';
+import { PreConfirmOrderRequestAdapter } from './PreConfirmOrderRequestAdapter';
 import {
   StripeCheckoutSessionResult,
-  ConfirmOrderUseCase,
-} from '../../domain/use-case/ConfirmOrderUseCase';
+  PreConfirmOrderUseCase,
+} from '../../domain/use-case/PreConfirmOrderUseCase';
 import { ReceiveOrderHostRequestAdapter } from './ReceiveOrderByHostRequestAdapter';
 import {
   ReceiveOrderHostResult,
@@ -26,7 +26,7 @@ export class OrderController {
     private readonly draftOrderUseCase: DraftOrderUseCase,
     private readonly editOrderUseCase: EditOrderUseCase,
     private readonly deleteOrderUseCase: DeleteOrderUseCase,
-    private readonly confirmOrderUseCase: ConfirmOrderUseCase,
+    private readonly preConfirmOrderUseCase: PreConfirmOrderUseCase,
     private readonly receiveOrderByHostUseCase: ReceiveOrderHostUseCase,
   ) {}
 
@@ -62,10 +62,10 @@ export class OrderController {
   }
 
   @Post('confirm')
-  async confirmOrder(
-    @Body() confirmationRequest: ConfirmOrderRequestAdapter,
+  async preConfirmOrder(
+    @Body() confirmationRequest: PreConfirmOrderRequestAdapter,
   ): Promise<StripeCheckoutSessionResult> {
-    const stripeCheckoutSession = await this.confirmOrderUseCase.execute(
+    const stripeCheckoutSession = await this.preConfirmOrderUseCase.execute(
       confirmationRequest,
     );
 

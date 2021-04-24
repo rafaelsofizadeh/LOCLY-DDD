@@ -5,9 +5,9 @@ import { StripeModule } from '@golevelup/nestjs-stripe';
 import { CustomerRepository } from '../../application/port/CustomerRepository';
 import { HostRepository } from '../../application/port/HostRepository';
 import { OrderRepository } from '../../application/port/OrderRepository';
-import { ConfirmOrder } from '../../application/services/ConfirmOrderService';
+import { PreConfirmOrder } from '../../application/services/PreConfirmOrderService';
 import { DraftOrder } from '../../application/services/DraftOrderService';
-import { ConfirmOrderUseCase } from '../../domain/use-case/ConfirmOrderUseCase';
+import { PreConfirmOrderUseCase } from '../../domain/use-case/PreConfirmOrderUseCase';
 import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
 import { CustomerMongoRepositoryAdapter } from '../persistence/customer/CustomerMongoRepositoryAdapter';
 import { HostMongoRepositoryAdapter } from '../persistence/host/HostMongoRepositoryAdapter';
@@ -16,8 +16,8 @@ import { OrderController } from '../rest-api/OrderController';
 import { MatchRecorder } from '../../application/port/MatchRecorder';
 import { MatchMongoRecorderAdapter } from '../persistence/match/MatchMongoRecorderAdapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ConfirmOrderUseCaseService } from '../../domain/use-case/ConfirmOrderUseCaseService';
-import { ConfirmOrderWebhookHandler } from '../../application/services/ConfirmOrderWebhookHandler';
+import { ConfirmOrderUseCase } from '../../domain/use-case/ConfirmOrderUseCase';
+import { ConfirmOrderWebhookHandler } from '../../application/services/ConfirmOrderService';
 import { ReceiveOrderHostUseCase } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 import { ReceiveOrderHost } from '../../application/services/ReceiveOrderByHostService';
 import { EditOrder } from '../../application/services/EditOrderService';
@@ -36,8 +36,8 @@ const useCaseProviders: Provider[] = [
   { provide: DraftOrderUseCase, useClass: DraftOrder },
   { provide: EditOrderUseCase, useClass: EditOrder },
   { provide: DeleteOrderUseCase, useClass: DeleteOrder },
-  { provide: ConfirmOrderUseCase, useClass: ConfirmOrder },
-  { provide: ConfirmOrderUseCaseService, useClass: ConfirmOrderWebhookHandler },
+  { provide: PreConfirmOrderUseCase, useClass: PreConfirmOrder },
+  { provide: ConfirmOrderUseCase, useClass: ConfirmOrderWebhookHandler },
   { provide: ReceiveOrderHostUseCase, useClass: ReceiveOrderHost },
 ];
 

@@ -173,15 +173,14 @@ describe('Confirm Order – POST /order/confirm', () => {
 
   // IMPORTANT: ALWAYS clean up the database after commenting out the cleanup in afterEach
   // (usually done for testing purposes)
-  // afterEach(() =>
-  //   Promise.all([
-  //     customerRepository.deleteCustomer(testCustomer.id),
-  //     hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
-  //     // TODO (FUTURE): Delete through deleteOrderUseCase
-  //     orderRepository.deleteOrder(testOrder.id),
-  //     // TODO: Clean up Match
-  //   ]),
-  // );
+  afterEach(() =>
+    Promise.all([
+      customerRepository.deleteCustomer(testCustomer.id),
+      hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
+      // TODO (FUTURE): Delete through deleteOrderUseCase
+      orderRepository.deleteOrder(testOrder.id),
+    ]),
+  );
 
   it('Matches Order with a Host, updates Order\'s "hostId" property, and Host\'s "orderIds" property', async () => {
     const response: supertest.Response = await supertest(app.getHttpServer())
