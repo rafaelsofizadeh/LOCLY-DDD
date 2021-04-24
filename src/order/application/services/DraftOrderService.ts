@@ -48,14 +48,14 @@ export class DraftOrder implements DraftOrderUseCase {
       },
       getShipmentCostQuote,
       checkServiceAvailability,
-      async (newlyDraftedOrder: DraftedOrder) => {
-        await this.orderRepository.addOrder(newlyDraftedOrder, session);
-        await this.customerRepository.addOrderToCustomer(
-          newlyDraftedOrder.customerId,
-          newlyDraftedOrder.id,
+      (newlyDraftedOrder: DraftedOrder) =>
+        this.orderRepository.addOrder(newlyDraftedOrder, session),
+      (toBeAddedToCustomerId, toBeAddedToCustomerOrderId) =>
+        this.customerRepository.addOrderToCustomer(
+          toBeAddedToCustomerId,
+          toBeAddedToCustomerOrderId,
           session,
-        );
-      },
+        ),
     );
 
     return draftedOrder;

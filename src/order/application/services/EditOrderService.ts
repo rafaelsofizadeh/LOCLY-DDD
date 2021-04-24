@@ -14,12 +14,14 @@ import {
   DraftOrderUseCase,
 } from '../../domain/use-case/DraftOrderUseCase';
 import { UUID } from '../../../common/domain/UUID';
+import { CustomerRepository } from '../port/CustomerRepository';
 
 @Injectable()
 export class EditOrder implements EditOrderUseCase {
   constructor(
     private readonly draftOrderUseCase: DraftOrderUseCase,
     private readonly orderRepository: OrderRepository,
+    private readonly customerRepository: CustomerRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
@@ -47,9 +49,14 @@ export class EditOrder implements EditOrderUseCase {
 
     const draftedOrder: DraftedOrder = await DraftedOrder.edit(
       editOrderRequest,
-      // throws if orderId doesn't exist
       (toBeDeletedOrderId: UUID) =>
-        this.orderRepository.deleteOrder(toBeDeletedOrderId),
+        this.orderRepository.deleteOrder(toBeDeletedOrderId, session),
+      (toBeRemovedFromCustomerId: UUID, toBeRemovedFromCustomerOrderId: UUID) =>
+        this.customerRepository.removeOrderFromCustomer(
+          toBeRemovedFromCustomerId,
+          toBeRemovedFromCustomerOrderId,
+          session,
+        ),
       (draftOrderRequest: DraftOrderRequest) =>
         this.draftOrderUseCase.execute(draftOrderRequest),
     );

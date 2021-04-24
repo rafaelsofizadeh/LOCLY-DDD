@@ -91,7 +91,11 @@ export class DraftedOrder implements DraftedOrderProps {
     }: DraftOrderRequest,
     shipmentCostQuoteFn: ShipmentCostQuoteFn,
     serviceAvailabilityFn: ServiceAvailabilityFn,
-    saveOrder: (draftedOrder: DraftedOrder) => Promise<unknown>,
+    addOrder: (draftedOrder: DraftedOrder) => Promise<unknown>,
+    addOrderToCustomer: (
+      toBeAddedToCustomerId: UUID,
+      toBeAddedToCustomerOrderId: UUID,
+    ) => Promise<unknown>,
   ): Promise<DraftedOrder> {
     this.validateOriginDestination(
       originCountry,
@@ -119,7 +123,10 @@ export class DraftedOrder implements DraftedOrderProps {
       shipmentCost,
     });
 
-    await saveOrder(draftedOrder);
+    await Promise.all([
+      addOrder(draftedOrder),
+      addOrderToCustomer(draftedOrder.customerId, draftedOrder.id),
+    ]);
 
     return draftedOrder;
   }
@@ -186,11 +193,18 @@ export class DraftedOrder implements DraftedOrderProps {
   static async edit(
     { orderId, ...draftOrderRequest }: EditOrderRequest,
     deleteOldOrder: (toBeDeletedOrderId: UUID) => Promise<unknown>,
+    removeOldOrderFromCustomer: (
+      toBeRemovedFromCustomerId: UUID,
+      toBeRemovedFromCustomerOrderId: UUID,
+    ) => Promise<unknown>,
     draftNewOrder: (
       draftOrderRequest: DraftOrderRequest,
     ) => Promise<DraftedOrder>,
   ): Promise<DraftedOrder> {
-    await deleteOldOrder(orderId);
+    await Promise.all([
+      deleteOldOrder(orderId),
+      removeOldOrderFromCustomer(draftOrderRequest.customerId, orderId),
+    ]);
 
     const draftedOrder: DraftedOrder = await draftNewOrder(draftOrderRequest);
 
