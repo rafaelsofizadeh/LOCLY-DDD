@@ -22,6 +22,8 @@ import { ReceiveOrderHostUseCase } from '../../domain/use-case/ReceiveOrderByHos
 import { ReceiveOrderHost } from '../../application/services/ReceiveOrderByHostService';
 import { EditOrder } from '../../application/services/EditOrderService';
 import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
+import { DeleteOrderUseCase } from '../../domain/use-case/DeleteOrderUseCase';
+import { DeleteOrder } from '../../application/services/DeleteOrderService';
 
 const persistenceProviders: Provider[] = [
   { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
@@ -33,6 +35,7 @@ const persistenceProviders: Provider[] = [
 const useCaseProviders: Provider[] = [
   { provide: DraftOrderUseCase, useClass: DraftOrder },
   { provide: EditOrderUseCase, useClass: EditOrder },
+  { provide: DeleteOrderUseCase, useClass: DeleteOrder },
   { provide: ConfirmOrderUseCase, useClass: ConfirmOrder },
   { provide: ConfirmOrderUseCaseService, useClass: ConfirmOrderWebhookHandler },
   { provide: ReceiveOrderHostUseCase, useClass: ReceiveOrderHost },

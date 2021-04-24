@@ -16,6 +16,8 @@ import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 import { SerializePrivatePropertiesInterceptor } from './SerializePrivatePropertiesInterceptor';
 import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
 import { EditOrderRequestAdapter } from './EditOrderRequestAdapter';
+import { DeleteOrderUseCase } from '../../domain/use-case/DeleteOrderUseCase';
+import { DeleteOrderRequestAdapter } from './DeleteOrderRequestAdapter';
 
 // TODO: Separate out to classes per each use case
 @Controller('order')
@@ -23,6 +25,7 @@ export class OrderController {
   constructor(
     private readonly draftOrderUseCase: DraftOrderUseCase,
     private readonly editOrderUseCase: EditOrderUseCase,
+    private readonly deleteOrderUseCase: DeleteOrderUseCase,
     private readonly confirmOrderUseCase: ConfirmOrderUseCase,
     private readonly receiveOrderByHostUseCase: ReceiveOrderHostUseCase,
   ) {}
@@ -49,6 +52,13 @@ export class OrderController {
     );
 
     return editedDraftedOrder;
+  }
+
+  @Post('delete')
+  async deleteOrder(
+    @Body() deleteOrderRequest: DeleteOrderRequestAdapter,
+  ): Promise<void> {
+    await this.deleteOrderUseCase.execute(deleteOrderRequest);
   }
 
   @Post('confirm')

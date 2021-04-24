@@ -71,6 +71,29 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
       });
   }
 
+  async removeOrderFromCustomer(
+    customerId: UUID,
+    orderId: UUID,
+    transaction?: ClientSession,
+  ): Promise<void> {
+    await this.customerCollection
+      .updateOne(
+        { _id: uuidToMuuid(customerId) },
+        {
+          $pull: {
+            orderIds: uuidToMuuid(orderId),
+          },
+        },
+        transaction ? { session: transaction } : undefined,
+      )
+      .catch(error => {
+        throw new Exception(
+          Code.INTERNAL_ERROR,
+          `Customer couldn't remove order from consumer (orderId: ${orderId}, customerId: ${customerId}): ${error}`,
+        );
+      });
+  }
+
   async findCustomer(
     customerId: UUID,
     transaction?: ClientSession,

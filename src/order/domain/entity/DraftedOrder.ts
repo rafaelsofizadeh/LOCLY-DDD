@@ -9,6 +9,7 @@ import {
 } from '../../application/services/ShipmentCostCalculator/getShipmentCostQuote';
 import { Country } from '../data/Country';
 import { Currency } from '../data/Currency';
+import { DeleteOrderRequest } from '../use-case/DeleteOrderUseCase';
 import { DraftOrderRequest } from '../use-case/DraftOrderUseCase';
 import { EditOrderRequest } from '../use-case/EditOrderUseCase';
 import { Address } from './Address';
@@ -194,5 +195,19 @@ export class DraftedOrder implements DraftedOrderProps {
     const draftedOrder: DraftedOrder = await draftNewOrder(draftOrderRequest);
 
     return draftedOrder;
+  }
+
+  static async delete(
+    { orderId, customerId }: DeleteOrderRequest,
+    deleteOrder: (toBeDeletedOrderId: UUID) => Promise<unknown>,
+    removeOrderFromCustomer: (
+      toRemoveOrderFromCustomerId: UUID,
+      toBeRemovedFromCustomerOrderId: UUID,
+    ) => Promise<unknown>,
+  ) {
+    await Promise.all([
+      deleteOrder(orderId),
+      removeOrderFromCustomer(customerId, orderId),
+    ]);
   }
 }
