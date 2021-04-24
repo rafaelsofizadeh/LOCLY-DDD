@@ -15,7 +15,14 @@ export abstract class CustomerRepository {
   ): Promise<void>;
 
   abstract addOrderToCustomer(
-    order: DraftedOrder,
+    customerId: UUID,
+    orderId: UUID,
+    transaction?: ClientSession,
+  ): Promise<void>;
+
+  abstract removeOrderFromCustomer(
+    customerId: UUID,
+    orderId: UUID,
     transaction?: ClientSession,
   ): Promise<void>;
 

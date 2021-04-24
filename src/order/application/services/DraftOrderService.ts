@@ -35,7 +35,7 @@ export class DraftOrder implements DraftOrderUseCase {
     return draftedOrder;
   }
 
-  private async draftOrderAndPersist(
+  private async draftOrder(
     { customerId, originCountry, items, destination }: DraftOrderRequest,
     session: ClientSession,
   ): Promise<DraftedOrder> {
@@ -51,7 +51,8 @@ export class DraftOrder implements DraftOrderUseCase {
       async (newlyDraftedOrder: DraftedOrder) => {
         await this.orderRepository.addOrder(newlyDraftedOrder, session);
         await this.customerRepository.addOrderToCustomer(
-          newlyDraftedOrder,
+          newlyDraftedOrder.customerId,
+          newlyDraftedOrder.id,
           session,
         );
       },

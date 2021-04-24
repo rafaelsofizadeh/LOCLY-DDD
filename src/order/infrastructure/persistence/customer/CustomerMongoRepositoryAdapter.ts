@@ -49,7 +49,8 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
   }
 
   async addOrderToCustomer(
-    { id: orderId, customerId }: DraftedOrder,
+    customerId: UUID,
+    orderId: UUID,
     transaction?: ClientSession,
   ): Promise<void> {
     await this.customerCollection
