@@ -12,9 +12,6 @@ export const Category = {
 export type Category = typeof Category[keyof typeof Category];
 
 export type PhysicalItemProps = {
-  width: number;
-  length: number;
-  height: number;
   weight: Gram;
 };
 
@@ -35,32 +32,14 @@ export class Item implements ItemProps {
 
   readonly category: Category;
 
-  readonly width: number;
-
-  readonly length: number;
-
-  readonly height: number;
-
   readonly weight: Gram;
 
-  private constructor({
-    id,
-    title,
-    storeName,
-    category,
-    weight,
-    width,
-    length,
-    height,
-  }: ItemProps) {
+  private constructor({ id, title, storeName, category, weight }: ItemProps) {
     this.id = id;
     this.title = title;
     this.storeName = storeName;
     this.category = category;
     this.weight = weight;
-    this.width = width;
-    this.length = length;
-    this.height = height;
   }
 
   static fromData(payload: ItemProps) {
@@ -69,14 +48,5 @@ export class Item implements ItemProps {
 
   static create(payload: WithoutId<ItemProps>) {
     return new this({ ...payload, id: UUID() });
-  }
-
-  get physicalCharacteristics(): PhysicalItemProps {
-    return {
-      width: this.width,
-      length: this.length,
-      height: this.height,
-      weight: this.weight,
-    };
   }
 }

@@ -174,7 +174,7 @@ export class DraftedOrder implements DraftedOrderProps {
     const { currency, services }: ShipmentCostQuote = getShipmentCostQuote(
       originCountry,
       destinationCountry,
-      items.map(({ physicalCharacteristics }) => physicalCharacteristics),
+      items.map(item => ({ weight: item.weight })),
     );
 
     // TODO: Service choice logic

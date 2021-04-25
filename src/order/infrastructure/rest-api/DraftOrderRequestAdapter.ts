@@ -31,18 +31,6 @@ export class ItemValidationSchema {
   @IsInt()
   @IsPositive()
   weight: Gram;
-
-  @IsInt()
-  @IsPositive()
-  width: number;
-
-  @IsInt()
-  @IsPositive()
-  length: number;
-
-  @IsInt()
-  @IsPositive()
-  height: number;
 }
 
 export class AddressValidationSchema {

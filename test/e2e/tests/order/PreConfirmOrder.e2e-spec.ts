@@ -155,9 +155,6 @@ describe('Confirm Order – POST /order/confirm', () => {
         Item.create({
           title: 'Laptop',
           storeName: 'Amazon',
-          width: 100,
-          height: 100,
-          length: 100,
           weight: 10,
           category: Category.Electronics,
         }),
