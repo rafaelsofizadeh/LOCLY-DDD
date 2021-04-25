@@ -201,9 +201,11 @@ export class DraftedOrder implements DraftedOrderProps {
       draftOrderRequest: DraftOrderRequest,
     ) => Promise<DraftedOrder>,
   ): Promise<DraftedOrder> {
+    // TODO: moving removeOldOrderFromCustomer below deleteOldOrder (thus making removeOldOrder and
+    // draftNewOrder->addOrderToCustomer closer) leads to a writing conflict (TransientTransactionError)
     await Promise.all([
-      deleteOldOrder(orderId),
       removeOldOrderFromCustomer(draftOrderRequest.customerId, orderId),
+      deleteOldOrder(orderId),
     ]);
 
     const draftedOrder: DraftedOrder = await draftNewOrder(draftOrderRequest);
