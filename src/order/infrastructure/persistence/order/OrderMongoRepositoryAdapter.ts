@@ -30,15 +30,12 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
 
   async addOrder(
     draftedOrder: DraftedOrder,
-    transaction?: ClientSession,
+    session?: ClientSession,
   ): Promise<void> {
     const draftedOrderDocument = draftedOrderToMongoDocument(draftedOrder);
 
     await this.orderCollection
-      .insertOne(
-        draftedOrderDocument,
-        transaction ? { session: transaction } : undefined,
-      )
+      .insertOne(draftedOrderDocument, { session })
       .catch(error => {
         throw new Exception(
           Code.INTERNAL_ERROR,
@@ -51,21 +48,19 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   async setProperties(
     orderId: UUID,
     properties: Partial<EditableOrderProps>,
-    transaction?: ClientSession,
+    session?: ClientSession,
   ) {
     await this.orderCollection.updateOne(
       { _id: uuidToMuuid(orderId) },
       { $set: convertToMongoDocument(properties) },
-      transaction ? { session: transaction } : undefined,
+      { session },
     );
   }
 
-  async findOrder(orderId: UUID, transaction?: ClientSession): Promise<Order> {
+  async findOrder(orderId: UUID, session?: ClientSession): Promise<Order> {
     const orderDocument: OrderMongoDocument = await this.orderCollection.findOne(
-      {
-        _id: uuidToMuuid(orderId),
-      },
-      transaction ? { session: transaction } : undefined,
+      { _id: uuidToMuuid(orderId) },
+      { session },
     );
 
     if (!orderDocument) {
@@ -81,17 +76,14 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
 
   async findOrders(
     orderIds: UUID[],
-    transaction?: ClientSession,
+    session?: ClientSession,
   ): Promise<Order[]> {
     const orderMongoBinaryIds: Binary[] = orderIds.map(orderId =>
       uuidToMuuid(orderId),
     );
 
     const orderDocuments: OrderMongoDocument[] = await this.orderCollection
-      .find(
-        { _id: { $in: orderMongoBinaryIds } },
-        transaction ? { session: transaction } : undefined,
-      )
+      .find({ _id: { $in: orderMongoBinaryIds } }, { session })
       .toArray();
 
     // To access all orderIds and failedOrderIds, catch the exception and access its 'data' property
@@ -115,10 +107,10 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     );
   }
 
-  async deleteOrder(orderId: UUID, transaction?: ClientSession): Promise<void> {
+  async deleteOrder(orderId: UUID, session?: ClientSession): Promise<void> {
     const deleteResult: DeleteWriteOpResultObject = await this.orderCollection.deleteOne(
       { _id: uuidToMuuid(orderId) },
-      transaction ? { session: transaction } : undefined,
+      { session },
     );
 
     if (deleteResult.deletedCount !== 1) {

@@ -28,15 +28,13 @@ export class MatchMongoRecorderAdapter implements MatchRecorder {
   async recordMatch(
     orderId: UUID,
     hostId: UUID,
-    transaction?: ClientSession,
+    session?: ClientSession,
   ): Promise<UUID> {
     const matchId = orderId;
 
     await this.matchCollection.insertOne(
       matchToMongoDocument({ orderId, hostId }),
-      {
-        session: transaction,
-      },
+      { session },
     );
 
     return matchId;
@@ -44,17 +42,17 @@ export class MatchMongoRecorderAdapter implements MatchRecorder {
 
   async retrieveAndDeleteMatch(
     matchId: UUID,
-    transaction?: ClientSession,
+    session?: ClientSession,
   ): Promise<Match> {
     const matchMongoBinaryId: Binary = uuidToMuuid(matchId);
     const matchDocument: MatchMongoDocument = await this.matchCollection.findOne(
       { _id: matchMongoBinaryId },
-      transaction ? { session: transaction } : undefined,
+      { session },
     );
 
     await this.matchCollection.deleteOne(
       { _id: matchMongoBinaryId },
-      transaction ? { session: transaction } : undefined,
+      { session },
     );
 
     return mongoDocumentToMatch(matchDocument);
@@ -63,14 +61,14 @@ export class MatchMongoRecorderAdapter implements MatchRecorder {
   async findMatch(
     orderId: UUID,
     hostId: UUID,
-    transaction?: ClientSession,
+    session?: ClientSession,
   ): Promise<Match> {
     const orderMongoBinaryId: Binary = uuidToMuuid(orderId);
     const hostMongoBinaryId: Binary = uuidToMuuid(hostId);
 
     const matchDocument: MatchMongoDocument = await this.matchCollection.findOne(
       { _id: orderMongoBinaryId, hostId: hostMongoBinaryId },
-      transaction ? { session: transaction } : undefined,
+      { session },
     );
 
     if (!matchDocument) {

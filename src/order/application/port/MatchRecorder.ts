@@ -10,17 +10,17 @@ export abstract class MatchRecorder {
   abstract recordMatch(
     orderId: UUID,
     hostId: UUID,
-    transaction?: ClientSession,
+    session?: ClientSession,
   ): Promise<UUID>;
 
   abstract retrieveAndDeleteMatch(
     matchId: UUID,
-    transaction?: ClientSession,
+    session?: ClientSession,
   ): Promise<Match>;
 
   abstract findMatch(
     orderId: UUID,
     hostId: UUID,
-    transaction?: ClientSession,
+    session?: ClientSession,
   ): Promise<Match>;
 }

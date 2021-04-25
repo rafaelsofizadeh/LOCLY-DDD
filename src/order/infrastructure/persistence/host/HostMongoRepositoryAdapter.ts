@@ -14,7 +14,6 @@ import { Code } from '../../../../common/error-handling/Code';
 import { UUID } from '../../../../common/domain/UUID';
 import { uuidToMuuid } from '../../../../common/utils';
 import { Country } from '../../../domain/data/Country';
-import { ConfirmedOrder } from '../../../domain/entity/ConfirmedOrder';
 
 @Injectable()
 export class HostMongoRepositoryAdapter implements HostRepository {
@@ -24,42 +23,35 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   ) {}
 
   // For testing
-  async addManyHosts(
-    hosts: Host[],
-    transaction?: ClientSession,
-  ): Promise<void> {
+  async addManyHosts(hosts: Host[], session?: ClientSession): Promise<void> {
     await this.hostCollection.insertMany(hosts.map(hostToMongoDocument), {
-      session: transaction,
+      session,
     });
   }
 
-  async addHost(host: Host, transaction?: ClientSession): Promise<void> {
+  async addHost(host: Host, session?: ClientSession): Promise<void> {
     await this.hostCollection.insertOne(hostToMongoDocument(host), {
-      session: transaction,
+      session,
     });
   }
 
   // For testing
   async deleteManyHosts(
     hostIds: UUID[],
-    transaction?: ClientSession,
+    session?: ClientSession,
   ): Promise<void> {
     await this.hostCollection.deleteMany(
       {
-        _id: {
-          $in: hostIds.map(hostId => uuidToMuuid(hostId)),
-        },
+        _id: { $in: hostIds.map(hostId => uuidToMuuid(hostId)) },
       },
-      transaction ? { session: transaction } : undefined,
+      { session },
     );
   }
 
-  async deleteHost(hostId: UUID, transaction?: ClientSession): Promise<void> {
+  async deleteHost(hostId: UUID, session?: ClientSession): Promise<void> {
     await this.hostCollection.deleteOne(
-      {
-        _id: uuidToMuuid(hostId),
-      },
-      transaction ? { session: transaction } : undefined,
+      { _id: uuidToMuuid(hostId) },
+      { session },
     );
   }
 
@@ -67,17 +59,13 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   async addOrderToHost(
     hostId: UUID,
     orderId: UUID,
-    transaction?: ClientSession,
+    session?: ClientSession,
   ): Promise<void> {
     await this.hostCollection
       .updateOne(
         { _id: uuidToMuuid(hostId) },
-        {
-          $push: {
-            orderIds: uuidToMuuid(orderId),
-          },
-        },
-        transaction ? { session: transaction } : undefined,
+        { $push: { orderIds: uuidToMuuid(orderId) } },
+        { session },
       )
       .catch(error => {
         throw new Exception(
@@ -87,12 +75,10 @@ export class HostMongoRepositoryAdapter implements HostRepository {
       });
   }
 
-  async findHost(hostId: UUID, transaction?: ClientSession): Promise<Host> {
+  async findHost(hostId: UUID, session?: ClientSession): Promise<Host> {
     const hostDocument: HostMongoDocument = await this.hostCollection.findOne(
-      {
-        _id: uuidToMuuid(hostId),
-      },
-      transaction ? { session: transaction } : undefined,
+      { _id: uuidToMuuid(hostId) },
+      { session },
     );
 
     if (!hostDocument) {
@@ -108,7 +94,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
 
   async findHostAvailableInCountryWithMinimumNumberOfOrders(
     country: Country,
-    transaction?: ClientSession,
+    session?: ClientSession,
   ): Promise<Host> {
     // Finding max value in array: https://stackoverflow.com/questions/32076382/mongodb-how-to-get-max-value-from-collections
     // Sorting by array length: https://stackoverflow.com/a/54529224/6539857
@@ -137,7 +123,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
           },
           { $limit: 1 },
         ],
-        transaction ? { session: transaction } : undefined,
+        { session },
       )
       .toArray();
 
