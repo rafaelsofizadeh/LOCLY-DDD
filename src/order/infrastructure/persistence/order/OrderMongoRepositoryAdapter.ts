@@ -4,6 +4,7 @@ import {
   ClientSession,
   Collection,
   DeleteWriteOpResultObject,
+  FilterQuery,
 } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
@@ -12,8 +13,9 @@ import { Code } from '../../../../common/error-handling';
 import { Exception } from '../../../../common/error-handling';
 import { OrderRepository } from '../../../application/port/OrderRepository';
 import {
-  EditableOrderProps,
+  OrderPropsWithoutId,
   Order,
+  OrderSearchRequirements,
   OrderStatus,
 } from '../../../domain/entity/Order';
 import {
@@ -53,27 +55,39 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
 
   async setProperties(
     orderId: UUID,
-    properties: Partial<EditableOrderProps>,
+    properties: Partial<OrderPropsWithoutId> & { status: OrderStatus },
+    orderSearchRequirements: OrderSearchRequirements = {},
     session?: ClientSession,
   ) {
     await this.orderCollection.updateOne(
-      { _id: uuidToMuuid(orderId) },
+      this.mongoFilterQuery(orderId, orderSearchRequirements),
       { $set: convertToMongoDocument(properties) },
       { session },
     );
   }
 
-  async findOrder(orderId: UUID, session?: ClientSession): Promise<Order> {
+  async findOrder(
+    orderId: UUID,
+    orderSearchRequirements: OrderSearchRequirements = {},
+    session?: ClientSession,
+  ): Promise<Order> {
+    const filterQuery: FilterQuery<OrderMongoDocument> = this.mongoFilterQuery(
+      orderId,
+      orderSearchRequirements,
+    );
+
     const orderDocument: OrderMongoDocument = await this.orderCollection.findOne(
-      { _id: uuidToMuuid(orderId) },
+      filterQuery,
       { session },
     );
 
     if (!orderDocument) {
+      console.log(filterQuery._id, filterQuery._id.toString());
+
       throw new Exception(
         Code.ENTITY_NOT_FOUND_ERROR,
         `Order (id: ${orderId}) not found`,
-        { orderId },
+        { orderId, orderSearchRequirements, filterQuery },
       );
     }
 
@@ -113,9 +127,13 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     );
   }
 
-  async deleteOrder(orderId: UUID, session?: ClientSession): Promise<void> {
+  async deleteOrder(
+    orderId: UUID,
+    orderSearchRequirements: OrderSearchRequirements = {},
+    session?: ClientSession,
+  ): Promise<void> {
     const deleteResult: DeleteWriteOpResultObject = await this.orderCollection.deleteOne(
-      { _id: uuidToMuuid(orderId) },
+      this.mongoFilterQuery(orderId, orderSearchRequirements),
       { session },
     );
 
@@ -126,5 +144,13 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
         { orderId },
       );
     }
+  }
+
+  // TODO: Better typing (usage of FilterQuery)
+  private mongoFilterQuery(
+    orderId: UUID,
+    orderSearchRequirements: OrderSearchRequirements = {},
+  ): FilterQuery<OrderMongoDocument> {
+    return convertToMongoDocument({ id: orderId, ...orderSearchRequirements });
   }
 }

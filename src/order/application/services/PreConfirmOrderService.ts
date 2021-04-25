@@ -59,12 +59,12 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
 
   // TODO: Error handling and rejection events
   private async matchOrderAndCheckout(
-    { orderId }: PreConfirmOrderRequest,
+    { orderId, customerId }: PreConfirmOrderRequest,
     session: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const draftedOrder = (await this.orderRepository.findOrder(
       orderId,
-      OrderStatus.Drafted,
+      { status: OrderStatus.Drafted, customerId },
       session,
     )) as DraftedOrder;
 

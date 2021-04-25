@@ -4,4 +4,7 @@ import { PreConfirmOrderRequest } from '../../domain/use-case/PreConfirmOrderUse
 export class PreConfirmOrderRequestAdapter implements PreConfirmOrderRequest {
   @IsUUID()
   readonly orderId: UUID;
+
+  @IsUUID()
+  readonly customerId: UUID;
 }

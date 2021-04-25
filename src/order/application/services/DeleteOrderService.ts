@@ -10,6 +10,7 @@ import {
   DeleteOrderRequest,
   DeleteOrderUseCase,
 } from '../../domain/use-case/DeleteOrderUseCase';
+import { UUID } from '../../../common/domain';
 
 @Injectable()
 export class DeleteOrder implements DeleteOrderUseCase {
@@ -40,9 +41,16 @@ export class DeleteOrder implements DeleteOrderUseCase {
         orderId,
         customerId,
       },
-      toBeDeletedOrderId =>
-        this.orderRepository.deleteOrder(toBeDeletedOrderId, session),
-      (toRemoveOrderFromCustomerId, toBeRemovedFromCustomerOrderId) =>
+      (toBeDeletedOrderId: UUID, orderOwnerCustomerId: UUID) =>
+        this.orderRepository.deleteOrder(
+          toBeDeletedOrderId,
+          { customerId: orderOwnerCustomerId },
+          session,
+        ),
+      (
+        toRemoveOrderFromCustomerId: UUID,
+        toBeRemovedFromCustomerOrderId: UUID,
+      ) =>
         this.customerRepository.removeOrderFromCustomer(
           toRemoveOrderFromCustomerId,
           toBeRemovedFromCustomerOrderId,

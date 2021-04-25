@@ -191,8 +191,11 @@ export class DraftedOrder implements DraftedOrderProps {
   }
 
   static async edit(
-    { orderId, ...draftOrderRequest }: EditOrderRequest,
-    deleteOldOrder: (toBeDeletedOrderId: UUID) => Promise<unknown>,
+    { orderId, customerId, ...restDraftOrderRequest }: EditOrderRequest,
+    deleteOldOrder: (
+      toBeDeletedOrderId: UUID,
+      orderOwnerCustomerId: UUID,
+    ) => Promise<unknown>,
     removeOldOrderFromCustomer: (
       toBeRemovedFromCustomerId: UUID,
       toBeRemovedFromCustomerOrderId: UUID,
@@ -201,28 +204,34 @@ export class DraftedOrder implements DraftedOrderProps {
       draftOrderRequest: DraftOrderRequest,
     ) => Promise<DraftedOrder>,
   ): Promise<DraftedOrder> {
-    // TODO: moving removeOldOrderFromCustomer below deleteOldOrder (thus making removeOldOrder and
+    // TODO(FUTURE): moving removeOldOrderFromCustomer below deleteOldOrder (thus making removeOldOrder and
     // draftNewOrder->addOrderToCustomer closer) leads to a writing conflict (TransientTransactionError)
     await Promise.all([
-      removeOldOrderFromCustomer(draftOrderRequest.customerId, orderId),
-      deleteOldOrder(orderId),
+      removeOldOrderFromCustomer(customerId, orderId),
+      deleteOldOrder(orderId, customerId),
     ]);
 
-    const draftedOrder: DraftedOrder = await draftNewOrder(draftOrderRequest);
+    const draftedOrder: DraftedOrder = await draftNewOrder({
+      customerId,
+      ...restDraftOrderRequest,
+    });
 
     return draftedOrder;
   }
 
   static async delete(
     { orderId, customerId }: DeleteOrderRequest,
-    deleteOrder: (toBeDeletedOrderId: UUID) => Promise<unknown>,
+    deleteOrder: (
+      toBeDeletedOrderId: UUID,
+      orderOwnerCustomerId: UUID,
+    ) => Promise<unknown>,
     removeOrderFromCustomer: (
       toRemoveOrderFromCustomerId: UUID,
       toBeRemovedFromCustomerOrderId: UUID,
     ) => Promise<unknown>,
   ) {
     await Promise.all([
-      deleteOrder(orderId),
+      deleteOrder(orderId, customerId),
       removeOrderFromCustomer(customerId, orderId),
     ]);
   }

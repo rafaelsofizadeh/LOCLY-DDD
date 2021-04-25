@@ -180,6 +180,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       .post('/order/confirm')
       .send({
         orderId: testOrder.id,
+        customerId: testCustomer.id,
       });
 
     expect(response.status).toBe(201);

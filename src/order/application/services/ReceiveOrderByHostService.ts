@@ -48,6 +48,8 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
             status: OrderStatus.ReceivedByHost,
             receivedByHostDate,
           },
+          // TODO:
+          {},
           session,
         ),
     );

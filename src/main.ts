@@ -3,7 +3,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './AppModule';
 
 // TODO(GLOBAL): "not found document" handling application-wide.
-// TODO(GLOBAL): Add state transition control for Orders
 // TODO(GLOBAL) ^related: More expressive UseCases with Order types/stages
 // TODO(GLOBAL): Error handling in all repo methods
 // TODO(GLOBAL): Tie deleteOrder to removeOrderFromCustomer

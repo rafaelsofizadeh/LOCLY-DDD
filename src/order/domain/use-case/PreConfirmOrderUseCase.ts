@@ -3,6 +3,7 @@ import { UUID } from '../../../common/domain';
 
 export interface PreConfirmOrderRequest {
   orderId: UUID;
+  customerId: UUID;
 }
 
 export interface StripeCheckoutSessionResult {

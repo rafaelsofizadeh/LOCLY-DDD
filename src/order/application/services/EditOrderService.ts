@@ -16,6 +16,7 @@ import {
 import { UUID } from '../../../common/domain';
 import { CustomerRepository } from '../port/CustomerRepository';
 import { withTransaction } from '../../../common/application';
+import { OrderStatus } from '../../domain/entity/Order';
 
 @Injectable()
 export class EditOrder implements EditOrderUseCase {
@@ -44,12 +45,14 @@ export class EditOrder implements EditOrderUseCase {
     editOrderRequest: EditOrderRequest,
     session: ClientSession,
   ): Promise<DraftedOrder> {
-    // TODO(GLOBAL): Application-wide security rules (orderId <-> customerId <-> hostId control)
-
     const draftedOrder: DraftedOrder = await DraftedOrder.edit(
       editOrderRequest,
-      (toBeDeletedOrderId: UUID) =>
-        this.orderRepository.deleteOrder(toBeDeletedOrderId, session),
+      (toBeDeletedOrderId: UUID, orderOwnerCustomerId: UUID) =>
+        this.orderRepository.deleteOrder(
+          toBeDeletedOrderId,
+          { status: OrderStatus.Drafted, customerId: orderOwnerCustomerId },
+          session,
+        ),
       (toBeRemovedFromCustomerId: UUID, toBeRemovedFromCustomerOrderId: UUID) =>
         this.customerRepository.removeOrderFromCustomer(
           toBeRemovedFromCustomerId,

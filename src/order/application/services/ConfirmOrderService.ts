@@ -68,6 +68,7 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
             status: OrderStatus.Confirmed,
             hostId: confirmedHostId,
           },
+          { status: OrderStatus.Drafted },
           session,
         ),
       (toAddOrderToHostId: UUID, toAddOrderId: UUID) =>

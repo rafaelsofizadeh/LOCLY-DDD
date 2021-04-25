@@ -29,8 +29,13 @@ export type Order =
   | ReceivedByHostOrder
   | VerifiedByHostOrder;
 
-export type EditableOrderProps =
-  | Omit<DraftedOrderProps, 'id'>
-  | Omit<ConfirmedOrderProps, 'id'>
-  | Omit<ReceivedByHostOrderProps, 'id'>
-  | Omit<VerifiedByHostOrderProps, 'id'>;
+export type OrderProps = DraftedOrderProps &
+  ConfirmedOrderProps &
+  ReceivedByHostOrderProps &
+  VerifiedByHostOrderProps;
+
+export type OrderPropsWithoutId = Omit<OrderProps, 'id'>;
+
+export type OrderSearchRequirements = Partial<OrderPropsWithoutId> & {
+  status?: OrderStatus;
+};
