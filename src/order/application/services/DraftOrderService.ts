@@ -22,11 +22,14 @@ export class DraftOrder implements DraftOrderUseCase {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute(draftOrderRequest: DraftOrderRequest): Promise<DraftedOrder> {
-    const session = this.mongoClient.startSession();
-
+  async execute(
+    draftOrderRequest: DraftOrderRequest,
+    session?: ClientSession,
+  ): Promise<DraftedOrder> {
     const draftedOrder: DraftedOrder = await withTransaction(
-      () => this.draftOrder(draftOrderRequest, session),
+      (transactionalSession: ClientSession) =>
+        this.draftOrder(draftOrderRequest, transactionalSession),
+      this.mongoClient,
       session,
     );
 
@@ -37,6 +40,8 @@ export class DraftOrder implements DraftOrderUseCase {
     { customerId, originCountry, items, destination }: DraftOrderRequest,
     session: ClientSession,
   ): Promise<DraftedOrder> {
+    // TODO: Check if customerId exists
+
     const draftedOrder: DraftedOrder = await DraftedOrder.create(
       {
         customerId,

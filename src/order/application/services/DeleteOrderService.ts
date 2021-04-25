@@ -19,11 +19,14 @@ export class DeleteOrder implements DeleteOrderUseCase {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute(deleteOrderRequest: DeleteOrderRequest): Promise<void> {
-    const session = this.mongoClient.startSession();
-
+  async execute(
+    deleteOrderRequest: DeleteOrderRequest,
+    session?: ClientSession,
+  ): Promise<void> {
     await withTransaction(
-      () => this.deleteOrder(deleteOrderRequest, session),
+      (transactionalSession: ClientSession) =>
+        this.deleteOrder(deleteOrderRequest, transactionalSession),
+      this.mongoClient,
       session,
     );
   }
@@ -43,6 +46,7 @@ export class DeleteOrder implements DeleteOrderUseCase {
         this.customerRepository.removeOrderFromCustomer(
           toRemoveOrderFromCustomerId,
           toBeRemovedFromCustomerOrderId,
+          session,
         ),
     );
   }

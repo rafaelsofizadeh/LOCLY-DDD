@@ -30,17 +30,18 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute({
-    orderId,
-  }: PreConfirmOrderRequest): Promise<StripeCheckoutSessionResult> {
-    const session = this.mongoClient.startSession();
-
-    // Transaction TODOs:
-    // TODO(GLOBAL): Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
-    // TOOD(GLOBAL): Session initialization to withTransaction
+  async execute(
+    preConfirmOrderRequest: PreConfirmOrderRequest,
+    session?: ClientSession,
+  ): Promise<StripeCheckoutSessionResult> {
     // TODO(GLOBAL): Transaction decorator
     const checkoutSession: Stripe.Checkout.Session = await withTransaction(
-      () => this.matchOrderAndCheckout(orderId, session),
+      (transactionalSession: ClientSession) =>
+        this.matchOrderAndCheckout(
+          preConfirmOrderRequest,
+          transactionalSession,
+        ),
+      this.mongoClient,
       session,
     );
 
@@ -51,7 +52,7 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
 
   // TODO: Error handling and rejection events
   private async matchOrderAndCheckout(
-    orderId: UUID,
+    { orderId }: PreConfirmOrderRequest,
     session: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const draftedOrder = (await this.orderRepository.findOrder(

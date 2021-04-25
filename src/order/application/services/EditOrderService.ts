@@ -15,6 +15,7 @@ import {
 } from '../../domain/use-case/DraftOrderUseCase';
 import { UUID } from '../../../common/domain/UUID';
 import { CustomerRepository } from '../port/CustomerRepository';
+import { withTransaction } from '../../../common/utils';
 
 @Injectable()
 export class EditOrder implements EditOrderUseCase {
@@ -25,22 +26,22 @@ export class EditOrder implements EditOrderUseCase {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute(editOrderRequest: EditOrderRequest): Promise<DraftedOrder> {
-    const session = this.mongoClient.startSession();
-
-    // TODO: can't use withTransaction, because draftOrderUseCase already calls a session of its own.
-    // Potential solution!: let draftOrderUseCase and withTransaction accept a pre-defined session as an argument
-    const draftedOrder: DraftedOrder = await this.editOrderAndPersist(
-      editOrderRequest,
+  async execute(
+    editOrderRequest: EditOrderRequest,
+    session?: ClientSession,
+  ): Promise<DraftedOrder> {
+    const draftedOrder: DraftedOrder = await withTransaction(
+      (transactionalSession: ClientSession) =>
+        this.editOrder(editOrderRequest, transactionalSession),
+      this.mongoClient,
       session,
     );
 
     return draftedOrder;
   }
 
-  private async editOrderAndPersist(
+  private async editOrder(
     editOrderRequest: EditOrderRequest,
-    // TODO(NOW)(IMPORTANT): transactions
     session: ClientSession,
   ): Promise<DraftedOrder> {
     // TODO(GLOBAL): Application-wide security rules (orderId <-> customerId <-> hostId control)
@@ -56,7 +57,7 @@ export class EditOrder implements EditOrderUseCase {
           session,
         ),
       (draftOrderRequest: DraftOrderRequest) =>
-        this.draftOrderUseCase.execute(draftOrderRequest),
+        this.draftOrderUseCase.execute(draftOrderRequest, session),
     );
 
     return draftedOrder;

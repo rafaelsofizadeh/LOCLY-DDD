@@ -27,16 +27,19 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
 
   @StripeWebhookHandler('checkout.session.completed')
   // TODO: Better Stripe typing
-  async execute(paymentFinalizedEvent: Stripe.Event): Promise<HostMatchResult> {
+  async execute(
+    paymentFinalizedEvent: Stripe.Event,
+    session?: ClientSession,
+  ): Promise<HostMatchResult> {
     const orderAndMatchId: UUID = UUID(
       (paymentFinalizedEvent.data.object as Stripe.Checkout.Session)
         .client_reference_id as UUID,
     );
 
-    const session: ClientSession = this.mongoClient.startSession();
-
     const { hostId } = await withTransaction(
-      () => this.confirmOrder(orderAndMatchId, session),
+      (transactionalSession: ClientSession) =>
+        this.confirmOrder(orderAndMatchId, transactionalSession),
+      this.mongoClient,
       session,
     );
 

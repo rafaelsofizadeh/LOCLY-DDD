@@ -16,18 +16,17 @@ import { OrderStatus } from '../../domain/entity/Order';
 export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
-    // TODO(GLOBAL): MongoClient dependency in withTransaction wrapper class
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute({
-    orderId,
-  }: ReceiveOrderHostRequest): Promise<ReceiveOrderHostResult> {
-    const session = this.mongoClient.startSession();
-
-    // TODO: Helper function instead of assigning a let variable in try block: https://jira.mongodb.org/browse/NODE-2014
+  async execute(
+    { orderId }: ReceiveOrderHostRequest,
+    session?: ClientSession,
+  ): Promise<ReceiveOrderHostResult> {
     const receivedByHostDate: Date = await withTransaction(
-      () => this.handleOrderReceiptByHost(orderId, session),
+      (transactionalSession: ClientSession) =>
+        this.handleOrderReceiptByHost(orderId, transactionalSession),
+      this.mongoClient,
       session,
     );
 
