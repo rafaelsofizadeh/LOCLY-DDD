@@ -1,6 +1,6 @@
+import { HttpStatus } from '@nestjs/common';
 import { Modify } from '../../../common/domain';
 import { UUID } from '../../../common/domain';
-import { Code } from '../../../common/error-handling';
 import { Exception } from '../../../common/error-handling';
 import { ServiceAvailabilityFn } from '../../application/services/checkServiceAvailability';
 import {
@@ -158,8 +158,8 @@ export class DraftedOrder implements DraftedOrderProps {
 
     if (!isServiceAvailable) {
       throw new Exception(
-        Code.VALIDATION_ERROR,
-        `Service unavailable for origin: ${originCountry} & destination: ${destinationCountry}.`,
+        HttpStatus.SERVICE_UNAVAILABLE,
+        `Service unavailable for origin = ${originCountry}, destination = ${destinationCountry}`,
         { originCountry, destinationCountry },
       );
     }

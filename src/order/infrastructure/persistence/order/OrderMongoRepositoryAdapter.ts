@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import {
   Binary,
   ClientSession,
@@ -9,7 +9,6 @@ import {
 import { InjectCollection } from 'nest-mongodb';
 
 import { UUID } from '../../../../common/domain';
-import { Code } from '../../../../common/error-handling';
 import { Exception } from '../../../../common/error-handling';
 import { OrderRepository } from '../../../application/port/OrderRepository';
 import {
@@ -46,7 +45,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       .insertOne(draftedOrderDocument, { session })
       .catch(error => {
         throw new Exception(
-          Code.INTERNAL_ERROR,
+          HttpStatus.INTERNAL_SERVER_ERROR,
           `Error creating a new draftedOrder in the database. ${error.name}: ${error.message}`,
           { draftedOrder, draftedOrderDocument },
         );
@@ -85,7 +84,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       console.log(filterQuery._id, filterQuery._id.toString());
 
       throw new Exception(
-        Code.ENTITY_NOT_FOUND_ERROR,
+        HttpStatus.NOT_FOUND,
         `Order (id: ${orderId}) not found`,
         { orderId, orderSearchRequirements, filterQuery },
       );
@@ -116,7 +115,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       );
 
       throw new Exception(
-        Code.ENTITY_NOT_FOUND_ERROR,
+        HttpStatus.NOT_FOUND,
         `Orders (ids: ${failedOrderIds.join(', ')}) not found`,
         { orderIds, failedOrderIds },
       );
@@ -139,7 +138,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
 
     if (deleteResult.deletedCount !== 1) {
       throw new Exception(
-        Code.ENTITY_NOT_FOUND_ERROR,
+        HttpStatus.NOT_FOUND,
         `Cannot delete, order (id: ${orderId}}) not found`,
         { orderId },
       );

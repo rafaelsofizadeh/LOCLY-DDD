@@ -1,5 +1,5 @@
 import { ClientSession, Collection } from 'mongodb';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
 import { HostRepository } from '../../../application/port/HostRepository';
@@ -10,7 +10,6 @@ import {
   hostToMongoDocument,
 } from './HostMongoMapper';
 import { Exception } from '../../../../common/error-handling';
-import { Code } from '../../../../common/error-handling';
 import { UUID } from '../../../../common/domain';
 import { Country } from '../../../domain/data/Country';
 import { uuidToMuuid } from '../../../../common/persistence';
@@ -69,8 +68,9 @@ export class HostMongoRepositoryAdapter implements HostRepository {
       )
       .catch(error => {
         throw new Exception(
-          Code.INTERNAL_ERROR,
+          HttpStatus.INTERNAL_SERVER_ERROR,
           `Host couldn't accept order and add order to host (orderId: ${orderId}, hostId: ${hostId}): ${error}`,
+          { hostId, orderId },
         );
       });
   }
@@ -83,7 +83,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
 
     if (!hostDocument) {
       throw new Exception(
-        Code.ENTITY_NOT_FOUND_ERROR,
+        HttpStatus.NOT_FOUND,
         `Order (id: ${hostId}) not found`,
         { hostId },
       );
@@ -129,7 +129,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
 
     if (!hostDocuments.length) {
       throw new Exception(
-        Code.ENTITY_NOT_FOUND_ERROR,
+        HttpStatus.NOT_FOUND,
         `No available host (country: ${country})`,
         { country },
       );

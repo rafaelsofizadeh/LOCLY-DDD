@@ -1,5 +1,5 @@
 import { ClientSession, Collection } from 'mongodb';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
 import { UUID } from '../../../../common/domain';
@@ -11,7 +11,6 @@ import {
   customerToMongoDocument,
 } from './CustomerMongoMapper';
 import { Exception } from '../../../../common/error-handling';
-import { Code } from '../../../../common/error-handling';
 import { uuidToMuuid } from '../../../../common/persistence';
 
 @Injectable()
@@ -53,8 +52,9 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
       )
       .catch(error => {
         throw new Exception(
-          Code.INTERNAL_ERROR,
+          HttpStatus.INTERNAL_SERVER_ERROR,
           `Order couldn't be added to customer (orderId: ${orderId}, customerId: ${customerId}): ${error}`,
+          { orderId, customerId },
         );
       });
   }
@@ -72,8 +72,9 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
       )
       .catch(error => {
         throw new Exception(
-          Code.INTERNAL_ERROR,
+          HttpStatus.INTERNAL_SERVER_ERROR,
           `Order couldn't be removed from customer (orderId: ${orderId}, customerId: ${customerId}): ${error}`,
+          { orderId, customerId },
         );
       });
   }
@@ -89,7 +90,7 @@ export class CustomerMongoRepositoryAdapter implements CustomerRepository {
 
     if (!customerDocument) {
       throw new Exception(
-        Code.ENTITY_NOT_FOUND_ERROR,
+        HttpStatus.NOT_FOUND,
         `Customer (id: ${customerId}) not found`,
         { customerId },
       );

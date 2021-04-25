@@ -30,7 +30,7 @@ export class OrderController {
     private readonly receiveOrderByHostUseCase: ReceiveOrderHostUseCase,
   ) {}
 
-  @Post('create')
+  @Post('draft')
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async draftOrder(
     @Body() orderRequest: DraftOrderRequestAdapter,
