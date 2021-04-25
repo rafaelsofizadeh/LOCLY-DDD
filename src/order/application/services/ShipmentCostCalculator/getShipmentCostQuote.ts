@@ -10,7 +10,6 @@ type PriceTableSpecification = {
   colsName: string;
   deliveryZoneNames: string[];
   weightIntervals: Gram[];
-  // TODO: Type alias for currency
   currency: Currency;
 };
 
@@ -19,7 +18,6 @@ export type ShipmentCostSpecification = {
   [countryIsoCode: string]: {
     postalServiceName: string;
     priceTableSpecification: PriceTableSpecification;
-    // key: PriceTableSpecification.deliveryZoneNames
     deliveryZones: { [key: string]: Country[] };
     deliveryServices: Array<{
       id: string;
