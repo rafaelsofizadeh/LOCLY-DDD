@@ -45,7 +45,7 @@ const testProviders: Provider[] = [];
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MongoModule.forFeature(['orders', 'customers', 'hosts', 'matches']),
+    MongoModule.forFeature(['orders', 'customers', 'hosts']),
     StripeModule.forRootAsync(StripeModule, {
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

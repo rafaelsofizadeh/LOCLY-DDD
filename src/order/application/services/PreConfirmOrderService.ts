@@ -9,16 +9,24 @@ import {
 } from '../../domain/use-case/PreConfirmOrderUseCase';
 import { OrderRepository } from '../port/OrderRepository';
 import { Host } from '../../domain/entity/Host';
-import { MatchRecorder } from '../port/MatchRecorder';
 import { UUID } from '../../../common/domain';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import { DraftedOrder, ServiceFee } from '../../domain/entity/DraftedOrder';
 import { HostRepository } from '../port/HostRepository';
+import { OrderStatus } from '../../domain/entity/Order';
 
 type StripeCheckoutSession = Stripe.Checkout.Session;
-type MatchReference = StripeCheckoutSession['client_reference_id'];
+type StripePrice = Pick<
+  Stripe.Checkout.SessionCreateParams.LineItem.PriceData,
+  'currency' | 'unit_amount'
+>;
+
+export type Match = {
+  orderId: UUID;
+  hostId: UUID;
+};
 
 @Injectable()
 export class PreConfirmOrder implements PreConfirmOrderUseCase {
@@ -26,7 +34,6 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
-    private readonly matchRecorder: MatchRecorder,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
@@ -57,36 +64,18 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
   ): Promise<StripeCheckoutSession> {
     const draftedOrder = (await this.orderRepository.findOrder(
       orderId,
+      OrderStatus.Drafted,
       session,
     )) as DraftedOrder;
 
-    const matchId: UUID = await draftedOrder.matchHost(
-      async (draftedOrderToMatchHostTo: DraftedOrder) =>
-        this.findMatchingHost(draftedOrderToMatchHostTo, session),
-      async (newlyMatchedOrder: DraftedOrder, matchedHostId: UUID) =>
-        this.recordMatch(newlyMatchedOrder, matchedHostId, session),
-    );
+    const hostId: UUID = await this.findMatchingHost(draftedOrder, session);
 
     const checkoutSession: StripeCheckoutSession = await this.createStripeCheckoutSession(
       draftedOrder,
-      matchId,
+      hostId,
     );
 
     return checkoutSession;
-  }
-
-  private async recordMatch(
-    { id: orderId }: DraftedOrder,
-    hostId: UUID,
-    session: ClientSession,
-  ): Promise<UUID> {
-    const matchId: UUID = await this.matchRecorder.recordMatch(
-      orderId,
-      hostId,
-      session,
-    );
-
-    return matchId;
   }
 
   private async findMatchingHost(
@@ -103,15 +92,13 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
 
   private async createStripeCheckoutSession(
     draftedOrder: DraftedOrder,
-    matchId: UUID & MatchReference,
+    hostId: UUID,
   ): Promise<StripeCheckoutSession> {
     const serviceFee: ServiceFee = await draftedOrder.calculateServiceFee();
-    const stripeFee: Pick<
-      Stripe.Checkout.SessionCreateParams.LineItem.PriceData,
-      'currency' | 'unit_amount'
-    > = {
-      currency: serviceFee.currency,
-      unit_amount: Math.floor(serviceFee.amount * 100),
+    const stripePrice: StripePrice = this.stripePrice(serviceFee);
+    const match: Match = {
+      orderId: draftedOrder.id,
+      hostId,
     };
 
     /**
@@ -133,10 +120,11 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
     const checkoutSession: StripeCheckoutSession = await this.stripe.checkout.sessions.create(
       {
         payment_method_types: ['card'],
+        // TODO: pre-fill customer / customer_email
         line_items: [
           {
             price_data: {
-              ...stripeFee,
+              ...stripePrice,
               product_data: {
                 name: 'Locly and Host Service Fee',
               },
@@ -144,7 +132,7 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
             quantity: 1,
           },
         ],
-        client_reference_id: matchId, // ! IMPORTANT !
+        metadata: match,
         mode: 'payment',
         success_url: 'https://news.ycombinator.com',
         cancel_url: 'https://reddit.com',
@@ -152,5 +140,12 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
     );
 
     return checkoutSession;
+  }
+
+  private stripePrice(serviceFee: ServiceFee) {
+    return {
+      currency: serviceFee.currency,
+      unit_amount: Math.floor(serviceFee.amount * 100),
+    };
   }
 }

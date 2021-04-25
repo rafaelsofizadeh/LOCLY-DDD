@@ -5,7 +5,9 @@ import { InjectClient } from 'nest-mongodb';
 import Stripe from 'stripe';
 import { UUID } from '../../../common/domain';
 import { withTransaction } from '../../../common/application';
+import { Address } from '../../domain/entity/Address';
 import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
+import { Host } from '../../domain/entity/Host';
 
 import { OrderStatus } from '../../domain/entity/Order';
 import {
@@ -13,15 +15,14 @@ import {
   HostMatchResult,
 } from '../../domain/use-case/ConfirmOrderUseCase';
 import { HostRepository } from '../port/HostRepository';
-import { MatchRecorder } from '../port/MatchRecorder';
 import { OrderRepository } from '../port/OrderRepository';
+import { Match } from './PreConfirmOrderService';
 
 @Injectable()
 export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,
-    private readonly matchRecorder: MatchRecorder,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
@@ -31,29 +32,32 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
     paymentFinalizedEvent: Stripe.Event,
     session?: ClientSession,
   ): Promise<HostMatchResult> {
-    const orderAndMatchId: UUID = UUID(
-      (paymentFinalizedEvent.data.object as Stripe.Checkout.Session)
-        .client_reference_id as UUID,
-    );
+    const { orderId, hostId } = (paymentFinalizedEvent.data
+      .object as Stripe.Checkout.Session).metadata as Match;
 
-    const { hostId } = await withTransaction(
-      (transactionalSession: ClientSession) =>
-        this.confirmOrder(orderAndMatchId, transactionalSession),
+    const matchedHostAddress: Address = await withTransaction(
+      async (transactionalSession: ClientSession) => {
+        await this.confirmOrder(orderId, hostId, transactionalSession);
+
+        // Don't Promise.all with confirmOrder because write-read conflict
+        const host: Host = await this.hostRepository.findHost(
+          hostId,
+          transactionalSession,
+        );
+        return host.address;
+      },
       this.mongoClient,
       session,
     );
 
-    return { matchedHostId: hostId };
+    return { matchedHostAddress };
   }
 
   private async confirmOrder(
-    matchId: UUID,
+    orderId: UUID,
+    hostId: UUID,
     session: ClientSession,
-  ): Promise<{ orderId: UUID; hostId: UUID }> {
-    const { orderId, hostId } = await this.matchRecorder.retrieveAndDeleteMatch(
-      matchId,
-    );
-
+  ): Promise<void> {
     await ConfirmedOrder.confirm(
       orderId,
       hostId,
@@ -73,7 +77,5 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
           session,
         ),
     );
-
-    return { orderId, hostId };
   }
 }

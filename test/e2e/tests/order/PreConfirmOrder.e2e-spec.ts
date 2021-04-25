@@ -15,10 +15,6 @@ import { DraftOrderUseCase } from '../../../../src/order/domain/use-case/DraftOr
 import { Category, Item } from '../../../../src/order/domain/entity/Item';
 import { Country } from '../../../../src/order/domain/data/Country';
 import { isString } from 'class-validator';
-import {
-  Match,
-  MatchRecorder,
-} from '../../../../src/order/application/port/MatchRecorder';
 import { HostRepository } from '../../../../src/order/application/port/HostRepository';
 import { DraftedOrder } from '../../../../src/order/domain/entity/DraftedOrder';
 import {
@@ -33,7 +29,6 @@ describe('Confirm Order – POST /order/confirm', () => {
   let customerRepository: CustomerRepository;
   let orderRepository: OrderRepository;
   let hostRepository: HostRepository;
-  let matchRecorder: MatchRecorder;
 
   let draftOrderUseCase: DraftOrderUseCase;
 
@@ -60,8 +55,6 @@ describe('Confirm Order – POST /order/confirm', () => {
     hostRepository = (await moduleRef.resolve(
       HostRepository,
     )) as HostRepository;
-
-    matchRecorder = (await moduleRef.resolve(MatchRecorder)) as MatchRecorder;
 
     draftOrderUseCase = (await moduleRef.resolve(
       DraftOrderUseCase,
@@ -173,14 +166,14 @@ describe('Confirm Order – POST /order/confirm', () => {
 
   // IMPORTANT: ALWAYS clean up the database after commenting out the cleanup in afterEach
   // (usually done for testing purposes)
-  afterEach(() =>
-    Promise.all([
-      customerRepository.deleteCustomer(testCustomer.id),
-      hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
-      // TODO (FUTURE): Delete through deleteOrderUseCase
-      orderRepository.deleteOrder(testOrder.id),
-    ]),
-  );
+  // afterEach(() =>
+  //   Promise.all([
+  //     customerRepository.deleteCustomer(testCustomer.id),
+  //     hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
+  //     // TODO (FUTURE): Delete through deleteOrderUseCase
+  //     orderRepository.deleteOrder(testOrder.id),
+  //   ]),
+  // );
 
   it('Matches Order with a Host, updates Order\'s "hostId" property, and Host\'s "orderIds" property', async () => {
     const response: supertest.Response = await supertest(app.getHttpServer())
@@ -197,14 +190,6 @@ describe('Confirm Order – POST /order/confirm', () => {
     expect(checkoutId).toBeDefined();
     expect(isString(checkoutId)).toBe(true);
     expect(checkoutId.slice(0, 2)).toBe('cs'); // "Checkout Session"
-
-    const match: Match = await matchRecorder.findMatch(
-      testOrder.id,
-      // testOrder SHOULD be matched with the first testHost
-      testHosts[0].id,
-    );
-
-    expect(match).toBeDefined();
 
     updatedStripeCheckoutSessionInTestPage(checkoutId);
   });
