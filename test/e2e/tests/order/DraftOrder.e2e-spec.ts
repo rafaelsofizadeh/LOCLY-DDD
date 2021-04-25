@@ -9,8 +9,6 @@ import { OrderRepository } from '../../../../src/order/application/port/OrderRep
 import { UUID } from '../../../../src/common/domain';
 import { OrderStatus } from '../../../../src/order/domain/entity/Order';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
-import { Address } from '../../../../src/order/domain/entity/Address';
-import { Category } from '../../../../src/order/domain/entity/Item';
 import {
   destinationCountriesAvailable,
   originCountriesAvailable,
@@ -73,11 +71,7 @@ describe('Create Order – POST /order/create', () => {
           {
             title: 'Laptop',
             storeName: 'Amazon',
-            width: 100,
-            height: 100,
-            length: 100,
             weight: 1500,
-            category: Category.Electronics,
           },
         ],
       });

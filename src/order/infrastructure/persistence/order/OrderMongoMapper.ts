@@ -135,7 +135,7 @@ export function mongoDocumentToOrder(orderDocument: OrderMongoDocument): Order {
     >;
 
     const physicalItems = items.map(
-      ({ title, storeName, category, ...physicalItem }) => physicalItem,
+      ({ title, storeName, ...physicalItem }) => physicalItem,
     );
 
     return VerifiedByHostOrder.fromData({

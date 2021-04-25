@@ -2,9 +2,10 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
-  IsEnum,
+  IsDefined,
   IsInt,
   IsISO31661Alpha3,
+  IsNotEmptyObject,
   IsPositive,
   IsString,
   Length,
@@ -13,7 +14,7 @@ import {
 
 import { IsUUID, UUID } from '../../../common/domain';
 import { Country } from '../../domain/data/Country';
-import { Category, Gram } from '../../domain/entity/Item';
+import { Gram } from '../../domain/entity/Item';
 import { DraftOrderRequest } from '../../domain/use-case/DraftOrderUseCase';
 
 export class ItemValidationSchema {
@@ -24,9 +25,6 @@ export class ItemValidationSchema {
   @IsString()
   @Length(2, 50)
   storeName: string;
-
-  @IsEnum(Category)
-  category: Category;
 
   @IsInt()
   @IsPositive()
@@ -46,6 +44,8 @@ export class DraftOrderRequestAdapter implements DraftOrderRequest {
   readonly originCountry: Country;
 
   @ValidateNested()
+  @IsNotEmptyObject()
+  @IsDefined()
   @Type(() => AddressValidationSchema)
   readonly destination: AddressValidationSchema;
 

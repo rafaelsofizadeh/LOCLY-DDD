@@ -12,7 +12,7 @@ import { Host } from '../../../../src/order/domain/entity/Host';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { DraftOrderUseCase } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
-import { Category, Item } from '../../../../src/order/domain/entity/Item';
+import { Item } from '../../../../src/order/domain/entity/Item';
 import { Country } from '../../../../src/order/domain/data/Country';
 import { isString } from 'class-validator';
 import { HostRepository } from '../../../../src/order/application/port/HostRepository';
@@ -156,7 +156,6 @@ describe('Confirm Order – POST /order/confirm', () => {
           title: 'Laptop',
           storeName: 'Amazon',
           weight: 10,
-          category: Category.Electronics,
         }),
       ],
     });

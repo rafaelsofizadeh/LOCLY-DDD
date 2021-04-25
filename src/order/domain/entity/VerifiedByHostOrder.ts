@@ -1,6 +1,4 @@
 import { UUID } from '../../../common/domain';
-import { Code } from '../../../common/error-handling';
-import { Exception } from '../../../common/error-handling';
 import {
   getShipmentCostQuote,
   ShipmentCostQuote,
@@ -101,26 +99,4 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
 
     return verifiedByHostOrder;
   }
-
-  // edit({ physicalItems }: Pick<VerifiedByHostOrderProps, 'physicalItems'>) {
-  //   if (!this.areItemsAssignable(physicalItems)) {
-  //     throw new Exception(
-  //       Code.INTERNAL_ERROR,
-  //       "Host cannot add or remove any items from the list, only update existing items's properties.",
-  //     );
-  //   }
-
-  //   this.setPhysicalItems(physicalItems);
-  // }
-  //
-  // private areItemsAssignable(comparateItems: PhysicalItemProps[]): boolean {
-  //   return (
-  //     this._physicalItems.length == comparateItems.length &&
-  //     this._physicalItems.every(({ id: itemId }) =>
-  //       comparateItems.some(
-  //         ({ id: comparateItemId }) => itemId === comparateItemId,
-  //       ),
-  //     )
-  //   );
-  // }
 }
