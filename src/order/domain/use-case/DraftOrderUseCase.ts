@@ -1,10 +1,10 @@
-import { UUID } from '../../../common/domain/UUID';
+import { UUID } from '../../../common/domain';
 import { Country } from '../data/Country';
 import { ItemProps } from '../entity/Item';
 import { DraftedOrder } from '../entity/DraftedOrder';
-import { UseCase } from '../../../common/domain/UseCase';
+import { UseCase } from '../../../common/domain';
 import { Address } from '../entity/Address';
-import { WithoutId } from '../../../common/domain/types';
+import { WithoutId } from '../../../common/domain';
 
 export interface DraftOrderRequest {
   customerId: UUID;

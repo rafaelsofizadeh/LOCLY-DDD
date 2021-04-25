@@ -1,9 +1,9 @@
 import Stripe from 'stripe';
-import { UseCase } from '../../../common/domain/UseCase';
-import { UUID } from '../../../common/domain/UUID';
+import { UseCase } from '../../../common/domain';
+import { Address } from '../entity/Address';
 
 export interface HostMatchResult {
-  matchedHostId: UUID;
+  matchedHostAddress: Address;
 }
 
 export abstract class ConfirmOrderUseCase extends UseCase<

@@ -1,7 +1,58 @@
-import { isUUID } from 'class-validator';
 import { Binary } from 'mongodb';
-import { UUID } from '../../../common/domain/UUID';
-import { muuidToUuid, uuidToMuuid } from '../../../common/utils';
+import * as MUUID from 'uuid-mongodb';
+import { isUUID, UUID } from './domain';
+
+function muuidToString(id: Binary): string {
+  return MUUID.from(id).toString();
+}
+
+export function muuidToUuid(id: Binary): UUID {
+  return UUID(muuidToString(id));
+}
+
+export function uuidToMuuid(id: UUID): Binary {
+  return MUUID.from(id);
+}
+
+// https://gist.github.com/penguinboy/762197
+export function flattenObject<T extends Record<string, any>>(
+  object: T,
+  path?: string,
+  keyFilter?: (k: string) => boolean,
+  valueFilter: (v: any) => boolean = (v: any) => v === undefined || v === null,
+  separator: string = '.',
+): T {
+  return Object.keys(object).reduce((flatObjectAcc: T, key: string): T => {
+    if (keyFilter && keyFilter(key)) {
+      return flatObjectAcc;
+    }
+
+    const value = object[key];
+
+    // Filter out values (e.g. undefined or null)
+    if (valueFilter && valueFilter(value)) {
+      return flatObjectAcc;
+    }
+
+    const newPath = [path, key].filter(Boolean).join(separator);
+
+    const isObject = [
+      typeof value === 'object',
+      value !== null, // as typeof null === 'object'
+      !(value instanceof Date),
+      !(value instanceof RegExp),
+      !(value instanceof Binary),
+      !(Array.isArray(value) && value.length === 0),
+    ].every(Boolean);
+
+    return isObject
+      ? {
+          ...flatObjectAcc,
+          ...flattenObject(value, newPath, keyFilter, valueFilter, separator),
+        }
+      : { ...flatObjectAcc, [newPath]: value };
+  }, {} as T);
+}
 
 type RemovePrefix<
   T,
@@ -48,7 +99,6 @@ function isBinary(value: any): value is Binary {
   return value instanceof Binary;
 }
 
-// TODO: Add Prefix argument
 // TODO: Better typing (input type inferrence/generics not working)
 export function serializeMongoData(
   input: any,
@@ -112,14 +162,15 @@ export function convertToMongoDocument(
   }
 
   
-  if (isUUID(input, 4)) {
+  if (isUUID(input)) {
     return uuidToMuuid(input);
   }
 
   return input;
 }
 
-// Deprecated but potentially useful
+/* 
+Deprecated but potentially useful
 
 type RemapPrefixedProps<T, P extends string = '_'> = T extends object
   ? T extends Date | Binary | Buffer | RegExp
@@ -142,3 +193,4 @@ type DeepBinaryToUUID<T> = T extends object
 type SerializedMongoDocumentDeprecated<T> = RemapPrefixedProps<
   DeepBinaryToUUID<T>
 >;
+*/

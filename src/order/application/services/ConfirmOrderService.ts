@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
 import Stripe from 'stripe';
-import { UUID } from '../../../common/domain/UUID';
-import { withTransaction } from '../../../common/utils';
+import { UUID } from '../../../common/domain';
+import { withTransaction } from '../../../common/application';
 import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 
 import { OrderStatus } from '../../domain/entity/Order';

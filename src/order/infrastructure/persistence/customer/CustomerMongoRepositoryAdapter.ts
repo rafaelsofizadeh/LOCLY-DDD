@@ -2,7 +2,7 @@ import { ClientSession, Collection } from 'mongodb';
 import { Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
-import { UUID } from '../../../../common/domain/UUID';
+import { UUID } from '../../../../common/domain';
 import { CustomerRepository } from '../../../application/port/CustomerRepository';
 import { Customer } from '../../../domain/entity/Customer';
 import {
@@ -10,9 +10,9 @@ import {
   CustomerMongoDocument,
   customerToMongoDocument,
 } from './CustomerMongoMapper';
-import { Exception } from '../../../../common/error-handling/Exception';
-import { Code } from '../../../../common/error-handling/Code';
-import { uuidToMuuid } from '../../../../common/utils';
+import { Exception } from '../../../../common/error-handling';
+import { Code } from '../../../../common/error-handling';
+import { uuidToMuuid } from '../../../../common/persistence';
 
 @Injectable()
 export class CustomerMongoRepositoryAdapter implements CustomerRepository {

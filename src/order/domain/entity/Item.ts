@@ -1,5 +1,5 @@
-import { WithoutId } from '../../../common/domain/types';
-import { UUID } from '../../../common/domain/UUID';
+import { WithoutId } from '../../../common/domain';
+import { UUID } from '../../../common/domain';
 
 export type Gram = number;
 

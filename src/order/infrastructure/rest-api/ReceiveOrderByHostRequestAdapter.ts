@@ -1,4 +1,4 @@
-import { IsUUID, UUID } from '../../../common/domain/UUID';
+import { IsUUID, UUID } from '../../../common/domain';
 import { ReceiveOrderHostRequest } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 
 export class ReceiveOrderHostRequestAdapter implements ReceiveOrderHostRequest {

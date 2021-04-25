@@ -13,9 +13,9 @@ import {
   DraftOrderRequest,
   DraftOrderUseCase,
 } from '../../domain/use-case/DraftOrderUseCase';
-import { UUID } from '../../../common/domain/UUID';
+import { UUID } from '../../../common/domain';
 import { CustomerRepository } from '../port/CustomerRepository';
-import { withTransaction } from '../../../common/utils';
+import { withTransaction } from '../../../common/application';
 
 @Injectable()
 export class EditOrder implements EditOrderUseCase {

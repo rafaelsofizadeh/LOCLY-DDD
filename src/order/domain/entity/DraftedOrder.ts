@@ -1,7 +1,7 @@
-import { Modify } from '../../../common/domain/types';
-import { UUID } from '../../../common/domain/UUID';
-import { Code } from '../../../common/error-handling/Code';
-import { Exception } from '../../../common/error-handling/Exception';
+import { Modify } from '../../../common/domain';
+import { UUID } from '../../../common/domain';
+import { Code } from '../../../common/error-handling';
+import { Exception } from '../../../common/error-handling';
 import { ServiceAvailabilityFn } from '../../application/services/checkServiceAvailability';
 import {
   ShipmentCostQuote,

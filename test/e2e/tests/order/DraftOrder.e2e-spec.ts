@@ -6,7 +6,7 @@ import { isUUID } from 'class-validator';
 import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
-import { UUID } from '../../../../src/common/domain/UUID';
+import { UUID } from '../../../../src/common/domain';
 import { OrderStatus } from '../../../../src/order/domain/entity/Order';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { Address } from '../../../../src/order/domain/entity/Address';

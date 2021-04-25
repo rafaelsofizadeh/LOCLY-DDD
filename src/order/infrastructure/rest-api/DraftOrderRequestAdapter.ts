@@ -11,7 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { IsUUID, UUID } from '../../../common/domain/UUID';
+import { IsUUID, UUID } from '../../../common/domain';
 import { Country } from '../../domain/data/Country';
 import { Category, Gram } from '../../domain/entity/Item';
 import { DraftOrderRequest } from '../../domain/use-case/DraftOrderUseCase';

@@ -1,6 +1,6 @@
-import { UUID } from '../../../common/domain/UUID';
+import { UUID } from '../../../common/domain';
 import { DraftedOrder } from '../entity/DraftedOrder';
-import { UseCase } from '../../../common/domain/UseCase';
+import { UseCase } from '../../../common/domain';
 import { DraftOrderRequest } from './DraftOrderUseCase';
 
 export interface EditOrderRequest extends DraftOrderRequest {

@@ -9,11 +9,11 @@ import {
   HostMongoDocument,
   hostToMongoDocument,
 } from './HostMongoMapper';
-import { Exception } from '../../../../common/error-handling/Exception';
-import { Code } from '../../../../common/error-handling/Code';
-import { UUID } from '../../../../common/domain/UUID';
-import { uuidToMuuid } from '../../../../common/utils';
+import { Exception } from '../../../../common/error-handling';
+import { Code } from '../../../../common/error-handling';
+import { UUID } from '../../../../common/domain';
 import { Country } from '../../../domain/data/Country';
+import { uuidToMuuid } from '../../../../common/persistence';
 
 @Injectable()
 export class HostMongoRepositoryAdapter implements HostRepository {

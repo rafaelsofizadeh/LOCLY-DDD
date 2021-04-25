@@ -1,5 +1,5 @@
 import { ClientSession } from 'mongodb';
-import { UUID } from '../../../common/domain/UUID';
+import { UUID } from '../../../common/domain';
 import { Customer } from '../../domain/entity/Customer';
 
 export abstract class CustomerRepository {

@@ -1,10 +1,11 @@
 import { Binary } from 'mongodb';
 
-import { uuidToMuuid } from '../../../../common/utils';
-
 import { Customer } from '../../../domain/entity/Customer';
 import { Address } from '../../../domain/entity/Address';
-import { serializeMongoData, convertToMongoDocument } from '../utils';
+import {
+  convertToMongoDocument,
+  serializeMongoData,
+} from '../../../../common/persistence';
 
 type CustomerAddress = Address & { selected: boolean };
 

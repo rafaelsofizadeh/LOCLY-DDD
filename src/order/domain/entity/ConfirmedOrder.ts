@@ -1,4 +1,4 @@
-import { UUID } from '../../../common/domain/UUID';
+import { UUID } from '../../../common/domain';
 import { Country } from '../data/Country';
 import { ReceivedByHostOrder } from './ReceivedByHostOrder';
 

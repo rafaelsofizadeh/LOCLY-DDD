@@ -11,7 +11,6 @@ import { Host } from '../../../../src/order/domain/entity/Host';
 
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
-import { muuidToUuid } from '../../../../src/common/utils';
 import { DraftOrderUseCase } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
 import { Category, Item } from '../../../../src/order/domain/entity/Item';
 import { Country } from '../../../../src/order/domain/data/Country';
@@ -26,6 +25,7 @@ import {
   destinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../../src/order/application/services/checkServiceAvailability';
+import { muuidToUuid } from '../../../../src/common/persistence';
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;

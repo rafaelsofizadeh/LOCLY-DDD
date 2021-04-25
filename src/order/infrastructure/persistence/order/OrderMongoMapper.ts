@@ -11,9 +11,9 @@ import { VerifiedByHostOrder } from '../../../domain/entity/VerifiedByHostOrder'
 import { PhysicalItemProps } from '../../../domain/entity/Item';
 import {
   convertToMongoDocument,
-  SerializedMongoDocument,
   serializeMongoData,
-} from '../utils';
+  SerializedMongoDocument,
+} from '../../../../common/persistence';
 
 export type ItemMongoSubdocument = Omit<ItemProps, 'id'> & {
   _id: Binary;

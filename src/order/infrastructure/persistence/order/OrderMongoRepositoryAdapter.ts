@@ -7,19 +7,25 @@ import {
 } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
-import { UUID } from '../../../../common/domain/UUID';
-import { Code } from '../../../../common/error-handling/Code';
-import { Exception } from '../../../../common/error-handling/Exception';
+import { UUID } from '../../../../common/domain';
+import { Code } from '../../../../common/error-handling';
+import { Exception } from '../../../../common/error-handling';
 import { OrderRepository } from '../../../application/port/OrderRepository';
-import { EditableOrderProps, Order } from '../../../domain/entity/Order';
+import {
+  EditableOrderProps,
+  Order,
+  OrderStatus,
+} from '../../../domain/entity/Order';
 import {
   OrderMongoDocument,
   draftedOrderToMongoDocument,
   mongoDocumentToOrder,
 } from './OrderMongoMapper';
-import { uuidToMuuid } from '../../../../common/utils';
 import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
-import { convertToMongoDocument } from '../utils';
+import {
+  convertToMongoDocument,
+  uuidToMuuid,
+} from '../../../../common/persistence';
 
 @Injectable()
 export class OrderMongoRepositoryAdapter implements OrderRepository {

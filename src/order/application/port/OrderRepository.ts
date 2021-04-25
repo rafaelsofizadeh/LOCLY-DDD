@@ -1,5 +1,5 @@
 import { ClientSession } from 'mongodb';
-import { UUID } from '../../../common/domain/UUID';
+import { UUID } from '../../../common/domain';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 import {
   EditableOrderProps,

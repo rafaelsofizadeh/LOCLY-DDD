@@ -4,7 +4,7 @@ import { CustomerRepository } from '../port/CustomerRepository';
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/utils';
+import { withTransaction } from '../../../common/application';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 import {
   DeleteOrderRequest,

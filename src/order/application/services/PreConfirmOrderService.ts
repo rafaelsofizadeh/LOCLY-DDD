@@ -10,10 +10,10 @@ import {
 import { OrderRepository } from '../port/OrderRepository';
 import { Host } from '../../domain/entity/Host';
 import { MatchRecorder } from '../port/MatchRecorder';
-import { UUID } from '../../../common/domain/UUID';
+import { UUID } from '../../../common/domain';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/utils';
+import { withTransaction } from '../../../common/application';
 import { DraftedOrder, ServiceFee } from '../../domain/entity/DraftedOrder';
 import { HostRepository } from '../port/HostRepository';
 

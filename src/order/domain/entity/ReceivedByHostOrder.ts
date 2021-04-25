@@ -1,4 +1,4 @@
-import { UUID } from '../../../common/domain/UUID';
+import { UUID } from '../../../common/domain';
 
 export interface ReceivedByHostOrderProps {
   id: UUID;

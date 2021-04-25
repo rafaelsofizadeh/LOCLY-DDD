@@ -1,4 +1,4 @@
-import { UUID } from '../../../common/domain/UUID';
+import { UUID } from '../../../common/domain';
 
 import { Address } from './Address';
 import { ConfirmedOrder } from './ConfirmedOrder';

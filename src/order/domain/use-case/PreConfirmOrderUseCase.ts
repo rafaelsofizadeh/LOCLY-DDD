@@ -1,5 +1,5 @@
-import { UseCase } from '../../../common/domain/UseCase';
-import { UUID } from '../../../common/domain/UUID';
+import { UseCase } from '../../../common/domain';
+import { UUID } from '../../../common/domain';
 
 export interface PreConfirmOrderRequest {
   orderId: UUID;

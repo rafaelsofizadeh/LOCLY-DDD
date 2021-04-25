@@ -1,4 +1,4 @@
-import { IsUUID, UUID } from '../../../common/domain/UUID';
+import { IsUUID, UUID } from '../../../common/domain';
 import { DeleteOrderRequest } from '../../domain/use-case/DeleteOrderUseCase';
 
 export class DeleteOrderRequestAdapter implements DeleteOrderRequest {

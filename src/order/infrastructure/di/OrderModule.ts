@@ -13,8 +13,6 @@ import { CustomerMongoRepositoryAdapter } from '../persistence/customer/Customer
 import { HostMongoRepositoryAdapter } from '../persistence/host/HostMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from '../persistence/order/OrderMongoRepositoryAdapter';
 import { OrderController } from '../rest-api/OrderController';
-import { MatchRecorder } from '../../application/port/MatchRecorder';
-import { MatchMongoRecorderAdapter } from '../persistence/match/MatchMongoRecorderAdapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ConfirmOrderUseCase } from '../../domain/use-case/ConfirmOrderUseCase';
 import { ConfirmOrderWebhookHandler } from '../../application/services/ConfirmOrderService';
@@ -29,7 +27,6 @@ const persistenceProviders: Provider[] = [
   { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
   { provide: CustomerRepository, useClass: CustomerMongoRepositoryAdapter },
   { provide: HostRepository, useClass: HostMongoRepositoryAdapter },
-  { provide: MatchRecorder, useClass: MatchMongoRecorderAdapter },
 ];
 
 const useCaseProviders: Provider[] = [

@@ -1,5 +1,5 @@
-import { UUID } from '../../../common/domain/UUID';
-import { UseCase } from '../../../common/domain/UseCase';
+import { UUID } from '../../../common/domain';
+import { UseCase } from '../../../common/domain';
 
 export interface DeleteOrderRequest {
   orderId: UUID;

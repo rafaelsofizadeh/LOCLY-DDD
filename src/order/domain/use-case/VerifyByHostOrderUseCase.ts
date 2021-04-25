@@ -1,4 +1,4 @@
-import { UUID } from '../../../common/domain/UUID';
+import { UUID } from '../../../common/domain';
 import { PhysicalItemProps } from '../entity/Item';
 import { VerifiedByHostOrder } from '../entity/VerifiedByHostOrder';
 

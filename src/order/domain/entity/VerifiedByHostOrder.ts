@@ -1,6 +1,6 @@
-import { UUID } from '../../../common/domain/UUID';
-import { Code } from '../../../common/error-handling/Code';
-import { Exception } from '../../../common/error-handling/Exception';
+import { UUID } from '../../../common/domain';
+import { Code } from '../../../common/error-handling';
+import { Exception } from '../../../common/error-handling';
 import {
   getShipmentCostQuote,
   ShipmentCostQuote,
