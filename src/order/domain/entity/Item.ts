@@ -25,6 +25,7 @@ export interface ItemProps extends PhysicalItemProps {
   category: Category;
 }
 
+// TODO: Remove physical dimensions
 export class Item implements ItemProps {
   readonly id: UUID;
 

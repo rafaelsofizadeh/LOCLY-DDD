@@ -140,7 +140,8 @@ describe('Confirm Order – POST /order/confirm', () => {
       }),
     );
 
-    // TODO(?): Promise.all()'ing this leads to an ERROR. Apparently a write conflict between
+    // TODO(TRANSACTION#1; RELATED: TRANSACTION#2):
+    // Promise.all()'ing this leads to an ERROR. Apparently a write conflict between
     // 1. customerRepository.addCustomer (insert)
     // 2. draftOrderUseCase.execute > customerRepository.addOrderToCustomer (update)
     await hostRepository.addManyHosts(testHosts);
@@ -166,14 +167,13 @@ describe('Confirm Order – POST /order/confirm', () => {
 
   // IMPORTANT: ALWAYS clean up the database after commenting out the cleanup in afterEach
   // (usually done for testing purposes)
-  // afterEach(() =>
-  //   Promise.all([
-  //     customerRepository.deleteCustomer(testCustomer.id),
-  //     hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
-  //     // TODO (FUTURE): Delete through deleteOrderUseCase
-  //     orderRepository.deleteOrder(testOrder.id),
-  //   ]),
-  // );
+  afterEach(() =>
+    Promise.all([
+      customerRepository.deleteCustomer(testCustomer.id),
+      hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
+      orderRepository.deleteOrder(testOrder.id),
+    ]),
+  );
 
   it('Matches Order with a Host, updates Order\'s "hostId" property, and Host\'s "orderIds" property', async () => {
     const response: supertest.Response = await supertest(app.getHttpServer())
