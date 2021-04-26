@@ -40,8 +40,6 @@ export class DraftOrder implements DraftOrderUseCase {
     { customerId, originCountry, items, destination }: DraftOrderRequest,
     session: ClientSession,
   ): Promise<DraftedOrder> {
-    // TODO: Check if customerId exists
-
     const draftedOrder: DraftedOrder = await DraftedOrder.create(
       {
         customerId,
