@@ -123,10 +123,12 @@ export class DraftedOrder implements DraftedOrderProps {
       shipmentCost,
     });
 
-    await Promise.all([
-      addOrder(draftedOrder),
-      addOrderToCustomer(draftedOrder.customerId, draftedOrder.id),
-    ]);
+    // TODO(IMPORANT): Document MongoDb concurrent transaction limitations.
+    // https://jira.mongodb.org/browse/SERVER-36428?focusedCommentId=2136170&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-2136170
+    // (GLOBAL) DON'T parallelize this. Promise.all()'ing these, together with transactions, will lead to random
+    // TransientTransactionError errors.
+    await addOrder(draftedOrder);
+    await addOrderToCustomer(draftedOrder.customerId, draftedOrder.id);
 
     return draftedOrder;
   }
@@ -204,12 +206,8 @@ export class DraftedOrder implements DraftedOrderProps {
       draftOrderRequest: DraftOrderRequest,
     ) => Promise<DraftedOrder>,
   ): Promise<DraftedOrder> {
-    // TODO(TRANSACTION#2): moving removeOldOrderFromCustomer below deleteOldOrder (thus making removeOldOrder and
-    // draftNewOrder->addOrderToCustomer closer) leads to a writing conflict (TransientTransactionError)
-    await Promise.all([
-      removeOldOrderFromCustomer(customerId, orderId),
-      deleteOldOrder(orderId, customerId),
-    ]);
+    await removeOldOrderFromCustomer(customerId, orderId);
+    await deleteOldOrder(orderId, customerId);
 
     const draftedOrder: DraftedOrder = await draftNewOrder({
       customerId,
@@ -230,9 +228,7 @@ export class DraftedOrder implements DraftedOrderProps {
       toBeRemovedFromCustomerOrderId: UUID,
     ) => Promise<unknown>,
   ) {
-    await Promise.all([
-      deleteOrder(orderId, customerId),
-      removeOrderFromCustomer(customerId, orderId),
-    ]);
+    await deleteOrder(orderId, customerId);
+    await removeOrderFromCustomer(customerId, orderId);
   }
 }

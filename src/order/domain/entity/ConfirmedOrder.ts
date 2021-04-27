@@ -37,10 +37,8 @@ export class ConfirmedOrder implements ConfirmedOrderProps {
       toAddOrderId: UUID,
     ) => Promise<unknown>,
   ): Promise<void> {
-    await Promise.all([
-      persistConfirmationFn(orderId, hostId),
-      addOrderToHostFn(hostId, orderId),
-    ]);
+    await persistConfirmationFn(orderId, hostId);
+    await addOrderToHostFn(hostId, orderId);
   }
 
   toReceivedByHost() {

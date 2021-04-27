@@ -39,7 +39,6 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
       async (transactionalSession: ClientSession) => {
         await this.confirmOrder(orderId, hostId, transactionalSession);
 
-        // Don't Promise.all with confirmOrder because write-read conflict
         const host: Host = await this.hostRepository.findHost(
           hostId,
           transactionalSession,
