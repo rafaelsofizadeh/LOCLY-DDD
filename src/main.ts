@@ -3,10 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './AppModule';
 import { CustomExceptionFilter } from './order/infrastructure/rest-api/CustomExceptionFilter';
 
-// TODO(GLOBAL): "not found document" handling application-wide.
-// TODO(GLOBAL) ^related: More expressive UseCases with Order types/stages
-// TODO(GLOBAL): Error handling in all repo methods
-// TODO(GLOBAL): Tie deleteOrder to removeOrderFromCustomer
+// TODO(GLOBAL) More expressive UseCases with Order types/stages
 // TODO(GLOBAL): Rethink everything related to event emitting
 
 declare const module: any;

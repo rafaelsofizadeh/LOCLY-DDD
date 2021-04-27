@@ -5,11 +5,15 @@ import {
   Collection,
   DeleteWriteOpResultObject,
   FilterQuery,
+  UpdateWriteOpResult,
 } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
 import { UUID } from '../../../../common/domain';
-import { Exception } from '../../../../common/error-handling';
+import {
+  expectOnlySingleResult,
+  throwCustomException,
+} from '../../../../common/error-handling';
 import { OrderRepository } from '../../../application/port/OrderRepository';
 import {
   OrderPropsWithoutId,
@@ -43,13 +47,12 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
 
     await this.orderCollection
       .insertOne(draftedOrderDocument, { session })
-      .catch(error => {
-        throw new Exception(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          `Error creating a new draftedOrder in the database. ${error.name}: ${error.message}`,
+      .catch(
+        throwCustomException(
+          'Error creating a new draftedOrder in the database',
           { draftedOrder, draftedOrderDocument },
-        );
-      });
+        ),
+      );
   }
 
   async setProperties(
@@ -58,10 +61,26 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     orderSearchRequirements: OrderSearchRequirements = {},
     session?: ClientSession,
   ) {
-    await this.orderCollection.updateOne(
-      this.mongoFilterQuery(orderId, orderSearchRequirements),
-      { $set: convertToMongoDocument(properties) },
-      { session },
+    const updateResult: UpdateWriteOpResult = await this.orderCollection
+      .updateOne(
+        this.mongoFilterQuery(orderId, orderSearchRequirements),
+        { $set: convertToMongoDocument(properties) },
+        { session },
+      )
+      .catch(
+        throwCustomException('Error updating order', {
+          orderId,
+          properties,
+          orderSearchRequirements,
+        }),
+      );
+
+    expectOnlySingleResult(
+      [updateResult.matchedCount, updateResult.modifiedCount],
+      {
+        operation: 'setting properties on',
+        entity: 'order',
+      },
     );
   }
 
@@ -75,19 +94,21 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       orderSearchRequirements,
     );
 
-    const orderDocument: OrderMongoDocument = await this.orderCollection.findOne(
-      filterQuery,
-      { session },
-    );
+    const orderDocument: OrderMongoDocument = await this.orderCollection
+      .findOne(filterQuery, { session })
+      .catch(
+        throwCustomException('Error searching for an order', {
+          orderId,
+          orderSearchRequirements,
+        }),
+      );
 
     if (!orderDocument) {
-      console.log(filterQuery._id, filterQuery._id.toString());
-
-      throw new Exception(
-        HttpStatus.NOT_FOUND,
-        `Order (id: ${orderId}) not found`,
-        { orderId, orderSearchRequirements, filterQuery },
-      );
+      throwCustomException('No order found', {
+        orderId,
+        orderSearchRequirements,
+        filterQuery,
+      })();
     }
 
     return mongoDocumentToOrder(orderDocument);
@@ -114,11 +135,10 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
           ) === -1,
       );
 
-      throw new Exception(
-        HttpStatus.NOT_FOUND,
-        `Orders (ids: ${failedOrderIds.join(', ')}) not found`,
-        { orderIds, failedOrderIds },
-      );
+      throwCustomException('Orders not found', {
+        orderIds,
+        failedOrderIds,
+      })();
     }
 
     return orderDocuments.map(orderDocument =>
@@ -131,18 +151,21 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     orderSearchRequirements: OrderSearchRequirements = {},
     session?: ClientSession,
   ): Promise<void> {
-    const deleteResult: DeleteWriteOpResultObject = await this.orderCollection.deleteOne(
-      this.mongoFilterQuery(orderId, orderSearchRequirements),
-      { session },
-    );
-
-    if (deleteResult.deletedCount !== 1) {
-      throw new Exception(
-        HttpStatus.NOT_FOUND,
-        `Cannot delete, order (id: ${orderId}}) not found`,
-        { orderId },
+    const deleteResult: DeleteWriteOpResultObject = await this.orderCollection
+      .deleteOne(this.mongoFilterQuery(orderId, orderSearchRequirements), {
+        session,
+      })
+      .catch(
+        throwCustomException('Error deleting order', {
+          orderId,
+          orderSearchRequirements,
+        }),
       );
-    }
+
+    expectOnlySingleResult([deleteResult.deletedCount], {
+      operation: 'deleting',
+      entity: 'order',
+    });
   }
 
   // TODO: Better typing (usage of FilterQuery)

@@ -161,8 +161,6 @@ describe('Confirm Order – POST /order/confirm', () => {
     });
   });
 
-  // IMPORTANT: ALWAYS clean up the database after commenting out the cleanup in afterEach
-  // (usually done for testing purposes)
   afterEach(() =>
     Promise.all([
       customerRepository.deleteCustomer(testCustomer.id),
