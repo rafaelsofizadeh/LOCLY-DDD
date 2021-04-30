@@ -260,7 +260,6 @@ const isoEntries = Object.entries(entries).reduce(
 
     if (isoMatches.length === 0) return isoEntries;
 
-    //console.log(country, isoMatches.slice(0, 6));
     const match = isoMatches[0].item;
 
     isoEntries[match['alpha-3']] = services;

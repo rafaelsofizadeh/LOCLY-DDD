@@ -20,8 +20,6 @@ import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest
 
 // TODO(GLOBAL)(TESTING): Substitute database name in tests
 
-// TODO: afterEach / beforeEach troubles
-
 describe('[POST /order/draft] DraftOrderUseCase', () => {
   let app: INestApplication;
 

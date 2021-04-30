@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
 import {
@@ -16,6 +16,7 @@ import { withTransaction } from '../../../common/application';
 import { DraftedOrder, ServiceFee } from '../../domain/entity/DraftedOrder';
 import { HostRepository } from '../port/HostRepository';
 import { OrderStatus } from '../../domain/entity/Order';
+import { throwCustomException } from '../../../common/error-handling';
 
 type StripeCheckoutSession = Stripe.Checkout.Session;
 type StripePrice = Pick<
@@ -82,12 +83,20 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
     { originCountry }: DraftedOrder,
     session: ClientSession,
   ): Promise<UUID> {
-    const matchedHost: Host = await this.hostRepository.findHostAvailableInCountryWithMinimumNumberOfOrders(
-      originCountry,
-      session,
-    );
+    try {
+      const matchedHost: Host = await this.hostRepository.findHostAvailableInCountryWithMinimumNumberOfOrders(
+        originCountry,
+        session,
+      );
 
-    return matchedHost.id;
+      return matchedHost.id;
+    } catch (error) {
+      throwCustomException(
+        'No available host',
+        { originCountry },
+        HttpStatus.SERVICE_UNAVAILABLE,
+      )();
+    }
   }
 
   private async createStripeCheckoutSession(
@@ -120,7 +129,7 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
     const checkoutSession: StripeCheckoutSession = await this.stripe.checkout.sessions.create(
       {
         payment_method_types: ['card'],
-        // TODO: pre-fill customer / customer_email
+        customer_email: 'rafa.sofizadeh@gmail.com',
         line_items: [
           {
             price_data: {
