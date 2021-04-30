@@ -1,5 +1,5 @@
 import * as supertest from 'supertest';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { isUUID } from 'class-validator';
 
@@ -96,8 +96,7 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
         .post('/order/draft')
         .send(testOrderRequest);
 
-      // HTTP 201 'CREATED'
-      expect(response.status).toBe(201);
+      expect(response.status).toBe(HttpStatus.CREATED);
 
       const { id, customerId, destination } = response.body as DraftedOrder;
 
@@ -134,8 +133,7 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
         .post('/order/draft')
         .send(invalidTestOrderRequest);
 
-      // HTTP 400 'BAD REQUEST'
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
 
       expect(response.body.message).toEqual([
         'customerId must be an UUID',
@@ -161,21 +159,16 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
         .post('/order/draft')
         .send(invalidTestOrderRequest);
 
-      // HTTP 400 'BAD REQUEST'
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(HttpStatus.BAD_REQUEST);
 
-      expect(response.body).toEqual({
-        statusCode: 400,
-        message: [
-          'customerId must be an UUID',
-          'originCountry must be a valid ISO31661 Alpha3 code',
-          'destination should not be null or undefined',
-          'destination must be a non-empty object',
-          'items.0.weight must be a positive number',
-          'items.0.weight must be an integer number',
-        ],
-        error: 'Bad Request',
-      });
+      expect(response.body.message).toEqual([
+        'customerId must be an UUID',
+        'originCountry must be a valid ISO31661 Alpha3 code',
+        'destination should not be null or undefined',
+        'destination must be a non-empty object',
+        'items.0.weight must be a positive number',
+        'items.0.weight must be an integer number',
+      ]);
     });
 
     it('fails due to unavailable service in country', async () => {
@@ -200,7 +193,7 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
         .send(testOrderRequest);
 
       // HTTP 503 'SERVICE UNAVAILABLE'
-      expect(response.status).toBe(503);
+      expect(response.status).toBe(HttpStatus.SERVICE_UNAVAILABLE);
 
       // TODO: Error typing
       const { message, data } = response.body;
@@ -231,13 +224,14 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
         .post('/order/draft')
         .send(invalidTestOrderRequest);
 
-      // HTTP 404 'NOT FOUND'
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(HttpStatus.NOT_FOUND);
 
       expect(response.body.message).toMatch(
         // TODO: Remove necessity for the entire string (toMatch apparently doesn't work with non-exact matches)
         new RegExp(
-          `NOT_FOUND | Order couldn't be added to customer \(orderId: [a-zA-Z0-9-]+, customerId: ${nonexistentCustomerId}\): customer with given id doesn't exist`,
+          `${
+            HttpStatus[HttpStatus.NOT_FOUND]
+          } | Order couldn't be added to customer \(orderId: [a-zA-Z0-9-]+, customerId: ${nonexistentCustomerId}\): customer with given id doesn't exist`,
         ),
       );
     });
