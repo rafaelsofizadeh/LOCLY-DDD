@@ -7,10 +7,10 @@ import {
   StripeCheckoutSessionResult,
   PreConfirmOrderUseCase,
 } from '../../domain/use-case/PreConfirmOrderUseCase';
-import { ReceiveOrderHostRequestAdapter } from './request-adapters/ReceiveOrderByHostRequestAdapter';
+import { ReceiveOrderByHostRequestAdapter } from './request-adapters/ReceiveOrderByHostRequestAdapter';
 import {
-  ReceiveOrderHostResult,
-  ReceiveOrderHostUseCase,
+  ReceiveOrderByHostResult,
+  ReceiveOrderByHostUseCase,
 } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
 import { SerializePrivatePropertiesInterceptor } from './nest-infrastructure/SerializePrivatePropertiesInterceptor';
@@ -27,7 +27,7 @@ export class OrderController {
     private readonly editOrderUseCase: EditOrderUseCase,
     private readonly deleteOrderUseCase: DeleteOrderUseCase,
     private readonly preConfirmOrderUseCase: PreConfirmOrderUseCase,
-    private readonly receiveOrderByHostUseCase: ReceiveOrderHostUseCase,
+    private readonly receiveOrderByHostUseCase: ReceiveOrderByHostUseCase,
   ) {}
 
   @Post('draft')
@@ -74,8 +74,8 @@ export class OrderController {
 
   @Post('receivedByHost')
   async receiveOrderByHost(
-    @Body() receiveOrderByHostRequest: ReceiveOrderHostRequestAdapter,
-  ): Promise<ReceiveOrderHostResult> {
+    @Body() receiveOrderByHostRequest: ReceiveOrderByHostRequestAdapter,
+  ): Promise<ReceiveOrderByHostResult> {
     const receivedByHostDateResult = await this.receiveOrderByHostUseCase.execute(
       receiveOrderByHostRequest,
     );

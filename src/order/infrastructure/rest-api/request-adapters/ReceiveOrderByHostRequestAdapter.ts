@@ -1,7 +1,8 @@
 import { IsUUID, UUID } from '../../../../common/domain';
-import { ReceiveOrderHostRequest } from '../../../domain/use-case/ReceiveOrderByHostUseCase';
+import { ReceiveOrderByHostRequest } from '../../../domain/use-case/ReceiveOrderByHostUseCase';
 
-export class ReceiveOrderHostRequestAdapter implements ReceiveOrderHostRequest {
+export class ReceiveOrderByHostRequestAdapter
+  implements ReceiveOrderByHostRequest {
   @IsUUID()
   readonly orderId: UUID;
 }

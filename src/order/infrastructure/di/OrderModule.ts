@@ -16,8 +16,8 @@ import { OrderController } from '../rest-api/OrderController';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ConfirmOrderUseCase } from '../../domain/use-case/ConfirmOrderUseCase';
 import { ConfirmOrderWebhookHandler } from '../../application/services/ConfirmOrderService';
-import { ReceiveOrderHostUseCase } from '../../domain/use-case/ReceiveOrderByHostUseCase';
-import { ReceiveOrderHost } from '../../application/services/ReceiveOrderByHostService';
+import { ReceiveOrderByHostUseCase } from '../../domain/use-case/ReceiveOrderByHostUseCase';
+import { ReceiveOrderByHost } from '../../application/services/ReceiveOrderByHostService';
 import { EditOrder } from '../../application/services/EditOrderService';
 import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
 import { DeleteOrderUseCase } from '../../domain/use-case/DeleteOrderUseCase';
@@ -35,7 +35,7 @@ const useCaseProviders: Provider[] = [
   { provide: DeleteOrderUseCase, useClass: DeleteOrder },
   { provide: PreConfirmOrderUseCase, useClass: PreConfirmOrder },
   { provide: ConfirmOrderUseCase, useClass: ConfirmOrderWebhookHandler },
-  { provide: ReceiveOrderHostUseCase, useClass: ReceiveOrderHost },
+  { provide: ReceiveOrderByHostUseCase, useClass: ReceiveOrderByHost },
 ];
 
 // TODO(NOW): find a better place to initialize testing dependencies (through .env? npm scripts?)

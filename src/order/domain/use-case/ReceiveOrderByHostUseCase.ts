@@ -1,15 +1,16 @@
 import { UUID } from '../../../common/domain';
 import { UseCase } from '../../../common/domain';
 
-export interface ReceiveOrderHostRequest {
+export interface ReceiveOrderByHostRequest {
   orderId: UUID;
+  customerId: UUID;
 }
 
-export interface ReceiveOrderHostResult {
+export interface ReceiveOrderByHostResult {
   receivedByHostDate: Date;
 }
 
-export abstract class ReceiveOrderHostUseCase extends UseCase<
-  ReceiveOrderHostRequest,
-  ReceiveOrderHostResult
+export abstract class ReceiveOrderByHostUseCase extends UseCase<
+  ReceiveOrderByHostRequest,
+  ReceiveOrderByHostResult
 > {}

@@ -5,27 +5,31 @@ import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import {
-  ReceiveOrderHostRequest,
-  ReceiveOrderHostResult,
-  ReceiveOrderHostUseCase,
+  ReceiveOrderByHostRequest,
+  ReceiveOrderByHostResult,
+  ReceiveOrderByHostUseCase,
 } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 import { ReceivedByHostOrder } from '../../domain/entity/ReceivedByHostOrder';
 import { OrderStatus } from '../../domain/entity/Order';
 
 @Injectable()
-export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
+export class ReceiveOrderByHost implements ReceiveOrderByHostUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
   async execute(
-    { orderId }: ReceiveOrderHostRequest,
+    { orderId, customerId }: ReceiveOrderByHostRequest,
     session?: ClientSession,
-  ): Promise<ReceiveOrderHostResult> {
+  ): Promise<ReceiveOrderByHostResult> {
     const receivedByHostDate: Date = await withTransaction(
       (transactionalSession: ClientSession) =>
-        this.handleOrderReceiptByHost(orderId, transactionalSession),
+        this.handleOrderReceiptByHost(
+          orderId,
+          customerId,
+          transactionalSession,
+        ),
       this.mongoClient,
       session,
     );
@@ -37,6 +41,7 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
 
   private async handleOrderReceiptByHost(
     orderId: UUID,
+    customerId: UUID,
     session: ClientSession,
   ): Promise<Date> {
     const receivedByHostDate: Date = await ReceivedByHostOrder.receiveByHost(
@@ -48,8 +53,7 @@ export class ReceiveOrderHost implements ReceiveOrderHostUseCase {
             status: OrderStatus.ReceivedByHost,
             receivedByHostDate,
           },
-          // TODO:
-          {},
+          { status: OrderStatus.Confirmed, customerId },
           session,
         ),
     );

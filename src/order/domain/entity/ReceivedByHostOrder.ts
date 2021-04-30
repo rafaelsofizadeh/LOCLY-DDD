@@ -5,39 +5,17 @@ export interface ReceivedByHostOrderProps {
   receivedByHostDate: Date;
 }
 
-export class ReceivedByHostOrder implements ReceivedByHostOrderProps {
-  readonly id: UUID;
-
-  readonly receivedByHostDate: Date;
-
-  private constructor({ id, receivedByHostDate }: ReceivedByHostOrderProps) {
-    this.id = id;
-    this.receivedByHostDate = receivedByHostDate;
-  }
-
-  static fromData(payload: ReceivedByHostOrderProps) {
-    return new this(payload);
-  }
-
-  static create({ id }: Pick<ReceivedByHostOrder, 'id'>): ReceivedByHostOrder {
-    const receivedByHostOrder: ReceivedByHostOrder = new this({
-      id,
-      receivedByHostDate: new Date(),
-    });
-
-    return receivedByHostOrder;
-  }
-
+export class ReceivedByHostOrder {
   static async receiveByHost(
     orderId: UUID,
-    persistHostReceipt: (
+    updateOrderReceiptDate: (
       toBeReceivedByHostOrderId: UUID,
       receivedByHostDate: Date,
     ) => Promise<unknown>,
   ): Promise<Date> {
     const receivedByHostDate: Date = new Date();
 
-    await persistHostReceipt(orderId, receivedByHostDate);
+    await updateOrderReceiptDate(orderId, receivedByHostDate);
 
     return receivedByHostDate;
   }

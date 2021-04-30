@@ -1,6 +1,5 @@
 import { UUID } from '../../../common/domain';
 import { Country } from '../data/Country';
-import { ReceivedByHostOrder } from './ReceivedByHostOrder';
 
 export interface ConfirmedOrderProps {
   id: UUID;
@@ -39,9 +38,5 @@ export class ConfirmedOrder implements ConfirmedOrderProps {
   ): Promise<void> {
     await persistConfirmationFn(orderId, hostId);
     await addOrderToHostFn(hostId, orderId);
-  }
-
-  toReceivedByHost() {
-    return ReceivedByHostOrder.create(this);
   }
 }
