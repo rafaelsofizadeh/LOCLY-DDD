@@ -18,7 +18,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:preconfirm-order": "jest -i 'PreConfirmOrder'",
+    "test:confirm-order": "jest -i 'ConfirmOrder'",
     "test:draft-order": "jest -i 'DraftOrder'"
   },
   "dependencies": {
