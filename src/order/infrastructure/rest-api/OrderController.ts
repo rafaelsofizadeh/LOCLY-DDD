@@ -1,23 +1,23 @@
 import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
 
-import { DraftOrderRequestAdapter } from './DraftOrderRequestAdapter';
+import { DraftOrderRequestAdapter } from './request-adapters/DraftOrderRequestAdapter';
 import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
-import { PreConfirmOrderRequestAdapter } from './PreConfirmOrderRequestAdapter';
+import { PreConfirmOrderRequestAdapter } from './request-adapters/PreConfirmOrderRequestAdapter';
 import {
   StripeCheckoutSessionResult,
   PreConfirmOrderUseCase,
 } from '../../domain/use-case/PreConfirmOrderUseCase';
-import { ReceiveOrderHostRequestAdapter } from './ReceiveOrderByHostRequestAdapter';
+import { ReceiveOrderHostRequestAdapter } from './request-adapters/ReceiveOrderByHostRequestAdapter';
 import {
   ReceiveOrderHostResult,
   ReceiveOrderHostUseCase,
 } from '../../domain/use-case/ReceiveOrderByHostUseCase';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
-import { SerializePrivatePropertiesInterceptor } from './SerializePrivatePropertiesInterceptor';
+import { SerializePrivatePropertiesInterceptor } from './nest-infrastructure/SerializePrivatePropertiesInterceptor';
 import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
-import { EditOrderRequestAdapter } from './EditOrderRequestAdapter';
+import { EditOrderRequestAdapter } from './request-adapters/EditOrderRequestAdapter';
 import { DeleteOrderUseCase } from '../../domain/use-case/DeleteOrderUseCase';
-import { DeleteOrderRequestAdapter } from './DeleteOrderRequestAdapter';
+import { DeleteOrderRequestAdapter } from './request-adapters/DeleteOrderRequestAdapter';
 
 // TODO: Separate out to classes per each use case
 @Controller('order')

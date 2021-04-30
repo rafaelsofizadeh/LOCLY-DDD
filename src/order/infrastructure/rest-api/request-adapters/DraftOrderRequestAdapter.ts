@@ -12,10 +12,10 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { IsUUID, UUID } from '../../../common/domain';
-import { Country } from '../../domain/data/Country';
-import { Gram } from '../../domain/entity/Item';
-import { DraftOrderRequest } from '../../domain/use-case/DraftOrderUseCase';
+import { IsUUID, UUID } from '../../../../common/domain';
+import { Country } from '../../../domain/data/Country';
+import { Gram } from '../../../domain/entity/Item';
+import { DraftOrderRequest } from '../../../domain/use-case/DraftOrderUseCase';
 
 export class ItemValidationSchema {
   @IsString()

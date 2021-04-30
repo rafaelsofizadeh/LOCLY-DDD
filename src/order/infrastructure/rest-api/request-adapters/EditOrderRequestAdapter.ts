@@ -6,9 +6,9 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { IsUUID, UUID } from '../../../common/domain';
-import { Country } from '../../domain/data/Country';
-import { EditOrderRequest } from '../../domain/use-case/EditOrderUseCase';
+import { IsUUID, UUID } from '../../../../common/domain';
+import { Country } from '../../../domain/data/Country';
+import { EditOrderRequest } from '../../../domain/use-case/EditOrderUseCase';
 import {
   AddressValidationSchema,
   ItemValidationSchema,

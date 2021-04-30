@@ -25,7 +25,7 @@ import { StripeCheckoutSessionResult } from '../../../../src/order/domain/use-ca
 import { ConfirmedOrder } from '../../../../src/order/domain/entity/ConfirmedOrder';
 import { OrderStatus } from '../../../../src/order/domain/entity/Order';
 import { UUID } from '../../../../src/common/domain';
-import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/CustomExceptionFilter';
+import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
 
 type HostConfig = {
   country: Country;

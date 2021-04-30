@@ -16,7 +16,7 @@ import {
 import { DraftOrderRequest } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
 import { DraftedOrder } from '../../../../src/order/domain/entity/DraftedOrder';
 import { Country } from '../../../../src/order/domain/data/Country';
-import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/CustomExceptionFilter';
+import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
 
 // TODO(GLOBAL)(TESTING): Substitute database name in tests
 

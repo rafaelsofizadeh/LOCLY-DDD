@@ -1,7 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './AppModule';
-import { CustomExceptionFilter } from './order/infrastructure/rest-api/CustomExceptionFilter';
+import { CustomExceptionFilter } from './order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
 
 // TODO(GLOBAL) More expressive UseCases with Order types/stages
 // TODO(GLOBAL): Rethink everything related to event emitting
