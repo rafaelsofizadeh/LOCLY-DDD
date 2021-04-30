@@ -1,8 +1,8 @@
-import { readFile, writeFile } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
+import * as child_process from 'child_process';
 import * as path from 'path';
 import * as supertest from 'supertest';
-import * as MUUID from 'uuid-mongodb';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../../../../src/AppModule';
@@ -21,7 +21,17 @@ import {
   destinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../../src/order/application/services/checkServiceAvailability';
-import { muuidToUuid } from '../../../../src/common/persistence';
+import { StripeCheckoutSessionResult } from '../../../../src/order/domain/use-case/PreConfirmOrderUseCase';
+import { ConfirmedOrder } from '../../../../src/order/domain/entity/ConfirmedOrder';
+import { OrderStatus } from '../../../../src/order/domain/entity/Order';
+import { UUID } from '../../../../src/common/domain';
+import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/CustomExceptionFilter';
+
+type HostConfig = {
+  country: Country;
+  available: boolean;
+  orderCount: number;
+};
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;
@@ -36,13 +46,22 @@ describe('Confirm Order – POST /order/confirm', () => {
   let testOrder: DraftedOrder;
   let testHosts: Host[];
 
+  const originCountry: Country = originCountriesAvailable[0];
+  const destinationCountry: Country = destinationCountriesAvailable[0];
+
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleRef.createNestApplication();
-    await app.init();
+    app = moduleRef.createNestApplication(undefined, { bodyParser: false });
+
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
+    app.useGlobalFilters(new CustomExceptionFilter());
+
+    await app.listen(3000);
 
     customerRepository = (await moduleRef.resolve(
       CustomerRepository,
@@ -59,24 +78,71 @@ describe('Confirm Order – POST /order/confirm', () => {
     draftOrderUseCase = (await moduleRef.resolve(
       DraftOrderUseCase,
     )) as DraftOrderUseCase;
-  });
-
-  beforeEach(async () => {
-    const originCountry: Country = originCountriesAvailable[0];
-    const destinationCountry: Country = destinationCountriesAvailable[0];
 
     testCustomer = Customer.create({
       selectedAddress: { country: destinationCountry },
       orderIds: [],
     });
 
-    const testHostConfigs: Array<{
-      country: Country;
-      available: boolean;
-      orderCount: number;
-    }> = [
+    await customerRepository.addCustomer(testCustomer);
+
+    const stripeListener = child_process.spawn('stripe', [
+      'listen',
+      '--forward-to',
+      'localhost:3000/stripe/webhook',
+    ]);
+
+    await new Promise((resolve, reject) => {
+      const stdHandler = (data: Buffer) => {
+        if (data.toString().includes('Ready!')) {
+          console.log(data.toString());
+          return resolve('Stripe finished');
+        }
+      };
+
+      stripeListener.stdout.on('data', stdHandler);
+      stripeListener.stderr.on('data', stdHandler);
+      stripeListener.on('close', () => 'STRIPE CLOSED');
+    });
+  });
+
+  beforeEach(async () => {
+    testOrder = await draftOrderUseCase.execute({
+      customerId: testCustomer.id,
+      originCountry,
+      destination: testCustomer.selectedAddress,
+      items: [
+        Item.create({
+          title: 'Laptop',
+          storeName: 'Amazon',
+          weight: 10,
+        }),
+      ],
+    });
+  });
+
+  afterEach(
+    async () =>
+      await Promise.allSettled([
+        hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
+        orderRepository.deleteOrder(testOrder.id),
+      ]),
+  );
+
+  afterAll(
+    async () =>
+      await Promise.allSettled([
+        customerRepository.deleteCustomer(testCustomer.id),
+      ]),
+  );
+
+  it(`Matches Order with a Host, updates Order's "hostId" property, and Host's "orderIds" property`, async (done) /* done() is needed for "awaiting" setTimeout */ => {
+    // https://stackoverflow.com/a/49864436/6539857
+    jest.setTimeout(45000);
+
+    const testHostConfigs: HostConfig[] = [
       /*
-      Test host #1:
+      Test host #1 (will be selected):
       ✔ available
       ✔ same country as the testOrder
       ✔ lowest number of orders (1)
@@ -131,45 +197,11 @@ describe('Confirm Order – POST /order/confirm', () => {
         orderCount: 3,
       },
     ];
-
-    testHosts = testHostConfigs.map(({ country, available, orderCount }) =>
-      Host.create({
-        address: { country },
-        available,
-        orderIds: [...Array(orderCount)].map(_ => muuidToUuid(MUUID.v4())),
-      }),
-    );
-
-    // TODO(TRANSACTION#1; RELATED: TRANSACTION#2):
-    // Promise.all()'ing this leads to an ERROR. Apparently a write conflict between
-    // 1. customerRepository.addCustomer (insert)
-    // 2. draftOrderUseCase.execute > customerRepository.addOrderToCustomer (update)
+    testHosts = configsToHosts(testHostConfigs);
     await hostRepository.addManyHosts(testHosts);
-    await customerRepository.addCustomer(testCustomer);
 
-    testOrder = await draftOrderUseCase.execute({
-      customerId: testCustomer.id,
-      originCountry,
-      destination: testCustomer.selectedAddress,
-      items: [
-        Item.create({
-          title: 'Laptop',
-          storeName: 'Amazon',
-          weight: 10,
-        }),
-      ],
-    });
-  });
+    const testMatchedHost = testHosts[0];
 
-  afterEach(() =>
-    Promise.all([
-      customerRepository.deleteCustomer(testCustomer.id),
-      hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
-      orderRepository.deleteOrder(testOrder.id),
-    ]),
-  );
-
-  it('Matches Order with a Host, updates Order\'s "hostId" property, and Host\'s "orderIds" property', async () => {
     const response: supertest.Response = await supertest(app.getHttpServer())
       .post('/order/confirm')
       .send({
@@ -177,59 +209,148 @@ describe('Confirm Order – POST /order/confirm', () => {
         customerId: testCustomer.id,
       });
 
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(HttpStatus.CREATED);
 
-    // TODO: strong typing
-    const { checkoutId }: { checkoutId: string } = response.body;
+    const { checkoutId } = response.body as StripeCheckoutSessionResult;
 
     expect(checkoutId).toBeDefined();
     expect(isString(checkoutId)).toBe(true);
     expect(checkoutId.slice(0, 2)).toBe('cs'); // "Checkout Session"
 
     updatedStripeCheckoutSessionInTestPage(checkoutId);
+
+    await fillStripeCheckoutForm();
+
+    setTimeout(async () => {
+      let updatedTestOrder: ConfirmedOrder;
+
+      // Expect to resolve and not throw/reject
+      await expect(
+        (async () => {
+          updatedTestOrder = (await orderRepository.findOrder(testOrder.id, {
+            status: OrderStatus.Confirmed,
+          })) as ConfirmedOrder;
+        })(),
+      ).resolves.toBeUndefined();
+
+      expect(updatedTestOrder.hostId).toBeDefined();
+      expect(updatedTestOrder.hostId).toBe(testMatchedHost.id);
+
+      const updatedTestHost: Host = await hostRepository.findHost(
+        testMatchedHost.id,
+      );
+
+      expect(updatedTestHost.orderIds).toContain(testOrder.id);
+      expect(updatedTestHost.orderIds.length).toBe(
+        testMatchedHost.orderIds.length + 1,
+      );
+
+      // Called at the end of setTimeout to allow setTimeout to block the test case.
+      done();
+    }, 15000);
+  });
+
+  it(`Doesn't matches Order with a Host as no Host is available in given country`, async () /* done() is needed for "awaiting" setTimeout */ => {
+    // https://stackoverflow.com/a/49864436/6539857
+    jest.setTimeout(15000);
+
+    // All hosts are available, but none are in the given country
+    const incompatibleCountries = ([
+      'XXX',
+      'YYY',
+      'ZZZ',
+    ] as unknown[]) as Country[];
+
+    const testHostConfigs: HostConfig[] = incompatibleCountries.map(
+      country => ({ country, available: true, orderCount: 1 }),
+    );
+    testHosts = configsToHosts(testHostConfigs);
+    await hostRepository.addManyHosts(testHosts);
+
+    const response: supertest.Response = await supertest(app.getHttpServer())
+      .post('/order/confirm')
+      .send({
+        orderId: testOrder.id,
+        customerId: testCustomer.id,
+      });
+
+    expect(response.status).toBe(HttpStatus.SERVICE_UNAVAILABLE);
+    expect(response.body.message).toMatch(
+      // TODO: Remove necessity for the entire string (toMatch apparently doesn't work with non-exact matches)
+      new RegExp(
+        `${
+          HttpStatus[HttpStatus.SERVICE_UNAVAILABLE]
+        } | No available host: \(originCountry: ${originCountry}\)`,
+      ),
+    );
   });
 });
 
 function updatedStripeCheckoutSessionInTestPage(checkoutId: string) {
   const checkoutPagePath = path.join(__dirname, './CheckoutPage.html');
 
-  readFile(checkoutPagePath, 'utf8', (error, data) => {
-    if (error) {
-      console.log(error);
-    }
+  const checkoutPage: string = readFileSync(checkoutPagePath, 'utf8');
 
-    const updatedStripeCheckoutSessionFileContent = data.replace(
-      /cs_test_[\w\d]+/g,
-      checkoutId,
-    );
+  const updatedStripeCheckoutSessionFileContent = checkoutPage.replace(
+    /cs_test_[\w\d]+/g,
+    checkoutId,
+  );
 
-    writeFile(
-      checkoutPagePath,
-      updatedStripeCheckoutSessionFileContent,
-      'utf8',
-      error => {
-        if (error) {
-          console.log(error);
-        }
-      },
-    );
+  writeFileSync(
+    checkoutPagePath,
+    updatedStripeCheckoutSessionFileContent,
+    'utf8',
+  );
+}
+
+async function fillStripeCheckoutForm(): Promise<void> {
+  const typingOptions = { delay: 50 };
+  const testCardNumber = '4242424242424242';
+  const testCardExpirty = '0424';
+  const testCardCvc = '100';
+  const testNameOnCard = 'TEST TESTOV';
+
+  await page.goto(
+    'file:///Users/rafaelsofizadeh/Documents/Developer/LOCLY-DDD/test/e2e/tests/order/CheckoutPage.html',
+  );
+  await page.click('#checkout-button');
+
+  await page.waitForSelector('#cardNumber');
+  await page.focus('#cardNumber');
+  await page.keyboard.type(testCardNumber, typingOptions);
+
+  await page.focus('#cardExpiry');
+  await page.keyboard.type(testCardExpirty, typingOptions);
+
+  await page.focus('#cardCvc');
+  await page.keyboard.type(testCardCvc, typingOptions);
+
+  await page.focus('#billingName');
+  await page.keyboard.type(testNameOnCard, typingOptions);
+
+  await page.evaluate(() => {
+    (document.querySelector(
+      '#root > div > div > div.App-Payment > div > form > div:nth-child(2) > div:nth-child(4) > button',
+    ) as HTMLElement).click();
   });
 }
 
-/*const {
-      status,
-      hostId,
-    }: { status: OrderStatus; hostId: string } = response.body;
+function generateUuids(n: number) {
+  const uuids: UUID[] = [];
 
-    expect(status).toBe(OrderStatus.Confirmed);
-    expect(hostId).toBe(testHosts[0].id);
+  for (let i = 0; i < n; i++) {
+    uuids.push(UUID());
+  }
 
-    const updatedTestHost: Host = await hostRepository.findHost(
-      UUID(hostId),
-    );
+  return uuids;
+}
 
-    console.log('updatedTestHost', updatedTestHost);
-
-    expect(updatedTestHost.orderIds.toContain(
-      testOrder.id,
-    );*/
+function configsToHosts(hostConfigs: HostConfig[]): Host[] {
+  return hostConfigs.map(({ country, available, orderCount }) =>
+    Host.create({
+      address: { country },
+      available,
+      orderIds: generateUuids(orderCount),
+    }),
+  );
+}

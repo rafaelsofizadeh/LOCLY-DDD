@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Buy cool new product</title>
-    <script src="https://js.stripe.com/v3/"></script>
+    <script src="../../../lib/stripe.js"></script>
   </head>
   <body>
     <section>
@@ -20,7 +20,7 @@
       stripe
         .redirectToCheckout({
           sessionId:
-            'cs_test_a1m4DA2ZDMbS6a18CrXt4WDw70DehrHfF3132ZCFjI2DQlq23j2aNdYCMA',
+            'cs_test_a1KCUkgFRIoNtjbHEtuHU643ZNlDXdFdoXtr4F6Dr5ASjCF5GcLGll0c6F',
         })
         .then(function(result) {
           console.log(result);

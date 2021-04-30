@@ -46,9 +46,12 @@
     "@nestjs/cli": "^7.0.0",
     "@nestjs/schematics": "^7.0.0",
     "@nestjs/testing": "^7.0.0",
+    "@types/expect-puppeteer": "^4.4.5",
     "@types/express": "^4.17.3",
     "@types/jest": "26.0.10",
+    "@types/jest-environment-puppeteer": "^4.4.1",
     "@types/node": "^13.9.1",
+    "@types/puppeteer": "^5.4.3",
     "@types/supertest": "^2.0.8",
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "3.9.1",
@@ -58,15 +61,17 @@
     "eslint-plugin-import": "^2.20.1",
     "fuse.js": "^6.4.6",
     "jest": "26.4.2",
+    "jest-puppeteer": "^5.0.3",
     "prettier": "^1.19.1",
+    "puppeteer": "^9.0.0",
     "start-server-webpack-plugin": "^2.2.5",
     "supertest": "^4.0.2",
     "ts-jest": "26.2.0",
     "ts-loader": "^6.2.1",
     "ts-node": "9.0.0",
     "tsconfig-paths": "^3.9.0",
-    "webpack-node-externals": "^2.5.2",
-    "typescript": "https://typescript.visualstudio.com/cf7ac146-d525-443c-b23c-0d58337efebc/_apis/build/builds/99188/artifacts?artifactName=tgz&fileId=8A4F5CF4310E72AE3F3599DB677A807009BC386229856DAD4B06C74D77071B7702&fileName=/typescript-4.3.0-insiders.20210325.tgz"
+    "typescript": "https://typescript.visualstudio.com/cf7ac146-d525-443c-b23c-0d58337efebc/_apis/build/builds/99188/artifacts?artifactName=tgz&fileId=8A4F5CF4310E72AE3F3599DB677A807009BC386229856DAD4B06C74D77071B7702&fileName=/typescript-4.3.0-insiders.20210325.tgz",
+    "webpack-node-externals": "^2.5.2"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -80,6 +85,6 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "preset": "jest-puppeteer"
   }
 }
