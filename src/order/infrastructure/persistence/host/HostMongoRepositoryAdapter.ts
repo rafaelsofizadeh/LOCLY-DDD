@@ -169,10 +169,10 @@ export class HostMongoRepositoryAdapter implements HostRepository {
 
     if (!hostDocument) {
       throwCustomException(
-        'No available host',
+        'No host found',
         { country },
-        HttpStatus.SERVICE_UNAVAILABLE,
-      );
+        HttpStatus.NOT_FOUND,
+      )();
     }
 
     return mongoDocumentToHost(hostDocument);

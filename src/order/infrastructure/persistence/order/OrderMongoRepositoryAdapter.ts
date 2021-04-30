@@ -107,7 +107,6 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       throwCustomException('No order found', {
         orderId,
         orderSearchRequirements,
-        filterQuery,
       })();
     }
 
