@@ -5,4 +5,7 @@ export class ReceiveOrderByHostRequestAdapter
   implements ReceiveOrderByHostRequest {
   @IsUUID()
   readonly orderId: UUID;
+
+  @IsUUID()
+  readonly customerId: UUID;
 }
