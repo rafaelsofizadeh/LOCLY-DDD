@@ -2,6 +2,7 @@ import {
   ClientSession,
   Collection,
   DeleteWriteOpResultObject,
+  InsertWriteOpResult,
   UpdateWriteOpResult,
 } from 'mongodb';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -15,6 +16,7 @@ import {
   hostToMongoDocument,
 } from './HostMongoMapper';
 import {
+  expectOnlyNResults,
   expectOnlySingleResult,
   throwCustomException,
 } from '../../../../common/error-handling';
@@ -33,9 +35,14 @@ export class HostMongoRepositoryAdapter implements HostRepository {
   async addManyHosts(hosts: Host[], session?: ClientSession): Promise<void> {
     const hostDocuments: HostMongoDocument[] = hosts.map(hostToMongoDocument);
 
-    await this.hostCollection
+    const result: InsertWriteOpResult<HostMongoDocument> = await this.hostCollection
       .insertMany(hostDocuments, { session })
       .catch(throwCustomException('Error adding many hosts', { hosts }));
+
+    expectOnlyNResults(hosts.length, [result.insertedCount], {
+      operation: 'inserting',
+      entity: 'host',
+    });
   }
 
   async addHost(host: Host, session?: ClientSession): Promise<void> {
@@ -51,7 +58,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     hostIds: UUID[],
     session?: ClientSession,
   ): Promise<void> {
-    await this.hostCollection
+    const result: DeleteWriteOpResultObject = await this.hostCollection
       .deleteMany(
         {
           _id: { $in: hostIds.map(hostId => uuidToMuuid(hostId)) },
@@ -59,6 +66,11 @@ export class HostMongoRepositoryAdapter implements HostRepository {
         { session },
       )
       .catch(throwCustomException('Error deleting many hosts', { hostIds }));
+
+    expectOnlyNResults(hostIds.length, [result.deletedCount], {
+      operation: 'deleting',
+      entity: 'host',
+    });
   }
 
   async deleteHost(hostId: UUID, session?: ClientSession): Promise<void> {

@@ -41,16 +41,17 @@ export function throwCustomException(
   };
 }
 
-export function expectOnlySingleResult(
+export function expectOnlyNResults(
+  n: number,
   controlledVariables: number[],
   { operation, entity }: { operation: string; entity: string },
   fnMainArgs?: Record<string, any>,
 ) {
   const errorMessageBeginning = `Error ${operation} ${entity} — `;
-  const lessThanOneErrorMessage = `${errorMessageBeginning} no ${entity} with given requirements`;
-  const moreThanOneErrorMessage = `${errorMessageBeginning} more than one ${entity} with given requirements (shouldn't be possible)`;
+  const lessThanOneErrorMessage = `${errorMessageBeginning} less than ${n} ${entity} with given requirements`;
+  const moreThanOneErrorMessage = `${errorMessageBeginning} more than ${n} ${entity}s with given requirements (shouldn't be possible)`;
 
-  if (controlledVariables.some(variable => variable < 1)) {
+  if (controlledVariables.some(variable => variable < n)) {
     throwCustomException(
       lessThanOneErrorMessage,
       fnMainArgs,
@@ -58,7 +59,15 @@ export function expectOnlySingleResult(
     )();
   }
 
-  if (controlledVariables.some(variable => variable > 1)) {
+  if (controlledVariables.some(variable => variable > n)) {
     throwCustomException(moreThanOneErrorMessage, fnMainArgs)();
   }
+}
+
+export function expectOnlySingleResult(
+  controlledVariables: number[],
+  description: { operation: string; entity: string },
+  fnMainArgs?: Record<string, any>,
+) {
+  expectOnlyNResults(1, controlledVariables, description, fnMainArgs);
 }
