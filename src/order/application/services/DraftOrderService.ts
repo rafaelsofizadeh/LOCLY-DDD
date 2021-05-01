@@ -27,8 +27,8 @@ export class DraftOrder implements DraftOrderUseCase {
     session?: ClientSession,
   ): Promise<DraftedOrder> {
     const draftedOrder: DraftedOrder = await withTransaction(
-      (transactionalSession: ClientSession) =>
-        this.draftOrder(draftOrderRequest, transactionalSession),
+      (sessionWithTransaction: ClientSession) =>
+        this.draftOrder(draftOrderRequest, sessionWithTransaction),
       this.mongoClient,
       session,
     );

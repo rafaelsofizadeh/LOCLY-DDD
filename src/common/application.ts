@@ -40,8 +40,8 @@ async function withNewSessionTransaction<T>(
   await mongoClient.withSession(
     async (session: ClientSession) =>
       await session.withTransaction(
-        async (transactionalSession: ClientSession) =>
-          (result = await fn(transactionalSession)),
+        async (sessionWithTransaction: ClientSession) =>
+          (result = await fn(sessionWithTransaction)),
       ),
   );
 

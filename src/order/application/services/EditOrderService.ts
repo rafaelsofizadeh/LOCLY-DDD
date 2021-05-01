@@ -32,8 +32,8 @@ export class EditOrder implements EditOrderUseCase {
     session?: ClientSession,
   ): Promise<DraftedOrder> {
     const draftedOrder: DraftedOrder = await withTransaction(
-      (transactionalSession: ClientSession) =>
-        this.editOrder(editOrderRequest, transactionalSession),
+      (sessionWithTransaction: ClientSession) =>
+        this.editOrder(editOrderRequest, sessionWithTransaction),
       this.mongoClient,
       session,
     );

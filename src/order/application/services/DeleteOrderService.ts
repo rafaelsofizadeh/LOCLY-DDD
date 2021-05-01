@@ -25,8 +25,8 @@ export class DeleteOrder implements DeleteOrderUseCase {
     session?: ClientSession,
   ): Promise<void> {
     await withTransaction(
-      (transactionalSession: ClientSession) =>
-        this.deleteOrder(deleteOrderRequest, transactionalSession),
+      (sessionWithTransaction: ClientSession) =>
+        this.deleteOrder(deleteOrderRequest, sessionWithTransaction),
       this.mongoClient,
       session,
     );

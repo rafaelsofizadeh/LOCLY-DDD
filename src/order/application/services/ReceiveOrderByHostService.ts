@@ -24,11 +24,11 @@ export class ReceiveOrderByHost implements ReceiveOrderByHostUseCase {
     session?: ClientSession,
   ): Promise<ReceiveOrderByHostResult> {
     const receivedByHostDate: Date = await withTransaction(
-      (transactionalSession: ClientSession) =>
+      (sessionWithTransaction: ClientSession) =>
         this.handleOrderReceiptByHost(
           orderId,
           customerId,
-          transactionalSession,
+          sessionWithTransaction,
         ),
       this.mongoClient,
       session,

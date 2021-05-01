@@ -44,10 +44,10 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
   ): Promise<StripeCheckoutSessionResult> {
     // TODO(GLOBAL): Transaction decorator
     const checkoutSession: Stripe.Checkout.Session = await withTransaction(
-      (transactionalSession: ClientSession) =>
+      (sessionWithTransaction: ClientSession) =>
         this.matchOrderAndCheckout(
           preConfirmOrderRequest,
-          transactionalSession,
+          sessionWithTransaction,
         ),
       this.mongoClient,
       session,

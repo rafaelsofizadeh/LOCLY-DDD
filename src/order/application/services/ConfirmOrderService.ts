@@ -36,12 +36,12 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
       .object as Stripe.Checkout.Session).metadata as Match;
 
     const matchedHostAddress: Address = await withTransaction(
-      async (transactionalSession: ClientSession) => {
-        await this.confirmOrder(orderId, hostId, transactionalSession);
+      async (sessionWithTransaction: ClientSession) => {
+        await this.confirmOrder(orderId, hostId, sessionWithTransaction);
 
         const host: Host = await this.hostRepository.findHost(
           hostId,
-          transactionalSession,
+          sessionWithTransaction,
         );
         return host.address;
       },
