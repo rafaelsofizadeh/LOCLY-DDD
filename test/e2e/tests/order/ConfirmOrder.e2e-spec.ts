@@ -94,8 +94,9 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     await new Promise((resolve, reject) => {
       const stdHandler = (data: Buffer) => {
+        console.log(data.toString());
+
         if (data.toString().includes('Ready!')) {
-          console.log(data.toString());
           return resolve('Stripe finished');
         }
       };
@@ -121,13 +122,12 @@ describe('Confirm Order – POST /order/confirm', () => {
     });
   });
 
-  afterEach(
-    async () =>
-      await Promise.allSettled([
-        hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
-        orderRepository.deleteOrder(testOrder.id),
-      ]),
-  );
+  afterEach(async () => {
+    await Promise.allSettled([
+      hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
+      orderRepository.deleteOrder(testOrder.id),
+    ]);
+  });
 
   afterAll(
     async () =>
@@ -328,11 +328,9 @@ async function fillStripeCheckoutForm(): Promise<void> {
   await page.focus('#billingName');
   await page.keyboard.type(testNameOnCard, typingOptions);
 
-  await page.evaluate(() => {
-    (document.querySelector(
-      '#root > div > div > div.App-Payment > div > form > div:nth-child(2) > div:nth-child(4) > button',
-    ) as HTMLElement).click();
-  });
+  await page.click(
+    '#root > div > div > div.App-Payment > div > form > div:nth-child(2) > div:nth-child(4) > button',
+  );
 }
 
 function generateUuids(n: number) {
