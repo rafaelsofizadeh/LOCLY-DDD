@@ -10,7 +10,7 @@ export abstract class OrderRepository {
   ): Promise<void>;
 
   abstract findOrder(
-    orderFilter: OrderFilter,
+    filter: OrderFilter,
     session?: ClientSession,
   ): Promise<Order>;
 
@@ -20,12 +20,12 @@ export abstract class OrderRepository {
   ): Promise<Order[]>;
 
   abstract deleteOrder(
-    orderFilter: OrderFilter,
+    filter: OrderFilter,
     session?: ClientSession,
   ): Promise<void>;
 
   abstract setProperties(
-    orderFilter: OrderFilter,
+    filter: OrderFilter,
     // TODO: type is almost the same as OrderFilter
     properties: WithoutId<OrderFilter>,
     session?: ClientSession,

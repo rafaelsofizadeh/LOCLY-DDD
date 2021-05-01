@@ -51,22 +51,22 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   async setProperties(
-    orderFilter: OrderFilter,
+    filter: OrderFilter,
     // TODO: better type naming for OrderFilter here
     properties: WithoutId<OrderFilter>,
     session?: ClientSession,
   ) {
     const updateResult: UpdateWriteOpResult = await this.orderCollection
       .updateOne(
-        convertToMongoDocument(orderFilter),
+        convertToMongoDocument(filter),
         { $set: convertToMongoDocument(properties) },
         { session },
       )
       .catch(
         throwCustomException('Error updating order', {
-          orderId: orderFilter.id,
+          orderId: filter.id,
           properties,
-          orderFilter,
+          filter,
         }),
       );
 
@@ -80,27 +80,27 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   async findOrder(
-    orderFilter: OrderFilter,
+    filter: OrderFilter,
     session?: ClientSession,
   ): Promise<Order> {
     // TODO: better typing using FilterQuery
     const filterQuery: FilterQuery<OrderMongoDocument> = convertToMongoDocument(
-      orderFilter,
+      filter,
     );
 
     const orderDocument: OrderMongoDocument = await this.orderCollection
       .findOne(filterQuery, { session })
       .catch(
         throwCustomException('Error searching for an order', {
-          orderId: orderFilter.id,
-          orderFilter,
+          orderId: filter.id,
+          filter,
         }),
       );
 
     if (!orderDocument) {
       throwCustomException('No order found', {
-        orderId: orderFilter.id,
-        orderFilter,
+        orderId: filter.id,
+        filter,
       })();
     }
 
@@ -140,17 +140,17 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   async deleteOrder(
-    orderFilter: OrderFilter,
+    filter: OrderFilter,
     session?: ClientSession,
   ): Promise<void> {
     const deleteResult: DeleteWriteOpResultObject = await this.orderCollection
-      .deleteOne(convertToMongoDocument(orderFilter), {
+      .deleteOne(convertToMongoDocument(filter), {
         session,
       })
       .catch(
         throwCustomException('Error deleting order', {
-          orderId: orderFilter.id,
-          orderFilter,
+          orderId: filter.id,
+          filter,
         }),
       );
 
