@@ -1,3 +1,4 @@
+import { WithoutId } from '../../../common/domain';
 import { ConfirmedOrder, ConfirmedOrderProps } from './ConfirmedOrder';
 import { DraftedOrder, DraftedOrderProps } from './DraftedOrder';
 import {
@@ -34,8 +35,9 @@ export type OrderProps = DraftedOrderProps &
   ReceivedByHostOrderProps &
   VerifiedByHostOrderProps;
 
-export type OrderPropsWithoutId = Omit<OrderProps, 'id'>;
-
-export type OrderSearchRequirements = Partial<OrderPropsWithoutId> & {
-  status?: OrderStatus;
-};
+export type OrderFilter = Required<Pick<OrderProps, 'id'>> &
+  Partial<
+    WithoutId<OrderProps> & {
+      status: OrderStatus;
+    }
+  >;

@@ -1,7 +1,6 @@
 import { ClientSession } from 'mongodb';
 import { UUID } from '../../../common/domain';
 import { Country } from '../../domain/data/Country';
-import { ConfirmedOrder } from '../../domain/entity/ConfirmedOrder';
 import { Host } from '../../domain/entity/Host';
 
 export abstract class HostRepository {

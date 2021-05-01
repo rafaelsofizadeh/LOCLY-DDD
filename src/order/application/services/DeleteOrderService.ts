@@ -43,8 +43,7 @@ export class DeleteOrder implements DeleteOrderUseCase {
       },
       (toBeDeletedOrderId: UUID, orderOwnerCustomerId: UUID) =>
         this.orderRepository.deleteOrder(
-          toBeDeletedOrderId,
-          { customerId: orderOwnerCustomerId },
+          { id: toBeDeletedOrderId, customerId: orderOwnerCustomerId },
           session,
         ),
       (

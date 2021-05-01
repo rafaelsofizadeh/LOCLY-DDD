@@ -49,8 +49,11 @@ export class EditOrder implements EditOrderUseCase {
       editOrderRequest,
       (toBeDeletedOrderId: UUID, orderOwnerCustomerId: UUID) =>
         this.orderRepository.deleteOrder(
-          toBeDeletedOrderId,
-          { status: OrderStatus.Drafted, customerId: orderOwnerCustomerId },
+          {
+            id: toBeDeletedOrderId,
+            status: OrderStatus.Drafted,
+            customerId: orderOwnerCustomerId,
+          },
           session,
         ),
       (toBeRemovedFromCustomerId: UUID, toBeRemovedFromCustomerOrderId: UUID) =>

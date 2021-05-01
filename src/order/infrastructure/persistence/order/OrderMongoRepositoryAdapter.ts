@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   Binary,
   ClientSession,
@@ -9,18 +9,13 @@ import {
 } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
-import { UUID } from '../../../../common/domain';
+import { UUID, WithoutId } from '../../../../common/domain';
 import {
   expectOnlySingleResult,
   throwCustomException,
 } from '../../../../common/error-handling';
 import { OrderRepository } from '../../../application/port/OrderRepository';
-import {
-  OrderPropsWithoutId,
-  Order,
-  OrderSearchRequirements,
-  OrderStatus,
-} from '../../../domain/entity/Order';
+import { Order, OrderFilter, OrderStatus } from '../../../domain/entity/Order';
 import {
   OrderMongoDocument,
   draftedOrderToMongoDocument,
@@ -56,22 +51,22 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   async setProperties(
-    orderId: UUID,
-    properties: Partial<OrderPropsWithoutId> & { status: OrderStatus },
-    orderSearchRequirements: OrderSearchRequirements = {},
+    orderFilter: OrderFilter,
+    // TODO: better type naming for OrderFilter here
+    properties: WithoutId<OrderFilter>,
     session?: ClientSession,
   ) {
     const updateResult: UpdateWriteOpResult = await this.orderCollection
       .updateOne(
-        this.mongoFilterQuery(orderId, orderSearchRequirements),
+        convertToMongoDocument(orderFilter),
         { $set: convertToMongoDocument(properties) },
         { session },
       )
       .catch(
         throwCustomException('Error updating order', {
-          orderId,
+          orderId: orderFilter.id,
           properties,
-          orderSearchRequirements,
+          orderFilter,
         }),
       );
 
@@ -85,28 +80,27 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   async findOrder(
-    orderId: UUID,
-    orderSearchRequirements: OrderSearchRequirements = {},
+    orderFilter: OrderFilter,
     session?: ClientSession,
   ): Promise<Order> {
-    const filterQuery: FilterQuery<OrderMongoDocument> = this.mongoFilterQuery(
-      orderId,
-      orderSearchRequirements,
+    // TODO: better typing using FilterQuery
+    const filterQuery: FilterQuery<OrderMongoDocument> = convertToMongoDocument(
+      orderFilter,
     );
 
     const orderDocument: OrderMongoDocument = await this.orderCollection
       .findOne(filterQuery, { session })
       .catch(
         throwCustomException('Error searching for an order', {
-          orderId,
-          orderSearchRequirements,
+          orderId: orderFilter.id,
+          orderFilter,
         }),
       );
 
     if (!orderDocument) {
       throwCustomException('No order found', {
-        orderId,
-        orderSearchRequirements,
+        orderId: orderFilter.id,
+        orderFilter,
       })();
     }
 
@@ -146,18 +140,17 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   }
 
   async deleteOrder(
-    orderId: UUID,
-    orderSearchRequirements: OrderSearchRequirements = {},
+    orderFilter: OrderFilter,
     session?: ClientSession,
   ): Promise<void> {
     const deleteResult: DeleteWriteOpResultObject = await this.orderCollection
-      .deleteOne(this.mongoFilterQuery(orderId, orderSearchRequirements), {
+      .deleteOne(convertToMongoDocument(orderFilter), {
         session,
       })
       .catch(
         throwCustomException('Error deleting order', {
-          orderId,
-          orderSearchRequirements,
+          orderId: orderFilter.id,
+          orderFilter,
         }),
       );
 
@@ -165,13 +158,5 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       operation: 'deleting',
       entity: 'order',
     });
-  }
-
-  // TODO: Better typing (usage of FilterQuery)
-  private mongoFilterQuery(
-    orderId: UUID,
-    orderSearchRequirements: OrderSearchRequirements = {},
-  ): FilterQuery<OrderMongoDocument> {
-    return convertToMongoDocument({ id: orderId, ...orderSearchRequirements });
   }
 }

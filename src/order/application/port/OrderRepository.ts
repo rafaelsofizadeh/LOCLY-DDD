@@ -1,12 +1,7 @@
 import { ClientSession } from 'mongodb';
-import { UUID } from '../../../common/domain';
+import { UUID, WithoutId } from '../../../common/domain';
 import { DraftedOrder } from '../../domain/entity/DraftedOrder';
-import {
-  OrderPropsWithoutId,
-  Order,
-  OrderStatus,
-  OrderSearchRequirements,
-} from '../../domain/entity/Order';
+import { Order, OrderFilter } from '../../domain/entity/Order';
 
 export abstract class OrderRepository {
   abstract addOrder(
@@ -15,8 +10,7 @@ export abstract class OrderRepository {
   ): Promise<void>;
 
   abstract findOrder(
-    orderId: UUID,
-    orderSearchRequirements?: OrderSearchRequirements,
+    orderFilter: OrderFilter,
     session?: ClientSession,
   ): Promise<Order>;
 
@@ -26,16 +20,14 @@ export abstract class OrderRepository {
   ): Promise<Order[]>;
 
   abstract deleteOrder(
-    orderId: UUID,
-    orderSearchRequirements?: OrderSearchRequirements,
+    orderFilter: OrderFilter,
     session?: ClientSession,
   ): Promise<void>;
 
   abstract setProperties(
-    orderId: UUID,
-    // TODO: type is almost the same as OrderSearchRequirements
-    properties: Partial<OrderPropsWithoutId> & { status: OrderStatus },
-    orderSearchRequirements?: OrderSearchRequirements,
+    orderFilter: OrderFilter,
+    // TODO: type is almost the same as OrderFilter
+    properties: WithoutId<OrderFilter>,
     session?: ClientSession,
   ): Promise<void>;
 }

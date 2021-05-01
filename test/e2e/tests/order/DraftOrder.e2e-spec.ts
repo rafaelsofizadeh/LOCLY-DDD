@@ -74,7 +74,7 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
     afterEach(() =>
       Promise.all([
         customerRepository.deleteCustomer(testCustomer.id),
-        orderRepository.deleteOrder(testOrderId),
+        orderRepository.deleteOrder({ id: testOrderId }),
       ]),
     );
 
@@ -108,7 +108,10 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
       // 2. order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
       // should be a DraftedOrder
       await expect(
-        orderRepository.findOrder(testOrderId, { status: OrderStatus.Drafted }),
+        orderRepository.findOrder({
+          id: testOrderId,
+          status: OrderStatus.Drafted,
+        }),
       ).resolves.toBeInstanceOf(DraftedOrder);
 
       // Load the test customer from the database

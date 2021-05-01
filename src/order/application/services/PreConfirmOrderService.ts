@@ -64,8 +64,7 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
     session: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const draftedOrder = (await this.orderRepository.findOrder(
-      orderId,
-      { status: OrderStatus.Drafted, customerId },
+      { id: orderId, status: OrderStatus.Drafted, customerId },
       session,
     )) as DraftedOrder;
 
