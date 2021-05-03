@@ -44,12 +44,22 @@ export function throwCustomException(
 export function expectOnlyNResults(
   n: number,
   controlledVariables: number[],
-  { operation, entity }: { operation: string; entity: string },
+  {
+    operation,
+    entity,
+    lessThanMessage = '',
+    moreThanMessage = '',
+  }: {
+    operation: string;
+    entity: string;
+    lessThanMessage?: string;
+    moreThanMessage?: string;
+  },
   fnMainArgs?: Record<string, any>,
 ) {
-  const errorMessageBeginning = `Error ${operation} ${entity} — `;
-  const lessThanOneErrorMessage = `${errorMessageBeginning} less than ${n} ${entity} with given requirements`;
-  const moreThanOneErrorMessage = `${errorMessageBeginning} more than ${n} ${entity}s with given requirements (shouldn't be possible)`;
+  const errorMessageBeginning = `Error ${operation} ${entity} —`;
+  const lessThanOneErrorMessage = `${errorMessageBeginning} less than ${n} ${entity} with given requirements – ${lessThanMessage}`;
+  const moreThanOneErrorMessage = `${errorMessageBeginning} more than ${n} ${entity}s with given requirements (shouldn't be possible) – ${moreThanMessage}`;
 
   if (controlledVariables.some(variable => variable < n)) {
     throwCustomException(
@@ -66,7 +76,7 @@ export function expectOnlyNResults(
 
 export function expectOnlySingleResult(
   controlledVariables: number[],
-  description: { operation: string; entity: string },
+  description: { operation: string; entity: string; lessThanMessage?: string },
   fnMainArgs?: Record<string, any>,
 ) {
   expectOnlyNResults(1, controlledVariables, description, fnMainArgs);
