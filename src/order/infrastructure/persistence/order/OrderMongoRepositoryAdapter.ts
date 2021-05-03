@@ -25,11 +25,7 @@ import {
   Photo,
 } from './OrderMongoMapper';
 import { DraftOrder } from '../../../domain/entity/DraftOrder';
-import {
-  convertToMongoDocument,
-  ItemPhotoStorage,
-  uuidToMuuid,
-} from '../../../../common/persistence';
+import { mongoQuery, uuidToMuuid } from '../../../../common/persistence';
 
 @Injectable()
 export class OrderMongoRepositoryAdapter implements OrderRepository {
@@ -63,8 +59,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   ) {
     const updateResult: UpdateWriteOpResult = await this.orderCollection
       .updateOne(
-        convertToMongoDocument(filter),
-        { $set: convertToMongoDocument(properties) },
+        mongoQuery(filter),
+        { $set: mongoQuery(properties) },
         { session },
       )
       .catch(
@@ -89,9 +85,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     session?: ClientSession,
   ): Promise<Order> {
     // TODO: better typing using FilterQuery
-    const filterQuery: FilterQuery<OrderMongoDocument> = convertToMongoDocument(
-      filter,
-    );
+    const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(filter);
 
     const orderDocument: OrderMongoDocument = await this.orderCollection
       .findOne(filterQuery, { session })
@@ -149,7 +143,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     session?: ClientSession,
   ): Promise<void> {
     const deleteResult: DeleteWriteOpResultObject = await this.orderCollection
-      .deleteOne(convertToMongoDocument(filter), {
+      .deleteOne(mongoQuery(filter), {
         session,
       })
       .catch(

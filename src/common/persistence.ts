@@ -14,15 +14,32 @@ export function uuidToMuuid(id: UUID): Binary {
   return MUUID.from(id);
 }
 
+// https://stackoverflow.com/a/47058976/6539857
+type PathsToStringProps<T> = T extends string ? [] : {
+    [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>]
+}[Extract<keyof T, string>];
+
+type Join<T extends string[], D extends string> =
+    T extends [] ? never :
+    T extends [infer F] ? F :
+    T extends [infer F, ...infer R] ?
+    F extends string ?
+    `${F}${D}${Join<Extract<R, string[]>, D>}` : never : string;
+
 // https://gist.github.com/penguinboy/762197
+// TODO: Typing
 export function flattenObject<T extends Record<string, any>>(
   object: T,
   path?: string,
   keyFilter?: (k: string) => boolean,
   valueFilter: (v: any) => boolean = (v: any) => v === undefined || v === null,
   separator: string = '.',
-): T {
-  return Object.keys(object).reduce((flatObjectAcc: T, key: string): T => {
+): {
+  [K in keyof T as Join<PathsToStringProps<T[K]>, '.'>]: T[K] extends object ? never : T[K]
+} {
+  const keys: (keyof T)[] = Object.keys(object);
+
+  return keys.reduce((flatObjectAcc: T, key: string): T => {
     if (keyFilter && keyFilter(key)) {
       return flatObjectAcc;
     }
@@ -51,7 +68,7 @@ export function flattenObject<T extends Record<string, any>>(
           ...flattenObject(value, newPath, keyFilter, valueFilter, separator),
         }
       : { ...flatObjectAcc, [newPath]: value };
-  }, {} as T);
+  }, {} as T) as any;
 }
 
 type RemovePrefix<
@@ -91,8 +108,16 @@ export type ConvertedToMongoDocument<
       }
   : T extends string
   ? isUUID<T> extends true
-  ? Binary
-  : T
+    ? Binary
+    : T
+  : T;
+
+// export type Singular<T> = T extends `${infer S}s` ? S : T;
+
+export type WithoutArrays<T> = T extends object
+  ? T extends Array<infer R>
+    ? WithoutArrays<R>
+    : { [K in keyof T]: WithoutArrays<T[K]> }
   : T;
 
 function isBinary(value: any): value is Binary {
@@ -135,6 +160,19 @@ export function serializeMongoData(
 
 export function convertToMongoDocument(
   input: any,
+  omitArrays?: false,
+): ConvertedToMongoDocument<typeof input>
+export function convertToMongoDocument(
+  input: any,
+  omitArrays?: true,
+): WithoutArrays<ConvertedToMongoDocument<typeof input>>
+export function convertToMongoDocument(
+  input: any,
+  omitArrays?: boolean,
+): ConvertedToMongoDocument<typeof input>
+export function convertToMongoDocument(
+  input: any,
+  omitArrays = false,
 ): ConvertedToMongoDocument<typeof input> {
   if (
     typeof input === 'object' &&
@@ -142,7 +180,11 @@ export function convertToMongoDocument(
     !(input instanceof Buffer)
   ) {
     if (Array.isArray(input)) {
-      return input.map(convertToMongoDocument);
+      if (omitArrays) {
+        return;
+      }
+
+      return input.map(element => convertToMongoDocument(element, omitArrays));
     }
 
     return Object.keys(input).reduce((convertedInput, key) => {
@@ -155,7 +197,7 @@ export function convertToMongoDocument(
         newKey = `_${key}`;
       }
 
-      convertedInput[newKey] = convertToMongoDocument(value);
+      convertedInput[newKey] = convertToMongoDocument(value, omitArrays);
 
       return convertedInput;
     }, {} as ConvertedToMongoDocument<typeof input>);
@@ -167,6 +209,14 @@ export function convertToMongoDocument(
   }
 
   return input;
+}
+
+// TODO: typing
+export function mongoQuery<O extends object>(input: object) {
+  const convertedToMongo = convertToMongoDocument(input);
+  const convertedToMongoDotNotation = flattenObject(convertedToMongo);
+
+  return convertedToMongoDotNotation;
 }
 
 /* 
