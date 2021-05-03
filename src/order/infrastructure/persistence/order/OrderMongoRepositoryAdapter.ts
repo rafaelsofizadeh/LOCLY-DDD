@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { promisify } from 'util';
+import { PromiseWritable } from 'promise-writable';
 import {
   Binary,
   ClientSession,
@@ -15,15 +17,17 @@ import {
   throwCustomException,
 } from '../../../../common/error-handling';
 import { OrderRepository } from '../../../application/port/OrderRepository';
-import { Order, OrderFilter, OrderStatus } from '../../../domain/entity/Order';
+import { Order, OrderFilter } from '../../../domain/entity/Order';
 import {
   OrderMongoDocument,
-  draftedOrderToMongoDocument,
+  draftOrderToMongoDocument,
   mongoDocumentToOrder,
+  Photo,
 } from './OrderMongoMapper';
-import { DraftedOrder } from '../../../domain/entity/DraftedOrder';
+import { DraftOrder } from '../../../domain/entity/DraftOrder';
 import {
   convertToMongoDocument,
+  ItemPhotoStorage,
   uuidToMuuid,
 } from '../../../../common/persistence';
 
@@ -32,20 +36,21 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   constructor(
     @InjectCollection('orders')
     private readonly orderCollection: Collection<OrderMongoDocument>,
+    private readonly itemPhotoStorage: ItemPhotoStorage,
   ) {}
 
   async addOrder(
-    draftedOrder: DraftedOrder,
+    draftOrder: DraftOrder,
     session?: ClientSession,
   ): Promise<void> {
-    const draftedOrderDocument = draftedOrderToMongoDocument(draftedOrder);
+    const draftOrderDocument = draftOrderToMongoDocument(draftOrder);
 
     await this.orderCollection
-      .insertOne(draftedOrderDocument, { session })
+      .insertOne(draftOrderDocument, { session })
       .catch(
         throwCustomException(
-          'Error creating a new draftedOrder in the database',
-          { draftedOrder, draftedOrderDocument },
+          'Error creating a new draftOrder in the database',
+          { draftOrder, draftOrderDocument },
         ),
       );
   }
