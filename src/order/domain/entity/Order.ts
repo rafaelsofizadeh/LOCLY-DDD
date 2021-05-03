@@ -1,10 +1,7 @@
 import { WithoutId } from '../../../common/domain';
-import { ConfirmedOrder, ConfirmedOrderProps } from './ConfirmedOrder';
-import { DraftedOrder, DraftedOrderProps } from './DraftedOrder';
-import {
-  ReceivedByHostOrder,
-  ReceivedByHostOrderProps,
-} from './ReceivedByHostOrder';
+import { ConfirmOrder, ConfirmOrderProps } from './ConfirmOrder';
+import { DraftOrder, DraftOrderProps } from './DraftOrder';
+import { ReceiveOrderItem, ReceiveOrderItemProps } from './ReceiveOrderItem';
 import {
   VerifiedByHostOrder,
   VerifiedByHostOrderProps,
@@ -25,14 +22,14 @@ export const OrderStatus = {
 export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
 
 export type Order =
-  | DraftedOrder
-  | ConfirmedOrder
-  | ReceivedByHostOrder
+  | DraftOrder
+  | ConfirmOrder
+  | ReceiveOrderItem
   | VerifiedByHostOrder;
 
-export type OrderProps = DraftedOrderProps &
-  ConfirmedOrderProps &
-  ReceivedByHostOrderProps &
+export type OrderProps = DraftOrderProps &
+  ConfirmOrderProps &
+  ReceiveOrderItemProps &
   VerifiedByHostOrderProps;
 
 export type OrderFilter = Required<Pick<OrderProps, 'id'>> &

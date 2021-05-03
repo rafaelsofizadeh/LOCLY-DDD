@@ -1,13 +1,10 @@
 import { ClientSession } from 'mongodb';
 import { UUID, WithoutId } from '../../../common/domain';
-import { DraftedOrder } from '../../domain/entity/DraftedOrder';
+import { DraftOrder } from '../../domain/entity/DraftOrder';
 import { Order, OrderFilter } from '../../domain/entity/Order';
 
 export abstract class OrderRepository {
-  abstract addOrder(
-    order: DraftedOrder,
-    session?: ClientSession,
-  ): Promise<void>;
+  abstract addOrder(order: DraftOrder, session?: ClientSession): Promise<void>;
 
   abstract findOrder(
     filter: OrderFilter,

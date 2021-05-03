@@ -21,7 +21,7 @@ export type ServiceFee = {
   amount: number;
 };
 
-export interface DraftedOrderProps {
+export interface DraftOrderProps {
   id: UUID;
   customerId: UUID;
   items: Item[];
@@ -30,7 +30,7 @@ export interface DraftedOrderProps {
   shipmentCost: ShipmentCost;
 }
 
-export class DraftedOrder implements DraftedOrderProps {
+export class DraftOrder implements DraftOrderProps {
   readonly id: UUID;
 
   readonly customerId: UUID;
@@ -66,7 +66,7 @@ export class DraftedOrder implements DraftedOrderProps {
     originCountry,
     destination,
     shipmentCost,
-  }: DraftedOrderProps) {
+  }: DraftOrderProps) {
     this.id = id;
     this.customerId = customerId;
     this._items = items;
@@ -75,7 +75,7 @@ export class DraftedOrder implements DraftedOrderProps {
     this._originCountry = originCountry;
   }
 
-  static fromData(payload: Modify<DraftedOrderProps, { items: ItemProps[] }>) {
+  static fromData(payload: Modify<DraftOrderProps, { items: ItemProps[] }>) {
     return new this({
       ...payload,
       items: payload.items.map(Item.fromData.bind(Item)),
@@ -91,12 +91,12 @@ export class DraftedOrder implements DraftedOrderProps {
     }: DraftOrderRequest,
     shipmentCostQuoteFn: ShipmentCostQuoteFn,
     serviceAvailabilityFn: ServiceAvailabilityFn,
-    addOrder: (draftedOrder: DraftedOrder) => Promise<unknown>,
+    addOrder: (draftOrder: DraftOrder) => Promise<unknown>,
     addOrderToCustomer: (
       toBeAddedToCustomerId: UUID,
       toBeAddedToCustomerOrderId: UUID,
     ) => Promise<unknown>,
-  ): Promise<DraftedOrder> {
+  ): Promise<DraftOrder> {
     this.validateOriginDestination(
       originCountry,
       destination,
@@ -114,7 +114,7 @@ export class DraftedOrder implements DraftedOrderProps {
       shipmentCostQuoteFn,
     );
 
-    const draftedOrder: DraftedOrder = new this({
+    const draftOrder: DraftOrder = new this({
       id: UUID(),
       customerId,
       items,
@@ -127,18 +127,16 @@ export class DraftedOrder implements DraftedOrderProps {
     // https://jira.mongodb.org/browse/SERVER-36428?focusedCommentId=2136170&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-2136170
     // (GLOBAL) DON'T parallelize this. Promise.all()'ing these, together with transactions, will lead to random
     // TransientTransactionError errors.
-    await addOrder(draftedOrder);
-    await addOrderToCustomer(draftedOrder.customerId, draftedOrder.id);
+    await addOrder(draftOrder);
+    await addOrderToCustomer(draftOrder.customerId, draftOrder.id);
 
-    return draftedOrder;
+    return draftOrder;
   }
 
   async matchHost(
-    findMatchingHostFn: (
-      draftedOrderToMatchHostTo: DraftedOrder,
-    ) => Promise<UUID>,
+    findMatchingHostFn: (draftOrderToMatchHostTo: DraftOrder) => Promise<UUID>,
     persistHostMatch: (
-      matchedOrder: DraftedOrder,
+      matchedOrder: DraftOrder,
       matchedHostId: UUID,
     ) => Promise<UUID>,
   ): Promise<UUID> {
@@ -204,17 +202,17 @@ export class DraftedOrder implements DraftedOrderProps {
     ) => Promise<unknown>,
     draftNewOrder: (
       draftOrderRequest: DraftOrderRequest,
-    ) => Promise<DraftedOrder>,
-  ): Promise<DraftedOrder> {
+    ) => Promise<DraftOrder>,
+  ): Promise<DraftOrder> {
     await removeOldOrderFromCustomer(customerId, orderId);
     await deleteOldOrder(orderId, customerId);
 
-    const draftedOrder: DraftedOrder = await draftNewOrder({
+    const draftOrder: DraftOrder = await draftNewOrder({
       customerId,
       ...restDraftOrderRequest,
     });
 
-    return draftedOrder;
+    return draftOrder;
   }
 
   static async delete(

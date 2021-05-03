@@ -1,4 +1,11 @@
-import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { DraftOrderRequestAdapter } from './request-adapters/DraftOrderRequestAdapter';
 import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
@@ -7,19 +14,20 @@ import {
   StripeCheckoutSessionResult,
   PreConfirmOrderUseCase,
 } from '../../domain/use-case/PreConfirmOrderUseCase';
-import { ReceiveOrderByHostRequestAdapter } from './request-adapters/ReceiveOrderByHostRequestAdapter';
+import { ReceiveOrderItemRequestAdapter } from './request-adapters/ReceiveOrderItemRequestAdapter';
 import {
-  ReceiveOrderByHostResult,
-  ReceiveOrderByHostUseCase,
-} from '../../domain/use-case/ReceiveOrderByHostUseCase';
-import { DraftedOrder } from '../../domain/entity/DraftedOrder';
+  ReceiveOrderItemResult,
+  ReceiveOrderItemUseCase,
+} from '../../domain/use-case/ReceiveOrderItemUseCase';
+import { DraftOrder } from '../../domain/entity/DraftOrder';
 import { SerializePrivatePropertiesInterceptor } from './nest-infrastructure/SerializePrivatePropertiesInterceptor';
 import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
 import { EditOrderRequestAdapter } from './request-adapters/EditOrderRequestAdapter';
 import { DeleteOrderUseCase } from '../../domain/use-case/DeleteOrderUseCase';
 import { DeleteOrderRequestAdapter } from './request-adapters/DeleteOrderRequestAdapter';
+import { AddItemInfoRequestDataAdapter } from './request-adapters/AddItemInfoRequestAdapter';
+import { AddItemInfoUseCase } from '../../domain/use-case/AddItemInfoUseCase';
 
-// TODO: Separate out to classes per each use case
 @Controller('order')
 export class OrderController {
   constructor(
@@ -27,31 +35,32 @@ export class OrderController {
     private readonly editOrderUseCase: EditOrderUseCase,
     private readonly deleteOrderUseCase: DeleteOrderUseCase,
     private readonly preConfirmOrderUseCase: PreConfirmOrderUseCase,
-    private readonly receiveOrderByHostUseCase: ReceiveOrderByHostUseCase,
+    private readonly receiveOrderItemUseCase: ReceiveOrderItemUseCase,
+    private readonly addItemInfoUseCase: AddItemInfoUseCase,
   ) {}
 
   @Post('draft')
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async draftOrder(
     @Body() orderRequest: DraftOrderRequestAdapter,
-  ): Promise<DraftedOrder> {
-    const draftedOrder: DraftedOrder = await this.draftOrderUseCase.execute(
+  ): Promise<DraftOrder> {
+    const draftOrder: DraftOrder = await this.draftOrderUseCase.execute(
       orderRequest,
     );
 
-    return draftedOrder;
+    return draftOrder;
   }
 
   @Post('edit')
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async editOrder(
     @Body() editOrderRequest: EditOrderRequestAdapter,
-  ): Promise<DraftedOrder> {
-    const editedDraftedOrder: DraftedOrder = await this.editOrderUseCase.execute(
+  ): Promise<DraftOrder> {
+    const editedDraftOrder: DraftOrder = await this.editOrderUseCase.execute(
       editOrderRequest,
     );
 
-    return editedDraftedOrder;
+    return editedDraftOrder;
   }
 
   @Post('delete')
@@ -73,12 +82,26 @@ export class OrderController {
   }
 
   @Post('receivedByHost')
-  async receiveOrderByHost(
-    @Body() receiveOrderByHostRequest: ReceiveOrderByHostRequestAdapter,
-  ): Promise<ReceiveOrderByHostResult> {
-    const receivedByHostDateResult = await this.receiveOrderByHostUseCase.execute(
-      receiveOrderByHostRequest,
+  async receiveOrderItem(
+    @Body() receiveOrderItemRequest: ReceiveOrderItemRequestAdapter,
+  ): Promise<ReceiveOrderItemResult> {
+    const receivedByHostDateResult = await this.receiveOrderItemUseCase.execute(
+      receiveOrderItemRequest,
     );
+
+    return receivedByHostDateResult;
+  }
+
+  @Post('addItemInfo')
+  @UseInterceptors(FilesInterceptor('photos'))
+  async addItemInfo(
+    @Body() addItemInfoRequestData: AddItemInfoRequestDataAdapter,
+    @UploadedFiles() photos: Express.Multer.File[],
+  ) {
+    const receivedByHostDateResult = await this.addItemInfoUseCase.execute({
+      ...addItemInfoRequestData,
+      photos,
+    });
 
     return receivedByHostDateResult;
   }

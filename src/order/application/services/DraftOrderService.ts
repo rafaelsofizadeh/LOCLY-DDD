@@ -10,12 +10,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
-import { DraftedOrder } from '../../domain/entity/DraftedOrder';
+import { DraftOrder } from '../../domain/entity/DraftOrder';
 import { getShipmentCostQuote } from './ShipmentCostCalculator/getShipmentCostQuote';
 import { checkServiceAvailability } from './checkServiceAvailability';
 
 @Injectable()
-export class DraftOrder implements DraftOrderUseCase {
+export class DraftOrderService implements DraftOrderUseCase {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,
@@ -25,22 +25,22 @@ export class DraftOrder implements DraftOrderUseCase {
   async execute(
     draftOrderRequest: DraftOrderRequest,
     session?: ClientSession,
-  ): Promise<DraftedOrder> {
-    const draftedOrder: DraftedOrder = await withTransaction(
+  ): Promise<DraftOrder> {
+    const draftOrder: DraftOrder = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.draftOrder(draftOrderRequest, sessionWithTransaction),
       this.mongoClient,
       session,
     );
 
-    return draftedOrder;
+    return draftOrder;
   }
 
   private async draftOrder(
     { customerId, originCountry, items, destination }: DraftOrderRequest,
     session: ClientSession,
-  ): Promise<DraftedOrder> {
-    const draftedOrder: DraftedOrder = await DraftedOrder.create(
+  ): Promise<DraftOrder> {
+    const draftOrder: DraftOrder = await DraftOrder.create(
       {
         customerId,
         originCountry,
@@ -49,8 +49,8 @@ export class DraftOrder implements DraftOrderUseCase {
       },
       getShipmentCostQuote,
       checkServiceAvailability,
-      (newlyDraftedOrder: DraftedOrder) =>
-        this.orderRepository.addOrder(newlyDraftedOrder, session),
+      (newlyDraftOrder: DraftOrder) =>
+        this.orderRepository.addOrder(newlyDraftOrder, session),
       (toBeAddedToCustomerId, toBeAddedToCustomerOrderId) =>
         this.customerRepository.addOrderToCustomer(
           toBeAddedToCustomerId,
@@ -59,6 +59,6 @@ export class DraftOrder implements DraftOrderUseCase {
         ),
     );
 
-    return draftedOrder;
+    return draftOrder;
   }
 }

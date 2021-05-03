@@ -1,7 +1,7 @@
 import { UUID } from '../../../common/domain';
 import { Country } from '../data/Country';
 import { ItemProps } from '../entity/Item';
-import { DraftedOrder } from '../entity/DraftedOrder';
+import { DraftOrder } from '../entity/DraftOrder';
 import { UseCase } from '../../../common/domain';
 import { Address } from '../entity/Address';
 import { WithoutId } from '../../../common/domain';
@@ -15,5 +15,5 @@ export interface DraftOrderRequest {
 
 export abstract class DraftOrderUseCase extends UseCase<
   DraftOrderRequest,
-  DraftedOrder
+  DraftOrder
 > {}

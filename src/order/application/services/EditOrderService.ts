@@ -8,7 +8,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { DraftedOrder } from '../../domain/entity/DraftedOrder';
+import { DraftOrder } from '../../domain/entity/DraftOrder';
 import {
   DraftOrderRequest,
   DraftOrderUseCase,
@@ -19,7 +19,7 @@ import { withTransaction } from '../../../common/application';
 import { OrderStatus } from '../../domain/entity/Order';
 
 @Injectable()
-export class EditOrder implements EditOrderUseCase {
+export class EditOrderService implements EditOrderUseCase {
   constructor(
     private readonly draftOrderUseCase: DraftOrderUseCase,
     private readonly orderRepository: OrderRepository,
@@ -30,22 +30,22 @@ export class EditOrder implements EditOrderUseCase {
   async execute(
     editOrderRequest: EditOrderRequest,
     session?: ClientSession,
-  ): Promise<DraftedOrder> {
-    const draftedOrder: DraftedOrder = await withTransaction(
+  ): Promise<DraftOrder> {
+    const draftOrder: DraftOrder = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.editOrder(editOrderRequest, sessionWithTransaction),
       this.mongoClient,
       session,
     );
 
-    return draftedOrder;
+    return draftOrder;
   }
 
   private async editOrder(
     editOrderRequest: EditOrderRequest,
     session: ClientSession,
-  ): Promise<DraftedOrder> {
-    const draftedOrder: DraftedOrder = await DraftedOrder.edit(
+  ): Promise<DraftOrder> {
+    const draftOrder: DraftOrder = await DraftOrder.edit(
       editOrderRequest,
       (toBeDeletedOrderId: UUID, orderOwnerCustomerId: UUID) =>
         this.orderRepository.deleteOrder(
@@ -66,6 +66,6 @@ export class EditOrder implements EditOrderUseCase {
         this.draftOrderUseCase.execute(draftOrderRequest, session),
     );
 
-    return draftedOrder;
+    return draftOrder;
   }
 }

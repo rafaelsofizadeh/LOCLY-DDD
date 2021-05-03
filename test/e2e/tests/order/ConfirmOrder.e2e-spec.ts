@@ -16,13 +16,13 @@ import { Item } from '../../../../src/order/domain/entity/Item';
 import { Country } from '../../../../src/order/domain/data/Country';
 import { isString } from 'class-validator';
 import { HostRepository } from '../../../../src/order/application/port/HostRepository';
-import { DraftedOrder } from '../../../../src/order/domain/entity/DraftedOrder';
+import { DraftOrder } from '../../../../src/order/domain/entity/DraftOrder';
 import {
   destinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../../src/order/application/services/checkServiceAvailability';
 import { StripeCheckoutSessionResult } from '../../../../src/order/domain/use-case/PreConfirmOrderUseCase';
-import { ConfirmedOrder } from '../../../../src/order/domain/entity/ConfirmedOrder';
+import { ConfirmOrder } from '../../../../src/order/domain/entity/ConfirmOrder';
 import { OrderStatus } from '../../../../src/order/domain/entity/Order';
 import { UUID } from '../../../../src/common/domain';
 import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
@@ -43,7 +43,7 @@ describe('Confirm Order – POST /order/confirm', () => {
   let draftOrderUseCase: DraftOrderUseCase;
 
   let testCustomer: Customer;
-  let testOrder: DraftedOrder;
+  let testOrder: DraftOrder;
   let testHosts: Host[];
 
   const originCountry: Country = originCountriesAvailable[0];
@@ -222,7 +222,12 @@ describe('Confirm Order – POST /order/confirm', () => {
     await fillStripeCheckoutForm();
 
     setTimeout(async () => {
-      let updatedTestOrder: ConfirmedOrder;
+      await page.screenshot({
+        path: './test/e2e/tests/order/page.png',
+        fullPage: true,
+      });
+
+      let updatedTestOrder: ConfirmOrder;
 
       // Expect to resolve and not throw/reject
       await expect(
@@ -230,7 +235,7 @@ describe('Confirm Order – POST /order/confirm', () => {
           updatedTestOrder = (await orderRepository.findOrder({
             id: testOrder.id,
             status: OrderStatus.Confirmed,
-          })) as ConfirmedOrder;
+          })) as ConfirmOrder;
         })(),
       ).resolves.toBeUndefined();
 

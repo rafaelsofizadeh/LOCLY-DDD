@@ -1,7 +1,7 @@
 import { UUID } from '../../../common/domain';
 
 import { Address } from './Address';
-import { DraftedOrder } from './DraftedOrder';
+import { DraftOrder } from './DraftOrder';
 
 export interface CustomerProps {
   id: UUID;
@@ -30,7 +30,7 @@ export class Customer implements CustomerProps {
     return new this({ ...payload, id: UUID() });
   }
 
-  acceptOrder({ id: orderId }: DraftedOrder) {
+  acceptOrder({ id: orderId }: DraftOrder) {
     this.orderIds.push(orderId);
   }
 }

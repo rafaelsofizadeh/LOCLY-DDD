@@ -14,7 +14,7 @@ import {
   originCountriesAvailable,
 } from '../../../../src/order/application/services/checkServiceAvailability';
 import { DraftOrderRequest } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
-import { DraftedOrder } from '../../../../src/order/domain/entity/DraftedOrder';
+import { DraftOrder } from '../../../../src/order/domain/entity/DraftOrder';
 import { Country } from '../../../../src/order/domain/data/Country';
 import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
 
@@ -78,7 +78,7 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
       ]),
     );
 
-    it('successfully creates a DraftedOrder', async () => {
+    it('successfully creates a DraftOrder', async () => {
       const testOrderRequest: DraftOrderRequest = {
         customerId: testCustomer.id,
         originCountry: originCountriesAvailable[0],
@@ -98,7 +98,7 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
 
       expect(response.status).toBe(HttpStatus.CREATED);
 
-      const { id, customerId, destination } = response.body as DraftedOrder;
+      const { id, customerId, destination } = response.body as DraftOrder;
 
       // 1. order id should be a UUID
       expect(isUUID(id)).toBe(true);
@@ -106,13 +106,13 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
       testOrderId = UUID(id);
 
       // 2. order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
-      // should be a DraftedOrder
+      // should be a DraftOrder
       await expect(
         orderRepository.findOrder({
           id: testOrderId,
           status: OrderStatus.Drafted,
         }),
-      ).resolves.toBeInstanceOf(DraftedOrder);
+      ).resolves.toBeInstanceOf(DraftOrder);
 
       // Load the test customer from the database
       const updatedTestCustomer: Customer = await customerRepository.findCustomer(

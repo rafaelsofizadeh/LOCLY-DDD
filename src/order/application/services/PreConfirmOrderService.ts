@@ -13,7 +13,7 @@ import { UUID } from '../../../common/domain';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
-import { DraftedOrder, ServiceFee } from '../../domain/entity/DraftedOrder';
+import { DraftOrder, ServiceFee } from '../../domain/entity/DraftOrder';
 import { HostRepository } from '../port/HostRepository';
 import { OrderStatus } from '../../domain/entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
@@ -30,7 +30,7 @@ export type Match = {
 };
 
 @Injectable()
-export class PreConfirmOrder implements PreConfirmOrderUseCase {
+export class PreConfirmOrderService implements PreConfirmOrderUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,
@@ -63,15 +63,15 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
     { orderId, customerId }: PreConfirmOrderRequest,
     session: ClientSession,
   ): Promise<StripeCheckoutSession> {
-    const draftedOrder = (await this.orderRepository.findOrder(
+    const draftOrder = (await this.orderRepository.findOrder(
       { id: orderId, status: OrderStatus.Drafted, customerId },
       session,
-    )) as DraftedOrder;
+    )) as DraftOrder;
 
-    const hostId: UUID = await this.findMatchingHost(draftedOrder, session);
+    const hostId: UUID = await this.findMatchingHost(draftOrder, session);
 
     const checkoutSession: StripeCheckoutSession = await this.createStripeCheckoutSession(
-      draftedOrder,
+      draftOrder,
       hostId,
     );
 
@@ -79,7 +79,7 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
   }
 
   private async findMatchingHost(
-    { originCountry }: DraftedOrder,
+    { originCountry }: DraftOrder,
     session: ClientSession,
   ): Promise<UUID> {
     try {
@@ -99,13 +99,13 @@ export class PreConfirmOrder implements PreConfirmOrderUseCase {
   }
 
   private async createStripeCheckoutSession(
-    draftedOrder: DraftedOrder,
+    draftOrder: DraftOrder,
     hostId: UUID,
   ): Promise<StripeCheckoutSession> {
-    const serviceFee: ServiceFee = await draftedOrder.calculateServiceFee();
+    const serviceFee: ServiceFee = await draftOrder.calculateServiceFee();
     const stripePrice: StripePrice = this.stripePrice(serviceFee);
     const match: Match = {
-      orderId: draftedOrder.id,
+      orderId: draftOrder.id,
       hostId,
     };
 

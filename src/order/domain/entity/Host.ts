@@ -1,7 +1,7 @@
 import { UUID } from '../../../common/domain';
 
 import { Address } from './Address';
-import { ConfirmedOrder } from './ConfirmedOrder';
+import { ConfirmOrder } from './ConfirmOrder';
 
 export interface HostProps {
   id: UUID;
@@ -34,7 +34,7 @@ export class Host implements HostProps {
     return new this({ ...payload, id: UUID() });
   }
 
-  async acceptOrder({ id: orderId }: ConfirmedOrder) {
+  async acceptOrder({ id: orderId }: ConfirmOrder) {
     this.orderIds.push(orderId);
   }
 }

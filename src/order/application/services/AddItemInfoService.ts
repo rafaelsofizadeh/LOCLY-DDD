@@ -4,30 +4,30 @@ import { UUID } from '../../../common/domain';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
-import {
-  ReceiveOrderByHostRequest,
-  ReceiveOrderByHostResult,
-  ReceiveOrderByHostUseCase,
-} from '../../domain/use-case/ReceiveOrderByHostUseCase';
-import { ReceivedByHostOrder } from '../../domain/entity/ReceivedByHostOrder';
+import { ReceiveOrderItem } from '../../domain/entity/ReceiveOrderItem';
 import { OrderStatus } from '../../domain/entity/Order';
+import {
+  AddItemInfoRequest,
+  AddItemInfoResult,
+  AddItemInfoUseCase,
+} from '../../domain/use-case/AddItemInfoUseCase';
 
 @Injectable()
-export class ReceiveOrderByHost implements ReceiveOrderByHostUseCase {
+export class AddItemInfoService implements AddItemInfoUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
   async execute(
-    { orderId, customerId }: ReceiveOrderByHostRequest,
+    addItemInfoRequest: AddItemInfoRequest,
     session?: ClientSession,
-  ): Promise<ReceiveOrderByHostResult> {
+  ): Promise<AddItemInfoResult> {
+    // TODO(GLOBAL): Transaction decorator
     const receivedByHostDate: Date = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.handleOrderReceiptByHost(
-          orderId,
-          customerId,
+          addItemInfoRequest,
           sessionWithTransaction,
         ),
       this.mongoClient,
@@ -40,20 +40,22 @@ export class ReceiveOrderByHost implements ReceiveOrderByHostUseCase {
   }
 
   private async handleOrderReceiptByHost(
-    orderId: UUID,
-    customerId: UUID,
+    { orderId, customerId, itemId, photos }: AddItemInfoRequest,
     session: ClientSession,
   ): Promise<Date> {
-    const receivedByHostDate: Date = await ReceivedByHostOrder.receiveByHost(
+    const receivedByHostDate: Date = await ReceiveOrderItem.receiveByHost(
       orderId,
-      (toBeReceivedByHostOrderId: UUID, receivedByHostDate: Date) =>
+      (toBeReceiveOrderItemId: UUID, receivedByHostDate: Date) =>
         this.orderRepository.setProperties(
-          toBeReceivedByHostOrderId,
+          {
+            id: toBeReceiveOrderItemId,
+            status: OrderStatus.Confirmed,
+            customerId,
+          },
           {
             status: OrderStatus.ReceivedByHost,
             receivedByHostDate,
           },
-          { status: OrderStatus.Confirmed, customerId },
           session,
         ),
     );

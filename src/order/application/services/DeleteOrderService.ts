@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
-import { DraftedOrder } from '../../domain/entity/DraftedOrder';
+import { DraftOrder } from '../../domain/entity/DraftOrder';
 import {
   DeleteOrderRequest,
   DeleteOrderUseCase,
@@ -13,7 +13,7 @@ import {
 import { UUID } from '../../../common/domain';
 
 @Injectable()
-export class DeleteOrder implements DeleteOrderUseCase {
+export class DeleteOrderService implements DeleteOrderUseCase {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,
@@ -36,7 +36,7 @@ export class DeleteOrder implements DeleteOrderUseCase {
     { orderId, customerId }: DeleteOrderRequest,
     session: ClientSession,
   ): Promise<void> {
-    await DraftedOrder.delete(
+    await DraftOrder.delete(
       {
         orderId,
         customerId,
