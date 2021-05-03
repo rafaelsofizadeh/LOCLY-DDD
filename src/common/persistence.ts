@@ -203,7 +203,6 @@ export function convertToMongoDocument(
     }, {} as ConvertedToMongoDocument<typeof input>);
   }
 
-  
   if (isUUID(input)) {
     return uuidToMuuid(input);
   }

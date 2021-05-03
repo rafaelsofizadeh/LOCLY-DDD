@@ -35,8 +35,7 @@ export class OrderController {
     private readonly editOrderUseCase: EditOrderUseCase,
     private readonly deleteOrderUseCase: DeleteOrderUseCase,
     private readonly preConfirmOrderUseCase: PreConfirmOrderUseCase,
-    private readonly receiveOrderItemUseCase: ReceiveOrderItemUseCase,
-    private readonly addItemInfoUseCase: AddItemInfoUseCase,
+    private readonly receiveOrderItemUseCase: ReceiveOrderItemUseCase, // private readonly addItemInfoUseCase: AddItemInfoUseCase,
   ) {}
 
   @Post('draft')
@@ -81,28 +80,28 @@ export class OrderController {
     return stripeCheckoutSession;
   }
 
-  @Post('receivedByHost')
+  @Post('receiveItem')
   async receiveOrderItem(
     @Body() receiveOrderItemRequest: ReceiveOrderItemRequestAdapter,
   ): Promise<ReceiveOrderItemResult> {
-    const receivedByHostDateResult = await this.receiveOrderItemUseCase.execute(
+    const receivedDateResult = await this.receiveOrderItemUseCase.execute(
       receiveOrderItemRequest,
     );
 
-    return receivedByHostDateResult;
+    return receivedDateResult;
   }
-
+  /*
   @Post('addItemInfo')
   @UseInterceptors(FilesInterceptor('photos'))
   async addItemInfo(
     @Body() addItemInfoRequestData: AddItemInfoRequestDataAdapter,
     @UploadedFiles() photos: Express.Multer.File[],
   ) {
-    const receivedByHostDateResult = await this.addItemInfoUseCase.execute({
+    const receivedDateResult = await this.addItemInfoUseCase.execute({
       ...addItemInfoRequestData,
       photos,
     });
 
-    return receivedByHostDateResult;
-  }
+    return receivedDateResult;
+  }*/
 }

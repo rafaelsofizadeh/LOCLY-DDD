@@ -26,6 +26,7 @@ import {
 } from './OrderMongoMapper';
 import { DraftOrder } from '../../../domain/entity/DraftOrder';
 import { mongoQuery, uuidToMuuid } from '../../../../common/persistence';
+import { ItemFilter } from '../../../domain/entity/Item';
 
 @Injectable()
 export class OrderMongoRepositoryAdapter implements OrderRepository {
@@ -157,5 +158,54 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       operation: 'deleting',
       entity: 'order',
     });
+  }
+
+  // TODO: Merge orderFilter and itemFilter
+  async setItemProperties(
+    orderFilter: OrderFilter,
+    itemFilter: ItemFilter,
+    properties: WithoutId<ItemFilter>,
+    session?: ClientSession,
+  ): Promise<void> {
+    // Query for undefined field https://docs.mongodb.com/manual/tutorial/query-for-null-fields/#existence-check
+    const filter = {
+      ...orderFilter,
+      items: itemFilter,
+    };
+    const queryWithoutReceivedCheck = mongoQuery(filter);
+    const query = {
+      ...queryWithoutReceivedCheck,
+      // Can't receive an already-received item
+      'items.receivedDate': { $exists: false },
+    };
+
+    const itemSetQuery = mongoQuery({ 'items.$': properties });
+
+    const updateResult: UpdateWriteOpResult = await this.orderCollection
+      .updateOne(query, { $set: itemSetQuery }, { session })
+      .catch(
+        throwCustomException('Error updating order item', {
+          orderId: filter.id,
+          itemId: filter.items.id,
+          properties,
+          filter,
+        }),
+      );
+
+    expectOnlySingleResult(
+      [updateResult.matchedCount, updateResult.modifiedCount],
+      {
+        operation: 'setting properties on',
+        entity: 'order item',
+        lessThanMessage:
+          "the item either doesn't exist, or has already been received",
+      },
+      {
+        orderId: filter.id,
+        itemId: filter.items.id,
+        properties,
+        filter,
+      },
+    );
   }
 }

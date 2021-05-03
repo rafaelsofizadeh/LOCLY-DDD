@@ -6,7 +6,6 @@ import { Order, OrderStatus, ShipmentCost } from '../../../domain/entity/Order';
 import { Country } from '../../../domain/data/Country';
 import { DraftOrder } from '../../../domain/entity/DraftOrder';
 import { ConfirmOrder } from '../../../domain/entity/ConfirmOrder';
-import { ReceiveOrderItem } from '../../../domain/entity/ReceiveOrderItem';
 import { VerifiedByHostOrder } from '../../../domain/entity/VerifiedByHostOrder';
 import { PhysicalItemProps } from '../../../domain/entity/Item';
 import {
@@ -32,7 +31,7 @@ type AnyOrderMongoDocument = {
   items: ItemMongoSubdocument[];
   shipmentCost: ShipmentCost;
   destination: Address;
-  receivedByHostDate: Date;
+  receivedDate: Date;
 };
 
 export type DraftedOrderMongoDocument = Pick<
@@ -53,7 +52,7 @@ export type ConfirmedOrderMongoDocument = Pick<
 
 export type ReceivedOrderItemMongoDocument = Pick<
   AnyOrderMongoDocument,
-  '_id' | 'status' | 'receivedByHostDate'
+  '_id' | 'status' | 'receivedDate'
 >;
 
 export type VerifiedByHostOrderMongoDocument = Pick<
@@ -89,12 +88,6 @@ export function isConfirmedOrderMongoDocument(
   return orderMongoDocument.status === OrderStatus.Confirmed;
 }
 
-export function isReceivedOrderItemMongoDocument(
-  orderMongoDocument: OrderMongoDocument,
-): orderMongoDocument is ReceivedOrderItemMongoDocument {
-  return orderMongoDocument.status === OrderStatus.ReceivedByHost;
-}
-
 export function isVerifiedByHostOrderMongoDocument(
   orderMongoDocument: OrderMongoDocument,
 ): orderMongoDocument is VerifiedByHostOrderMongoDocument {
@@ -104,8 +97,9 @@ export function isVerifiedByHostOrderMongoDocument(
 export function draftOrderToMongoDocument(
   draftOrder: DraftOrder,
 ): DraftedOrderMongoDocument {
+  const draftedOrderMongoDocument = convertToMongoDocument(draftOrder);
   return {
-    ...convertToMongoDocument(draftOrder),
+    ...draftedOrderMongoDocument,
     status: OrderStatus.Drafted,
   };
 }

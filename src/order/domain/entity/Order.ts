@@ -1,7 +1,8 @@
-import { WithoutId } from '../../../common/domain';
+import { EntityFilter, WithoutId } from '../../../common/domain';
 import { ConfirmOrder, ConfirmOrderProps } from './ConfirmOrder';
 import { DraftOrder, DraftOrderProps } from './DraftOrder';
-import { ReceiveOrderItem, ReceiveOrderItemProps } from './ReceiveOrderItem';
+import { ItemFilter } from './Item';
+import { ReceiveOrderItem } from './ReceiveOrderItem';
 import {
   VerifiedByHostOrder,
   VerifiedByHostOrderProps,
@@ -15,7 +16,6 @@ export type ShipmentCost = {
 export const OrderStatus = {
   Drafted: 'drafted',
   Confirmed: 'confirmed',
-  ReceivedByHost: 'host_received',
   VerifiedByHost: 'host_verified',
 } as const;
 
@@ -29,12 +29,12 @@ export type Order =
 
 export type OrderProps = DraftOrderProps &
   ConfirmOrderProps &
-  ReceiveOrderItemProps &
   VerifiedByHostOrderProps;
 
-export type OrderFilter = Required<Pick<OrderProps, 'id'>> &
-  Partial<
-    WithoutId<OrderProps> & {
-      status: OrderStatus;
-    }
-  >;
+export type OrderFilter = EntityFilter<
+  OrderProps & {
+    status: OrderStatus;
+  }
+>;
+
+export type OrderItemFilter = OrderFilter & { item: ItemFilter };

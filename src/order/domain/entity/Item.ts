@@ -1,5 +1,6 @@
-import { WithoutId } from '../../../common/domain';
+import { EntityFilter, WithoutId } from '../../../common/domain';
 import { UUID } from '../../../common/domain';
+import { ReceiveItemProps } from './ReceiveItem';
 
 export type Gram = number;
 
@@ -37,3 +38,5 @@ export class Item implements ItemProps {
     return new this({ ...payload, id: UUID() });
   }
 }
+
+export type ItemFilter = EntityFilter<ItemProps & ReceiveItemProps>;

@@ -24,4 +24,8 @@ export const UUID = (id?: UUID) => (id || uuidv4()) as UUID;
 
 export const IsUUID = () => IsUUIDDecorator(4);
 
-export const isUUID = (input: unknown) => isUUIDValidator(input, 4);
+export const isUUID = (input: unknown): input is UUID =>
+  isUUIDValidator(input, 4);
+
+export type EntityFilter<T extends { id: UUID }> = Required<Pick<T, 'id'>> &
+  Partial<WithoutId<T>>;
