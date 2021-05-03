@@ -256,7 +256,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     }, 15000);
   });
 
-  it(`Doesn't matches Order with a Host as no Host is available in given country`, async () /* done() is needed for "awaiting" setTimeout */ => {
+  it(`Doesn't match Order with a Host as no Host is available in given country`, async () /* done() is needed for "awaiting" setTimeout */ => {
     // https://stackoverflow.com/a/49864436/6539857
     jest.setTimeout(15000);
 
