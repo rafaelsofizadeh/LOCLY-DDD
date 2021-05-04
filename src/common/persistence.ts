@@ -130,6 +130,7 @@ export function serializeMongoData(
 ): SerializedMongoDocument<typeof input> {
   if (
     typeof input === 'object' &&
+    !(input === null) && 
     !(input instanceof Date) &&
     !(input instanceof Buffer)
   ) {
