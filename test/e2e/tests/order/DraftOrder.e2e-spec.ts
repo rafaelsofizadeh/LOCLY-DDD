@@ -111,6 +111,7 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
         orderRepository.findOrder({
           id: testOrderId,
           status: OrderStatus.Drafted,
+          customerId: testCustomer.id,
         }),
       ).resolves.toBeInstanceOf(DraftOrder);
 
