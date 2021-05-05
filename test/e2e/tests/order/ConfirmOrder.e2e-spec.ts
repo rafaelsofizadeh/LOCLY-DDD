@@ -78,10 +78,11 @@ describe('Confirm Order – POST /order/confirm', () => {
       DraftOrderUseCase,
     )) as DraftOrderUseCase;
 
-    testCustomer = Customer.create({
+    testCustomer = {
+      id: UUID(),
       selectedAddress: { country: destinationCountry },
       orderIds: [],
-    });
+    };
 
     await customerRepository.addCustomer(testCustomer);
 
@@ -353,11 +354,10 @@ function generateUuids(n: number) {
 }
 
 function configsToHosts(hostConfigs: HostConfig[]): Host[] {
-  return hostConfigs.map(({ country, available, orderCount }) =>
-    Host.create({
-      address: { country },
-      available,
-      orderIds: generateUuids(orderCount),
-    }),
-  );
+  return hostConfigs.map(({ country, available, orderCount }) => ({
+    id: UUID(),
+    address: { country },
+    available,
+    orderIds: generateUuids(orderCount),
+  }));
 }

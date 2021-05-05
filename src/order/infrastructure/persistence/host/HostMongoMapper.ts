@@ -17,9 +17,7 @@ export type HostMongoDocument = {
 export function mongoDocumentToHost(
   hostMongoDocument: HostMongoDocument,
 ): Host {
-  const serializedHostMongoDocument = serializeMongoData(hostMongoDocument);
-
-  return Host.fromData(serializedHostMongoDocument);
+  return serializeMongoData(hostMongoDocument);
 }
 
 export function hostToMongoDocument(host: Host): HostMongoDocument {

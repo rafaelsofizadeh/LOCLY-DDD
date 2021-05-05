@@ -66,10 +66,11 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
 
   describe('interact with DB and require invididual teardown', () => {
     beforeEach(async () => {
-      testCustomer = Customer.create({
+      testCustomer = {
+        id: UUID(),
         selectedAddress: { country: destinationCountriesAvailable[1] },
         orderIds: [],
-      });
+      };
 
       await customerRepository.addCustomer(testCustomer);
     });

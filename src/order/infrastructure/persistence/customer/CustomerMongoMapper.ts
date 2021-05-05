@@ -29,7 +29,7 @@ export function mongoDocumentToCustomer({
     selectedAddress,
   });
 
-  return Customer.fromData(serializedCustomerMongoDocument);
+  return serializedCustomerMongoDocument;
 }
 
 export function customerToMongoDocument(
