@@ -103,7 +103,6 @@ describe('Confirm Order – POST /order/confirm', () => {
 
       stripeListener.stdout.on('data', stdHandler);
       stripeListener.stderr.on('data', stdHandler);
-      stripeListener.on('close', () => 'STRIPE CLOSED');
     });
   });
 
@@ -256,10 +255,8 @@ describe('Confirm Order – POST /order/confirm', () => {
     }, 15000);
   });
 
-  it(`Doesn't match Order with a Host as no Host is available in given country`, async () /* done() is needed for "awaiting" setTimeout */ => {
+  it(`Doesn't match Order with a Host as no Host is available in given country`, async () => {
     // https://stackoverflow.com/a/49864436/6539857
-    jest.setTimeout(15000);
-
     // All hosts are available, but none are in the given country
     const incompatibleCountries = ([
       'XXX',
@@ -334,9 +331,11 @@ async function fillStripeCheckoutForm(): Promise<void> {
   await page.focus('#billingName');
   await page.keyboard.type(testNameOnCard, typingOptions);
 
-  await page.click(
-    '#root > div > div > div.App-Payment > div > form > div:nth-child(2) > div:nth-child(4) > button',
-  );
+  await page.evaluate(() => {
+    (document.getElementsByClassName(
+      'SubmitButton-IconContainer',
+    )[0] as HTMLElement).click();
+  });
 }
 
 function generateUuids(n: number) {
