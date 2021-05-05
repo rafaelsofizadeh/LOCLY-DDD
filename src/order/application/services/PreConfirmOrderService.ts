@@ -15,7 +15,7 @@ import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import { DraftOrder, ServiceFee } from '../../domain/entity/DraftOrder';
 import { HostRepository } from '../port/HostRepository';
-import { OrderStatus } from '../../domain/entity/Order';
+import { DraftedOrderStatus, OrderStatus } from '../../domain/entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
 
 type StripeCheckoutSession = Stripe.Checkout.Session;
@@ -64,7 +64,7 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
     session: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const draftOrder = (await this.orderRepository.findOrder(
-      { id: orderId, status: OrderStatus.Drafted, customerId },
+      { id: orderId, status: DraftedOrderStatus, customerId },
       session,
     )) as DraftOrder;
 

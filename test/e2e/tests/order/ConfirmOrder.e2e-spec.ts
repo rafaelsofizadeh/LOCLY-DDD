@@ -12,7 +12,6 @@ import { Host } from '../../../../src/order/domain/entity/Host';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { DraftOrderUseCase } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
-import { Item } from '../../../../src/order/domain/entity/Item';
 import { Country } from '../../../../src/order/domain/data/Country';
 import { isString } from 'class-validator';
 import { HostRepository } from '../../../../src/order/application/port/HostRepository';
@@ -23,7 +22,7 @@ import {
 } from '../../../../src/order/application/services/checkServiceAvailability';
 import { StripeCheckoutSessionResult } from '../../../../src/order/domain/use-case/PreConfirmOrderUseCase';
 import { ConfirmOrder } from '../../../../src/order/domain/entity/ConfirmOrder';
-import { OrderStatus } from '../../../../src/order/domain/entity/Order';
+import { ConfirmedOrderStatus } from '../../../../src/order/domain/entity/Order';
 import { UUID } from '../../../../src/common/domain';
 import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
 
@@ -112,11 +111,11 @@ describe('Confirm Order – POST /order/confirm', () => {
       originCountry,
       destination: testCustomer.selectedAddress,
       items: [
-        Item.create({
+        {
           title: 'Laptop',
           storeName: 'Amazon',
           weight: 10,
-        }),
+        },
       ],
     });
   });
@@ -233,7 +232,7 @@ describe('Confirm Order – POST /order/confirm', () => {
         (async () => {
           updatedTestOrder = (await orderRepository.findOrder({
             id: testOrder.id,
-            status: OrderStatus.Confirmed,
+            status: ConfirmedOrderStatus,
           })) as ConfirmOrder;
         })(),
       ).resolves.toBeUndefined();

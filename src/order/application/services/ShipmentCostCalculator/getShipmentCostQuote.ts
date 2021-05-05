@@ -1,6 +1,6 @@
 import { Country } from '../../../domain/data/Country';
 import { Currency } from '../../../domain/data/Currency';
-import { Gram, PhysicalItemProps } from '../../../domain/entity/Item';
+import { Gram, PhysicalItem } from '../../../domain/entity/Item';
 import countryIsoList from './data/CountryIsoCodes';
 import priceGuide from './data/PriceGuide';
 
@@ -79,7 +79,7 @@ function validateOriginCountry(originCountry: Country): void {
 
 function validatePackageDimensions(
   weightIntervals: Gram[],
-  packages: PhysicalItemProps[],
+  packages: PhysicalItem[],
 ): Index {
   const totalWeight = packages
     .map(pkg => pkg.weight)
@@ -101,7 +101,7 @@ function validatePackageDimensions(
 export function getShipmentCostQuote(
   originCountry: Country,
   destinationCountry: Country,
-  packages: PhysicalItemProps[],
+  packages: PhysicalItem[],
 ): ShipmentCostQuote {
   validateCountry(originCountry);
   validateCountry(destinationCountry);
@@ -171,5 +171,5 @@ export function getShipmentCostQuote(
 export type ShipmentCostQuoteFn = (
   originCountry: Country,
   destinationCountry: Country,
-  packages: PhysicalItemProps[],
+  packages: PhysicalItem[],
 ) => ShipmentCostQuote;

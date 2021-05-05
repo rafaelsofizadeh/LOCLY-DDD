@@ -1,6 +1,6 @@
 import { EntityFilter } from '../../../common/domain';
-import { ConfirmOrder, ConfirmOrderProps } from './ConfirmOrder';
-import { DraftOrder, DraftOrderProps } from './DraftOrder';
+import { ConfirmOrder } from './ConfirmOrder';
+import { DraftOrder } from './DraftOrder';
 import { ItemFilter } from './Item';
 
 export type ShipmentCost = {
@@ -8,19 +8,20 @@ export type ShipmentCost = {
   currency: string;
 };
 
-export const OrderStatus = {
-  Drafted: 'drafted',
-  Confirmed: 'confirmed',
-} as const;
+export const DraftedOrderStatus = 'drafted' as const;
 
-export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
+export const ConfirmedOrderStatus = 'confirmed' as const;
+
+export type OrderStatus =
+  | typeof DraftedOrderStatus
+  | typeof ConfirmedOrderStatus;
 
 export type Order = DraftOrder | ConfirmOrder;
 
-export type OrderProps = DraftOrderProps & ConfirmOrderProps;
+type AnyOrder = DraftOrder & ConfirmOrder;
 
 export type OrderFilter = EntityFilter<
-  OrderProps & {
+  AnyOrder & {
     status: OrderStatus;
   }
 >;

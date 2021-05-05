@@ -7,7 +7,10 @@ import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { UUID } from '../../../../src/common/domain';
-import { OrderStatus } from '../../../../src/order/domain/entity/Order';
+import {
+  DraftedOrderStatus,
+  OrderStatus,
+} from '../../../../src/order/domain/entity/Order';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import {
   destinationCountriesAvailable,
@@ -105,15 +108,15 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
 
       testOrderId = UUID(id);
 
-      // 2. order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
+      // 2. order should be added to the db and its status should be DraftedOrderStatus and the resulting Order object
       // should be a DraftOrder
       await expect(
         orderRepository.findOrder({
           id: testOrderId,
-          status: OrderStatus.Drafted,
+          status: DraftedOrderStatus,
           customerId: testCustomer.id,
         }),
-      ).resolves.toBeInstanceOf(DraftOrder);
+      ).resolves.toHaveProperty('status', DraftedOrderStatus);
 
       // Load the test customer from the database
       const updatedTestCustomer: Customer = await customerRepository.findCustomer(

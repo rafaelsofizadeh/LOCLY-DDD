@@ -12,7 +12,7 @@ import { DraftOrder } from '../../domain/entity/DraftOrder';
 import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
 import { CustomerRepository } from '../port/CustomerRepository';
 import { withTransaction } from '../../../common/application';
-import { OrderStatus } from '../../domain/entity/Order';
+import { DraftedOrderStatus, OrderStatus } from '../../domain/entity/Order';
 
 @Injectable()
 export class EditOrderService implements EditOrderUseCase {
@@ -44,7 +44,7 @@ export class EditOrderService implements EditOrderUseCase {
     await this.orderRepository.deleteOrder(
       {
         id: orderId,
-        status: OrderStatus.Drafted,
+        status: DraftedOrderStatus,
         customerId,
       },
       session,

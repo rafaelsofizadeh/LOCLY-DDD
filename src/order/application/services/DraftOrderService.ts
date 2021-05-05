@@ -20,7 +20,7 @@ import {
   checkServiceAvailability,
   ServiceAvailabilityFn,
 } from './checkServiceAvailability';
-import { Item, ItemProps } from '../../domain/entity/Item';
+import { Item } from '../../domain/entity/Item';
 import { UUID } from '../../../common/domain';
 import { Exception } from '../../../common/error-handling';
 import { Country } from '../../domain/data/Country';
@@ -53,7 +53,7 @@ export class DraftOrderService implements DraftOrderUseCase {
     {
       customerId,
       originCountry,
-      items: itemProps,
+      items: itemsWithoutId,
       destination,
     }: DraftOrderRequest,
     session: ClientSession,
@@ -64,8 +64,8 @@ export class DraftOrderService implements DraftOrderUseCase {
       checkServiceAvailability,
     );
 
-    const items = itemProps.map((subitemProps: ItemProps) =>
-      Item.create(subitemProps),
+    const items: Item[] = itemsWithoutId.map(itemWithoutId =>
+      Object.assign(itemWithoutId, { id: UUID() }),
     );
 
     const shipmentCost = this.approximateShipmentCost(
@@ -75,14 +75,14 @@ export class DraftOrderService implements DraftOrderUseCase {
       getShipmentCostQuote,
     );
 
-    const draftOrder: DraftOrder = new DraftOrder({
+    const draftOrder: DraftOrder = {
       id: UUID(),
       customerId,
       items,
       originCountry,
       destination,
       shipmentCost,
-    });
+    };
 
     // TODO(IMPORANT): Document MongoDb concurrent transaction limitations.
     // https://jira.mongodb.org/browse/SERVER-36428?focusedCommentId=2136170&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-2136170
