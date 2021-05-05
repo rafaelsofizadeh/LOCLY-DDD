@@ -7,6 +7,7 @@ import {
   Collection,
   DeleteWriteOpResultObject,
   FilterQuery,
+  GridFSBucket,
   UpdateWriteOpResult,
 } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
@@ -25,15 +26,20 @@ import {
   Photo,
 } from './OrderMongoMapper';
 import { DraftOrder } from '../../../domain/entity/DraftOrder';
-import { mongoQuery, uuidToMuuid } from '../../../../common/persistence';
+import {
+  convertToMongoDocument,
+  mongoQuery,
+  muuidToUuid,
+  uuidToMuuid,
+} from '../../../../common/persistence';
 import { ItemFilter } from '../../../domain/entity/Item';
+import { ItemPhotosUploadResult } from '../../../domain/use-case/AddItemPhotoUseCase';
 
 @Injectable()
 export class OrderMongoRepositoryAdapter implements OrderRepository {
   constructor(
     @InjectCollection('orders')
     private readonly orderCollection: Collection<OrderMongoDocument>,
-    private readonly itemPhotoStorage: ItemPhotoStorage,
   ) {}
 
   async addOrder(
@@ -90,12 +96,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
 
     const orderDocument: OrderMongoDocument = await this.orderCollection
       .findOne(filterQuery, { session })
-      .catch(
-        throwCustomException('Error searching for an order', {
-          orderId: filter.id,
-          filter,
-        }),
-      );
+      .catch(throwCustomException('Error searching for an order', filter));
 
     if (!orderDocument) {
       throwCustomException('No order found', {
@@ -207,5 +208,47 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
         filter,
       },
     );
+  }
+
+  async addItemPhotos(
+    orderFilter: OrderFilter,
+    itemFilter: ItemFilter,
+    photos: Photo[],
+    session?: ClientSession,
+  ): Promise<ItemPhotosUploadResult> {
+    const filter = {
+      ...orderFilter,
+      items: itemFilter,
+    };
+    const query = mongoQuery(filter);
+
+    // TODO: typing
+    const photoMuuids = photos.map(({ id }) => id);
+    const photoUploadResults: ItemPhotosUploadResult = photos.map(
+      ({ id, filename }) => ({ id: muuidToUuid(id), photoName: filename }),
+    );
+
+    // https://docs.mongodb.com/manual/reference/operator/update/positional/
+    const result: UpdateWriteOpResult = await this.orderCollection
+      .updateOne(
+        query,
+        { $push: { 'items.$.photos': photoMuuids } },
+        { session },
+      )
+      .catch(
+        throwCustomException('Error adding photo file id to order item', {
+          orderId: orderFilter.id,
+          itemId: itemFilter.id,
+          orderFilter,
+          itemFilter,
+        }),
+      );
+
+    expectOnlySingleResult([result.matchedCount, result.modifiedCount], {
+      operation: 'adding photo id to',
+      entity: 'order item',
+    });
+
+    return photoUploadResults;
   }
 }

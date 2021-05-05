@@ -3,6 +3,8 @@ import { UUID, WithoutId } from '../../../common/domain';
 import { DraftOrder } from '../../domain/entity/DraftOrder';
 import { ItemFilter } from '../../domain/entity/Item';
 import { Order, OrderFilter } from '../../domain/entity/Order';
+import { ItemPhotosUploadResult } from '../../domain/use-case/AddItemPhotoUseCase';
+import { Photo } from '../../infrastructure/persistence/order/OrderMongoMapper';
 
 export abstract class OrderRepository {
   abstract addOrder(order: DraftOrder, session?: ClientSession): Promise<void>;
@@ -35,4 +37,11 @@ export abstract class OrderRepository {
     properties: WithoutId<ItemFilter>,
     session?: ClientSession,
   ): Promise<void>;
+
+  abstract addItemPhotos(
+    orderFilter: OrderFilter,
+    itemFilter: ItemFilter,
+    photos: Photo[],
+    session?: ClientSession,
+  ): Promise<ItemPhotosUploadResult>;
 }

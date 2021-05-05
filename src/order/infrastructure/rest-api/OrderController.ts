@@ -25,8 +25,18 @@ import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
 import { EditOrderRequestAdapter } from './request-adapters/EditOrderRequestAdapter';
 import { DeleteOrderUseCase } from '../../domain/use-case/DeleteOrderUseCase';
 import { DeleteOrderRequestAdapter } from './request-adapters/DeleteOrderRequestAdapter';
-import { AddItemInfoRequestDataAdapter } from './request-adapters/AddItemInfoRequestAdapter';
-import { AddItemInfoUseCase } from '../../domain/use-case/AddItemInfoUseCase';
+import { AddItemPhotoRequestBodyAdapter } from './request-adapters/AddItemPhotoRequestAdapter';
+import {
+  AddItemPhotoRequest,
+  AddItemPhotoUseCase,
+  maxSimulataneousPhotoCount,
+  photoPropertyName,
+} from '../../domain/use-case/AddItemPhotoUseCase';
+import { Photo } from '../persistence/order/OrderMongoMapper';
+import { UUID } from '../../../common/domain';
+import { throwCustomException } from '../../../common/error-handling';
+import { uuidToMuuid } from '../../../common/persistence';
+import { Request } from 'express';
 
 @Controller('order')
 export class OrderController {
@@ -35,7 +45,8 @@ export class OrderController {
     private readonly editOrderUseCase: EditOrderUseCase,
     private readonly deleteOrderUseCase: DeleteOrderUseCase,
     private readonly preConfirmOrderUseCase: PreConfirmOrderUseCase,
-    private readonly receiveOrderItemUseCase: ReceiveOrderItemUseCase, // private readonly addItemInfoUseCase: AddItemInfoUseCase,
+    private readonly receiveOrderItemUseCase: ReceiveOrderItemUseCase,
+    private readonly addItemPhotoUseCase: AddItemPhotoUseCase,
   ) {}
 
   @Post('draft')
@@ -90,18 +101,19 @@ export class OrderController {
 
     return receivedDateResult;
   }
-  /*
-  @Post('addItemInfo')
-  @UseInterceptors(FilesInterceptor('photos'))
-  async addItemInfo(
-    @Body() addItemInfoRequestData: AddItemInfoRequestDataAdapter,
-    @UploadedFiles() photos: Express.Multer.File[],
+
+  @Post('addItemPhotos')
+  // file control/validation is done by MulterModule registration
+  @UseInterceptors(FilesInterceptor(photoPropertyName))
+  async addItemPhoto(
+    @Body() addItemPhotoRequestBody: AddItemPhotoRequestBodyAdapter,
+    @UploadedFiles() photos: Photo[],
   ) {
-    const receivedDateResult = await this.addItemInfoUseCase.execute({
-      ...addItemInfoRequestData,
+    const receivedDateResult = await this.addItemPhotoUseCase.execute({
+      ...addItemPhotoRequestBody,
       photos,
     });
 
     return receivedDateResult;
-  }*/
+  }
 }

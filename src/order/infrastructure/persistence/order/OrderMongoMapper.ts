@@ -65,10 +65,7 @@ export type VerifiedByHostOrderMongoDocumentProps = Omit<
   'items'
 > & { physicalItems: PhysicalItemMongoSubdocument[] };
 
-export type Photo = {
-  name: string;
-  file: Express.Multer.File;
-};
+export type Photo = Omit<Express.Multer.File, 'id'> & { id: Binary };
 
 export type OrderMongoDocument =
   | DraftedOrderMongoDocument

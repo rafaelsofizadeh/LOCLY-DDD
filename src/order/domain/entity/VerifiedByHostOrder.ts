@@ -1,77 +1,36 @@
 import { UUID } from '../../../common/domain';
-import {
-  getShipmentCostQuote,
-  ShipmentCostQuote,
-  ShipmentCostQuoteFn,
-} from '../../application/services/ShipmentCostCalculator/getShipmentCostQuote';
-import { Country } from '../data/Country';
-import { Address } from './Address';
 import { ShipmentCost } from './Order';
 import { PhysicalItemProps } from './Item';
 
 export interface VerifiedByHostOrderProps {
   id: UUID;
   physicalItems: PhysicalItemProps[];
-  originCountry: Country;
-  destination: Address;
   shipmentCost: ShipmentCost;
 }
 
 export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
   readonly id: UUID;
 
-  readonly originCountry: Country;
-
-  readonly destination: Address;
-
   private _physicalItems: PhysicalItemProps[];
 
   private _shipmentCost: ShipmentCost;
 
-  private readonly shipmentCostQuoteFn: ShipmentCostQuoteFn;
-
   get physicalItems(): PhysicalItemProps[] {
     return this._physicalItems;
-  }
-
-  private setPhysicalItems(physicalItems: PhysicalItemProps[]) {
-    this._physicalItems = physicalItems;
-    this._shipmentCost = this.approximateShipmentCost();
   }
 
   get shipmentCost(): ShipmentCost {
     return this._shipmentCost;
   }
 
-  private approximateShipmentCost(
-    physicalItems: PhysicalItemProps[] = this._physicalItems,
-  ): ShipmentCost {
-    const { currency, services }: ShipmentCostQuote = this.shipmentCostQuoteFn(
-      this.originCountry,
-      this.destination.country,
-      physicalItems,
-    );
-
-    // TODO: Service choice logic
-    const { price: amount } = services[0];
-
-    return { amount, currency };
-  }
-
   private constructor({
     id,
     physicalItems,
-    originCountry,
-    destination,
     shipmentCost,
   }: VerifiedByHostOrderProps) {
-    this.shipmentCostQuoteFn = getShipmentCostQuote;
-
     this.id = id;
     this._physicalItems = physicalItems;
-    this.destination = destination;
     this._shipmentCost = shipmentCost;
-    this.originCountry = originCountry;
   }
 
   static fromData(payload: VerifiedByHostOrderProps) {
@@ -80,22 +39,15 @@ export class VerifiedByHostOrder implements VerifiedByHostOrderProps {
 
   static create({
     physicalItems,
-    originCountry,
-    destination,
   }: Omit<
     VerifiedByHostOrderProps,
     'id' | 'shipmentCost'
   >): VerifiedByHostOrder {
-    // Placeholder values for further redundancy checks in set__() methods
     const verifiedByHostOrder: VerifiedByHostOrder = new this({
       id: UUID(),
       physicalItems,
-      originCountry,
-      destination,
       shipmentCost: { amount: -999, currency: '---' },
     });
-
-    verifiedByHostOrder.setPhysicalItems(physicalItems);
 
     return verifiedByHostOrder;
   }
