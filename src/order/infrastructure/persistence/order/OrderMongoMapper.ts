@@ -1,10 +1,15 @@
 import { Binary } from 'mongodb';
 
 import { Item } from '../../../domain/entity/Item';
-import { Address } from '../../../domain/entity/Address';
-import { DraftedOrderStatus, Order, OrderStatus, ShipmentCost } from '../../../domain/entity/Order';
+import {
+  Address,
+  DraftOrder,
+  DraftedOrderStatus,
+  Order,
+  OrderStatus,
+  ShipmentCost,
+} from '../../../domain/entity/Order';
 import { Country } from '../../../domain/data/Country';
-import { DraftOrder } from '../../../domain/entity/DraftOrder';
 import { PhysicalItem } from '../../../domain/entity/Item';
 import {
   convertToMongoDocument,

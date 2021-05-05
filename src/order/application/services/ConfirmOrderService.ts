@@ -5,10 +5,10 @@ import { InjectClient } from 'nest-mongodb';
 import Stripe from 'stripe';
 import { UUID } from '../../../common/domain';
 import { withTransaction } from '../../../common/application';
-import { Address } from '../../domain/entity/Address';
 import { Host } from '../../domain/entity/Host';
 
 import {
+  Address,
   ConfirmedOrderStatus,
   DraftedOrderStatus,
 } from '../../domain/entity/Order';

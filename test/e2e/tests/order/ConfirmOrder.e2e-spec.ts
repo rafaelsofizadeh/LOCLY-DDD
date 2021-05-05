@@ -15,14 +15,16 @@ import { DraftOrderUseCase } from '../../../../src/order/domain/use-case/DraftOr
 import { Country } from '../../../../src/order/domain/data/Country';
 import { isString } from 'class-validator';
 import { HostRepository } from '../../../../src/order/application/port/HostRepository';
-import { DraftOrder } from '../../../../src/order/domain/entity/DraftOrder';
 import {
   destinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../../src/order/application/services/checkServiceAvailability';
 import { StripeCheckoutSessionResult } from '../../../../src/order/domain/use-case/PreConfirmOrderUseCase';
-import { ConfirmOrder } from '../../../../src/order/domain/entity/ConfirmOrder';
-import { ConfirmedOrderStatus } from '../../../../src/order/domain/entity/Order';
+import {
+  DraftOrder,
+  ConfirmOrder,
+  ConfirmedOrderStatus,
+} from '../../../../src/order/domain/entity/Order';
 import { UUID } from '../../../../src/common/domain';
 import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
 

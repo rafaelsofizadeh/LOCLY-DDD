@@ -15,14 +15,13 @@ import {
   throwCustomException,
 } from '../../../../common/error-handling';
 import { OrderRepository } from '../../../application/port/OrderRepository';
-import { Order, OrderFilter } from '../../../domain/entity/Order';
+import { Order, DraftOrder, OrderFilter } from '../../../domain/entity/Order';
 import {
   OrderMongoDocument,
   draftOrderToMongoDocument,
   mongoDocumentToOrder,
   Photo,
 } from './OrderMongoMapper';
-import { DraftOrder } from '../../../domain/entity/DraftOrder';
 import {
   mongoQuery,
   muuidToUuid,

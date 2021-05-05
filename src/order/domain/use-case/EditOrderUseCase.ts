@@ -1,5 +1,5 @@
 import { UUID } from '../../../common/domain';
-import { DraftOrder } from '../entity/DraftOrder';
+import { DraftOrder } from '../entity/Order';
 import { UseCase } from '../../../common/domain';
 import { DraftOrderRequest } from './DraftOrderUseCase';
 

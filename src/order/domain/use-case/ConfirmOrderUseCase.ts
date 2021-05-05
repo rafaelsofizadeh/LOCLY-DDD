@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import { UseCase } from '../../../common/domain';
-import { Address } from '../entity/Address';
+import { Address } from '../entity/Order';
 
 export interface HostMatchResult {
   matchedHostAddress: Address;

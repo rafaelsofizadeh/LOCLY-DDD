@@ -10,7 +10,6 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
-import { DraftOrder } from '../../domain/entity/DraftOrder';
 import {
   getShipmentCostQuote,
   ShipmentCostQuote,
@@ -24,8 +23,12 @@ import { Item } from '../../domain/entity/Item';
 import { UUID } from '../../../common/domain';
 import { Exception } from '../../../common/error-handling';
 import { Country } from '../../domain/data/Country';
-import { DraftedOrderStatus, ShipmentCost } from '../../domain/entity/Order';
-import { Address } from '../../domain/entity/Address';
+import {
+  Address,
+  DraftOrder,
+  DraftedOrderStatus,
+  ShipmentCost,
+} from '../../domain/entity/Order';
 
 @Injectable()
 export class DraftOrderService implements DraftOrderUseCase {

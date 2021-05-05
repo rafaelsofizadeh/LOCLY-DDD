@@ -13,9 +13,12 @@ import { UUID } from '../../../common/domain';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
-import { DraftOrder, ServiceFee } from '../../domain/entity/DraftOrder';
+import {
+  DraftedOrderStatus,
+  DraftOrder,
+  ServiceFee,
+} from '../../domain/entity/Order';
 import { HostRepository } from '../port/HostRepository';
-import { DraftedOrderStatus, OrderStatus } from '../../domain/entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
 
 type StripeCheckoutSession = Stripe.Checkout.Session;

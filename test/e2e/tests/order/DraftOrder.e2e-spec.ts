@@ -7,17 +7,16 @@ import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { UUID } from '../../../../src/common/domain';
-import {
-  DraftedOrderStatus,
-  OrderStatus,
-} from '../../../../src/order/domain/entity/Order';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import {
   destinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../../src/order/application/services/checkServiceAvailability';
 import { DraftOrderRequest } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
-import { DraftOrder } from '../../../../src/order/domain/entity/DraftOrder';
+import {
+  DraftedOrderStatus,
+  DraftOrder,
+} from '../../../../src/order/domain/entity/Order';
 import { Country } from '../../../../src/order/domain/data/Country';
 import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
 
@@ -82,7 +81,7 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
       ]),
     );
 
-    it('successfully creates a DraftOrder', async () => {
+    it('successfully creates a Order', async () => {
       const testOrderRequest: DraftOrderRequest = {
         customerId: testCustomer.id,
         originCountry: originCountriesAvailable[0],

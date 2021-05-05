@@ -19,7 +19,7 @@ import {
   ReceiveOrderItemResult,
   ReceiveOrderItemUseCase,
 } from '../../domain/use-case/ReceiveOrderItemUseCase';
-import { DraftOrder } from '../../domain/entity/DraftOrder';
+import { DraftOrder } from '../../domain/entity/Order';
 import { SerializePrivatePropertiesInterceptor } from './nest-infrastructure/SerializePrivatePropertiesInterceptor';
 import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
 import { EditOrderRequestAdapter } from './request-adapters/EditOrderRequestAdapter';

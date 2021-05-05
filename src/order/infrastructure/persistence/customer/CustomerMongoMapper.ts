@@ -1,7 +1,7 @@
 import { Binary } from 'mongodb';
 
 import { Customer } from '../../../domain/entity/Customer';
-import { Address } from '../../../domain/entity/Address';
+import { Address } from '../../../domain/entity/Order';
 import {
   convertToMongoDocument,
   serializeMongoData,
