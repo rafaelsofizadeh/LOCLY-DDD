@@ -23,20 +23,4 @@ export class ConfirmOrder implements ConfirmOrderProps {
   static fromData(payload: ConfirmOrderProps) {
     return new this(payload);
   }
-
-  static async confirm(
-    orderId: UUID,
-    hostId: UUID,
-    persistConfirmationFn: (
-      toConfirmOrderId: UUID,
-      confirmedHostId: UUID,
-    ) => Promise<unknown>,
-    addOrderToHostFn: (
-      toAddOrderToHostId: UUID,
-      toAddOrderId: UUID,
-    ) => Promise<unknown>,
-  ): Promise<void> {
-    await persistConfirmationFn(orderId, hostId);
-    await addOrderToHostFn(hostId, orderId);
-  }
 }

@@ -5,12 +5,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
-import { DraftOrder } from '../../domain/entity/DraftOrder';
 import {
   DeleteOrderRequest,
   DeleteOrderUseCase,
 } from '../../domain/use-case/DeleteOrderUseCase';
-import { UUID } from '../../../common/domain';
+import { OrderStatus } from '../../domain/entity/Order';
 
 @Injectable()
 export class DeleteOrderService implements DeleteOrderUseCase {
@@ -36,25 +35,14 @@ export class DeleteOrderService implements DeleteOrderUseCase {
     { orderId, customerId }: DeleteOrderRequest,
     session: ClientSession,
   ): Promise<void> {
-    await DraftOrder.delete(
-      {
-        orderId,
-        customerId,
-      },
-      (toBeDeletedOrderId: UUID, orderOwnerCustomerId: UUID) =>
-        this.orderRepository.deleteOrder(
-          { id: toBeDeletedOrderId, customerId: orderOwnerCustomerId },
-          session,
-        ),
-      (
-        toRemoveOrderFromCustomerId: UUID,
-        toBeRemovedFromCustomerOrderId: UUID,
-      ) =>
-        this.customerRepository.removeOrderFromCustomer(
-          toRemoveOrderFromCustomerId,
-          toBeRemovedFromCustomerOrderId,
-          session,
-        ),
+    await this.orderRepository.deleteOrder(
+      { id: orderId, status: OrderStatus.Drafted, customerId },
+      session,
+    );
+    await this.customerRepository.removeOrderFromCustomer(
+      customerId,
+      orderId,
+      session,
     );
   }
 }

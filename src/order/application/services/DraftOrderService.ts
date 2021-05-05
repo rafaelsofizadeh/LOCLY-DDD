@@ -6,13 +6,26 @@ import {
   DraftOrderUseCase,
 } from '../../domain/use-case/DraftOrderUseCase';
 
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import { DraftOrder } from '../../domain/entity/DraftOrder';
-import { getShipmentCostQuote } from './ShipmentCostCalculator/getShipmentCostQuote';
-import { checkServiceAvailability } from './checkServiceAvailability';
+import {
+  getShipmentCostQuote,
+  ShipmentCostQuote,
+  ShipmentCostQuoteFn,
+} from './ShipmentCostCalculator/getShipmentCostQuote';
+import {
+  checkServiceAvailability,
+  ServiceAvailabilityFn,
+} from './checkServiceAvailability';
+import { Item, ItemProps } from '../../domain/entity/Item';
+import { UUID } from '../../../common/domain';
+import { Exception } from '../../../common/error-handling';
+import { Country } from '../../domain/data/Country';
+import { ShipmentCost } from '../../domain/entity/Order';
+import { Address } from '../../domain/entity/Address';
 
 @Injectable()
 export class DraftOrderService implements DraftOrderUseCase {
@@ -37,28 +50,88 @@ export class DraftOrderService implements DraftOrderUseCase {
   }
 
   private async draftOrder(
-    { customerId, originCountry, items, destination }: DraftOrderRequest,
+    {
+      customerId,
+      originCountry,
+      items: itemProps,
+      destination,
+    }: DraftOrderRequest,
     session: ClientSession,
   ): Promise<DraftOrder> {
-    const draftOrder: DraftOrder = await DraftOrder.create(
-      {
-        customerId,
-        originCountry,
-        items,
-        destination,
-      },
-      getShipmentCostQuote,
+    this.validateOriginDestination(
+      originCountry,
+      destination,
       checkServiceAvailability,
-      (newlyDraftOrder: DraftOrder) =>
-        this.orderRepository.addOrder(newlyDraftOrder, session),
-      (toBeAddedToCustomerId, toBeAddedToCustomerOrderId) =>
-        this.customerRepository.addOrderToCustomer(
-          toBeAddedToCustomerId,
-          toBeAddedToCustomerOrderId,
-          session,
-        ),
+    );
+
+    const items = itemProps.map((subitemProps: ItemProps) =>
+      Item.create(subitemProps),
+    );
+
+    const shipmentCost = this.approximateShipmentCost(
+      originCountry,
+      destination,
+      items,
+      getShipmentCostQuote,
+    );
+
+    const draftOrder: DraftOrder = new DraftOrder({
+      id: UUID(),
+      customerId,
+      items,
+      originCountry,
+      destination,
+      shipmentCost,
+    });
+
+    // TODO(IMPORANT): Document MongoDb concurrent transaction limitations.
+    // https://jira.mongodb.org/browse/SERVER-36428?focusedCommentId=2136170&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-2136170
+    // (GLOBAL) DON'T parallelize this. Promise.all()'ing these, together with transactions, will lead to random
+    // TransientTransactionError errors.
+    await this.orderRepository.addOrder(draftOrder, session);
+    await this.customerRepository.addOrderToCustomer(
+      draftOrder.customerId,
+      draftOrder.id,
+      session,
     );
 
     return draftOrder;
+  }
+
+  private validateOriginDestination(
+    originCountry: Country,
+    { country: destinationCountry }: Address,
+    checkServiceAvailability: ServiceAvailabilityFn,
+  ) {
+    const isServiceAvailable: boolean = checkServiceAvailability(
+      originCountry,
+      destinationCountry,
+    );
+
+    if (!isServiceAvailable) {
+      throw new Exception(
+        HttpStatus.SERVICE_UNAVAILABLE,
+        `Service unavailable for origin = ${originCountry}, destination = ${destinationCountry}`,
+        { originCountry, destinationCountry },
+      );
+    }
+  }
+
+  private approximateShipmentCost(
+    originCountry: Country,
+    { country: destinationCountry }: Address,
+    items: Item[],
+    getShipmentCostQuote: ShipmentCostQuoteFn,
+  ): ShipmentCost {
+    const { currency, services }: ShipmentCostQuote = getShipmentCostQuote(
+      originCountry,
+      destinationCountry,
+      items.map(item => ({ weight: item.weight })),
+    );
+
+    // TODO: Service choice logic
+    const { price: amount } = services[0];
+
+    return { amount, currency };
   }
 }

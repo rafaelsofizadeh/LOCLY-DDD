@@ -27,16 +27,10 @@ import { DeleteOrderUseCase } from '../../domain/use-case/DeleteOrderUseCase';
 import { DeleteOrderRequestAdapter } from './request-adapters/DeleteOrderRequestAdapter';
 import { AddItemPhotoRequestBodyAdapter } from './request-adapters/AddItemPhotoRequestAdapter';
 import {
-  AddItemPhotoRequest,
   AddItemPhotoUseCase,
-  maxSimulataneousPhotoCount,
   photoPropertyName,
 } from '../../domain/use-case/AddItemPhotoUseCase';
 import { Photo } from '../persistence/order/OrderMongoMapper';
-import { UUID } from '../../../common/domain';
-import { throwCustomException } from '../../../common/error-handling';
-import { uuidToMuuid } from '../../../common/persistence';
-import { Request } from 'express';
 
 @Controller('order')
 export class OrderController {

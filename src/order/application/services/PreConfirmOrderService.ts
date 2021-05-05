@@ -102,7 +102,7 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
     draftOrder: DraftOrder,
     hostId: UUID,
   ): Promise<StripeCheckoutSession> {
-    const serviceFee: ServiceFee = await draftOrder.calculateServiceFee();
+    const serviceFee: ServiceFee = await this.calculateServiceFee();
     const stripePrice: StripePrice = this.stripePrice(serviceFee);
     const match: Match = {
       orderId: draftOrder.id,
@@ -154,6 +154,13 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
     return {
       currency: serviceFee.currency,
       unit_amount: Math.floor(serviceFee.amount * 100),
+    };
+  }
+
+  private async calculateServiceFee(): Promise<ServiceFee> {
+    return {
+      currency: 'USD',
+      amount: 100,
     };
   }
 }

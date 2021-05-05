@@ -9,11 +9,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { DraftOrder } from '../../domain/entity/DraftOrder';
-import {
-  DraftOrderRequest,
-  DraftOrderUseCase,
-} from '../../domain/use-case/DraftOrderUseCase';
-import { UUID } from '../../../common/domain';
+import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
 import { CustomerRepository } from '../port/CustomerRepository';
 import { withTransaction } from '../../../common/application';
 import { OrderStatus } from '../../domain/entity/Order';
@@ -42,28 +38,26 @@ export class EditOrderService implements EditOrderUseCase {
   }
 
   private async editOrder(
-    editOrderRequest: EditOrderRequest,
+    { orderId, customerId, ...restEditOrderRequest }: EditOrderRequest,
     session: ClientSession,
   ): Promise<DraftOrder> {
-    const draftOrder: DraftOrder = await DraftOrder.edit(
-      editOrderRequest,
-      (toBeDeletedOrderId: UUID, orderOwnerCustomerId: UUID) =>
-        this.orderRepository.deleteOrder(
-          {
-            id: toBeDeletedOrderId,
-            status: OrderStatus.Drafted,
-            customerId: orderOwnerCustomerId,
-          },
-          session,
-        ),
-      (toBeRemovedFromCustomerId: UUID, toBeRemovedFromCustomerOrderId: UUID) =>
-        this.customerRepository.removeOrderFromCustomer(
-          toBeRemovedFromCustomerId,
-          toBeRemovedFromCustomerOrderId,
-          session,
-        ),
-      (draftOrderRequest: DraftOrderRequest) =>
-        this.draftOrderUseCase.execute(draftOrderRequest, session),
+    await this.orderRepository.deleteOrder(
+      {
+        id: orderId,
+        status: OrderStatus.Drafted,
+        customerId,
+      },
+      session,
+    );
+    await this.customerRepository.removeOrderFromCustomer(
+      customerId,
+      orderId,
+      session,
+    );
+
+    const draftOrder: DraftOrder = await this.draftOrderUseCase.execute(
+      { customerId, ...restEditOrderRequest },
+      session,
     );
 
     return draftOrder;

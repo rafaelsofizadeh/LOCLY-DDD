@@ -6,7 +6,6 @@ import Stripe from 'stripe';
 import { UUID } from '../../../common/domain';
 import { withTransaction } from '../../../common/application';
 import { Address } from '../../domain/entity/Address';
-import { ConfirmOrder } from '../../domain/entity/ConfirmOrder';
 import { Host } from '../../domain/entity/Host';
 
 import { OrderStatus } from '../../domain/entity/Order';
@@ -57,24 +56,15 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
     hostId: UUID,
     session: ClientSession,
   ): Promise<void> {
-    await ConfirmOrder.confirm(
-      orderId,
-      hostId,
-      (toConfirmOrderId: UUID, confirmedHostId: UUID) =>
-        this.orderRepository.setProperties(
-          { id: toConfirmOrderId, status: OrderStatus.Drafted },
-          {
-            status: OrderStatus.Confirmed,
-            hostId: confirmedHostId,
-          },
-          session,
-        ),
-      (toAddOrderToHostId: UUID, toAddOrderId: UUID) =>
-        this.hostRepository.addOrderToHost(
-          toAddOrderToHostId,
-          toAddOrderId,
-          session,
-        ),
+    await this.orderRepository.setProperties(
+      { id: orderId, status: OrderStatus.Drafted },
+      {
+        status: OrderStatus.Confirmed,
+        hostId,
+      },
+      session,
     );
+
+    await this.hostRepository.addOrderToHost(hostId, orderId, session);
   }
 }

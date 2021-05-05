@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { OrderRepository } from '../port/OrderRepository';
-import { UUID } from '../../../common/domain';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
@@ -9,8 +8,6 @@ import {
   AddItemPhotoUseCase,
   ItemPhotosUploadResult,
 } from '../../domain/use-case/AddItemPhotoUseCase';
-import { Item } from '../../domain/entity/Item';
-import { Photo } from '../../infrastructure/persistence/order/OrderMongoMapper';
 
 @Injectable()
 export class AddItemPhotoService implements AddItemPhotoUseCase {
@@ -37,23 +34,11 @@ export class AddItemPhotoService implements AddItemPhotoUseCase {
     { orderId, hostId, itemId, photos }: AddItemPhotoRequest,
     session: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
-    return Item.uploadPhoto(
-      orderId,
-      hostId,
-      itemId,
+    return this.orderRepository.addItemPhotos(
+      { id: orderId, hostId },
+      { id: itemId },
       photos,
-      (
-        itemContainedOrderId: UUID,
-        orderAssigneeHostId: UUID,
-        toBeUploadedPhotoItemId: UUID,
-        uploadedPhotos: Photo[],
-      ) =>
-        this.orderRepository.addItemPhotos(
-          { id: itemContainedOrderId, hostId: orderAssigneeHostId },
-          { id: toBeUploadedPhotoItemId },
-          uploadedPhotos,
-          session,
-        ),
+      session,
     );
   }
 }

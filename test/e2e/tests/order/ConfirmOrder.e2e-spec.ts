@@ -222,7 +222,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     setTimeout(async () => {
       await page.screenshot({
-        path: './test/e2e/tests/order/page.png',
+        path: './test/e2e/tests/order/stripe_form_result.png',
         fullPage: true,
       });
 
@@ -306,8 +306,9 @@ function updatedStripeCheckoutSessionInTestPage(checkoutId: string) {
   );
 }
 
+// TODO: Retry on Stripe form error (will eliminate majority of test failures)
 async function fillStripeCheckoutForm(): Promise<void> {
-  const typingOptions = { delay: 50 };
+  const typingOptions = { delay: 100 };
   const testCardNumber = '4242424242424242';
   const testCardExpirty = '0424';
   const testCardCvc = '100';

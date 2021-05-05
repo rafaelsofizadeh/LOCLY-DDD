@@ -10,7 +10,6 @@ import {
   ReceiveOrderItemUseCase,
 } from '../../domain/use-case/ReceiveOrderItemUseCase';
 import { OrderStatus } from '../../domain/entity/Order';
-import { Item } from '../../domain/entity/Item';
 
 @Injectable()
 export class ReceiveOrderItemService implements ReceiveOrderItemUseCase {
@@ -46,26 +45,17 @@ export class ReceiveOrderItemService implements ReceiveOrderItemUseCase {
     itemId: UUID,
     session: ClientSession,
   ): Promise<Date> {
-    const receivedDate: Date = await Item.beReceived(
-      orderId,
-      hostId,
-      itemId,
-      (
-        itemContainedOrderId: UUID,
-        orderAssigneeHostId: UUID,
-        toBeReceivedOrderItemId: UUID,
-        receivedDate: Date,
-      ) =>
-        this.orderRepository.setItemProperties(
-          {
-            id: itemContainedOrderId,
-            status: OrderStatus.Confirmed,
-            hostId: orderAssigneeHostId,
-          },
-          { id: toBeReceivedOrderItemId },
-          { receivedDate },
-          session,
-        ),
+    const receivedDate = new Date();
+
+    await this.orderRepository.setItemProperties(
+      {
+        id: orderId,
+        status: OrderStatus.Confirmed,
+        hostId: hostId,
+      },
+      { id: itemId },
+      { receivedDate },
+      session,
     );
 
     return receivedDate;

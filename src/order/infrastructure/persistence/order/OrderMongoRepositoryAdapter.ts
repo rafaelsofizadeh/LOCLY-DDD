@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { promisify } from 'util';
-import { PromiseWritable } from 'promise-writable';
 import {
   Binary,
   ClientSession,
   Collection,
   DeleteWriteOpResultObject,
   FilterQuery,
-  GridFSBucket,
   UpdateWriteOpResult,
 } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
@@ -27,7 +24,6 @@ import {
 } from './OrderMongoMapper';
 import { DraftOrder } from '../../../domain/entity/DraftOrder';
 import {
-  convertToMongoDocument,
   mongoQuery,
   muuidToUuid,
   uuidToMuuid,
