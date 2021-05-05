@@ -6,7 +6,6 @@ import { Order, OrderStatus, ShipmentCost } from '../../../domain/entity/Order';
 import { Country } from '../../../domain/data/Country';
 import { DraftOrder } from '../../../domain/entity/DraftOrder';
 import { ConfirmOrder } from '../../../domain/entity/ConfirmOrder';
-import { VerifiedByHostOrder } from '../../../domain/entity/VerifiedByHostOrder';
 import { PhysicalItemProps } from '../../../domain/entity/Item';
 import {
   convertToMongoDocument,
@@ -55,23 +54,12 @@ export type ReceivedOrderItemMongoDocument = Pick<
   '_id' | 'status' | 'receivedDate'
 >;
 
-export type VerifiedByHostOrderMongoDocument = Pick<
-  AnyOrderMongoDocument,
-  '_id' | 'status' | 'originCountry' | 'items' | 'shipmentCost' | 'destination'
->;
-
-export type VerifiedByHostOrderMongoDocumentProps = Omit<
-  VerifiedByHostOrderMongoDocument,
-  'items'
-> & { physicalItems: PhysicalItemMongoSubdocument[] };
-
 export type Photo = Omit<Express.Multer.File, 'id'> & { id: Binary };
 
 export type OrderMongoDocument =
   | DraftedOrderMongoDocument
   | ConfirmedOrderMongoDocument
-  | ReceivedOrderItemMongoDocument
-  | VerifiedByHostOrderMongoDocument;
+  | ReceivedOrderItemMongoDocument;
 
 export function isDraftedOrderMongoDocument(
   orderMongoDocument: OrderMongoDocument,
@@ -85,12 +73,6 @@ export function isConfirmedOrderMongoDocument(
   return orderMongoDocument.status === OrderStatus.Confirmed;
 }
 
-export function isVerifiedByHostOrderMongoDocument(
-  orderMongoDocument: OrderMongoDocument,
-): orderMongoDocument is VerifiedByHostOrderMongoDocument {
-  return orderMongoDocument.status === OrderStatus.VerifiedByHost;
-}
-
 export function draftOrderToMongoDocument(
   draftOrder: DraftOrder,
 ): DraftedOrderMongoDocument {
@@ -101,15 +83,6 @@ export function draftOrderToMongoDocument(
   };
 }
 
-export function serializeVerifiedByHostOrderToMongoDocumentProps(
-  verifiedByHostOrder: VerifiedByHostOrder,
-): VerifiedByHostOrderMongoDocumentProps {
-  return {
-    ...convertToMongoDocument(verifiedByHostOrder),
-    status: OrderStatus.Confirmed,
-  };
-}
-
 export function mongoDocumentToOrder(orderDocument: OrderMongoDocument): Order {
   const payload = serializeMongoData(orderDocument);
 
@@ -117,23 +90,12 @@ export function mongoDocumentToOrder(orderDocument: OrderMongoDocument): Order {
     return DraftOrder.fromData(
       payload as SerializedMongoDocument<DraftedOrderMongoDocument>,
     );
-  } else if (isConfirmedOrderMongoDocument(orderDocument)) {
+  }
+
+  if (isConfirmedOrderMongoDocument(orderDocument)) {
     return ConfirmOrder.fromData(
       payload as SerializedMongoDocument<ConfirmedOrderMongoDocument>,
     );
-  } else if (isVerifiedByHostOrderMongoDocument(orderDocument)) {
-    const { items, ...restPayload } = payload as SerializedMongoDocument<
-      VerifiedByHostOrderMongoDocument
-    >;
-
-    const physicalItems = items.map(
-      ({ title, storeName, ...physicalItem }) => physicalItem,
-    );
-
-    return VerifiedByHostOrder.fromData({
-      ...restPayload,
-      physicalItems,
-    } as SerializedMongoDocument<VerifiedByHostOrderMongoDocumentProps>);
   }
 
   throw new Error('Invalid order status');
