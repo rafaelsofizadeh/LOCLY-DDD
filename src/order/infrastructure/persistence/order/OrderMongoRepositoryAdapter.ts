@@ -60,15 +60,13 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     properties: WithoutId<OrderFilter>,
     session?: ClientSession,
   ) {
+    const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(filter);
+
     const updateResult: UpdateWriteOpResult = await this.orderCollection
-      .updateOne(
-        mongoQuery(filter),
-        { $set: mongoQuery(properties) },
-        { session },
-      )
+      .updateOne(filterQuery, { $set: mongoQuery(properties) }, { session })
       .catch(
         throwCustomException('Error updating order', {
-          orderId: filter.id,
+          orderId: filter.orderId,
           properties,
           filter,
         }),
@@ -96,7 +94,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
 
     if (!orderDocument) {
       throwCustomException('No order found', {
-        orderId: filter.id,
+        orderId: filter.orderId,
         filter,
       })();
     }
@@ -146,7 +144,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       })
       .catch(
         throwCustomException('Error deleting order', {
-          orderId: filter.id,
+          orderId: filter.orderId,
           filter,
         }),
       );
@@ -182,8 +180,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       .updateOne(query, { $set: itemSetQuery }, { session })
       .catch(
         throwCustomException('Error updating order item', {
-          orderId: filter.id,
-          itemId: filter.items.id,
+          orderId: filter.orderId,
+          itemId: filter.items.itemId,
           properties,
           filter,
         }),
@@ -198,8 +196,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
           "the item either doesn't exist, or has already been received",
       },
       {
-        orderId: filter.id,
-        itemId: filter.items.id,
+        orderId: filter.orderId,
+        itemId: filter.items.itemId,
         properties,
         filter,
       },
@@ -233,8 +231,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       )
       .catch(
         throwCustomException('Error adding photo file id to order item', {
-          orderId: orderFilter.id,
-          itemId: itemFilter.id,
+          orderId: orderFilter.orderId,
+          itemId: itemFilter.itemId,
           orderFilter,
           itemFilter,
         }),

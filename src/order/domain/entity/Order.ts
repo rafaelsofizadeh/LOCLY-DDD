@@ -1,4 +1,4 @@
-import { EntityFilter } from '../../../common/domain';
+import { EntityFilter, UUID } from '../../../common/domain';
 import { ConfirmOrder } from './ConfirmOrder';
 import { DraftOrder } from './DraftOrder';
 import { ItemFilter } from './Item';
@@ -8,6 +8,7 @@ export type ShipmentCost = {
   currency: string;
 };
 
+// TODO: revert back to OrderStatus const-literal-enum
 export const DraftedOrderStatus = 'drafted' as const;
 
 export const ConfirmedOrderStatus = 'confirmed' as const;
@@ -21,6 +22,6 @@ export type Order = DraftOrder | ConfirmOrder;
 type AnyOrder = Omit<DraftOrder, 'status'> &
   Omit<ConfirmOrder, 'status'> & { status: OrderStatus };
 
-export type OrderFilter = EntityFilter<AnyOrder>;
+export type OrderFilter = EntityFilter<AnyOrder, { orderId: UUID }>;
 
 export type OrderItemFilter = OrderFilter & { item: ItemFilter };

@@ -49,11 +49,11 @@ export class ReceiveOrderItemService implements ReceiveOrderItemUseCase {
 
     await this.orderRepository.setItemProperties(
       {
-        id: orderId,
+        orderId,
         status: ConfirmedOrderStatus,
         hostId: hostId,
       },
-      { id: itemId },
+      { itemId },
       { receivedDate },
       session,
     );

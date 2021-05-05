@@ -35,8 +35,8 @@ export class AddItemPhotoService implements AddItemPhotoUseCase {
     session: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
     return this.orderRepository.addItemPhotos(
-      { id: orderId, hostId },
-      { id: itemId },
+      { orderId, hostId },
+      { itemId },
       photos,
       session,
     );

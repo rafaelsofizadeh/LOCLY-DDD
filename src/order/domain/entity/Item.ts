@@ -14,4 +14,4 @@ export interface Item extends PhysicalItem {
   readonly receivedDate?: Date;
 }
 
-export type ItemFilter = EntityFilter<Item>;
+export type ItemFilter = EntityFilter<Item, { itemId: UUID }>;

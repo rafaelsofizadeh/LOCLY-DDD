@@ -123,7 +123,7 @@ describe('Confirm Order – POST /order/confirm', () => {
   afterEach(async () => {
     await Promise.allSettled([
       hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
-      orderRepository.deleteOrder({ id: testOrder.id }),
+      orderRepository.deleteOrder({ orderId: testOrder.id }),
     ]);
   });
 
@@ -231,7 +231,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       await expect(
         (async () => {
           updatedTestOrder = (await orderRepository.findOrder({
-            id: testOrder.id,
+            orderId: testOrder.id,
             status: ConfirmedOrderStatus,
           })) as ConfirmOrder;
         })(),

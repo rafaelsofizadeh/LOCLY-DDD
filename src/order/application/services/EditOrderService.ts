@@ -43,7 +43,7 @@ export class EditOrderService implements EditOrderUseCase {
   ): Promise<DraftOrder> {
     await this.orderRepository.deleteOrder(
       {
-        id: orderId,
+        orderId,
         status: DraftedOrderStatus,
         customerId,
       },

@@ -36,7 +36,7 @@ export class DeleteOrderService implements DeleteOrderUseCase {
     session: ClientSession,
   ): Promise<void> {
     await this.orderRepository.deleteOrder(
-      { id: orderId, status: DraftedOrderStatus, customerId },
+      { orderId, status: DraftedOrderStatus, customerId },
       session,
     );
     await this.customerRepository.removeOrderFromCustomer(

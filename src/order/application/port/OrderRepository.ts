@@ -1,5 +1,5 @@
 import { ClientSession } from 'mongodb';
-import { UUID, WithoutId } from '../../../common/domain';
+import { UUID } from '../../../common/domain';
 import { DraftOrder } from '../../domain/entity/DraftOrder';
 import { ItemFilter } from '../../domain/entity/Item';
 import { Order, OrderFilter } from '../../domain/entity/Order';
@@ -27,14 +27,14 @@ export abstract class OrderRepository {
   abstract setProperties(
     filter: OrderFilter,
     // TODO: type is almost the same as OrderFilter
-    properties: WithoutId<OrderFilter>,
+    properties: Omit<OrderFilter, 'orderId'>,
     session?: ClientSession,
   ): Promise<void>;
 
   abstract setItemProperties(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
-    properties: WithoutId<ItemFilter>,
+    properties: Omit<ItemFilter, 'itemId'>,
     session?: ClientSession,
   ): Promise<void>;
 

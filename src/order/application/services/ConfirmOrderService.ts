@@ -60,7 +60,7 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
     session: ClientSession,
   ): Promise<void> {
     await this.orderRepository.setProperties(
-      { id: orderId, status: DraftedOrderStatus },
+      { orderId, status: DraftedOrderStatus },
       { status: ConfirmedOrderStatus, hostId },
       session,
     );

@@ -77,7 +77,7 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
     afterEach(() =>
       Promise.all([
         customerRepository.deleteCustomer(testCustomer.id),
-        orderRepository.deleteOrder({ id: testOrderId }),
+        orderRepository.deleteOrder({ orderId: testOrderId }),
       ]),
     );
 
@@ -112,7 +112,7 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
       // should be a DraftOrder
       await expect(
         orderRepository.findOrder({
-          id: testOrderId,
+          orderId: testOrderId,
           status: DraftedOrderStatus,
           customerId: testCustomer.id,
         }),
