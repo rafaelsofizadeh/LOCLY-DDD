@@ -319,15 +319,19 @@ async function fillStripeCheckoutForm(): Promise<void> {
   await page.click('#checkout-button');
 
   await page.waitForSelector('#cardNumber');
+  await page.click('#cardNumber');
   await page.focus('#cardNumber');
   await page.keyboard.type(testCardNumber, typingOptions);
 
+  await page.click('#cardExpiry');
   await page.focus('#cardExpiry');
   await page.keyboard.type(testCardExpirty, typingOptions);
 
+  await page.click('#cardCvc');
   await page.focus('#cardCvc');
   await page.keyboard.type(testCardCvc, typingOptions);
 
+  await page.click('#billingName');
   await page.focus('#billingName');
   await page.keyboard.type(testNameOnCard, typingOptions);
 

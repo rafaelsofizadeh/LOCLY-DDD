@@ -18,12 +18,9 @@ export type OrderStatus =
 
 export type Order = DraftOrder | ConfirmOrder;
 
-type AnyOrder = DraftOrder & ConfirmOrder;
+type AnyOrder = Omit<DraftOrder, 'status'> &
+  Omit<ConfirmOrder, 'status'> & { status: OrderStatus };
 
-export type OrderFilter = EntityFilter<
-  AnyOrder & {
-    status: OrderStatus;
-  }
->;
+export type OrderFilter = EntityFilter<AnyOrder>;
 
 export type OrderItemFilter = OrderFilter & { item: ItemFilter };

@@ -24,7 +24,7 @@ import { Item } from '../../domain/entity/Item';
 import { UUID } from '../../../common/domain';
 import { Exception } from '../../../common/error-handling';
 import { Country } from '../../domain/data/Country';
-import { ShipmentCost } from '../../domain/entity/Order';
+import { DraftedOrderStatus, ShipmentCost } from '../../domain/entity/Order';
 import { Address } from '../../domain/entity/Address';
 
 @Injectable()
@@ -77,6 +77,7 @@ export class DraftOrderService implements DraftOrderUseCase {
 
     const draftOrder: DraftOrder = {
       id: UUID(),
+      status: DraftedOrderStatus,
       customerId,
       items,
       originCountry,

@@ -11,7 +11,6 @@ import { Host } from '../../domain/entity/Host';
 import {
   ConfirmedOrderStatus,
   DraftedOrderStatus,
-  OrderStatus,
 } from '../../domain/entity/Order';
 import {
   ConfirmOrderUseCase,
@@ -62,10 +61,7 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
   ): Promise<void> {
     await this.orderRepository.setProperties(
       { id: orderId, status: DraftedOrderStatus },
-      {
-        status: ConfirmedOrderStatus,
-        hostId,
-      },
+      { status: ConfirmedOrderStatus, hostId },
       session,
     );
 
