@@ -1,8 +1,7 @@
-import { EntityFilter, WithoutId } from '../../../common/domain';
+import { EntityFilter } from '../../../common/domain';
 import { ConfirmOrder, ConfirmOrderProps } from './ConfirmOrder';
 import { DraftOrder, DraftOrderProps } from './DraftOrder';
 import { ItemFilter } from './Item';
-import { ReceiveOrderItem } from './ReceiveOrderItem';
 import {
   VerifiedByHostOrder,
   VerifiedByHostOrderProps,
@@ -21,11 +20,7 @@ export const OrderStatus = {
 
 export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
 
-export type Order =
-  | DraftOrder
-  | ConfirmOrder
-  | ReceiveOrderItem
-  | VerifiedByHostOrder;
+export type Order = DraftOrder | ConfirmOrder | VerifiedByHostOrder;
 
 export type OrderProps = DraftOrderProps &
   ConfirmOrderProps &

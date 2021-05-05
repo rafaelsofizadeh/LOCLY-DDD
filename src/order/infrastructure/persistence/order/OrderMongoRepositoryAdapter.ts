@@ -167,7 +167,6 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     properties: WithoutId<ItemFilter>,
     session?: ClientSession,
   ): Promise<void> {
-    // Query for undefined field https://docs.mongodb.com/manual/tutorial/query-for-null-fields/#existence-check
     const filter = {
       ...orderFilter,
       items: itemFilter,
@@ -176,7 +175,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     const query = {
       ...queryWithoutReceivedCheck,
       // Can't receive an already-received item
-      'items.receivedDate': { $exists: false },
+      // Query for undefined field https://docs.mongodb.com/manual/tutorial/query-for-null-fields/#existence-check
+      'items.receivedDate': null,
     };
 
     const itemSetQuery = mongoQuery({ 'items.$': properties });

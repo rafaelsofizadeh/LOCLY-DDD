@@ -9,8 +9,8 @@ import {
   ReceiveOrderItemResult,
   ReceiveOrderItemUseCase,
 } from '../../domain/use-case/ReceiveOrderItemUseCase';
-import { ReceiveOrderItem } from '../../domain/entity/ReceiveOrderItem';
 import { OrderStatus } from '../../domain/entity/Order';
+import { Item } from '../../domain/entity/Item';
 
 @Injectable()
 export class ReceiveOrderItemService implements ReceiveOrderItemUseCase {
@@ -46,7 +46,7 @@ export class ReceiveOrderItemService implements ReceiveOrderItemUseCase {
     itemId: UUID,
     session: ClientSession,
   ): Promise<Date> {
-    const receivedDate: Date = await ReceiveOrderItem.receive(
+    const receivedDate: Date = await Item.beReceived(
       orderId,
       hostId,
       itemId,
