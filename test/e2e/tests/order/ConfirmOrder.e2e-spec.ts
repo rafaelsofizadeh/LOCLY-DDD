@@ -130,9 +130,9 @@ describe('Confirm Order – POST /order/confirm', () => {
     ]);
   });
 
-      await Promise.allSettled([
-        customerRepository.deleteCustomer(testCustomer.id),
   afterAll(async () => {
+    await Promise.allSettled([
+      customerRepository.deleteCustomer(testCustomer.id),
     ]);
     await app.close();
   });
