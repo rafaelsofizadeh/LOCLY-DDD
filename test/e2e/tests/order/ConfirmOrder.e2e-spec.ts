@@ -47,6 +47,8 @@ describe('Confirm Order – POST /order/confirm', () => {
   let testOrder: DraftOrder;
   let testHosts: Host[];
 
+  let stripeListener: child_process.ChildProcess;
+
   const originCountry: Country = originCountriesAvailable[0];
   const destinationCountry: Country = getDestinationCountriesAvailable(
     originCountry,
@@ -90,7 +92,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     await customerRepository.addCustomer(testCustomer);
 
-    const stripeListener = child_process.spawn('stripe', [
+    stripeListener = child_process.spawn('stripe', [
       'listen',
       '--forward-to',
       'localhost:3000/stripe/webhook',
@@ -136,6 +138,8 @@ describe('Confirm Order – POST /order/confirm', () => {
     await Promise.allSettled([
       customerRepository.deleteCustomer(testCustomer.id),
     ]);
+
+    stripeListener.kill();
     await app.close();
   });
 
