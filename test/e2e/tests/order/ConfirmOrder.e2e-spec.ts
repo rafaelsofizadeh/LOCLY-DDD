@@ -15,10 +15,6 @@ import { DraftOrderUseCase } from '../../../../src/order/domain/use-case/DraftOr
 import { Country } from '../../../../src/order/domain/data/Country';
 import { isString } from 'class-validator';
 import { HostRepository } from '../../../../src/order/application/port/HostRepository';
-import {
-  destinationCountriesAvailable,
-  originCountriesAvailable,
-} from '../../../../src/order/application/services/checkServiceAvailability';
 import { StripeCheckoutSessionResult } from '../../../../src/order/domain/use-case/PreConfirmOrderUseCase';
 import {
   DraftOrder,
@@ -27,6 +23,10 @@ import {
 } from '../../../../src/order/domain/entity/Order';
 import { UUID } from '../../../../src/common/domain';
 import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
+import {
+  getDestinationCountriesAvailable,
+  originCountriesAvailable,
+} from '../../../../src/order/application/services/ShipmentCostCalculator/data/PriceGuide';
 
 type HostConfig = {
   country: Country;
@@ -48,7 +48,9 @@ describe('Confirm Order – POST /order/confirm', () => {
   let testHosts: Host[];
 
   const originCountry: Country = originCountriesAvailable[0];
-  const destinationCountry: Country = destinationCountriesAvailable[0];
+  const destinationCountry: Country = getDestinationCountriesAvailable(
+    originCountry,
+  )[0];
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({

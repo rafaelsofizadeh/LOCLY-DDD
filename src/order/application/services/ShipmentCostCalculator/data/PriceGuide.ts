@@ -1,6 +1,7 @@
+import { Country } from '../../../../domain/data/Country';
 import { ShipmentCostSpecification } from '../getShipmentCostQuote';
 
-const priceGuide: ShipmentCostSpecification = {
+export const priceGuide: ShipmentCostSpecification = {
   GBR: {
     postalServiceName: 'Royal Mail',
     priceTableSpecification: {
@@ -597,4 +598,17 @@ const priceGuide: ShipmentCostSpecification = {
   },
 };
 
-export default priceGuide;
+export const originCountriesAvailable = Object.keys(priceGuide) as Country[];
+export const getDestinationCountriesAvailable = (originCountry: Country) => {
+  const { deliveryZones } = priceGuide[originCountry];
+
+  return [
+    ...new Set(
+      Object.keys(deliveryZones).reduce(
+        (countryCombination, name) =>
+          countryCombination.concat(deliveryZones[name]),
+        [],
+      ),
+    ),
+  ];
+};

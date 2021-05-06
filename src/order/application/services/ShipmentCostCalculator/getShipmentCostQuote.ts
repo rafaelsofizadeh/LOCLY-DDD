@@ -3,7 +3,7 @@ import { throwCustomException } from '../../../../common/error-handling';
 import { Country } from '../../../domain/data/Country';
 import { Currency } from '../../../domain/data/Currency';
 import { Gram, PhysicalItem } from '../../../domain/entity/Item';
-import priceGuide from './data/PriceGuide';
+import { priceGuide } from './data/PriceGuide';
 
 // TODO: POST PRICE COVERAGE. Check Royal Mail PDF Bottom, VAT and "add 2.5GBP to prices in the table"
 type PriceTableSpecification = {

@@ -8,10 +8,6 @@ import { Customer } from '../../../../src/order/domain/entity/Customer';
 import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
 import { UUID } from '../../../../src/common/domain';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
-import {
-  destinationCountriesAvailable,
-  originCountriesAvailable,
-} from '../../../../src/order/application/services/checkServiceAvailability';
 import { DraftOrderRequest } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
 import {
   DraftedOrderStatus,
@@ -19,6 +15,10 @@ import {
 } from '../../../../src/order/domain/entity/Order';
 import { Country } from '../../../../src/order/domain/data/Country';
 import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
+import {
+  getDestinationCountriesAvailable,
+  originCountriesAvailable,
+} from '../../../../src/order/application/services/ShipmentCostCalculator/data/PriceGuide';
 
 // TODO(GLOBAL)(TESTING): Substitute database name in tests
 
@@ -30,6 +30,8 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
 
   let testOrderId: UUID;
   let testCustomer: Customer;
+
+  const originCountry = originCountriesAvailable[0];
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -67,7 +69,9 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
     beforeEach(async () => {
       testCustomer = {
         id: UUID(),
-        selectedAddress: { country: destinationCountriesAvailable[1] },
+        selectedAddress: {
+          country: getDestinationCountriesAvailable(originCountry)[0],
+        },
         orderIds: [],
       };
 
@@ -205,9 +209,10 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
       // TODO: Error typing
       const { message, data } = response.body;
 
+      // TODO: Better way to check error message
       // 1. Check the error format
-      expect(message).toBe(
-        `SERVICE_UNAVAILABLE | Service unavailable for origin = ${unavailableOriginCountry}, destination = ${testCustomer.selectedAddress.country}`,
+      expect(message.split(':')[0]).toBe(
+        `SERVICE_UNAVAILABLE | Origin country ${unavailableOriginCountry} is not supported by the calculator. `,
       );
     });
 
@@ -252,6 +257,8 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
      *
      * You can either knowingly make the UseCase fail (like in 'fails on nonexistent customer'),
      * or mock a function to __always__ fail. But how to mock the function, for example, addOrderToCustomer?
+     *
+     * TODO: Test for all granular calculator errors
      */
   });
 });
