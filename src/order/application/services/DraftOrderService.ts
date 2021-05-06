@@ -24,6 +24,7 @@ import {
   DraftedOrderStatus,
   ShipmentCost,
 } from '../../domain/entity/Order';
+import { throwCustomException } from '../../../common/error-handling';
 
 @Injectable()
 export class DraftOrderService implements DraftOrderUseCase {
@@ -48,34 +49,10 @@ export class DraftOrderService implements DraftOrderUseCase {
   }
 
   private async draftOrder(
-    {
-      customerId,
-      originCountry,
-      items: itemsWithoutId,
-      destination,
-    }: DraftOrderRequest,
+    draftOrderRequest: DraftOrderRequest,
     session: ClientSession,
   ): Promise<DraftOrder> {
-    const items: Item[] = itemsWithoutId.map(itemWithoutId =>
-      Object.assign(itemWithoutId, { id: UUID() }),
-    );
-
-    const shipmentCost = this.approximateShipmentCost(
-      originCountry,
-      destination,
-      items,
-      getShipmentCostQuote,
-    );
-
-    const draftOrder: DraftOrder = {
-      id: UUID(),
-      status: DraftedOrderStatus,
-      customerId,
-      items,
-      originCountry,
-      destination,
-      shipmentCost,
-    };
+    const draftOrder: DraftOrder = this.constructDraftOrder(draftOrderRequest);
 
     // TODO(IMPORANT): Document MongoDb concurrent transaction limitations.
     // https://jira.mongodb.org/browse/SERVER-36428?focusedCommentId=2136170&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-2136170
@@ -89,6 +66,43 @@ export class DraftOrderService implements DraftOrderUseCase {
     );
 
     return draftOrder;
+  }
+
+  private constructDraftOrder({
+    customerId,
+    originCountry,
+    items: itemsWithoutId,
+    destination,
+  }: DraftOrderRequest): DraftOrder {
+    // TODO: class-validator decorator https://github.com/typestack/class-validator/issues/486
+    if (originCountry === destination.country) {
+      throwCustomException(
+        "Origin country can't be equal to destination country",
+        { originCountry, destinationCountry: destination.country },
+        HttpStatus.SERVICE_UNAVAILABLE,
+      )();
+    }
+
+    const items: Item[] = itemsWithoutId.map(itemWithoutId =>
+      Object.assign(itemWithoutId, { id: UUID() }),
+    );
+
+    const shipmentCost = this.approximateShipmentCost(
+      originCountry,
+      destination,
+      items,
+      getShipmentCostQuote,
+    );
+
+    return {
+      id: UUID(),
+      status: DraftedOrderStatus,
+      customerId,
+      items,
+      originCountry,
+      destination,
+      shipmentCost,
+    };
   }
 
   private approximateShipmentCost(
