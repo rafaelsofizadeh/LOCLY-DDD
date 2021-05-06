@@ -9,7 +9,7 @@ export interface DraftOrderRequest {
   customerId: UUID;
   originCountry: Country;
   destination: Address;
-  items: WithoutId<Item>[];
+  items: Omit<WithoutId<Item>, 'receivedDate'>[];
 }
 
 export abstract class DraftOrderUseCase extends UseCase<
