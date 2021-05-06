@@ -15,10 +15,6 @@ import {
   ShipmentCostQuote,
   ShipmentCostQuoteFn,
 } from './ShipmentCostCalculator/getShipmentCostQuote';
-import {
-  checkServiceAvailability,
-  ServiceAvailabilityFn,
-} from './checkServiceAvailability';
 import { Item } from '../../domain/entity/Item';
 import { UUID } from '../../../common/domain';
 import { Exception } from '../../../common/error-handling';
@@ -61,12 +57,6 @@ export class DraftOrderService implements DraftOrderUseCase {
     }: DraftOrderRequest,
     session: ClientSession,
   ): Promise<DraftOrder> {
-    this.validateOriginDestination(
-      originCountry,
-      destination,
-      checkServiceAvailability,
-    );
-
     const items: Item[] = itemsWithoutId.map(itemWithoutId =>
       Object.assign(itemWithoutId, { id: UUID() }),
     );
@@ -100,25 +90,6 @@ export class DraftOrderService implements DraftOrderUseCase {
     );
 
     return draftOrder;
-  }
-
-  private validateOriginDestination(
-    originCountry: Country,
-    { country: destinationCountry }: Address,
-    checkServiceAvailability: ServiceAvailabilityFn,
-  ) {
-    const isServiceAvailable: boolean = checkServiceAvailability(
-      originCountry,
-      destinationCountry,
-    );
-
-    if (!isServiceAvailable) {
-      throw new Exception(
-        HttpStatus.SERVICE_UNAVAILABLE,
-        `Service unavailable for origin = ${originCountry}, destination = ${destinationCountry}`,
-        { originCountry, destinationCountry },
-      );
-    }
   }
 
   private approximateShipmentCost(

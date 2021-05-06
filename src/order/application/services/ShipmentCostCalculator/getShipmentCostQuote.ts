@@ -1,7 +1,8 @@
+import { HttpStatus } from '@nestjs/common';
+import { throwCustomException } from '../../../../common/error-handling';
 import { Country } from '../../../domain/data/Country';
 import { Currency } from '../../../domain/data/Currency';
 import { Gram, PhysicalItem } from '../../../domain/entity/Item';
-import countryIsoList from './data/CountryIsoCodes';
 import priceGuide from './data/PriceGuide';
 
 // TODO: POST PRICE COVERAGE. Check Royal Mail PDF Bottom, VAT and "add 2.5GBP to prices in the table"
@@ -63,12 +64,6 @@ function determineDeliveryZone(
   );
 }
 
-function validateCountry(country: Country): void {
-  if (!countryIsoList.includes(country)) {
-    throw new Error(`No such country ${country}.`);
-  }
-}
-
 function validateOriginCountry(originCountry: Country): void {
   if (!priceGuide.hasOwnProperty(originCountry)) {
     throw new Error(
@@ -103,69 +98,78 @@ export function getShipmentCostQuote(
   destinationCountry: Country,
   packages: PhysicalItem[],
 ): ShipmentCostQuote {
-  validateCountry(originCountry);
-  validateCountry(destinationCountry);
-  validateOriginCountry(originCountry);
+  try {
+    validateOriginCountry(originCountry);
 
-  const {
-    postalServiceName,
-    priceTableSpecification: { weightIntervals, deliveryZoneNames, currency },
-    deliveryZones,
-    deliveryServices,
-  } = priceGuide[originCountry];
+    const {
+      postalServiceName,
+      priceTableSpecification: { weightIntervals, deliveryZoneNames, currency },
+      deliveryZones,
+      deliveryServices,
+    } = priceGuide[originCountry];
 
-  const weightIntervalIndex: Index = validatePackageDimensions(
-    weightIntervals,
-    packages,
-  );
-
-  const deliveryZone = determineDeliveryZone(deliveryZones, destinationCountry);
-
-  if (!deliveryZone) {
-    throw new Error(
-      `Destination country ${originCountry} is not supported by ${postalServiceName}.`,
-    );
-  }
-
-  const deliveryZoneTableIndex = deliveryZoneNames.indexOf(deliveryZone);
-
-  const availableDeliveryServices = deliveryServices.filter(
-    ({ serviceAvailability }) =>
-      serviceAvailability.includes(destinationCountry) ||
-      serviceAvailability.includes('all'),
-  );
-
-  if (!availableDeliveryServices.length) {
-    throw new Error(
-      `Destination country ${destinationCountry} is not supported by ${postalServiceName}.`,
-    );
-  }
-
-  const services = availableDeliveryServices.map(service => {
-    const { name, tracked, priceTable } = service;
-
-    const price = getTableEntry(
-      priceTable,
-      weightIntervalIndex,
-      deliveryZoneTableIndex,
+    const weightIntervalIndex: Index = validatePackageDimensions(
+      weightIntervals,
+      packages,
     );
 
-    if (isNaN(price)) {
-      throw new Error('Unexpected error occurred');
+    const deliveryZone = determineDeliveryZone(
+      deliveryZones,
+      destinationCountry,
+    );
+
+    if (!deliveryZone) {
+      throw new Error(
+        `Destination country ${destinationCountry} is not supported by ${postalServiceName} of ${originCountry}.`,
+      );
     }
 
-    return {
-      name,
-      tracked,
-      price: Math.round((price + Number.EPSILON) * 100) / 100,
-    };
-  });
+    const deliveryZoneTableIndex = deliveryZoneNames.indexOf(deliveryZone);
 
-  return {
-    postalServiceName,
-    currency,
-    services,
-  };
+    const availableDeliveryServices = deliveryServices.filter(
+      ({ serviceAvailability }) =>
+        serviceAvailability.includes(destinationCountry) ||
+        serviceAvailability.includes('all'),
+    );
+
+    if (!availableDeliveryServices.length) {
+      throw new Error(
+        `Destination country ${destinationCountry} is not supported by ${postalServiceName}.`,
+      );
+    }
+
+    const services = availableDeliveryServices.map(service => {
+      const { name, tracked, priceTable } = service;
+
+      const price = getTableEntry(
+        priceTable,
+        weightIntervalIndex,
+        deliveryZoneTableIndex,
+      );
+
+      if (isNaN(price)) {
+        throw new Error('Unexpected error occurred');
+      }
+
+      return {
+        name,
+        tracked,
+        price: Math.round((price + Number.EPSILON) * 100) / 100,
+      };
+    });
+
+    return {
+      postalServiceName,
+      currency,
+      services,
+    };
+  } catch (error) {
+    throwCustomException(
+      error.message,
+      { originCountry, destinationCountry, packages },
+      HttpStatus.SERVICE_UNAVAILABLE,
+    )(error);
+  }
 }
 
 export type ShipmentCostQuoteFn = (
