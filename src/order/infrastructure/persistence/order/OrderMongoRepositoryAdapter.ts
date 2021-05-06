@@ -21,6 +21,8 @@ import {
   draftOrderToMongoDocument,
   mongoDocumentToOrder,
   Photo,
+  normalizeOrderFilter,
+  normalizeItemFilter,
 } from './OrderMongoMapper';
 import {
   mongoQuery,
@@ -59,7 +61,10 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     properties: WithoutId<OrderFilter>,
     session?: ClientSession,
   ) {
-    const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(filter);
+    const filterWithId = normalizeOrderFilter(filter);
+    const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(
+      filterWithId,
+    );
 
     const updateResult: UpdateWriteOpResult = await this.orderCollection
       .updateOne(filterQuery, { $set: mongoQuery(properties) }, { session })
@@ -85,7 +90,11 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     session?: ClientSession,
   ): Promise<Order> {
     // TODO: better typing using FilterQuery
-    const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(filter);
+    const filterWithId = normalizeOrderFilter(filter);
+    const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+    console.log(filterWithId, filterQuery);
 
     const orderDocument: OrderMongoDocument = await this.orderCollection
       .findOne(filterQuery, { session })
@@ -137,8 +146,13 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     filter: OrderFilter,
     session?: ClientSession,
   ): Promise<void> {
+    const filterWithId = normalizeOrderFilter(filter);
+    const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+
     const deleteResult: DeleteWriteOpResultObject = await this.orderCollection
-      .deleteOne(mongoQuery(filter), {
+      .deleteOne(filterQuery, {
         session,
       })
       .catch(
@@ -161,13 +175,17 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     properties: WithoutId<ItemFilter>,
     session?: ClientSession,
   ): Promise<void> {
+    const orderFilterWithId = normalizeOrderFilter(orderFilter);
+    const itemFilterWithId = normalizeItemFilter(itemFilter);
+
     const filter = {
-      ...orderFilter,
-      items: itemFilter,
+      ...orderFilterWithId,
+      items: itemFilterWithId,
     };
-    const queryWithoutReceivedCheck = mongoQuery(filter);
-    const query = {
-      ...queryWithoutReceivedCheck,
+
+    const filterQueryWithoutReceivedCheck = mongoQuery(filter);
+    const filterQuery = {
+      ...filterQueryWithoutReceivedCheck,
       // Can't receive an already-received item
       // Query for undefined field https://docs.mongodb.com/manual/tutorial/query-for-null-fields/#existence-check
       'items.receivedDate': null,
@@ -176,11 +194,11 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     const itemSetQuery = mongoQuery({ 'items.$': properties });
 
     const updateResult: UpdateWriteOpResult = await this.orderCollection
-      .updateOne(query, { $set: itemSetQuery }, { session })
+      .updateOne(filterQuery, { $set: itemSetQuery }, { session })
       .catch(
         throwCustomException('Error updating order item', {
-          orderId: filter.orderId,
-          itemId: filter.items.itemId,
+          orderId: orderFilter.orderId,
+          itemId: itemFilter.itemId,
           properties,
           filter,
         }),
@@ -195,8 +213,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
           "the item either doesn't exist, or has already been received",
       },
       {
-        orderId: filter.orderId,
-        itemId: filter.items.itemId,
+        orderId: orderFilter.orderId,
+        itemId: itemFilter.itemId,
         properties,
         filter,
       },
@@ -209,11 +227,15 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     photos: Photo[],
     session?: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
+    const orderFilterWithId = normalizeOrderFilter(orderFilter);
+    const itemFilterWithId = normalizeItemFilter(itemFilter);
+
     const filter = {
-      ...orderFilter,
-      items: itemFilter,
+      ...orderFilterWithId,
+      items: itemFilterWithId,
     };
-    const query = mongoQuery(filter);
+
+    const filterQuery = mongoQuery(filter);
 
     // TODO: typing
     const photoMuuids = photos.map(({ id }) => id);
@@ -224,7 +246,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     // https://docs.mongodb.com/manual/reference/operator/update/positional/
     const result: UpdateWriteOpResult = await this.orderCollection
       .updateOne(
-        query,
+        filterQuery,
         { $push: { 'items.$.photos': photoMuuids } },
         { session },
       )

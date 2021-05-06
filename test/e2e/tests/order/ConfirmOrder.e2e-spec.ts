@@ -130,12 +130,12 @@ describe('Confirm Order – POST /order/confirm', () => {
     ]);
   });
 
-  afterAll(
-    async () =>
       await Promise.allSettled([
         customerRepository.deleteCustomer(testCustomer.id),
-      ]),
-  );
+  afterAll(async () => {
+    ]);
+    await app.close();
+  });
 
   it(`Matches Order with a Host, updates Order's "hostId" property, and Host's "orderIds" property`, async (done) /* done() is needed for "awaiting" setTimeout */ => {
     // https://stackoverflow.com/a/49864436/6539857
