@@ -21,19 +21,12 @@ export function throwCustomException(
   fnMainArgs: Record<string, any> = {},
   errorStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
 ) {
-  const debugOutputArgs: Array<[string, any]> = Object.entries(
-    fnMainArgs,
-  ).filter(
-    ([_, arg]: [string, any]) =>
-      typeof arg === 'string' || typeof arg === 'number',
-  );
-
-  const debugOutput = debugOutputArgs
-    .map(([key, arg]) => `${key}: ${arg}`)
+  const debugOutput = Object.entries(fnMainArgs)
+    .map(([key, arg]) => `${key}: ${JSON.stringify(arg)}`)
     .join(', ');
 
-  const finalMessage = `${message}: ${
-    debugOutputArgs.length ? `(${debugOutput})` : ''
+  const finalMessage = `${message} ${
+    debugOutput === '' ? '' : `: (${debugOutput})`
   }`;
 
   return (error?: Error) => {
