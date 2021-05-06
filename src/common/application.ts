@@ -10,7 +10,7 @@ export async function withTransaction<T>(
     abortTransactionOnNonMongoException(session, fn);
   // Session takes precendence over mongoClient
   return session === undefined
-    ? await withNewSessionTransaction(mongoClient, wrappedFn)
+    ? await withNewSessionTransaction(mongoClient, fn)
     : await withExistingSessionTransaction(session, wrappedFn);
 }
 
