@@ -26,8 +26,10 @@ export function throwCustomException(
     .join(', ');
 
   const finalMessage = `${message} ${
-    debugOutput === '' ? '' : `: (${debugOutput})`
+    debugOutput.length ? `: (${debugOutput})` : ''
   }`;
+
+  console.log(debugOutput, '\n\n', finalMessage, '\n\n\n\n');
 
   return (error?: Error) => {
     throw new Exception(errorStatus, finalMessage, fnMainArgs, error);
@@ -51,8 +53,12 @@ export function expectOnlyNResults(
   fnMainArgs?: Record<string, any>,
 ) {
   const errorMessageBeginning = `Error ${operation} ${entity} —`;
-  const lessThanOneErrorMessage = `${errorMessageBeginning} less than ${n} ${entity} with given requirements – ${lessThanMessage}`;
-  const moreThanOneErrorMessage = `${errorMessageBeginning} more than ${n} ${entity}s with given requirements (shouldn't be possible) – ${moreThanMessage}`;
+  const lessThanOneErrorMessage = `${errorMessageBeginning} less than ${n} ${entity} with given requirements ${
+    lessThanMessage.length ? ':' + lessThanMessage : ''
+  }`;
+  const moreThanOneErrorMessage = `${errorMessageBeginning} more than ${n} ${entity}s with given requirements (shouldn't be possible) ${
+    moreThanMessage.length ? ':' + moreThanMessage : ''
+  }`;
 
   if (controlledVariables.some(variable => variable < n)) {
     throwCustomException(

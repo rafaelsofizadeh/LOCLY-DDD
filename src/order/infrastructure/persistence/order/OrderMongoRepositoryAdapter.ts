@@ -70,9 +70,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       .updateOne(filterQuery, { $set: mongoQuery(properties) }, { session })
       .catch(
         throwCustomException('Error updating order', {
-          orderId: filter.orderId,
-          properties,
           filter,
+          properties,
         }),
       );
 
@@ -82,6 +81,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
         operation: 'setting properties on',
         entity: 'order',
       },
+      { filter, properties },
     );
   }
 
@@ -100,10 +100,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       .catch(throwCustomException('Error searching for an order', filter));
 
     if (!orderDocument) {
-      throwCustomException('No order found', {
-        orderId: filter.orderId,
-        filter,
-      })();
+      throwCustomException('No order found', filter)();
     }
 
     return mongoDocumentToOrder(orderDocument);
@@ -156,15 +153,18 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       })
       .catch(
         throwCustomException('Error deleting order', {
-          orderId: filter.orderId,
           filter,
         }),
       );
 
-    expectOnlySingleResult([deleteResult.deletedCount], {
-      operation: 'deleting',
-      entity: 'order',
-    });
+    expectOnlySingleResult(
+      [deleteResult.deletedCount],
+      {
+        operation: 'deleting',
+        entity: 'order',
+      },
+      filter,
+    );
   }
 
   // TODO: Merge orderFilter and itemFilter
@@ -196,10 +196,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       .updateOne(filterQuery, { $set: itemSetQuery }, { session })
       .catch(
         throwCustomException('Error updating order item', {
-          orderId: orderFilter.orderId,
-          itemId: itemFilter.itemId,
-          properties,
           filter,
+          properties,
         }),
       );
 
@@ -212,10 +210,8 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
           "the item either doesn't exist, or has already been received",
       },
       {
-        orderId: orderFilter.orderId,
-        itemId: itemFilter.itemId,
-        properties,
         filter,
+        properties,
       },
     );
   }
@@ -251,17 +247,19 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       )
       .catch(
         throwCustomException('Error adding photo file id to order item', {
-          orderId: orderFilter.orderId,
-          itemId: itemFilter.itemId,
           orderFilter,
           itemFilter,
         }),
       );
 
-    expectOnlySingleResult([result.matchedCount, result.modifiedCount], {
-      operation: 'adding photo id to',
-      entity: 'order item',
-    });
+    expectOnlySingleResult(
+      [result.matchedCount, result.modifiedCount],
+      {
+        operation: 'adding photo id to',
+        entity: 'order item',
+      },
+      { orderFilter, itemFilter },
+    );
 
     return photoUploadResults;
   }
