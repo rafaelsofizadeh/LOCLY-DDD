@@ -98,7 +98,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       'localhost:3000/stripe/webhook',
     ]);
 
-    await new Promise((resolve, reject) => {
+    await new Promise(resolve => {
       const stdHandler = (data: Buffer) => {
         console.log(data.toString());
 

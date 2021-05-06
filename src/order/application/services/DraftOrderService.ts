@@ -17,7 +17,6 @@ import {
 } from './ShipmentCostCalculator/getShipmentCostQuote';
 import { Item } from '../../domain/entity/Item';
 import { UUID } from '../../../common/domain';
-import { Exception } from '../../../common/error-handling';
 import { Country } from '../../domain/data/Country';
 import {
   Address,

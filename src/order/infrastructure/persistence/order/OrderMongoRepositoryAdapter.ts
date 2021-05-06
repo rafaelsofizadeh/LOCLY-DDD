@@ -94,7 +94,6 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(
       filterWithId,
     );
-    console.log(filterWithId, filterQuery);
 
     const orderDocument: OrderMongoDocument = await this.orderCollection
       .findOne(filterQuery, { session })
