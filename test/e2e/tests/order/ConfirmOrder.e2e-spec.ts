@@ -17,9 +17,9 @@ import { isString } from 'class-validator';
 import { HostRepository } from '../../../../src/order/application/port/HostRepository';
 import { StripeCheckoutSessionResult } from '../../../../src/order/domain/use-case/PreConfirmOrderUseCase';
 import {
-  DraftOrder,
-  ConfirmOrder,
-  ConfirmedOrderStatus,
+  DraftedOrder,
+  ConfirmedOrder,
+  OrderStatus,
 } from '../../../../src/order/domain/entity/Order';
 import { UUID } from '../../../../src/common/domain';
 import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
@@ -44,7 +44,7 @@ describe('Confirm Order – POST /order/confirm', () => {
   let draftOrderUseCase: DraftOrderUseCase;
 
   let testCustomer: Customer;
-  let testOrder: DraftOrder;
+  let testOrder: DraftedOrder;
   let testHosts: Host[];
 
   let stripeListener: child_process.ChildProcess;
@@ -234,15 +234,15 @@ describe('Confirm Order – POST /order/confirm', () => {
         fullPage: true,
       });
 
-      let updatedTestOrder: ConfirmOrder;
+      let updatedTestOrder: ConfirmedOrder;
 
       // Expect to resolve and not throw/reject
       await expect(
         (async () => {
           updatedTestOrder = (await orderRepository.findOrder({
             orderId: testOrder.id,
-            status: ConfirmedOrderStatus,
-          })) as ConfirmOrder;
+            status: OrderStatus.Confirmed,
+          })) as ConfirmedOrder;
         })(),
       ).resolves.toBeUndefined();
 

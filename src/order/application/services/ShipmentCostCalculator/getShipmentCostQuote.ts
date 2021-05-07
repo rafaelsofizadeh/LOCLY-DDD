@@ -175,5 +175,5 @@ export function getShipmentCostQuote(
 export type ShipmentCostQuoteFn = (
   originCountry: Country,
   destinationCountry: Country,
-  packages: PhysicalItem[],
+  packages: Array<{ weight: Gram }>,
 ) => ShipmentCostQuote;

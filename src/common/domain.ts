@@ -26,6 +26,3 @@ export const IsUUID = () => IsUUIDDecorator(4);
 
 export const isUUID = (input: unknown): input is UUID =>
   isUUIDValidator(input, 4);
-
-export type EntityFilter<T extends { id: UUID }, Id> = Partial<WithoutId<T>> &
-  Id;

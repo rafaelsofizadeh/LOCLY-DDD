@@ -7,11 +7,7 @@ import { UUID } from '../../../common/domain';
 import { withTransaction } from '../../../common/application';
 import { Host } from '../../domain/entity/Host';
 
-import {
-  Address,
-  ConfirmedOrderStatus,
-  DraftedOrderStatus,
-} from '../../domain/entity/Order';
+import { Address, OrderStatus } from '../../domain/entity/Order';
 import {
   ConfirmOrderUseCase,
   HostMatchResult,
@@ -60,8 +56,8 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
     session: ClientSession,
   ): Promise<void> {
     await this.orderRepository.setProperties(
-      { orderId, status: DraftedOrderStatus },
-      { status: ConfirmedOrderStatus, hostId },
+      { orderId, status: OrderStatus.Drafted },
+      { status: OrderStatus.Confirmed, hostId },
       session,
     );
 

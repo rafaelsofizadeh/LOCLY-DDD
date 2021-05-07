@@ -8,7 +8,7 @@ import {
   AddItemPhotoUseCase,
   ItemPhotosUploadResult,
 } from '../../domain/use-case/AddItemPhotoUseCase';
-import { ConfirmedOrderStatus } from '../../domain/entity/Order';
+import { OrderStatus } from '../../domain/entity/Order';
 
 @Injectable()
 export class AddItemPhotoService implements AddItemPhotoUseCase {
@@ -36,7 +36,7 @@ export class AddItemPhotoService implements AddItemPhotoUseCase {
     session: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
     return this.orderRepository.addItemPhotos(
-      { orderId, status: ConfirmedOrderStatus, hostId },
+      { orderId, status: OrderStatus.Confirmed, hostId },
       { itemId },
       photos,
       session,

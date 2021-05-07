@@ -10,8 +10,8 @@ import { UUID } from '../../../../src/common/domain';
 import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
 import { DraftOrderRequest } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
 import {
-  DraftedOrderStatus,
-  DraftOrder,
+  OrderStatus,
+  DraftedOrder,
 } from '../../../../src/order/domain/entity/Order';
 import { Country } from '../../../../src/order/domain/data/Country';
 import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
@@ -105,22 +105,22 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
 
       expect(response.status).toBe(HttpStatus.CREATED);
 
-      const { id, customerId, destination } = response.body as DraftOrder;
+      const { id, customerId, destination } = response.body as DraftedOrder;
 
       // 1. order id should be a UUID
       expect(isUUID(id)).toBe(true);
 
       testOrderId = UUID(id);
 
-      // 2. order should be added to the db and its status should be DraftedOrderStatus and the resulting Order object
-      // should be a DraftOrder
+      // 2. order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
+      // should be a DraftedOrder
       await expect(
         orderRepository.findOrder({
           orderId: testOrderId,
-          status: DraftedOrderStatus,
+          status: OrderStatus.Drafted,
           customerId: testCustomer.id,
         }),
-      ).resolves.toHaveProperty('status', DraftedOrderStatus);
+      ).resolves.toHaveProperty('status', OrderStatus.Drafted);
 
       // Load the test customer from the database
       const updatedTestCustomer: Customer = await customerRepository.findCustomer(

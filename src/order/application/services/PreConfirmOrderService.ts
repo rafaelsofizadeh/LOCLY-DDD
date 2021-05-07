@@ -13,11 +13,7 @@ import { UUID } from '../../../common/domain';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
-import {
-  DraftedOrderStatus,
-  DraftOrder,
-  ServiceFee,
-} from '../../domain/entity/Order';
+import { OrderStatus, DraftedOrder, Cost } from '../../domain/entity/Order';
 import { HostRepository } from '../port/HostRepository';
 import { throwCustomException } from '../../../common/error-handling';
 
@@ -67,9 +63,9 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
     session: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const draftOrder = (await this.orderRepository.findOrder(
-      { orderId, status: DraftedOrderStatus, customerId },
+      { orderId, status: OrderStatus.Drafted, customerId },
       session,
-    )) as DraftOrder;
+    )) as DraftedOrder;
 
     const hostId: UUID = await this.findMatchingHost(draftOrder, session);
 
@@ -82,7 +78,7 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
   }
 
   private async findMatchingHost(
-    { originCountry }: DraftOrder,
+    { originCountry }: DraftedOrder,
     session: ClientSession,
   ): Promise<UUID> {
     try {
@@ -102,11 +98,11 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
   }
 
   private async createStripeCheckoutSession(
-    draftOrder: DraftOrder,
+    draftOrder: DraftedOrder,
     hostId: UUID,
   ): Promise<StripeCheckoutSession> {
-    const serviceFee: ServiceFee = await this.calculateServiceFee();
-    const stripePrice: StripePrice = this.stripePrice(serviceFee);
+    const Cost: Cost = await this.calculateCost();
+    const stripePrice: StripePrice = this.stripePrice(Cost);
     const match: Match = {
       orderId: draftOrder.id,
       hostId,
@@ -153,14 +149,14 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
     return checkoutSession;
   }
 
-  private stripePrice(serviceFee: ServiceFee) {
+  private stripePrice(Cost: Cost) {
     return {
-      currency: serviceFee.currency,
-      unit_amount: Math.floor(serviceFee.amount * 100),
+      currency: Cost.currency,
+      unit_amount: Math.floor(Cost.amount * 100),
     };
   }
 
-  private async calculateServiceFee(): Promise<ServiceFee> {
+  private async calculateCost(): Promise<Cost> {
     return {
       currency: 'USD',
       amount: 100,

@@ -9,7 +9,7 @@ import {
   DeleteOrderRequest,
   DeleteOrderUseCase,
 } from '../../domain/use-case/DeleteOrderUseCase';
-import { DraftedOrderStatus, OrderStatus } from '../../domain/entity/Order';
+import { OrderStatus } from '../../domain/entity/Order';
 
 @Injectable()
 export class DeleteOrderService implements DeleteOrderUseCase {
@@ -36,7 +36,7 @@ export class DeleteOrderService implements DeleteOrderUseCase {
     session: ClientSession,
   ): Promise<void> {
     await this.orderRepository.deleteOrder(
-      { orderId, status: DraftedOrderStatus, customerId },
+      { orderId, status: OrderStatus.Drafted, customerId },
       session,
     );
     await this.customerRepository.removeOrderFromCustomer(

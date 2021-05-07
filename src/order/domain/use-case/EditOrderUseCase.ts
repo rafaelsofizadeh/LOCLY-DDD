@@ -1,5 +1,5 @@
 import { UUID } from '../../../common/domain';
-import { DraftOrder } from '../entity/Order';
+import { DraftedOrder } from '../entity/Order';
 import { UseCase } from '../../../common/domain';
 import { DraftOrderRequest } from './DraftOrderUseCase';
 
@@ -9,5 +9,5 @@ export interface EditOrderRequest extends DraftOrderRequest {
 
 export abstract class EditOrderUseCase extends UseCase<
   EditOrderRequest,
-  DraftOrder
+  DraftedOrder
 > {}

@@ -15,11 +15,9 @@ import {
   throwCustomException,
 } from '../../../../common/error-handling';
 import { OrderRepository } from '../../../application/port/OrderRepository';
-import { Order, DraftOrder, OrderFilter } from '../../../domain/entity/Order';
+import { Order, DraftedOrder, OrderFilter } from '../../../domain/entity/Order';
 import {
   OrderMongoDocument,
-  draftOrderToMongoDocument,
-  mongoDocumentToOrder,
   Photo,
   normalizeOrderFilter,
   normalizeItemFilter,
@@ -28,6 +26,8 @@ import {
   mongoQuery,
   muuidToUuid,
   uuidToMuuid,
+  convertToMongoDocument,
+  serializeMongoData,
 } from '../../../../common/persistence';
 import { ItemFilter } from '../../../domain/entity/Item';
 import { ItemPhotosUploadResult } from '../../../domain/use-case/AddItemPhotoUseCase';
@@ -40,10 +40,10 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
   ) {}
 
   async addOrder(
-    draftOrder: DraftOrder,
+    draftOrder: DraftedOrder,
     session?: ClientSession,
   ): Promise<void> {
-    const draftOrderDocument = draftOrderToMongoDocument(draftOrder);
+    const draftOrderDocument = convertToMongoDocument(draftOrder);
 
     await this.orderCollection
       .insertOne(draftOrderDocument, { session })
@@ -104,7 +104,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       throwCustomException('No order found', filter)();
     }
 
-    return mongoDocumentToOrder(orderDocument);
+    return serializeMongoData(orderDocument);
   }
 
   async findOrders(
@@ -135,7 +135,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     }
 
     return orderDocuments.map(orderDocument =>
-      mongoDocumentToOrder(orderDocument),
+      serializeMongoData(orderDocument),
     );
   }
 

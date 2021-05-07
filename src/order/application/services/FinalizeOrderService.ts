@@ -7,7 +7,7 @@ import {
   FinalizeOrderRequest,
   FinalizeOrderUseCase,
 } from '../../domain/use-case/FinalizeOrderUseCase';
-import { AnyOrder, ConfirmedOrderStatus } from '../../domain/entity/Order';
+import { Order, OrderStatus } from '../../domain/entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
 import { Item } from '../../domain/entity/Item';
 import { UUID } from '../../../common/domain';
@@ -41,17 +41,17 @@ export class FinalizeOrderService implements FinalizeOrderUseCase {
     }: FinalizeOrderRequest,
     session: ClientSession,
   ): Promise<void> {
-    const unfinishedItems: Item[] = await this.getUnfinalizedItems(
+    const notFinalizedItems: Item[] = await this.getUnfinalizedItems(
       orderId,
       hostId,
     );
 
-    const unfinishedItemIds: UUID[] = unfinishedItems.map(({ id }) => id);
+    const notFinalizedItemIds: UUID[] = notFinalizedItems.map(({ id }) => id);
 
-    if (unfinishedItems.length) {
+    if (notFinalizedItems.length) {
       throwCustomException(
         "Can't finalize order until all items have weights and photos",
-        { orderId, unfinishedItemIds },
+        { orderId, notFinalizedItemIds },
         HttpStatus.FORBIDDEN,
       )();
     }
@@ -72,11 +72,11 @@ export class FinalizeOrderService implements FinalizeOrderUseCase {
     hostId: UUID,
   ): Promise<Item[]> {
     // TODO(?): Replace this check with a mongo query http://www.askasya.com/post/matchallarrayelements/
-    const order: AnyOrder = (await this.orderRepository.findOrder({
+    const order: Order = await this.orderRepository.findOrder({
       orderId,
-      status: ConfirmedOrderStatus,
+      status: OrderStatus.Confirmed,
       hostId,
-    })) as AnyOrder;
+    });
 
     const notFinalizedItems: Item[] = order.items.filter(
       ({ receivedDate, photos }) => !(receivedDate && photos.length),

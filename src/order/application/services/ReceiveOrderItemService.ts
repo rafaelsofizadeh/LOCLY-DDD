@@ -9,7 +9,7 @@ import {
   ReceiveOrderItemResult,
   ReceiveOrderItemUseCase,
 } from '../../domain/use-case/ReceiveOrderItemUseCase';
-import { ConfirmedOrderStatus } from '../../domain/entity/Order';
+import { OrderStatus } from '../../domain/entity/Order';
 
 @Injectable()
 export class ReceiveOrderItemService implements ReceiveOrderItemUseCase {
@@ -50,7 +50,7 @@ export class ReceiveOrderItemService implements ReceiveOrderItemUseCase {
     await this.orderRepository.setItemProperties(
       {
         orderId,
-        status: ConfirmedOrderStatus,
+        status: OrderStatus.Confirmed,
         hostId,
       },
       {

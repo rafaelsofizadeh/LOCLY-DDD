@@ -1,6 +1,7 @@
 import { Binary } from 'mongodb';
+import { Stream } from 'stream';
 import * as MUUID from 'uuid-mongodb';
-import { isUUID, UUID } from './domain';
+import { isUUID, UUID, WithoutId } from './domain';
 
 function muuidToString(id: Binary): string {
   return MUUID.from(id).toString();
@@ -13,6 +14,9 @@ export function muuidToUuid(id: Binary): UUID {
 export function uuidToMuuid(id: UUID): Binary {
   return MUUID.from(id);
 }
+
+export type EntityFilter<T extends { id: UUID }, Id> = Partial<WithoutId<T>> &
+  Id;
 
 // https://stackoverflow.com/a/47058976/6539857
 type PathsToStringProps<T> = T extends string ? [] : {
@@ -71,45 +75,35 @@ export function flattenObject<T extends Record<string, any>>(
   }, {} as T) as any;
 }
 
-type RemovePrefix<
-  T,
-  P extends string = '_'
-> = T extends `${P}${infer WithoutPrefix}` ? WithoutPrefix : T;
+type isUUID<S> = S extends string ? S extends 'id' | `${infer IdOfEntity}Id` ? true : false : false;
 
-type AddPrefix<S, P extends string = '_'> = S extends string ? isUUID<S> extends true ? `${P}${S}` : S : S;
+type RemovePrefix<T> = T extends `_${infer WithoutPrefix}` ? WithoutPrefix : T;
+type AddPrefix<S> = S extends string ? isUUID<S> extends true ? `_${S}` : S : S;
 
-type isUUID<S extends string> = S extends '_id' | 'Id' ? true : false;
 
-export type SerializedMongoDocument<
-  T,
-  P extends string = '_'
-> = T extends object
-  ? T extends Date | Buffer | RegExp
+export type SerializedMongoDocument<T> = T extends object
+  ? T extends Date | Buffer | RegExp | Stream
     ? T
     : T extends Binary
     ? UUID
     : T extends Array<infer R>
     ? Array<SerializedMongoDocument<R>>
     : {
-        [K in keyof T as RemovePrefix<K, P>]: SerializedMongoDocument<T[K]>;
+        [K in keyof T as RemovePrefix<K>]: SerializedMongoDocument<T[K]>;
       }
   : T;
 
-export type ConvertedToMongoDocument<
-  T,
-  P extends string = '_'
-> = T extends object
-  ? T extends Date | Buffer | RegExp
+export type MongoDocument<T> = T extends object
+  ? T extends Date | Buffer | RegExp | Stream
     ? T
     : T extends Array<infer R>
-    ? Array<ConvertedToMongoDocument<R>>
+    ? Array<MongoDocument<R>>
     : {
-        [K in keyof T as AddPrefix<K, P>]: ConvertedToMongoDocument<T[K]>;
-      }
-  : T extends string
-  ? isUUID<T> extends true
-    ? Binary
-    : T
+        [K in keyof T as AddPrefix<K>]:
+          isUUID<K> extends true
+          ? Binary
+          : MongoDocument<T[K]>;
+    }
   : T;
 
 // export type Singular<T> = T extends `${infer S}s` ? S : T;
@@ -162,19 +156,19 @@ export function serializeMongoData(
 export function convertToMongoDocument(
   input: any,
   omitArrays?: false,
-): ConvertedToMongoDocument<typeof input>
+): MongoDocument<typeof input>
 export function convertToMongoDocument(
   input: any,
   omitArrays?: true,
-): WithoutArrays<ConvertedToMongoDocument<typeof input>>
+): WithoutArrays<MongoDocument<typeof input>>
 export function convertToMongoDocument(
   input: any,
   omitArrays?: boolean,
-): ConvertedToMongoDocument<typeof input>
+): MongoDocument<typeof input>
 export function convertToMongoDocument(
   input: any,
   omitArrays = false,
-): ConvertedToMongoDocument<typeof input> {
+): MongoDocument<typeof input> {
   if (
     typeof input === 'object' &&
     !(input === null) && 
@@ -202,7 +196,7 @@ export function convertToMongoDocument(
       convertedInput[newKey] = convertToMongoDocument(value, omitArrays);
 
       return convertedInput;
-    }, {} as ConvertedToMongoDocument<typeof input>);
+    }, {} as MongoDocument<typeof input>);
   }
 
   if (isUUID(input)) {
@@ -223,7 +217,7 @@ export function mongoQuery<O extends object>(input: object) {
 /* 
 Deprecated but potentially useful
 
-type RemapPrefixedProps<T, P extends string = '_'> = T extends object
+type RemapPrefixedProps<T> = T extends object
   ? T extends Date | Binary | Buffer | RegExp
     ? T
     : T extends Array<infer R>

@@ -2,8 +2,8 @@ import { UUID } from '../../../common/domain';
 
 import { Address } from './Order';
 
-export interface Customer {
+export type Customer = Readonly<{
   id: UUID;
   selectedAddress: Address;
   orderIds: UUID[];
-}
+}>;

@@ -11,7 +11,7 @@ import { ClientSession, MongoClient } from 'mongodb';
 import { DraftOrderUseCase } from '../../domain/use-case/DraftOrderUseCase';
 import { CustomerRepository } from '../port/CustomerRepository';
 import { withTransaction } from '../../../common/application';
-import { DraftedOrderStatus, DraftOrder } from '../../domain/entity/Order';
+import { OrderStatus, DraftedOrder } from '../../domain/entity/Order';
 
 @Injectable()
 export class EditOrderService implements EditOrderUseCase {
@@ -25,8 +25,8 @@ export class EditOrderService implements EditOrderUseCase {
   async execute(
     editOrderRequest: EditOrderRequest,
     session?: ClientSession,
-  ): Promise<DraftOrder> {
-    const draftOrder: DraftOrder = await withTransaction(
+  ): Promise<DraftedOrder> {
+    const draftOrder: DraftedOrder = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.editOrder(editOrderRequest, sessionWithTransaction),
       this.mongoClient,
@@ -39,11 +39,11 @@ export class EditOrderService implements EditOrderUseCase {
   private async editOrder(
     { orderId, customerId, ...restEditOrderRequest }: EditOrderRequest,
     session: ClientSession,
-  ): Promise<DraftOrder> {
+  ): Promise<DraftedOrder> {
     await this.orderRepository.deleteOrder(
       {
         orderId,
-        status: DraftedOrderStatus,
+        status: OrderStatus.Drafted,
         customerId,
       },
       session,
@@ -54,7 +54,7 @@ export class EditOrderService implements EditOrderUseCase {
       session,
     );
 
-    const draftOrder: DraftOrder = await this.draftOrderUseCase.execute(
+    const draftOrder: DraftedOrder = await this.draftOrderUseCase.execute(
       { customerId, ...restEditOrderRequest },
       session,
     );

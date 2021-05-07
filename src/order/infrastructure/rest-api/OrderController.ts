@@ -19,7 +19,7 @@ import {
   ReceiveOrderItemResult,
   ReceiveOrderItemUseCase,
 } from '../../domain/use-case/ReceiveOrderItemUseCase';
-import { DraftOrder } from '../../domain/entity/Order';
+import { DraftedOrder } from '../../domain/entity/Order';
 import { SerializePrivatePropertiesInterceptor } from './nest-infrastructure/SerializePrivatePropertiesInterceptor';
 import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
 import { EditOrderRequestAdapter } from './request-adapters/EditOrderRequestAdapter';
@@ -50,8 +50,8 @@ export class OrderController {
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async draftOrder(
     @Body() orderRequest: DraftOrderRequestAdapter,
-  ): Promise<DraftOrder> {
-    const draftOrder: DraftOrder = await this.draftOrderUseCase.execute(
+  ): Promise<DraftedOrder> {
+    const draftOrder: DraftedOrder = await this.draftOrderUseCase.execute(
       orderRequest,
     );
 
@@ -62,8 +62,8 @@ export class OrderController {
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async editOrder(
     @Body() editOrderRequest: EditOrderRequestAdapter,
-  ): Promise<DraftOrder> {
-    const editedDraftOrder: DraftOrder = await this.editOrderUseCase.execute(
+  ): Promise<DraftedOrder> {
+    const editedDraftOrder: DraftedOrder = await this.editOrderUseCase.execute(
       editOrderRequest,
     );
 

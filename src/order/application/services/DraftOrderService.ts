@@ -15,14 +15,14 @@ import {
   ShipmentCostQuote,
   ShipmentCostQuoteFn,
 } from './ShipmentCostCalculator/getShipmentCostQuote';
-import { Item } from '../../domain/entity/Item';
+import { DraftedItem, Item } from '../../domain/entity/Item';
 import { UUID } from '../../../common/domain';
 import { Country } from '../../domain/data/Country';
 import {
   Address,
-  DraftOrder,
-  DraftedOrderStatus,
+  DraftedOrder,
   Cost,
+  OrderStatus,
 } from '../../domain/entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
 
@@ -37,8 +37,8 @@ export class DraftOrderService implements DraftOrderUseCase {
   async execute(
     draftOrderRequest: DraftOrderRequest,
     session?: ClientSession,
-  ): Promise<DraftOrder> {
-    const draftOrder: DraftOrder = await withTransaction(
+  ): Promise<DraftedOrder> {
+    const draftOrder: DraftedOrder = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.draftOrder(draftOrderRequest, sessionWithTransaction),
       this.mongoClient,
@@ -51,8 +51,10 @@ export class DraftOrderService implements DraftOrderUseCase {
   private async draftOrder(
     draftOrderRequest: DraftOrderRequest,
     session: ClientSession,
-  ): Promise<DraftOrder> {
-    const draftOrder: DraftOrder = this.constructDraftOrder(draftOrderRequest);
+  ): Promise<DraftedOrder> {
+    const draftOrder: DraftedOrder = this.constructDraftOrder(
+      draftOrderRequest,
+    );
 
     // TODO(IMPORANT): Document MongoDb concurrent transaction limitations.
     // https://jira.mongodb.org/browse/SERVER-36428?focusedCommentId=2136170&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-2136170
@@ -73,7 +75,7 @@ export class DraftOrderService implements DraftOrderUseCase {
     originCountry,
     items: itemsWithoutId,
     destination,
-  }: DraftOrderRequest): DraftOrder {
+  }: DraftOrderRequest): DraftedOrder {
     // TODO: class-validator decorator https://github.com/typestack/class-validator/issues/486
     if (originCountry === destination.country) {
       throwCustomException(
@@ -83,9 +85,10 @@ export class DraftOrderService implements DraftOrderUseCase {
       )();
     }
 
-    const items: Item[] = itemsWithoutId.map(itemWithoutId =>
-      Object.assign(itemWithoutId, { id: UUID() }),
-    );
+    const items: DraftedItem[] = itemsWithoutId.map(itemWithoutId => ({
+      ...itemWithoutId,
+      id: UUID(),
+    }));
 
     const shipmentCost = this.approximateShipmentCost(
       originCountry,
@@ -96,7 +99,7 @@ export class DraftOrderService implements DraftOrderUseCase {
 
     return {
       id: UUID(),
-      status: DraftedOrderStatus,
+      status: OrderStatus.Drafted,
       customerId,
       items,
       originCountry,
@@ -108,13 +111,13 @@ export class DraftOrderService implements DraftOrderUseCase {
   private approximateShipmentCost(
     originCountry: Country,
     { country: destinationCountry }: Address,
-    items: Item[],
+    items: DraftedItem[],
     getShipmentCostQuote: ShipmentCostQuoteFn,
   ): Cost {
     const { currency, services }: ShipmentCostQuote = getShipmentCostQuote(
       originCountry,
       destinationCountry,
-      items.map(item => ({ weight: item.weight })),
+      items.map(({ weight }) => ({ weight })),
     );
 
     // TODO: Service choice logic

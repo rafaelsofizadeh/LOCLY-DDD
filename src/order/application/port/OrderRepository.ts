@@ -1,12 +1,15 @@
 import { ClientSession } from 'mongodb';
 import { UUID } from '../../../common/domain';
 import { ItemFilter } from '../../domain/entity/Item';
-import { Order, DraftOrder, OrderFilter } from '../../domain/entity/Order';
+import { Order, DraftedOrder, OrderFilter } from '../../domain/entity/Order';
 import { ItemPhotosUploadResult } from '../../domain/use-case/AddItemPhotoUseCase';
 import { Photo } from '../../infrastructure/persistence/order/OrderMongoMapper';
 
 export abstract class OrderRepository {
-  abstract addOrder(order: DraftOrder, session?: ClientSession): Promise<void>;
+  abstract addOrder(
+    order: DraftedOrder,
+    session?: ClientSession,
+  ): Promise<void>;
 
   abstract findOrder(
     filter: OrderFilter,
