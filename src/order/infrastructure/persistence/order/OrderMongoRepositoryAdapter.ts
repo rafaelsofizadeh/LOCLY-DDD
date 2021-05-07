@@ -244,7 +244,9 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     const result: UpdateWriteOpResult = await this.orderCollection
       .updateOne(
         filterQuery,
-        { $push: { 'items.$.photos': photoMuuids } },
+        // $each: https://docs.mongodb.com/manual/reference/operator/update/push/#append-multiple-values-to-an-array
+        // TODO:
+        { $push: { 'items.$.photos': { $each: photoMuuids } } },
         { session },
       )
       .catch(
