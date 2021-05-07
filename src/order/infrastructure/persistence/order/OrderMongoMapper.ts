@@ -18,8 +18,19 @@ export type ConfirmedOrderMongoDocument = MongoDocument<ConfirmedOrder>;
 
 export type Photo = Omit<Express.Multer.File, 'id'> & { id: Binary };
 
-export function normalizeOrderFilter({ orderId, ...restFilter }: OrderFilter) {
-  return { id: orderId, ...restFilter };
+export function normalizeOrderFilter({
+  orderId,
+  status,
+  ...restFilter
+}: OrderFilter) {
+  return {
+    id: orderId,
+    // TODO: Beautify
+    ...(status
+      ? { status: Array.isArray(status) ? { $in: status } : status }
+      : {}),
+    ...restFilter,
+  };
 }
 
 export function normalizeItemFilter({ itemId, ...restFilter }: ItemFilter) {

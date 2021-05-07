@@ -36,7 +36,11 @@ export class AddItemPhotoService implements AddItemPhotoUseCase {
     session: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
     return this.orderRepository.addItemPhotos(
-      { orderId, status: OrderStatus.Confirmed, hostId },
+      {
+        orderId,
+        status: [OrderStatus.Confirmed, OrderStatus.Finalized],
+        hostId,
+      },
       { itemId },
       photos,
       session,

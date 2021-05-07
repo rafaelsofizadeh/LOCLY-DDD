@@ -1,6 +1,7 @@
 import { Binary } from 'mongodb';
 import { Stream } from 'stream';
 import * as MUUID from 'uuid-mongodb';
+import { OrderStatus } from '../order/domain/entity/Order';
 import { isUUID, UUID, WithoutId } from './domain';
 
 function muuidToString(id: Binary): string {
@@ -15,7 +16,7 @@ export function uuidToMuuid(id: UUID): Binary {
   return MUUID.from(id);
 }
 
-export type EntityFilter<T extends { id: UUID }, Id> = Partial<WithoutId<T>> &
+export type EntityFilter<T extends { id: UUID }, Id> = Partial<Omit<WithoutId<T>, 'status'> & {status: OrderStatus | OrderStatus[]}> &
   Id;
 
 // https://stackoverflow.com/a/47058976/6539857
@@ -207,7 +208,7 @@ export function convertToMongoDocument(
 }
 
 // TODO: typing
-export function mongoQuery<O extends object>(input: object) {
+export function mongoQuery(input: object) {
   const convertedToMongo = convertToMongoDocument(input);
   const convertedToMongoDotNotation = flattenObject(convertedToMongo);
 
