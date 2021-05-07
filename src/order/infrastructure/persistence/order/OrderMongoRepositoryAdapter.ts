@@ -183,13 +183,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       items: itemFilterWithId,
     };
 
-    const filterQueryWithoutReceivedCheck = mongoQuery(filter);
-    const filterQuery = {
-      ...filterQueryWithoutReceivedCheck,
-      // Can't receive an already-received item
-      // Query for undefined field https://docs.mongodb.com/manual/tutorial/query-for-null-fields/#existence-check
-      'items.receivedDate': null,
-    };
+    const filterQuery = mongoQuery(filter);
 
     const itemSetQuery = mongoQuery({ 'items.$': properties });
 
@@ -231,7 +225,13 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       items: itemFilterWithId,
     };
 
-    const filterQuery = mongoQuery(filter);
+    const filterQueryWithoutReceivedCheck = mongoQuery(filter);
+    // TODO:
+    const receivedCheck = { 'items.receivedDate': { $ne: null } };
+    const filterQuery = {
+      ...filterQueryWithoutReceivedCheck,
+      ...receivedCheck,
+    };
 
     // TODO: typing
     // TODO: Error handling on photos
@@ -250,7 +250,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       .catch(
         throwCustomException('Error adding photo file id to order item', {
           orderFilter,
-          itemFilter,
+          itemFilter: { ...itemFilter, receivedDate: 'NOT_NULL' },
         }),
       );
 
@@ -260,7 +260,11 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
         operation: 'adding photo id to',
         entity: 'order item',
       },
-      { orderFilter, itemFilter },
+      {
+        orderFilter,
+        // TODO:
+        itemFilter: { ...itemFilter, receivedDate: 'NOT_NULL' },
+      },
     );
 
     return photoUploadResults;

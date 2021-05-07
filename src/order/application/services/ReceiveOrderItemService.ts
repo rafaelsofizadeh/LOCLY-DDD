@@ -51,9 +51,14 @@ export class ReceiveOrderItemService implements ReceiveOrderItemUseCase {
       {
         orderId,
         status: ConfirmedOrderStatus,
-        hostId: hostId,
+        hostId,
       },
-      { itemId },
+      {
+        itemId,
+        // Can't receive an already-received item
+        // Query for undefined field https://docs.mongodb.com/manual/tutorial/query-for-null-fields/#existence-check
+        receivedDate: null,
+      },
       { receivedDate },
       session,
     );
