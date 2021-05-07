@@ -44,9 +44,9 @@ export class SubmitShipmentInfoRequestAdapter
   @IsNotEmptyObject()
   @IsDefined()
   @Type(() => CostVerificationSchema)
-  deliveryCost: CostVerificationSchema;
+  shipmentCost: CostVerificationSchema;
 
   @IsOptional()
   @IsUrl()
-  calculatorResultUrl: URL;
+  calculatorResultUrl?: URL;
 }

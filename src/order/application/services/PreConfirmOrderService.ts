@@ -12,13 +12,13 @@ import { Host } from '../../domain/entity/Host';
 import { UUID } from '../../../common/domain';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/application';
+import { stripePrice, withTransaction } from '../../../common/application';
 import { OrderStatus, DraftedOrder, Cost } from '../../domain/entity/Order';
 import { HostRepository } from '../port/HostRepository';
 import { throwCustomException } from '../../../common/error-handling';
 
-type StripeCheckoutSession = Stripe.Checkout.Session;
-type StripePrice = Pick<
+export type StripeCheckoutSession = Stripe.Checkout.Session;
+export type StripePrice = Pick<
   Stripe.Checkout.SessionCreateParams.LineItem.PriceData,
   'currency' | 'unit_amount'
 >;
@@ -101,8 +101,8 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
     draftOrder: DraftedOrder,
     hostId: UUID,
   ): Promise<StripeCheckoutSession> {
-    const Cost: Cost = await this.calculateCost();
-    const stripePrice: StripePrice = this.stripePrice(Cost);
+    const loclyFee: Cost = await this.calculateLoclyFee();
+    const price: StripePrice = stripePrice(loclyFee);
     const match: Match = {
       orderId: draftOrder.id,
       hostId,
@@ -131,7 +131,7 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
         line_items: [
           {
             price_data: {
-              ...stripePrice,
+              ...price,
               product_data: {
                 name: 'Locly and Host Service Fee',
               },
@@ -149,14 +149,7 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
     return checkoutSession;
   }
 
-  private stripePrice(Cost: Cost) {
-    return {
-      currency: Cost.currency,
-      unit_amount: Math.floor(Cost.amount * 100),
-    };
-  }
-
-  private async calculateCost(): Promise<Cost> {
+  private async calculateLoclyFee(): Promise<Cost> {
     return {
       currency: 'USD',
       amount: 100,

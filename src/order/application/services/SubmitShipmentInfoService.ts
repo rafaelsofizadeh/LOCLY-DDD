@@ -36,7 +36,7 @@ export class SubmitShipmentInfoService implements SubmitShipmentInfoUseCase {
       orderId,
       hostId,
       totalWeight,
-      deliveryCost,
+      shipmentCost: finalShipmentCost,
       calculatorResultUrl,
     }: SubmitShipmentInfoRequest,
     session: ClientSession,
@@ -61,7 +61,7 @@ export class SubmitShipmentInfoService implements SubmitShipmentInfoUseCase {
       { orderId },
       {
         totalWeight,
-        deliveryCost,
+        finalShipmentCost,
         status: OrderStatus.Finalized,
         ...(calculatorResultUrl ? { calculatorResultUrl } : {}),
       },

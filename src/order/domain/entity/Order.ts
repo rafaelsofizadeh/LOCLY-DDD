@@ -25,6 +25,7 @@ export enum OrderStatus {
   Drafted = 'drafted',
   Confirmed = 'confirmed',
   Finalized = 'finalized',
+  Paid = 'paid',
 }
 
 export type Order = Readonly<{
@@ -34,23 +35,23 @@ export type Order = Readonly<{
   items: Item[];
   originCountry: Country;
   destination: Address;
-  shipmentCost: Cost;
+  initialShipmentCost: Cost;
   hostId: UUID;
   totalWeight: Gram;
-  deliveryCost: Cost;
-  calculatorResultUrl: URL;
+  finalShipmentCost: Cost;
+  calculatorResultUrl?: URL;
 }>;
 
 export type DraftedOrder = Pick<
   Order,
-  'id' | 'customerId' | 'originCountry' | 'destination' | 'shipmentCost'
+  'id' | 'customerId' | 'originCountry' | 'destination' | 'initialShipmentCost'
 > & { status: OrderStatus.Drafted; items: DraftedItem[] };
 
 export type ConfirmedOrder = Omit<DraftedOrder, 'status'> &
   Pick<Order, 'hostId'> & { status: OrderStatus.Confirmed };
 
 export type FinalizedOrder = Omit<ConfirmedOrder, 'status' | 'items'> &
-  Pick<Order, 'totalWeight' | 'deliveryCost' | 'calculatorResultUrl'> & {
+  Pick<Order, 'totalWeight' | 'initialShipmentCost' | 'calculatorResultUrl'> & {
     status: OrderStatus.Finalized;
     items: Array<ReceivedItem | FinalizedItem>;
   };

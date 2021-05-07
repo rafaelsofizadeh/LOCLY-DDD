@@ -1,4 +1,5 @@
 import { ClientSession, MongoClient } from 'mongodb';
+import { Cost } from '../order/domain/entity/Order';
 import { Exception } from './error-handling';
 
 export async function withTransaction<T>(
@@ -69,4 +70,11 @@ async function abortTransactionOnNonMongoException<T>(
 
     throw exceptionOrMongoError;
   }
+}
+
+export function stripePrice({ currency, amount }: Cost) {
+  return {
+    currency: currency,
+    unit_amount: Math.floor(amount * 100),
+  };
 }

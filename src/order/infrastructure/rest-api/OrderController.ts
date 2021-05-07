@@ -33,6 +33,7 @@ import {
 import { Photo } from '../persistence/order/OrderMongoMapper';
 import { SubmitShipmentInfoRequestAdapter } from './request-adapters/SubmitShipmentInfoRequestAdapter';
 import { SubmitShipmentInfoUseCase } from '../../domain/use-case/SubmitShipmentInfoUseCase';
+import { PrePayOrderShipmentFeeRequestAdapter } from './request-adapters/PrePayOrderShipmentFeeRequestAdapter';
 
 @Controller('order')
 export class OrderController {
@@ -119,5 +120,16 @@ export class OrderController {
     @Body() finalizeOrderRequest: SubmitShipmentInfoRequestAdapter,
   ): Promise<void> {
     await this.finalizeOrderUseCase.execute(finalizeOrderRequest);
+  }
+
+  @Post('payShipmentFee')
+  async prePayOrderShipmentFee(
+    @Body() prePayOrderShipmentFeeRequest: PrePayOrderShipmentFeeRequestAdapter,
+  ): Promise<StripeCheckoutSessionResult> {
+    const stripeCheckoutSession = await this.preConfirmOrderUseCase.execute(
+      prePayOrderShipmentFeeRequest,
+    );
+
+    return stripeCheckoutSession;
   }
 }

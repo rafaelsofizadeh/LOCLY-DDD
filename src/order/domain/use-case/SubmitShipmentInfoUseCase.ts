@@ -9,7 +9,7 @@ export interface SubmitShipmentInfoRequest {
   orderId: UUID;
   hostId: UUID;
   totalWeight: Gram;
-  deliveryCost: Cost;
+  shipmentCost: Cost;
   calculatorResultUrl?: URL;
 }
 

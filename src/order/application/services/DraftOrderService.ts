@@ -90,7 +90,7 @@ export class DraftOrderService implements DraftOrderUseCase {
       id: UUID(),
     }));
 
-    const shipmentCost = this.approximateShipmentCost(
+    const initialShipmentCost = this.approximateShipmentCost(
       originCountry,
       destination,
       items,
@@ -104,7 +104,7 @@ export class DraftOrderService implements DraftOrderUseCase {
       items,
       originCountry,
       destination,
-      shipmentCost,
+      initialShipmentCost,
     };
   }
 

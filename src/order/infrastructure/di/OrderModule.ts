@@ -16,7 +16,7 @@ import { OrderMongoRepositoryAdapter } from '../persistence/order/OrderMongoRepo
 import { OrderController } from '../rest-api/OrderController';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ConfirmOrderUseCase } from '../../domain/use-case/ConfirmOrderUseCase';
-import { ConfirmOrderWebhookHandler } from '../../application/services/ConfirmOrderService';
+import { ConfirmOrderWebhookHandler } from '../../application/services/ConfirmOrderWebhookHandler';
 import { ReceiveOrderItemUseCase } from '../../domain/use-case/ReceiveOrderItemUseCase';
 import { ReceiveOrderItemService } from '../../application/services/ReceiveOrderItemService';
 import { EditOrderService } from '../../application/services/EditOrderService';
@@ -38,6 +38,10 @@ import { uuidToMuuid } from '../../../common/persistence';
 import { Request } from 'express';
 import { SubmitShipmentInfoService } from '../../application/services/SubmitShipmentInfoService';
 import { SubmitShipmentInfoUseCase } from '../../domain/use-case/SubmitShipmentInfoUseCase';
+import { PrePayOrderShipmentFeeUseCase } from '../../domain/use-case/PrePayOrderShipmentFeeUseCase';
+import { PrePayOrderShipmentFeeService } from '../../application/services/PrePayOrderShipmentFeeService';
+import { PayOrderShipmentFeeWebhookHandler } from '../../application/services/PayOrderShipmentFeeWebhookHandler';
+import { PayOrderShipmentFeeUseCase } from '../../domain/use-case/PayOrderShipmentFeeUseCase';
 
 const imports: DynamicModule[] = [
   ConfigModule.forRoot(),
@@ -112,6 +116,14 @@ const useCaseProviders: Provider[] = [
   {
     provide: SubmitShipmentInfoUseCase,
     useClass: SubmitShipmentInfoService,
+  },
+  {
+    provide: PrePayOrderShipmentFeeUseCase,
+    useClass: PrePayOrderShipmentFeeService,
+  },
+  {
+    provide: PayOrderShipmentFeeUseCase,
+    useClass: PayOrderShipmentFeeWebhookHandler,
   },
 ];
 
