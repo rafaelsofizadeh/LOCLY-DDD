@@ -58,6 +58,8 @@ const imports: DynamicModule[] = [
       storage: new GridFsStorage({
         db,
         // TODO: Better 'file' function typing
+        // IMPORTANT: ALWAYS PUT REQUEST BODY FIELDS BEFORE FILE FIELD, or else req.body might be unpopulated
+        // https://stackoverflow.com/a/43197040
         file: (request: Request) => {
           const { hostId, itemId } = request.body as AddItemPhotoRequest;
 
@@ -75,8 +77,6 @@ const imports: DynamicModule[] = [
         files: maxSimulataneousPhotoCount,
       },
       fileFilter: (req, { mimetype }, cb) => {
-        console.log(req.body);
-
         if (!/image\/jpeg|jpg|png|gif|heic/.test(mimetype)) {
           try {
             throwCustomException('Unsupported file mimetype', {
