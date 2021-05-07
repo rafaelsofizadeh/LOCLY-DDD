@@ -5,6 +5,7 @@ import { CustomExceptionFilter } from './order/infrastructure/rest-api/nest-infr
 
 // TODO(GLOBAL) More expressive UseCases with Order types/stages
 // TODO(GLOBAL): Rethink everything related to event emitting; email notifications & maybe server-sent events
+// TODO(GLOBAL: Rethink order statuses and change status to "belongs-to-user" and "belongs-to-host"
 
 declare const module: any;
 

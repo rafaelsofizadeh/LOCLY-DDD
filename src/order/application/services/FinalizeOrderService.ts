@@ -41,15 +41,17 @@ export class FinalizeOrderService implements FinalizeOrderUseCase {
     }: FinalizeOrderRequest,
     session: ClientSession,
   ): Promise<void> {
-    const unfinilizedItems: Item[] = await this.getUnfinalizedItems(
+    const unfinishedItems: Item[] = await this.getUnfinalizedItems(
       orderId,
       hostId,
     );
 
-    if (unfinilizedItems.length) {
+    const unfinishedItemIds: UUID[] = unfinishedItems.map(({ id }) => id);
+
+    if (unfinishedItems.length) {
       throwCustomException(
         "Can't finalize order until all items have weights and photos",
-        { orderId, unfinilizedItems },
+        { orderId, unfinishedItemIds },
         HttpStatus.FORBIDDEN,
       )();
     }
