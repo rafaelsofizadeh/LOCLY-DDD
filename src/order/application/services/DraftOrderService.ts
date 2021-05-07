@@ -22,7 +22,7 @@ import {
   Address,
   DraftOrder,
   DraftedOrderStatus,
-  ShipmentCost,
+  Cost,
 } from '../../domain/entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
 
@@ -110,7 +110,7 @@ export class DraftOrderService implements DraftOrderUseCase {
     { country: destinationCountry }: Address,
     items: Item[],
     getShipmentCostQuote: ShipmentCostQuoteFn,
-  ): ShipmentCost {
+  ): Cost {
     const { currency, services }: ShipmentCostQuote = getShipmentCostQuote(
       originCountry,
       destinationCountry,

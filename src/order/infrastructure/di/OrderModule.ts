@@ -1,5 +1,5 @@
 import { DynamicModule, Module, Provider } from '@nestjs/common';
-import { getDbToken, InjectDb, MongoModule } from 'nest-mongodb';
+import { getDbToken, MongoModule } from 'nest-mongodb';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 import * as GridFsStorage from 'multer-gridfs-storage';
 
@@ -36,6 +36,8 @@ import { throwCustomException } from '../../../common/error-handling';
 import { UUID } from '../../../common/domain';
 import { uuidToMuuid } from '../../../common/persistence';
 import { Request } from 'express';
+import { FinalizeOrderService } from '../../application/services/FinalizeOrderService';
+import { FinalizeOrderUseCase } from '../../domain/use-case/FinalizeOrderUseCase';
 
 const imports: DynamicModule[] = [
   ConfigModule.forRoot(),
@@ -72,7 +74,9 @@ const imports: DynamicModule[] = [
         fileSize: maxPhotoSizeBytes,
         files: maxSimulataneousPhotoCount,
       },
-      fileFilter: (_, { mimetype }, cb) => {
+      fileFilter: (req, { mimetype }, cb) => {
+        console.log(req.body);
+
         if (!/image\/jpeg|jpg|png|gif|heic/.test(mimetype)) {
           try {
             throwCustomException('Unsupported file mimetype', {
@@ -91,7 +95,6 @@ const imports: DynamicModule[] = [
   }),
 ];
 
-InjectDb;
 const persistenceProviders: Provider[] = [
   { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
   { provide: CustomerRepository, useClass: CustomerMongoRepositoryAdapter },
@@ -106,6 +109,7 @@ const useCaseProviders: Provider[] = [
   { provide: ConfirmOrderUseCase, useClass: ConfirmOrderWebhookHandler },
   { provide: ReceiveOrderItemUseCase, useClass: ReceiveOrderItemService },
   { provide: AddItemPhotoUseCase, useClass: AddItemPhotoService },
+  { provide: FinalizeOrderUseCase, useClass: FinalizeOrderService },
 ];
 
 // TODO(NOW): find a better place to initialize testing dependencies (through .env? npm scripts?)

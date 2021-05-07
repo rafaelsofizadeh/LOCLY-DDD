@@ -29,8 +29,6 @@ export function throwCustomException(
     debugOutput.length ? `: (${debugOutput})` : ''
   }`;
 
-  console.log(debugOutput, '\n\n', finalMessage, '\n\n\n\n');
-
   return (error?: Error) => {
     throw new Exception(errorStatus, finalMessage, fnMainArgs, error);
   };

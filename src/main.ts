@@ -4,7 +4,7 @@ import { AppModule } from './AppModule';
 import { CustomExceptionFilter } from './order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
 
 // TODO(GLOBAL) More expressive UseCases with Order types/stages
-// TODO(GLOBAL): Rethink everything related to event emitting
+// TODO(GLOBAL): Rethink everything related to event emitting; email notifications & maybe server-sent events
 
 declare const module: any;
 

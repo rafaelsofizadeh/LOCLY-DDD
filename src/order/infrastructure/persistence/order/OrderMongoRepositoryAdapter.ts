@@ -55,6 +55,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       );
   }
 
+  // TODO: Vary allowed properties based on OrderStatus
   async setProperties(
     filter: OrderFilter,
     // TODO: better type naming for OrderFilter here
@@ -233,6 +234,7 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     const filterQuery = mongoQuery(filter);
 
     // TODO: typing
+    // TODO: Error handling on photos
     const photoMuuids = photos.map(({ id }) => id);
     const photoUploadResults: ItemPhotosUploadResult = photos.map(
       ({ id, filename }) => ({ id: muuidToUuid(id), photoName: filename }),

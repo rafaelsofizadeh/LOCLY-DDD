@@ -9,7 +9,7 @@ import {
   ReceiveOrderItemResult,
   ReceiveOrderItemUseCase,
 } from '../../domain/use-case/ReceiveOrderItemUseCase';
-import { ConfirmedOrderStatus, OrderStatus } from '../../domain/entity/Order';
+import { ConfirmedOrderStatus } from '../../domain/entity/Order';
 
 @Injectable()
 export class ReceiveOrderItemService implements ReceiveOrderItemUseCase {

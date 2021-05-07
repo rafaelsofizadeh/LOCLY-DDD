@@ -1,21 +1,21 @@
 import { Binary } from 'mongodb';
 
-import { Item, ItemFilter } from '../../../domain/entity/Item';
+import { Gram, Item, ItemFilter } from '../../../domain/entity/Item';
 import {
   Address,
   DraftOrder,
   DraftedOrderStatus,
   Order,
   OrderStatus,
-  ShipmentCost,
+  Cost,
   OrderFilter,
 } from '../../../domain/entity/Order';
 import { Country } from '../../../domain/data/Country';
 import { PhysicalItem } from '../../../domain/entity/Item';
 import {
   convertToMongoDocument,
-  serializeMongoData,
   SerializedMongoDocument,
+  serializeMongoData,
 } from '../../../../common/persistence';
 
 export type ItemMongoSubdocument = Omit<Item, 'id'> & {
@@ -26,16 +26,20 @@ export type PhysicalItemMongoSubdocument = Omit<PhysicalItem, 'id'> & {
   _id: Binary;
 };
 
+// TODO(typing): ConvertedToMongoDocument<AnyOrder>
 type AnyOrderMongoDocument = {
-  _id: Binary;
-  status: OrderStatus;
-  customerId: Binary;
-  hostId: Binary;
-  originCountry: Country;
-  items: ItemMongoSubdocument[];
-  shipmentCost: ShipmentCost;
-  destination: Address;
-  receivedDate: Date;
+  readonly _id: Binary;
+  readonly status: OrderStatus;
+  readonly customerId: Binary;
+  readonly hostId: Binary;
+  readonly originCountry: Country;
+  readonly items: ItemMongoSubdocument[];
+  readonly shipmentCost: Cost;
+  readonly destination: Address;
+  readonly receivedDate: Date;
+  readonly totalWeight: Gram;
+  readonly deliveryCost: Cost;
+  readonly calculatorResultUrl?: URL;
 };
 
 export type DraftedOrderMongoDocument = Pick<
