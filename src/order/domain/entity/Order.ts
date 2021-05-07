@@ -2,7 +2,7 @@ import { UUID } from '../../../common/domain';
 import { EntityFilter } from '../../../common/persistence';
 import { Country } from '../data/Country';
 import { Currency } from '../data/Currency';
-import { URL } from '../use-case/FinalizeOrderUseCase';
+import { URL } from '../use-case/SubmitShipmentInfoUseCase';
 import {
   DraftedItem,
   FinalizedItem,

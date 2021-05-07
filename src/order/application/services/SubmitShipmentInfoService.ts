@@ -4,23 +4,23 @@ import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import {
-  FinalizeOrderRequest,
-  FinalizeOrderUseCase,
-} from '../../domain/use-case/FinalizeOrderUseCase';
+  SubmitShipmentInfoRequest,
+  SubmitShipmentInfoUseCase,
+} from '../../domain/use-case/SubmitShipmentInfoUseCase';
 import { Order, OrderStatus } from '../../domain/entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
 import { Item } from '../../domain/entity/Item';
 import { UUID } from '../../../common/domain';
 
 @Injectable()
-export class FinalizeOrderService implements FinalizeOrderUseCase {
+export class SubmitShipmentInfoService implements SubmitShipmentInfoUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
   async execute(
-    finalizeOrderRequest: FinalizeOrderRequest,
+    finalizeOrderRequest: SubmitShipmentInfoRequest,
     session?: ClientSession,
   ): Promise<void> {
     await withTransaction(
@@ -38,7 +38,7 @@ export class FinalizeOrderService implements FinalizeOrderUseCase {
       totalWeight,
       deliveryCost,
       calculatorResultUrl,
-    }: FinalizeOrderRequest,
+    }: SubmitShipmentInfoRequest,
     session: ClientSession,
   ): Promise<void> {
     const notFinalizedItems: Item[] = await this.getUnfinalizedItems(
@@ -59,10 +59,12 @@ export class FinalizeOrderService implements FinalizeOrderUseCase {
     await this.orderRepository.setProperties(
       // status and hostId are already checked in findOrder()
       { orderId },
-      Object.assign(
-        { totalWeight, deliveryCost },
-        calculatorResultUrl ? { calculatorResultUrl } : {},
-      ),
+      {
+        totalWeight,
+        deliveryCost,
+        status: OrderStatus.Finalized,
+        ...(calculatorResultUrl ? { calculatorResultUrl } : {}),
+      },
       session,
     );
   }

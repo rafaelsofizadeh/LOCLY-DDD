@@ -5,7 +5,7 @@ import { Cost } from '../entity/Order';
 
 export type URL = string;
 
-export interface FinalizeOrderRequest {
+export interface SubmitShipmentInfoRequest {
   orderId: UUID;
   hostId: UUID;
   totalWeight: Gram;
@@ -13,7 +13,7 @@ export interface FinalizeOrderRequest {
   calculatorResultUrl?: URL;
 }
 
-export abstract class FinalizeOrderUseCase extends UseCase<
-  FinalizeOrderRequest,
+export abstract class SubmitShipmentInfoUseCase extends UseCase<
+  SubmitShipmentInfoRequest,
   void
 > {}

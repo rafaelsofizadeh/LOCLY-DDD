@@ -31,8 +31,8 @@ import {
   photoPropertyName,
 } from '../../domain/use-case/AddItemPhotoUseCase';
 import { Photo } from '../persistence/order/OrderMongoMapper';
-import { FinalizeOrderRequestAdapter } from './request-adapters/FinalizeOrderRequestAdapter';
-import { FinalizeOrderUseCase } from '../../domain/use-case/FinalizeOrderUseCase';
+import { SubmitShipmentInfoRequestAdapter } from './request-adapters/SubmitShipmentInfoRequestAdapter';
+import { SubmitShipmentInfoUseCase } from '../../domain/use-case/SubmitShipmentInfoUseCase';
 
 @Controller('order')
 export class OrderController {
@@ -43,7 +43,7 @@ export class OrderController {
     private readonly preConfirmOrderUseCase: PreConfirmOrderUseCase,
     private readonly receiveOrderItemUseCase: ReceiveOrderItemUseCase,
     private readonly addItemPhotoUseCase: AddItemPhotoUseCase,
-    private readonly finalizeOrderUseCase: FinalizeOrderUseCase,
+    private readonly finalizeOrderUseCase: SubmitShipmentInfoUseCase,
   ) {}
 
   @Post('draft')
@@ -116,7 +116,7 @@ export class OrderController {
 
   @Post('finalize')
   async finalizeOrder(
-    @Body() finalizeOrderRequest: FinalizeOrderRequestAdapter,
+    @Body() finalizeOrderRequest: SubmitShipmentInfoRequestAdapter,
   ): Promise<void> {
     await this.finalizeOrderUseCase.execute(finalizeOrderRequest);
   }

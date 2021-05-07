@@ -36,8 +36,8 @@ import { throwCustomException } from '../../../common/error-handling';
 import { UUID } from '../../../common/domain';
 import { uuidToMuuid } from '../../../common/persistence';
 import { Request } from 'express';
-import { FinalizeOrderService } from '../../application/services/FinalizeOrderService';
-import { FinalizeOrderUseCase } from '../../domain/use-case/FinalizeOrderUseCase';
+import { SubmitShipmentInfoService } from '../../application/services/SubmitShipmentInfoService';
+import { SubmitShipmentInfoUseCase } from '../../domain/use-case/SubmitShipmentInfoUseCase';
 
 const imports: DynamicModule[] = [
   ConfigModule.forRoot(),
@@ -109,7 +109,10 @@ const useCaseProviders: Provider[] = [
   { provide: ConfirmOrderUseCase, useClass: ConfirmOrderWebhookHandler },
   { provide: ReceiveOrderItemUseCase, useClass: ReceiveOrderItemService },
   { provide: AddItemPhotoUseCase, useClass: AddItemPhotoService },
-  { provide: FinalizeOrderUseCase, useClass: FinalizeOrderService },
+  {
+    provide: SubmitShipmentInfoUseCase,
+    useClass: SubmitShipmentInfoService,
+  },
 ];
 
 // TODO(NOW): find a better place to initialize testing dependencies (through .env? npm scripts?)

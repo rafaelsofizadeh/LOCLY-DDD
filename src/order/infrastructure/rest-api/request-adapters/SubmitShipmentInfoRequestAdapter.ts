@@ -14,9 +14,9 @@ import { IsUUID, UUID } from '../../../../common/domain';
 import { Gram } from '../../../domain/entity/Item';
 import { Cost } from '../../../domain/entity/Order';
 import {
-  FinalizeOrderRequest,
+  SubmitShipmentInfoRequest,
   URL,
-} from '../../../domain/use-case/FinalizeOrderUseCase';
+} from '../../../domain/use-case/SubmitShipmentInfoUseCase';
 
 class CostVerificationSchema implements Cost {
   @IsInt()
@@ -28,7 +28,8 @@ class CostVerificationSchema implements Cost {
   currency: 'USD';
 }
 
-export class FinalizeOrderRequestAdapter implements FinalizeOrderRequest {
+export class SubmitShipmentInfoRequestAdapter
+  implements SubmitShipmentInfoRequest {
   @IsUUID()
   readonly orderId: UUID;
 
