@@ -32,7 +32,7 @@ export function flattenObject<T extends Record<string, any>>(
   object: T,
   path?: string,
   keyFilter?: (k: string) => boolean,
-  valueFilter: (v: any) => boolean = (v: any) => v === undefined || v === null,
+  valueFilter?: (v: any) => boolean,
   separator: string = '.',
 ): {
   [K in keyof T as Join<PathsToStringProps<T[K]>, '.'>]: T[K] extends object ? never : T[K]
@@ -40,7 +40,7 @@ export function flattenObject<T extends Record<string, any>>(
   const keys: (keyof T)[] = Object.keys(object);
 
   return keys.reduce((flatObjectAcc: T, key: string): T => {
-    if (keyFilter && keyFilter(key)) {
+    if (keyFilter && !keyFilter(key)) {
       return flatObjectAcc;
     }
 
@@ -177,6 +177,7 @@ export function convertToMongoDocument(
 ): ConvertedToMongoDocument<typeof input> {
   if (
     typeof input === 'object' &&
+    !(input === null) && 
     !(input instanceof Date) &&
     !(input instanceof Buffer)
   ) {
