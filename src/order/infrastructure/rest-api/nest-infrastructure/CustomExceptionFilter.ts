@@ -15,8 +15,9 @@ export class CustomExceptionFilter implements ExceptionFilter {
 
     console.error(error);
 
-    return response
-      .status(status)
-      .json({ message: `${HttpStatus[status]} | ${error.message}`, data });
+    return response.status(status).json({
+      message: `${HttpStatus[status]} | ${error.message}`,
+      data,
+    });
   }
 }

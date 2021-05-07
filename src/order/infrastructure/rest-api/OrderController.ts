@@ -106,7 +106,6 @@ export class OrderController {
     @Body() addItemPhotoRequestBody: AddItemPhotoRequestBodyAdapter,
     @UploadedFiles() photos: Photo[],
   ) {
-    console.log(photos, addItemPhotoRequestBody);
     const receivedDateResult = await this.addItemPhotoUseCase.execute({
       ...addItemPhotoRequestBody,
       photos,

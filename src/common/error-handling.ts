@@ -1,4 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
+import { inspect } from 'util';
 
 export class Exception {
   public readonly message: string;
@@ -7,7 +8,7 @@ export class Exception {
   constructor(
     public readonly status: HttpStatus,
     specialMessage?: string,
-    public readonly data?: any,
+    public readonly data?: object,
     error: Error = new Error(),
   ) {
     this.error = Object.assign(error, {
@@ -22,7 +23,7 @@ export function throwCustomException(
   errorStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
 ) {
   const debugOutput = Object.entries(fnMainArgs)
-    .map(([key, arg]) => `${key}: ${JSON.stringify(arg)}`)
+    .map(([key, arg]) => `${key}: ${inspect(arg).replace(/\r?\n/g, '')}`)
     .join(', ');
 
   const finalMessage = `${message} ${
