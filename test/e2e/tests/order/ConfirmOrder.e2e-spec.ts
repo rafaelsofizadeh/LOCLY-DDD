@@ -145,7 +145,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
   it(`Matches Order with a Host, updates Order's "hostId" property, and Host's "orderIds" property`, async (done) /* done() is needed for "awaiting" setTimeout */ => {
     // https://stackoverflow.com/a/49864436/6539857
-    jest.setTimeout(45000);
+    jest.setTimeout(50000);
 
     const testHostConfigs: HostConfig[] = [
       /*
