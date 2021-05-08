@@ -40,7 +40,7 @@ import {
   SubmitShipmentInfoUseCase,
 } from '../../domain/use-case/SubmitShipmentInfoUseCase';
 import { PrePayOrderShipmentFeeRequestAdapter } from './request-adapters/PrePayOrderShipmentFeeRequestAdapter';
-import { StripeCheckoutCompletedUseCase } from '../../domain/use-case/StripeCheckoutCompletedWebhookHandler';
+import { PrePayOrderShipmentFeeUseCase } from '../../domain/use-case/PrePayOrderShipmentFeeUseCase';
 
 @Controller('order')
 export class OrderController {
@@ -52,6 +52,7 @@ export class OrderController {
     private readonly receiveOrderItemUseCase: ReceiveOrderItemUseCase,
     private readonly addItemPhotoUseCase: AddItemPhotoUseCase,
     private readonly submitShipmentInfoUseCase: SubmitShipmentInfoUseCase,
+    private readonly prePayOrderShipmentFeeUseCase: PrePayOrderShipmentFeeUseCase,
   ) {}
 
   @Post('draft')
@@ -135,7 +136,7 @@ export class OrderController {
   async prePayOrderShipmentFee(
     @Body() prePayOrderShipmentFeeRequest: PrePayOrderShipmentFeeRequestAdapter,
   ): Promise<StripeCheckoutSessionResult> {
-    const stripeCheckoutSession = await this.preConfirmOrderUseCase.execute(
+    const stripeCheckoutSession = await this.prePayOrderShipmentFeeUseCase.execute(
       prePayOrderShipmentFeeRequest,
     );
 

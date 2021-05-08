@@ -208,6 +208,7 @@ export function convertToMongoDocument(
 }
 
 // TODO: typing
+// TODO: Support status array
 export function mongoQuery(input: object) {
   const convertedToMongo = convertToMongoDocument(input);
   const convertedToMongoDotNotation = flattenObject(convertedToMongo);

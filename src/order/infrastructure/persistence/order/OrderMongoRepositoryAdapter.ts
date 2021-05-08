@@ -217,19 +217,32 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     photos: Photo[],
     session?: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
-    const orderFilterWithId = normalizeOrderFilter(orderFilter);
+    const { status, ...restOrderFilterWithId } = normalizeOrderFilter(
+      orderFilter,
+    );
     const itemFilterWithId = normalizeItemFilter(itemFilter);
 
     const filter = {
-      ...orderFilterWithId,
+      ...restOrderFilterWithId,
       items: itemFilterWithId,
     };
 
     const filterQueryWithoutReceivedCheck = mongoQuery(filter);
     // TODO:
-    const receivedCheck = { 'items.receivedDate': { $ne: null } };
+    const receivedCheck = {
+      'items.receivedDate': { $ne: null },
+    };
+
+    // TODO: Beautify
+    const statusQuery = status
+      ? {
+          status: Array.isArray(status) ? { $in: status } : status,
+        }
+      : {};
+
     const filterQuery = {
       ...filterQueryWithoutReceivedCheck,
+      ...statusQuery,
       ...receivedCheck,
     };
 
@@ -237,7 +250,10 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
     // TODO: Error handling on photos
     const photoMuuids = photos.map(({ id }) => id);
     const photoUploadResults: ItemPhotosUploadResult = photos.map(
-      ({ id, filename }) => ({ id: muuidToUuid(id), photoName: filename }),
+      ({ id, filename }) => ({
+        id: muuidToUuid(id),
+        photoName: filename,
+      }),
     );
 
     // https://docs.mongodb.com/manual/reference/operator/update/positional/
@@ -246,13 +262,22 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
         filterQuery,
         // $each: https://docs.mongodb.com/manual/reference/operator/update/push/#append-multiple-values-to-an-array
         // TODO:
-        { $push: { 'items.$.photos': { $each: photoMuuids } } },
+        {
+          $push: {
+            'items.$.photos': {
+              $each: photoMuuids,
+            },
+          },
+        },
         { session },
       )
       .catch(
         throwCustomException('Error adding photo file id to order item', {
           orderFilter,
-          itemFilter: { ...itemFilter, receivedDate: 'NOT_NULL' },
+          itemFilter: {
+            ...itemFilter,
+            receivedDate: 'NOT_NULL',
+          },
         }),
       );
 
@@ -265,7 +290,10 @@ export class OrderMongoRepositoryAdapter implements OrderRepository {
       {
         orderFilter,
         // TODO:
-        itemFilter: { ...itemFilter, receivedDate: 'NOT_NULL' },
+        itemFilter: {
+          ...itemFilter,
+          receivedDate: 'NOT_NULL',
+        },
       },
     );
 
