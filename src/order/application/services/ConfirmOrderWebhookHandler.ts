@@ -1,20 +1,17 @@
-import { StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { Injectable } from '@nestjs/common';
 import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
-import Stripe from 'stripe';
-import { UUID } from '../../../common/domain';
 import { withTransaction } from '../../../common/application';
 import { Host } from '../../domain/entity/Host';
 
 import { Address, OrderStatus } from '../../domain/entity/Order';
 import {
+  ConfirmOrderRequest,
   ConfirmOrderUseCase,
-  HostMatchResult,
+  ConfirmOrderResult,
 } from '../../domain/use-case/ConfirmOrderUseCase';
 import { HostRepository } from '../port/HostRepository';
 import { OrderRepository } from '../port/OrderRepository';
-import { Match } from './PreConfirmOrderService';
 
 @Injectable()
 export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
@@ -24,37 +21,24 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  @StripeWebhookHandler('checkout.session.completed')
-  // TODO: Better Stripe typing
   async execute(
-    paymentFinalizedEvent: Stripe.Event,
+    confirmOrderRequest: ConfirmOrderRequest,
     session?: ClientSession,
-  ): Promise<HostMatchResult> {
-    const { orderId, hostId } = (paymentFinalizedEvent.data
-      .object as Stripe.Checkout.Session).metadata as Match;
-
+  ): Promise<ConfirmOrderResult> {
     const matchedHostAddress: Address = await withTransaction(
-      async (sessionWithTransaction: ClientSession) => {
-        await this.confirmOrder(orderId, hostId, sessionWithTransaction);
-
-        const host: Host = await this.hostRepository.findHost(
-          hostId,
-          sessionWithTransaction,
-        );
-        return host.address;
-      },
+      (sessionWithTransaction: ClientSession) =>
+        this.confirmOrder(confirmOrderRequest, sessionWithTransaction),
       this.mongoClient,
       session,
     );
 
-    return { matchedHostAddress };
+    return { address: matchedHostAddress };
   }
 
   private async confirmOrder(
-    orderId: UUID,
-    hostId: UUID,
+    { orderId, hostId }: ConfirmOrderRequest,
     session: ClientSession,
-  ): Promise<void> {
+  ): Promise<Address> {
     await this.orderRepository.setProperties(
       { orderId, status: OrderStatus.Drafted },
       { status: OrderStatus.Confirmed, hostId },
@@ -62,5 +46,12 @@ export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
     );
 
     await this.hostRepository.addOrderToHost(hostId, orderId, session);
+
+    const { address }: Host = await this.hostRepository.findHost(
+      hostId,
+      session,
+    );
+
+    return address;
   }
 }

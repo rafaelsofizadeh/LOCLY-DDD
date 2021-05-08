@@ -12,16 +12,16 @@ import { Host } from '../../domain/entity/Host';
 import { UUID } from '../../../common/domain';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { stripePrice, withTransaction } from '../../../common/application';
+import {
+  StripeCheckoutSession,
+  StripePrice,
+  stripePrice,
+  withTransaction,
+} from '../../../common/application';
 import { OrderStatus, DraftedOrder, Cost } from '../../domain/entity/Order';
 import { HostRepository } from '../port/HostRepository';
 import { throwCustomException } from '../../../common/error-handling';
-
-export type StripeCheckoutSession = Stripe.Checkout.Session;
-export type StripePrice = Pick<
-  Stripe.Checkout.SessionCreateParams.LineItem.PriceData,
-  'currency' | 'unit_amount'
->;
+import { StripeCheckoutCompletedWebhookFeeType } from '../../domain/use-case/StripeCheckoutCompletedWebhookHandler';
 
 export type Match = {
   orderId: UUID;
@@ -124,27 +124,28 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
      *
      * 1. Customer pays Order -> Order tries to match with a Host -> no Host available
      */
-    const checkoutSession: StripeCheckoutSession = await this.stripe.checkout.sessions.create(
-      {
-        payment_method_types: ['card'],
-        customer_email: 'rafa.sofizadeh@gmail.com',
-        line_items: [
-          {
-            price_data: {
-              ...price,
-              product_data: {
-                name: 'Locly and Host Service Fee',
-              },
+    const checkoutSession = (await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      customer_email: 'rafa.sofizadeh@gmail.com',
+      line_items: [
+        {
+          price_data: {
+            ...price,
+            product_data: {
+              name: 'Locly and Host Service Fee',
             },
-            quantity: 1,
           },
-        ],
-        metadata: match,
-        mode: 'payment',
-        success_url: 'https://news.ycombinator.com',
-        cancel_url: 'https://reddit.com',
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        feeType: StripeCheckoutCompletedWebhookFeeType.Service,
+        ...match,
       },
-    );
+      mode: 'payment',
+      success_url: 'https://news.ycombinator.com',
+      cancel_url: 'https://reddit.com',
+    })) as Stripe.Response<StripeCheckoutSession>;
 
     return checkoutSession;
   }

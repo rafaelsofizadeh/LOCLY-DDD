@@ -40,8 +40,10 @@ import { SubmitShipmentInfoService } from '../../application/services/SubmitShip
 import { SubmitShipmentInfoUseCase } from '../../domain/use-case/SubmitShipmentInfoUseCase';
 import { PrePayOrderShipmentFeeUseCase } from '../../domain/use-case/PrePayOrderShipmentFeeUseCase';
 import { PrePayOrderShipmentFeeService } from '../../application/services/PrePayOrderShipmentFeeService';
-import { PayOrderShipmentFeeWebhookHandler } from '../../application/services/PayOrderShipmentFeeWebhookHandler';
 import { PayOrderShipmentFeeUseCase } from '../../domain/use-case/PayOrderShipmentFeeUseCase';
+import { PayOrderShipmentFeeWebhookHandler } from '../../application/services/PayOrderShipmentFeeWebhookHandler';
+import { StripeCheckoutCompletedUseCase } from '../../domain/use-case/StripeCheckoutCompletedWebhookHandler';
+import { StripeCheckoutCompletedWebhookHandler } from '../../application/services/StripeCheckoutCompletedWebhookHandler';
 
 const imports: DynamicModule[] = [
   ConfigModule.forRoot(),
@@ -124,6 +126,10 @@ const useCaseProviders: Provider[] = [
   {
     provide: PayOrderShipmentFeeUseCase,
     useClass: PayOrderShipmentFeeWebhookHandler,
+  },
+  {
+    provide: StripeCheckoutCompletedUseCase,
+    useClass: StripeCheckoutCompletedWebhookHandler,
   },
 ];
 

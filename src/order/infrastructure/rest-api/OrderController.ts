@@ -23,7 +23,10 @@ import { DraftedOrder } from '../../domain/entity/Order';
 import { SerializePrivatePropertiesInterceptor } from './nest-infrastructure/SerializePrivatePropertiesInterceptor';
 import { EditOrderUseCase } from '../../domain/use-case/EditOrderUseCase';
 import { EditOrderRequestAdapter } from './request-adapters/EditOrderRequestAdapter';
-import { DeleteOrderUseCase } from '../../domain/use-case/DeleteOrderUseCase';
+import {
+  DeleteOrderResult,
+  DeleteOrderUseCase,
+} from '../../domain/use-case/DeleteOrderUseCase';
 import { DeleteOrderRequestAdapter } from './request-adapters/DeleteOrderRequestAdapter';
 import { AddItemPhotoRequestBodyAdapter } from './request-adapters/AddItemPhotoRequestAdapter';
 import {
@@ -32,8 +35,12 @@ import {
 } from '../../domain/use-case/AddItemPhotoUseCase';
 import { Photo } from '../persistence/order/OrderMongoMapper';
 import { SubmitShipmentInfoRequestAdapter } from './request-adapters/SubmitShipmentInfoRequestAdapter';
-import { SubmitShipmentInfoUseCase } from '../../domain/use-case/SubmitShipmentInfoUseCase';
+import {
+  SubmitShipmentInfoResult,
+  SubmitShipmentInfoUseCase,
+} from '../../domain/use-case/SubmitShipmentInfoUseCase';
 import { PrePayOrderShipmentFeeRequestAdapter } from './request-adapters/PrePayOrderShipmentFeeRequestAdapter';
+import { StripeCheckoutCompletedUseCase } from '../../domain/use-case/StripeCheckoutCompletedWebhookHandler';
 
 @Controller('order')
 export class OrderController {
@@ -44,7 +51,7 @@ export class OrderController {
     private readonly preConfirmOrderUseCase: PreConfirmOrderUseCase,
     private readonly receiveOrderItemUseCase: ReceiveOrderItemUseCase,
     private readonly addItemPhotoUseCase: AddItemPhotoUseCase,
-    private readonly finalizeOrderUseCase: SubmitShipmentInfoUseCase,
+    private readonly submitShipmentInfoUseCase: SubmitShipmentInfoUseCase,
   ) {}
 
   @Post('draft')
@@ -74,7 +81,7 @@ export class OrderController {
   @Post('delete')
   async deleteOrder(
     @Body() deleteOrderRequest: DeleteOrderRequestAdapter,
-  ): Promise<void> {
+  ): Promise<DeleteOrderResult> {
     await this.deleteOrderUseCase.execute(deleteOrderRequest);
   }
 
@@ -115,11 +122,13 @@ export class OrderController {
     return receivedDateResult;
   }
 
-  @Post('finalize')
-  async finalizeOrder(
-    @Body() finalizeOrderRequest: SubmitShipmentInfoRequestAdapter,
-  ): Promise<void> {
-    await this.finalizeOrderUseCase.execute(finalizeOrderRequest);
+  @Post('submitShipmentInfo')
+  async submitOrderShipmentInfo(
+    @Body() submitOrderShipmentInfoRequest: SubmitShipmentInfoRequestAdapter,
+  ): Promise<SubmitShipmentInfoResult> {
+    await this.submitShipmentInfoUseCase.execute(
+      submitOrderShipmentInfoRequest,
+    );
   }
 
   @Post('payShipmentFee')

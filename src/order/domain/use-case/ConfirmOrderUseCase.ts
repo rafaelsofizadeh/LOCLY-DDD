@@ -1,14 +1,14 @@
-import Stripe from 'stripe';
 import { UseCase } from '../../../common/domain';
+import { Match } from '../../application/services/PreConfirmOrderService';
 import { Address } from '../entity/Order';
 
-export interface HostMatchResult {
-  matchedHostAddress: Address;
+export interface ConfirmOrderRequest extends Match {}
+
+export interface ConfirmOrderResult {
+  address: Address;
 }
 
 export abstract class ConfirmOrderUseCase extends UseCase<
-  Omit<Stripe.Event, 'type'> & {
-    type: Stripe.WebhookEndpointCreateParams.EnabledEvent;
-  },
-  HostMatchResult
+  ConfirmOrderRequest,
+  ConfirmOrderResult
 > {}

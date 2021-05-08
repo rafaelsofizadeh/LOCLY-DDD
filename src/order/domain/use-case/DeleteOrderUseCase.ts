@@ -6,7 +6,9 @@ export interface DeleteOrderRequest {
   customerId: UUID;
 }
 
+export type DeleteOrderResult = void;
+
 export abstract class DeleteOrderUseCase extends UseCase<
   DeleteOrderRequest,
-  void
+  DeleteOrderResult
 > {}

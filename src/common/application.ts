@@ -1,5 +1,7 @@
 import { ClientSession, MongoClient } from 'mongodb';
+import { Stripe } from 'stripe';
 import { Cost } from '../order/domain/entity/Order';
+import { StripeCheckoutCompletedWebhookPayload } from '../order/domain/use-case/StripeCheckoutCompletedWebhookHandler';
 import { Exception } from './error-handling';
 
 export async function withTransaction<T>(
@@ -72,9 +74,22 @@ async function abortTransactionOnNonMongoException<T>(
   }
 }
 
-export function stripePrice({ currency, amount }: Cost) {
+export function stripePrice({ currency, amount }: Cost): StripePrice {
   return {
     currency: currency,
     unit_amount: Math.floor(amount * 100),
   };
 }
+
+export type StripePrice = Pick<
+  Stripe.Checkout.SessionCreateParams.LineItem.PriceData,
+  'currency' | 'unit_amount'
+>;
+
+export type StripeEvent = Omit<Stripe.Event, 'type'> & {
+  type: Stripe.WebhookEndpointCreateParams.EnabledEvent;
+};
+
+export type StripeCheckoutSession = Stripe.Checkout.Session & {
+  metadata: StripeCheckoutCompletedWebhookPayload;
+};

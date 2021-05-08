@@ -13,7 +13,9 @@ export interface SubmitShipmentInfoRequest {
   calculatorResultUrl?: URL;
 }
 
+export type SubmitShipmentInfoResult = void;
+
 export abstract class SubmitShipmentInfoUseCase extends UseCase<
   SubmitShipmentInfoRequest,
-  void
+  SubmitShipmentInfoResult
 > {}

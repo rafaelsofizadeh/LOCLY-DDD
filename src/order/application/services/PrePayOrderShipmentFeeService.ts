@@ -10,9 +10,14 @@ import {
 import { OrderRepository } from '../port/OrderRepository';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { stripePrice, withTransaction } from '../../../common/application';
+import {
+  StripeCheckoutSession,
+  StripePrice,
+  stripePrice,
+  withTransaction,
+} from '../../../common/application';
 import { OrderStatus } from '../../domain/entity/Order';
-import { StripeCheckoutSession, StripePrice } from './PreConfirmOrderService';
+import { StripeCheckoutCompletedWebhookFeeType } from '../../domain/use-case/StripeCheckoutCompletedWebhookHandler';
 
 @Injectable()
 export class PrePayOrderShipmentFeeService
@@ -54,27 +59,28 @@ export class PrePayOrderShipmentFeeService
 
     const price: StripePrice = stripePrice(finalShipmentCost);
 
-    const checkoutSession: StripeCheckoutSession = await this.stripe.checkout.sessions.create(
-      {
-        payment_method_types: ['card'],
-        customer_email: 'rafa.sofizadeh@gmail.com',
-        line_items: [
-          {
-            price_data: {
-              ...price,
-              product_data: {
-                name: 'Order Shipment Fee',
-              },
+    const checkoutSession = (await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      customer_email: 'rafa.sofizadeh@gmail.com',
+      line_items: [
+        {
+          price_data: {
+            ...price,
+            product_data: {
+              name: 'Order Shipment Fee',
             },
-            quantity: 1,
           },
-        ],
-        metadata: { orderId },
-        mode: 'payment',
-        success_url: 'https://news.ycombinator.com',
-        cancel_url: 'https://reddit.com',
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        feeType: StripeCheckoutCompletedWebhookFeeType.Shipment,
+        orderId,
       },
-    );
+      mode: 'payment',
+      success_url: 'https://news.ycombinator.com',
+      cancel_url: 'https://reddit.com',
+    })) as Stripe.Response<StripeCheckoutSession>;
 
     return checkoutSession;
   }
