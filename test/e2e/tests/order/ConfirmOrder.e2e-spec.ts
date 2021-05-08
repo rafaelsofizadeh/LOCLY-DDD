@@ -100,8 +100,6 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     await new Promise(resolve => {
       const stdHandler = (data: Buffer) => {
-        console.log(data.toString());
-
         if (data.toString().includes('Ready!')) {
           return resolve('Stripe finished');
         }
@@ -129,14 +127,14 @@ describe('Confirm Order – POST /order/confirm', () => {
 
   afterEach(async () => {
     await Promise.allSettled([
-      //hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
-      //orderRepository.deleteOrder({ orderId: testOrder.id }),
+      hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
+      orderRepository.deleteOrder({ orderId: testOrder.id }),
     ]);
   });
 
   afterAll(async () => {
     await Promise.allSettled([
-      //customerRepository.deleteCustomer(testCustomer.id),
+      customerRepository.deleteCustomer(testCustomer.id),
     ]);
 
     stripeListener.kill();
