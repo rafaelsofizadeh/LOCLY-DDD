@@ -28,11 +28,11 @@ import {
   IDeleteOrder,
 } from './application/DeleteOrder/IDeleteOrder';
 import { DeleteOrderRequest } from './application/DeleteOrder/IDeleteOrder';
-import { AddItemPhotoRequestBodyAdapter } from './application/AddItemPhoto/AddItemPhotoRequestAdapter';
+import { AddItemPhotoRequestBody } from './application/AddItemPhoto/IAddItemPhoto';
 import {
   AddItemPhotoUseCase,
   photoPropertyName,
-} from './application/AddItemPhoto/AddItemPhotoUseCase';
+} from './application/AddItemPhoto/IAddItemPhoto';
 import { Photo } from './persistence/OrderMongoMapper';
 import { SubmitShipmentInfoRequestAdapter } from './application/SubmitShipmentInfo/SubmitShipmentInfoRequestAdapter';
 import {
@@ -112,7 +112,7 @@ export class OrderController {
   // file control/validation is done by MulterModule registration
   @UseInterceptors(FilesInterceptor(photoPropertyName))
   async addItemPhotoHandler(
-    @Body() addItemPhotoRequestBody: AddItemPhotoRequestBodyAdapter,
+    @Body() addItemPhotoRequestBody: AddItemPhotoRequestBody,
     @UploadedFiles() photos: Photo[],
   ) {
     const receivedDateResult = await this.addItemPhotoUseCase.execute({

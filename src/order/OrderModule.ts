@@ -29,8 +29,8 @@ import {
   AddItemPhotoUseCase,
   maxPhotoSizeBytes,
   maxSimulataneousPhotoCount,
-} from './application/AddItemPhoto/AddItemPhotoUseCase';
-import { AddItemPhotoService } from './application/AddItemPhoto/AddItemPhotoService';
+} from './application/AddItemPhoto/IAddItemPhoto';
+import { AddItemPhoto } from './application/AddItemPhoto/AddItemPhoto';
 import { MulterModule } from '@nestjs/platform-express';
 import { throwCustomException } from '../common/error-handling';
 import { UUID } from '../common/domain';
@@ -114,7 +114,7 @@ const useCaseProviders: Provider[] = [
   { provide: IConfirmOrder, useClass: ConfirmOrder },
   { provide: IConfirmOrderHandler, useClass: ConfirmOrderHandler },
   { provide: ReceiveItemUseCase, useClass: ReceiveItemService },
-  { provide: AddItemPhotoUseCase, useClass: AddItemPhotoService },
+  { provide: AddItemPhotoUseCase, useClass: AddItemPhoto },
   {
     provide: SubmitShipmentInfoUseCase,
     useClass: SubmitShipmentInfoService,

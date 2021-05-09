@@ -30,7 +30,7 @@ import {
   serializeMongoData,
 } from '../../common/persistence';
 import { ItemFilter } from '../entity/Item';
-import { ItemPhotosUploadResult } from '../application/AddItemPhoto/AddItemPhotoUseCase';
+import { ItemPhotosUploadResult } from '../application/AddItemPhoto/IAddItemPhoto';
 
 @Injectable()
 export class OrderMongoRepositoryAdapter implements OrderRepository {

@@ -7,11 +7,11 @@ import {
   AddItemPhotoRequest,
   AddItemPhotoUseCase,
   ItemPhotosUploadResult,
-} from './AddItemPhotoUseCase';
+} from './IAddItemPhoto';
 import { OrderStatus } from '../../entity/Order';
 
 @Injectable()
-export class AddItemPhotoService implements AddItemPhotoUseCase {
+export class AddItemPhoto implements AddItemPhotoUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
