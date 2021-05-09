@@ -1,7 +1,7 @@
 import { ClientSession, MongoClient } from 'mongodb';
 import { Stripe } from 'stripe';
-import { Cost } from '../order/domain/entity/Order';
-import { StripeCheckoutCompletedWebhookPayload } from '../order/domain/use-case/StripeCheckoutCompletedWebhookHandler';
+import { Cost } from '../order/entity/Order';
+import { StripeCheckoutCompletedWebhookPayload } from '../order/application/StripeCheckoutCompleted/StripeCheckoutCompletedUseCase';
 import { Exception } from './error-handling';
 
 export async function withTransaction<T>(

@@ -4,21 +4,18 @@ import { Test } from '@nestjs/testing';
 import { isUUID } from 'class-validator';
 
 import { AppModule } from '../../../../src/AppModule';
-import { Customer } from '../../../../src/order/domain/entity/Customer';
-import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
+import { Customer } from '../../../../src/order/entity/Customer';
+import { OrderRepository } from '../../../../src/order/persistence/OrderRepository';
 import { UUID } from '../../../../src/common/domain';
-import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
-import { DraftOrderRequest } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
-import {
-  OrderStatus,
-  DraftedOrder,
-} from '../../../../src/order/domain/entity/Order';
-import { Country } from '../../../../src/order/domain/data/Country';
-import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
+import { CustomerRepository } from '../../../../src/customer/persistence/CustomerRepository';
+import { DraftOrderRequest } from '../../../../src/order/application/DraftOrder/DraftOrderUseCase';
+import { OrderStatus, DraftedOrder } from '../../../../src/order/entity/Order';
+import { Country } from '../../../../src/order/entity/Country';
+import { CustomExceptionFilter } from '../../../../src/infrastructure/CustomExceptionFilter';
 import {
   getDestinationCountriesAvailable,
   originCountriesAvailable,
-} from '../../../../src/order/application/services/ShipmentCostCalculator/data/PriceGuide';
+} from '../../../../src/calculator/data/PriceGuide';
 
 // TODO(GLOBAL)(TESTING): Substitute database name in tests
 

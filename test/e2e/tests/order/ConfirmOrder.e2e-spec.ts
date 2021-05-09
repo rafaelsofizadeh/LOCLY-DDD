@@ -6,27 +6,27 @@ import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../../../../src/AppModule';
-import { Customer } from '../../../../src/order/domain/entity/Customer';
-import { Host } from '../../../../src/order/domain/entity/Host';
+import { Customer } from '../../../../src/order/entity/Customer';
+import { Host } from '../../../../src/order/entity/Host';
 
-import { CustomerRepository } from '../../../../src/order/application/port/CustomerRepository';
-import { OrderRepository } from '../../../../src/order/application/port/OrderRepository';
-import { DraftOrderUseCase } from '../../../../src/order/domain/use-case/DraftOrderUseCase';
-import { Country } from '../../../../src/order/domain/data/Country';
+import { CustomerRepository } from '../../../../src/customer/persistence/CustomerRepository';
+import { OrderRepository } from '../../../../src/order/persistence/OrderRepository';
+import { DraftOrderUseCase } from '../../../../src/order/application/DraftOrder/DraftOrderUseCase';
+import { Country } from '../../../../src/order/entity/Country';
 import { isString } from 'class-validator';
-import { HostRepository } from '../../../../src/order/application/port/HostRepository';
-import { StripeCheckoutSessionResult } from '../../../../src/order/domain/use-case/PreConfirmOrderUseCase';
+import { HostRepository } from '../../../../src/host/persistence/HostRepository';
+import { StripeCheckoutSessionResult } from '../../../../src/order/application/PreConfirmOrder/PreConfirmOrderUseCase';
 import {
   DraftedOrder,
   ConfirmedOrder,
   OrderStatus,
-} from '../../../../src/order/domain/entity/Order';
+} from '../../../../src/order/entity/Order';
 import { UUID } from '../../../../src/common/domain';
-import { CustomExceptionFilter } from '../../../../src/order/infrastructure/rest-api/nest-infrastructure/CustomExceptionFilter';
+import { CustomExceptionFilter } from '../../../../src/infrastructure/CustomExceptionFilter';
 import {
   getDestinationCountriesAvailable,
   originCountriesAvailable,
-} from '../../../../src/order/application/services/ShipmentCostCalculator/data/PriceGuide';
+} from '../../../../src/calculator/data/PriceGuide';
 
 type HostConfig = {
   country: Country;

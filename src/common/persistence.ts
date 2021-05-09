@@ -1,7 +1,7 @@
 import { Binary } from 'mongodb';
 import { Stream } from 'stream';
 import * as MUUID from 'uuid-mongodb';
-import { OrderStatus } from '../order/domain/entity/Order';
+import { OrderStatus } from '../order/entity/Order';
 import { isUUID, UUID, WithoutId } from './domain';
 
 function muuidToString(id: Binary): string {
