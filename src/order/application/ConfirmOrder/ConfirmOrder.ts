@@ -2,11 +2,7 @@ import Stripe from 'stripe';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
-import {
-  ConfirmOrderRequest,
-  StripeCheckoutSessionResult,
-  ConfirmOrderUseCase,
-} from './ConfirmOrderUseCase';
+import { StripeCheckoutSessionResult, IConfirmOrder } from './IConfirmOrder';
 import { OrderRepository } from '../../persistence/OrderRepository';
 import { Host } from '../../entity/Host';
 import { UUID } from '../../../common/domain';
@@ -22,6 +18,7 @@ import { OrderStatus, DraftedOrder, Cost } from '../../entity/Order';
 import { HostRepository } from '../../../host/persistence/HostRepository';
 import { throwCustomException } from '../../../common/error-handling';
 import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
+import { ConfirmOrderRequest } from './IConfirmOrder';
 
 export type Match = {
   orderId: UUID;
@@ -29,7 +26,7 @@ export type Match = {
 };
 
 @Injectable()
-export class ConfirmOrderService implements ConfirmOrderUseCase {
+export class ConfirmOrder implements IConfirmOrder {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,
@@ -54,7 +51,6 @@ export class ConfirmOrderService implements ConfirmOrderUseCase {
     };
   }
 
-  // TODO: Error handling and rejection events
   private async matchOrderAndCheckout(
     { orderId, customerId }: ConfirmOrderRequest,
     session: ClientSession,
@@ -94,6 +90,7 @@ export class ConfirmOrderService implements ConfirmOrderUseCase {
     }
   }
 
+  // TODO: Error handling and rejection events
   private async createStripeCheckoutSession(
     draftOrder: DraftedOrder,
     hostId: UUID,

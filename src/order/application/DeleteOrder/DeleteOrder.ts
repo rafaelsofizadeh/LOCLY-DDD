@@ -5,14 +5,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
-import {
-  DeleteOrderRequest,
-  DeleteOrderUseCase,
-} from './DeleteOrderUseCase';
+import { DeleteOrderRequest, IDeleteOrder } from './IDeleteOrder';
 import { OrderStatus } from '../../entity/Order';
 
 @Injectable()
-export class DeleteOrderService implements DeleteOrderUseCase {
+export class DeleteOrder implements IDeleteOrder {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,

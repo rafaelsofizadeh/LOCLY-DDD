@@ -1,14 +1,14 @@
-import { Match } from '../../../ConfirmOrder/ConfirmOrderService';
+import { Match } from '../../../ConfirmOrder/ConfirmOrder';
 import { Address } from '../../../../entity/Order';
 import { UseCase } from '../../../../../common/application';
 
-export interface ConfirmOrderRequest extends Match {}
+export interface ConfirmOrderHandlerRequest extends Match {}
 
-export interface ConfirmOrderResult {
+export interface ConfirmOrderHandlerResult {
   address: Address;
 }
 
 export abstract class IConfirmOrderHandler extends UseCase<
-  ConfirmOrderRequest,
-  ConfirmOrderResult
+  ConfirmOrderHandlerRequest,
+  ConfirmOrderHandlerResult
 > {}

@@ -9,11 +9,11 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { DraftOrderRequestAdapter } from './application/DraftOrder/DraftOrderRequestAdapter';
 import { DraftOrderUseCase } from './application/DraftOrder/DraftOrderUseCase';
-import { ConfirmOrderRequestAdapter } from './application/ConfirmOrder/ConfirmOrderRequestAdapter';
+import { ConfirmOrderRequest } from './application/ConfirmOrder/IConfirmOrder';
 import {
   StripeCheckoutSessionResult,
-  ConfirmOrderUseCase,
-} from './application/ConfirmOrder/ConfirmOrderUseCase';
+  IConfirmOrder,
+} from './application/ConfirmOrder/IConfirmOrder';
 import { ReceiveItemRequestAdapter } from './application/ReceiveItem/ReceiveItemRequestAdapter';
 import {
   ReceiveItemResult,
@@ -25,9 +25,9 @@ import { EditOrderUseCase } from './application/EditOrder/EditOrderUseCase';
 import { EditOrderRequestAdapter } from './application/EditOrder/EditOrderRequestAdapter';
 import {
   DeleteOrderResult,
-  DeleteOrderUseCase,
-} from './application/DeleteOrder/DeleteOrderUseCase';
-import { DeleteOrderRequestAdapter } from './application/DeleteOrder/DeleteOrderRequestAdapter';
+  IDeleteOrder,
+} from './application/DeleteOrder/IDeleteOrder';
+import { DeleteOrderRequest } from './application/DeleteOrder/IDeleteOrder';
 import { AddItemPhotoRequestBodyAdapter } from './application/AddItemPhoto/AddItemPhotoRequestAdapter';
 import {
   AddItemPhotoUseCase,
@@ -47,8 +47,8 @@ export class OrderController {
   constructor(
     private readonly draftOrderUseCase: DraftOrderUseCase,
     private readonly editOrderUseCase: EditOrderUseCase,
-    private readonly deleteOrderUseCase: DeleteOrderUseCase,
-    private readonly confirmOrderUseCase: ConfirmOrderUseCase,
+    private readonly deleteOrder: IDeleteOrder,
+    private readonly confirmOrder: IConfirmOrder,
     private readonly receiveItemUseCase: ReceiveItemUseCase,
     private readonly addItemPhotoUseCase: AddItemPhotoUseCase,
     private readonly submitShipmentInfoUseCase: SubmitShipmentInfoUseCase,
@@ -57,7 +57,7 @@ export class OrderController {
 
   @Post('draft')
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
-  async draftOrder(
+  async draftOrderHandler(
     @Body() orderRequest: DraftOrderRequestAdapter,
   ): Promise<DraftedOrder> {
     const draftOrder: DraftedOrder = await this.draftOrderUseCase.execute(
@@ -69,7 +69,7 @@ export class OrderController {
 
   @Post('edit')
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
-  async editOrder(
+  async editOrderHandler(
     @Body() editOrderRequest: EditOrderRequestAdapter,
   ): Promise<DraftedOrder> {
     const editedDraftOrder: DraftedOrder = await this.editOrderUseCase.execute(
@@ -80,17 +80,17 @@ export class OrderController {
   }
 
   @Post('delete')
-  async deleteOrder(
-    @Body() deleteOrderRequest: DeleteOrderRequestAdapter,
+  async deleteOrderHandler(
+    @Body() deleteOrderRequest: DeleteOrderRequest,
   ): Promise<DeleteOrderResult> {
-    await this.deleteOrderUseCase.execute(deleteOrderRequest);
+    await this.deleteOrder.execute(deleteOrderRequest);
   }
 
   @Post('confirm')
-  async confirmOrder(
-    @Body() confirmationRequest: ConfirmOrderRequestAdapter,
+  async confirmOrderHandler(
+    @Body() confirmationRequest: ConfirmOrderRequest,
   ): Promise<StripeCheckoutSessionResult> {
-    const stripeCheckoutSession = await this.confirmOrderUseCase.execute(
+    const stripeCheckoutSession = await this.confirmOrder.execute(
       confirmationRequest,
     );
 
@@ -98,7 +98,7 @@ export class OrderController {
   }
 
   @Post('receiveItem')
-  async receiveItem(
+  async receiveItemHandler(
     @Body() receiveItemRequest: ReceiveItemRequestAdapter,
   ): Promise<ReceiveItemResult> {
     const receivedDateResult = await this.receiveItemUseCase.execute(
@@ -111,7 +111,7 @@ export class OrderController {
   @Post('addItemPhotos')
   // file control/validation is done by MulterModule registration
   @UseInterceptors(FilesInterceptor(photoPropertyName))
-  async addItemPhoto(
+  async addItemPhotoHandler(
     @Body() addItemPhotoRequestBody: AddItemPhotoRequestBodyAdapter,
     @UploadedFiles() photos: Photo[],
   ) {
@@ -124,7 +124,7 @@ export class OrderController {
   }
 
   @Post('submitShipmentInfo')
-  async submitOrderShipmentInfo(
+  async submitOrderShipmentInfoHandler(
     @Body() submitOrderShipmentInfoRequest: SubmitShipmentInfoRequestAdapter,
   ): Promise<SubmitShipmentInfoResult> {
     await this.submitShipmentInfoUseCase.execute(
@@ -133,7 +133,7 @@ export class OrderController {
   }
 
   @Post('payShipment')
-  async payShipment(
+  async payShipmentHandler(
     @Body() payShipmentRequest: PayShipmentRequestAdapter,
   ): Promise<StripeCheckoutSessionResult> {
     const stripeCheckoutSession = await this.payShipmentUseCase.execute(

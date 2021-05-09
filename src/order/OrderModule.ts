@@ -6,9 +6,9 @@ import * as GridFsStorage from 'multer-gridfs-storage';
 import { CustomerRepository } from '../customer/persistence/CustomerRepository';
 import { HostRepository } from '../host/persistence/HostRepository';
 import { OrderRepository } from './persistence/OrderRepository';
-import { ConfirmOrderService } from './application/ConfirmOrder/ConfirmOrderService';
+import { ConfirmOrder } from './application/ConfirmOrder/ConfirmOrder';
 import { DraftOrderService } from './application/DraftOrder/DraftOrderService';
-import { ConfirmOrderUseCase } from './application/ConfirmOrder/ConfirmOrderUseCase';
+import { IConfirmOrder } from './application/ConfirmOrder/IConfirmOrder';
 import { DraftOrderUseCase } from './application/DraftOrder/DraftOrderUseCase';
 import { CustomerMongoRepositoryAdapter } from '../customer/persistence/CustomerMongoRepositoryAdapter';
 import { HostMongoRepositoryAdapter } from '../host/persistence/HostMongoRepositoryAdapter';
@@ -21,8 +21,8 @@ import { ReceiveItemUseCase } from './application/ReceiveItem/ReceiveItemUseCase
 import { ReceiveItemService } from './application/ReceiveItem/ReceiveItemService';
 import { EditOrderService } from './application/EditOrder/EditOrderService';
 import { EditOrderUseCase } from './application/EditOrder/EditOrderUseCase';
-import { DeleteOrderUseCase } from './application/DeleteOrder/DeleteOrderUseCase';
-import { DeleteOrderService } from './application/DeleteOrder/DeleteOrderService';
+import { IDeleteOrder } from './application/DeleteOrder/IDeleteOrder';
+import { DeleteOrder } from './application/DeleteOrder/DeleteOrder';
 import { Db } from 'mongodb';
 import {
   AddItemPhotoRequest,
@@ -110,8 +110,8 @@ const persistenceProviders: Provider[] = [
 const useCaseProviders: Provider[] = [
   { provide: DraftOrderUseCase, useClass: DraftOrderService },
   { provide: EditOrderUseCase, useClass: EditOrderService },
-  { provide: DeleteOrderUseCase, useClass: DeleteOrderService },
-  { provide: ConfirmOrderUseCase, useClass: ConfirmOrderService },
+  { provide: IDeleteOrder, useClass: DeleteOrder },
+  { provide: IConfirmOrder, useClass: ConfirmOrder },
   { provide: IConfirmOrderHandler, useClass: ConfirmOrderHandler },
   { provide: ReceiveItemUseCase, useClass: ReceiveItemService },
   { provide: AddItemPhotoUseCase, useClass: AddItemPhotoService },

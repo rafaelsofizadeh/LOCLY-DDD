@@ -6,9 +6,9 @@ import { Host } from '../../../../entity/Host';
 
 import { Address, OrderStatus } from '../../../../entity/Order';
 import {
-  ConfirmOrderRequest,
+  ConfirmOrderHandlerRequest,
   IConfirmOrderHandler,
-  ConfirmOrderResult,
+  ConfirmOrderHandlerResult,
 } from './IConfirmOrderHandler';
 import { HostRepository } from '../../../../../host/persistence/HostRepository';
 import { OrderRepository } from '../../../../persistence/OrderRepository';
@@ -22,12 +22,12 @@ export class ConfirmOrderHandler implements IConfirmOrderHandler {
   ) {}
 
   async execute(
-    confirmOrderRequest: ConfirmOrderRequest,
+    confirmOrderHandlerRequest: ConfirmOrderHandlerRequest,
     session?: ClientSession,
-  ): Promise<ConfirmOrderResult> {
+  ): Promise<ConfirmOrderHandlerResult> {
     const matchedHostAddress: Address = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.confirmOrder(confirmOrderRequest, sessionWithTransaction),
+        this.confirmOrder(confirmOrderHandlerRequest, sessionWithTransaction),
       this.mongoClient,
       session,
     );
@@ -36,7 +36,7 @@ export class ConfirmOrderHandler implements IConfirmOrderHandler {
   }
 
   private async confirmOrder(
-    { orderId, hostId }: ConfirmOrderRequest,
+    { orderId, hostId }: ConfirmOrderHandlerRequest,
     session: ClientSession,
   ): Promise<Address> {
     await this.orderRepository.setProperties(

@@ -15,7 +15,7 @@ import { DraftOrderUseCase } from '../../../../src/order/application/DraftOrder/
 import { Country } from '../../../../src/order/entity/Country';
 import { isString } from 'class-validator';
 import { HostRepository } from '../../../../src/host/persistence/HostRepository';
-import { StripeCheckoutSessionResult } from '../../../../src/order/application/ConfirmOrder/ConfirmOrderUseCase';
+import { StripeCheckoutSessionResult } from '../../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import {
   DraftedOrder,
   ConfirmedOrder,

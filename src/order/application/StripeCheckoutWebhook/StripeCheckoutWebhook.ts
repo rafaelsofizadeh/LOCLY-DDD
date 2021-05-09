@@ -6,7 +6,7 @@ import {
 } from '../../../common/application';
 import { throwCustomException } from '../../../common/error-handling';
 import {
-  ConfirmOrderRequest,
+  ConfirmOrderHandlerRequest,
   IConfirmOrderHandler,
 } from './handlers/ConfirmOrderHandler/IConfirmOrderHandler';
 import {
@@ -35,7 +35,7 @@ export class StripeCheckoutWebhook implements IStripeCheckoutWebhook {
     switch (webhookPayload.feeType) {
       case FeeType.Service:
         return this.confirmOrderWebhookGateway.execute(
-          webhookPayload as ConfirmOrderRequest,
+          webhookPayload as ConfirmOrderHandlerRequest,
         );
       case FeeType.Shipment:
         return this.payShipmentWebhookGateway.execute(
