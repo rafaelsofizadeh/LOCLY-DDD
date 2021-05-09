@@ -1,7 +1,7 @@
 import { ClientSession, MongoClient } from 'mongodb';
 import { Stripe } from 'stripe';
 import { Cost } from '../order/entity/Order';
-import { StripeCheckoutCompletedWebhookPayload } from '../order/application/StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookGateway';
+import { StripeCheckoutWebhookPayload } from '../order/application/StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { Exception } from './error-handling';
 
 export abstract class UseCase<TUseCasePort, TUseCaseResult> {
@@ -99,5 +99,5 @@ export type StripeEvent = Omit<Stripe.Event, 'type'> & {
 };
 
 export type StripeCheckoutSession = Stripe.Checkout.Session & {
-  metadata: StripeCheckoutCompletedWebhookPayload;
+  metadata: StripeCheckoutWebhookPayload;
 };

@@ -17,7 +17,7 @@ import {
   withTransaction,
 } from '../../../common/application';
 import { OrderStatus } from '../../entity/Order';
-import { StripeCheckoutCompletedWebhookFeeType } from '../StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookGateway';
+import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
 
 @Injectable()
 export class PayShipmentService implements PayShipmentUseCase {
@@ -70,7 +70,7 @@ export class PayShipmentService implements PayShipmentUseCase {
         },
       ],
       metadata: {
-        feeType: StripeCheckoutCompletedWebhookFeeType.Shipment,
+        feeType: FeeType.Shipment,
         orderId,
       },
       mode: 'payment',

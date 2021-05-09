@@ -7,38 +7,37 @@ import {
 import { throwCustomException } from '../../../common/error-handling';
 import {
   ConfirmOrderRequest,
-  ConfirmOrderWebhookGateway,
-} from './handlers/ConfirmOrderWebhookHandler/ConfirmOrderWebhookGateway';
+  IConfirmOrderHandler,
+} from './handlers/ConfirmOrderHandler/IConfirmOrderHandler';
 import {
   PayShipmentRequest,
-  PayShipmentWebhookGateway,
-} from './handlers/PayShipmentWebhookHandler/PayShipmentWebhookGateway';
+  IPayShipmentHandler,
+} from './handlers/PayShipmentHandler/IPayShipmentHandler';
 import {
-  StripeCheckoutCompletedResult,
-  StripeCheckoutCompletedWebhookGateway,
-  StripeCheckoutCompletedWebhookFeeType,
-  StripeCheckoutCompletedWebhookPayload,
-} from './StripeCheckoutCompletedWebhookGateway';
+  StripeCheckoutResult,
+  IStripeCheckoutWebhook,
+  FeeType,
+  StripeCheckoutWebhookPayload,
+} from './IStripeCheckoutWebhook';
 
 @Injectable()
-export class StripeCheckoutCompletedWebhookHandler
-  implements StripeCheckoutCompletedWebhookGateway {
+export class StripeCheckoutWebhook implements IStripeCheckoutWebhook {
   constructor(
-    private readonly confirmOrderWebhookGateway: ConfirmOrderWebhookGateway,
-    private readonly payShipmentWebhookGateway: PayShipmentWebhookGateway,
+    private readonly confirmOrderWebhookGateway: IConfirmOrderHandler,
+    private readonly payShipmentWebhookGateway: IPayShipmentHandler,
   ) {}
 
   @StripeWebhookHandler('checkout.session.completed')
-  execute(event: StripeEvent): Promise<StripeCheckoutCompletedResult> {
+  execute(event: StripeEvent): Promise<StripeCheckoutResult> {
     const webhookPayload = (event.data.object as StripeCheckoutSession)
-      .metadata as StripeCheckoutCompletedWebhookPayload;
+      .metadata as StripeCheckoutWebhookPayload;
 
     switch (webhookPayload.feeType) {
-      case StripeCheckoutCompletedWebhookFeeType.Service:
+      case FeeType.Service:
         return this.confirmOrderWebhookGateway.execute(
           webhookPayload as ConfirmOrderRequest,
         );
-      case StripeCheckoutCompletedWebhookFeeType.Shipment:
+      case FeeType.Shipment:
         return this.payShipmentWebhookGateway.execute(
           webhookPayload as PayShipmentRequest,
         );

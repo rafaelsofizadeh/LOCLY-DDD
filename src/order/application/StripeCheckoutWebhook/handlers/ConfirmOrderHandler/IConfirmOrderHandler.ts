@@ -8,7 +8,7 @@ export interface ConfirmOrderResult {
   address: Address;
 }
 
-export abstract class ConfirmOrderWebhookGateway extends UseCase<
+export abstract class IConfirmOrderHandler extends UseCase<
   ConfirmOrderRequest,
   ConfirmOrderResult
 > {}

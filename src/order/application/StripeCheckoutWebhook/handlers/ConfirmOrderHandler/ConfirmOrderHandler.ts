@@ -7,14 +7,14 @@ import { Host } from '../../../../entity/Host';
 import { Address, OrderStatus } from '../../../../entity/Order';
 import {
   ConfirmOrderRequest,
-  ConfirmOrderWebhookGateway,
+  IConfirmOrderHandler,
   ConfirmOrderResult,
-} from './ConfirmOrderWebhookGateway';
+} from './IConfirmOrderHandler';
 import { HostRepository } from '../../../../../host/persistence/HostRepository';
 import { OrderRepository } from '../../../../persistence/OrderRepository';
 
 @Injectable()
-export class ConfirmOrderWebhookHandler implements ConfirmOrderWebhookGateway {
+export class ConfirmOrderHandler implements IConfirmOrderHandler {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,

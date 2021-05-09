@@ -7,7 +7,7 @@ export interface PayShipmentRequest {
 
 export type PayShipmentResult = void;
 
-export abstract class PayShipmentWebhookGateway extends UseCase<
+export abstract class IPayShipmentHandler extends UseCase<
   PayShipmentRequest,
   PayShipmentResult
 > {}

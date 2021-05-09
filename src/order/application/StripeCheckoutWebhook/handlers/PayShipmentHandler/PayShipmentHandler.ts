@@ -7,12 +7,12 @@ import { OrderStatus } from '../../../../entity/Order';
 import {
   PayShipmentRequest,
   PayShipmentResult,
-  PayShipmentWebhookGateway,
-} from './PayShipmentWebhookGateway';
+  IPayShipmentHandler,
+} from './IPayShipmentHandler';
 import { OrderRepository } from '../../../../persistence/OrderRepository';
 
 @Injectable()
-export class PayShipmentWebhookHandler implements PayShipmentWebhookGateway {
+export class PayShipmentHandler implements IPayShipmentHandler {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,

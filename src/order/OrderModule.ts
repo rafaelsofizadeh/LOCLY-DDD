@@ -15,8 +15,8 @@ import { HostMongoRepositoryAdapter } from '../host/persistence/HostMongoReposit
 import { OrderMongoRepositoryAdapter } from './persistence/OrderMongoRepositoryAdapter';
 import { OrderController } from './OrderController';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ConfirmOrderWebhookGateway } from './application/StripeCheckoutCompletedWebhook/handlers/ConfirmOrderWebhookHandler/ConfirmOrderWebhookGateway';
-import { ConfirmOrderWebhookHandler } from './application/StripeCheckoutCompletedWebhook/handlers/ConfirmOrderWebhookHandler/ConfirmOrderWebhookHandler';
+import { IConfirmOrderHandler } from './application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/IConfirmOrderHandler';
+import { ConfirmOrderHandler } from './application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/ConfirmOrderHandler';
 import { ReceiveItemUseCase } from './application/ReceiveItem/ReceiveItemUseCase';
 import { ReceiveItemService } from './application/ReceiveItem/ReceiveItemService';
 import { EditOrderService } from './application/EditOrder/EditOrderService';
@@ -40,10 +40,10 @@ import { SubmitShipmentInfoService } from './application/SubmitShipmentInfo/Subm
 import { SubmitShipmentInfoUseCase } from './application/SubmitShipmentInfo/SubmitShipmentInfoUseCase';
 import { PayShipmentUseCase } from './application/PayShipment/PayShipmentUseCase';
 import { PayShipmentService } from './application/PayShipment/PayShipmentService';
-import { PayShipmentWebhookGateway } from './application/StripeCheckoutCompletedWebhook/handlers/PayShipmentWebhookHandler/PayShipmentWebhookGateway';
-import { PayShipmentWebhookHandler } from './application/StripeCheckoutCompletedWebhook/handlers/PayShipmentWebhookHandler/PayShipmentWebhookHandler';
-import { StripeCheckoutCompletedWebhookGateway } from './application/StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookGateway';
-import { StripeCheckoutCompletedWebhookHandler } from './application/StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookHandler';
+import { IPayShipmentHandler } from './application/StripeCheckoutWebhook/handlers/PayShipmentHandler/IPayShipmentHandler';
+import { PayShipmentHandler } from './application/StripeCheckoutWebhook/handlers/PayShipmentHandler/PayShipmentHandler';
+import { IStripeCheckoutWebhook } from './application/StripeCheckoutWebhook/IStripeCheckoutWebhook';
+import { StripeCheckoutWebhook } from './application/StripeCheckoutWebhook/StripeCheckoutWebhook';
 
 const imports: DynamicModule[] = [
   ConfigModule.forRoot(),
@@ -112,7 +112,7 @@ const useCaseProviders: Provider[] = [
   { provide: EditOrderUseCase, useClass: EditOrderService },
   { provide: DeleteOrderUseCase, useClass: DeleteOrderService },
   { provide: ConfirmOrderUseCase, useClass: ConfirmOrderService },
-  { provide: ConfirmOrderWebhookGateway, useClass: ConfirmOrderWebhookHandler },
+  { provide: IConfirmOrderHandler, useClass: ConfirmOrderHandler },
   { provide: ReceiveItemUseCase, useClass: ReceiveItemService },
   { provide: AddItemPhotoUseCase, useClass: AddItemPhotoService },
   {
@@ -124,12 +124,12 @@ const useCaseProviders: Provider[] = [
     useClass: PayShipmentService,
   },
   {
-    provide: PayShipmentWebhookGateway,
-    useClass: PayShipmentWebhookHandler,
+    provide: IPayShipmentHandler,
+    useClass: PayShipmentHandler,
   },
   {
-    provide: StripeCheckoutCompletedWebhookGateway,
-    useClass: StripeCheckoutCompletedWebhookHandler,
+    provide: IStripeCheckoutWebhook,
+    useClass: StripeCheckoutWebhook,
   },
 ];
 

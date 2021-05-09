@@ -21,7 +21,7 @@ import {
 import { OrderStatus, DraftedOrder, Cost } from '../../entity/Order';
 import { HostRepository } from '../../../host/persistence/HostRepository';
 import { throwCustomException } from '../../../common/error-handling';
-import { StripeCheckoutCompletedWebhookFeeType } from '../StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookGateway';
+import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
 
 export type Match = {
   orderId: UUID;
@@ -136,7 +136,7 @@ export class ConfirmOrderService implements ConfirmOrderUseCase {
         },
       ],
       metadata: {
-        feeType: StripeCheckoutCompletedWebhookFeeType.Service,
+        feeType: FeeType.Service,
         ...match,
       },
       mode: 'payment',
