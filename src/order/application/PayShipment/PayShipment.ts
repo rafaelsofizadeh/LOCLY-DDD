@@ -7,7 +7,7 @@ import {
   StripeCheckoutSessionResult,
   IPayShipment,
 } from './IPayShipment';
-import { OrderRepository } from '../../persistence/OrderRepository';
+import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import {
@@ -22,7 +22,7 @@ import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
 @Injectable()
 export class PayShipmentService implements IPayShipment {
   constructor(
-    private readonly orderRepository: OrderRepository,
+    private readonly orderRepository: IOrderRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}

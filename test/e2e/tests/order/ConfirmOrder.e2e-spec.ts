@@ -9,12 +9,12 @@ import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/entity/Customer';
 import { Host } from '../../../../src/order/entity/Host';
 
-import { CustomerRepository } from '../../../../src/customer/persistence/CustomerRepository';
-import { OrderRepository } from '../../../../src/order/persistence/OrderRepository';
+import { ICustomerRepository } from '../../../../src/customer/persistence/ICustomerRepository';
+import { IOrderRepository } from '../../../../src/order/persistence/IOrderRepository';
 import { IDraftOrder } from '../../../../src/order/application/DraftOrder/IDraftOrder';
 import { Country } from '../../../../src/order/entity/Country';
 import { isString } from 'class-validator';
-import { HostRepository } from '../../../../src/host/persistence/HostRepository';
+import { IHostRepository } from '../../../../src/host/persistence/IHostRepository';
 import { StripeCheckoutSessionResult } from '../../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import {
   DraftedOrder,
@@ -37,9 +37,9 @@ type HostConfig = {
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;
 
-  let customerRepository: CustomerRepository;
-  let orderRepository: OrderRepository;
-  let hostRepository: HostRepository;
+  let customerRepository: ICustomerRepository;
+  let orderRepository: IOrderRepository;
+  let hostRepository: IHostRepository;
 
   let draftOrderUseCase: IDraftOrder;
 
@@ -69,16 +69,16 @@ describe('Confirm Order – POST /order/confirm', () => {
     await app.listen(3000);
 
     customerRepository = (await moduleRef.resolve(
-      CustomerRepository,
-    )) as CustomerRepository;
+      ICustomerRepository,
+    )) as ICustomerRepository;
 
     orderRepository = (await moduleRef.resolve(
-      OrderRepository,
-    )) as OrderRepository;
+      IOrderRepository,
+    )) as IOrderRepository;
 
     hostRepository = (await moduleRef.resolve(
-      HostRepository,
-    )) as HostRepository;
+      IHostRepository,
+    )) as IHostRepository;
 
     draftOrderUseCase = (await moduleRef.resolve(IDraftOrder)) as IDraftOrder;
 

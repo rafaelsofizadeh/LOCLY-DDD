@@ -5,9 +5,9 @@ import { isUUID } from 'class-validator';
 
 import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/order/entity/Customer';
-import { OrderRepository } from '../../../../src/order/persistence/OrderRepository';
+import { IOrderRepository } from '../../../../src/order/persistence/IOrderRepository';
 import { UUID } from '../../../../src/common/domain';
-import { CustomerRepository } from '../../../../src/customer/persistence/CustomerRepository';
+import { ICustomerRepository } from '../../../../src/customer/persistence/ICustomerRepository';
 import { DraftOrderRequest } from '../../../../src/order/application/DraftOrder/IDraftOrder';
 import { OrderStatus, DraftedOrder } from '../../../../src/order/entity/Order';
 import { Country } from '../../../../src/order/entity/Country';
@@ -22,8 +22,8 @@ import {
 describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
 
-  let customerRepository: CustomerRepository;
-  let orderRepository: OrderRepository;
+  let customerRepository: ICustomerRepository;
+  let orderRepository: IOrderRepository;
 
   let testOrderId: UUID;
   let testCustomer: Customer;
@@ -50,12 +50,12 @@ describe('[POST /order/draft] IDraftOrder', () => {
     await app.init();
 
     customerRepository = (await moduleRef.resolve(
-      CustomerRepository,
-    )) as CustomerRepository;
+      ICustomerRepository,
+    )) as ICustomerRepository;
 
     orderRepository = (await moduleRef.resolve(
-      OrderRepository,
-    )) as OrderRepository;
+      IOrderRepository,
+    )) as IOrderRepository;
   });
 
   afterAll(async () => {

@@ -8,7 +8,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
 import { UUID } from '../../common/domain';
-import { CustomerRepository } from './CustomerRepository';
+import { ICustomerRepository } from './ICustomerRepository';
 import { Customer } from '../../order/entity/Customer';
 import {
   mongoDocumentToCustomer,
@@ -22,7 +22,7 @@ import {
 import { uuidToMuuid } from '../../common/persistence';
 
 @Injectable()
-export class CustomerMongoRepositoryAdapter implements CustomerRepository {
+export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
   constructor(
     @InjectCollection('customers')
     private readonly customerCollection: Collection<CustomerMongoDocument>,

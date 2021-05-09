@@ -1,5 +1,5 @@
-import { OrderRepository } from '../../persistence/OrderRepository';
-import { CustomerRepository } from '../../../customer/persistence/CustomerRepository';
+import { IOrderRepository } from '../../persistence/IOrderRepository';
+import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
 
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
@@ -11,8 +11,8 @@ import { OrderStatus } from '../../entity/Order';
 @Injectable()
 export class DeleteOrder implements IDeleteOrder {
   constructor(
-    private readonly customerRepository: CustomerRepository,
-    private readonly orderRepository: OrderRepository,
+    private readonly customerRepository: ICustomerRepository,
+    private readonly orderRepository: IOrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 

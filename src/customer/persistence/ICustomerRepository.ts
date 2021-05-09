@@ -2,7 +2,7 @@ import { ClientSession } from 'mongodb';
 import { UUID } from '../../common/domain';
 import { Customer } from '../../order/entity/Customer';
 
-export abstract class CustomerRepository {
+export abstract class ICustomerRepository {
   abstract addCustomer(
     customer: Customer,
     session?: ClientSession,

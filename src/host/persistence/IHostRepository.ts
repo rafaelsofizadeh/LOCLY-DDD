@@ -3,12 +3,12 @@ import { UUID } from '../../common/domain';
 import { Country } from '../../order/entity/Country';
 import { Host } from '../../order/entity/Host';
 
-export abstract class HostRepository {
+export abstract class IHostRepository {
   abstract addHost(host: Host, session?: ClientSession): Promise<void>;
 
   abstract addManyHosts(hosts: Host[], session?: ClientSession): Promise<void>;
 
-  // This should always be used together with OrderRepository.addHostToOrder
+  // This should always be used together with IOrderRepository.addHostToOrder
   abstract addOrderToHost(
     hostId: UUID,
     orderId: UUID,

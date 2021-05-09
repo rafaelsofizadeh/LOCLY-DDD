@@ -14,7 +14,7 @@ import {
   expectOnlySingleResult,
   throwCustomException,
 } from '../../common/error-handling';
-import { OrderRepository } from './OrderRepository';
+import { IOrderRepository } from './IOrderRepository';
 import { Order, DraftedOrder, OrderFilter } from '../entity/Order';
 import {
   OrderMongoDocument,
@@ -33,7 +33,7 @@ import { ItemFilter } from '../entity/Item';
 import { ItemPhotosUploadResult } from '../application/AddItemPhoto/IAddItemPhoto';
 
 @Injectable()
-export class OrderMongoRepositoryAdapter implements OrderRepository {
+export class OrderMongoRepositoryAdapter implements IOrderRepository {
   constructor(
     @InjectCollection('orders')
     private readonly orderCollection: Collection<OrderMongoDocument>,

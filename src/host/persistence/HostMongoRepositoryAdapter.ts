@@ -8,7 +8,7 @@ import {
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
-import { HostRepository } from './HostRepository';
+import { IHostRepository } from './IHostRepository';
 import { Host } from '../../order/entity/Host';
 import {
   mongoDocumentToHost,
@@ -25,7 +25,7 @@ import { Country } from '../../order/entity/Country';
 import { uuidToMuuid } from '../../common/persistence';
 
 @Injectable()
-export class HostMongoRepositoryAdapter implements HostRepository {
+export class HostMongoRepositoryAdapter implements IHostRepository {
   constructor(
     @InjectCollection('hosts')
     private readonly hostCollection: Collection<HostMongoDocument>,
@@ -95,7 +95,7 @@ export class HostMongoRepositoryAdapter implements HostRepository {
     });
   }
 
-  // This should always be used together with OrderRepository.addHostToOrder
+  // This should always be used together with IOrderRepository.addHostToOrder
   async addOrderToHost(
     hostId: UUID,
     orderId: UUID,

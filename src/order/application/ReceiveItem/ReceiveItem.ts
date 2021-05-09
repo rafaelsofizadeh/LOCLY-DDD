@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { OrderRepository } from '../../persistence/OrderRepository';
+import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { UUID } from '../../../common/domain';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
@@ -14,7 +14,7 @@ import { OrderStatus } from '../../entity/Order';
 @Injectable()
 export class ReceiveItem implements IReceiveItem {
   constructor(
-    private readonly orderRepository: OrderRepository,
+    private readonly orderRepository: IOrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 

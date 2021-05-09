@@ -1,5 +1,5 @@
-import { OrderRepository } from '../../persistence/OrderRepository';
-import { CustomerRepository } from '../../../customer/persistence/CustomerRepository';
+import { IOrderRepository } from '../../persistence/IOrderRepository';
+import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
 
 import { DraftOrderRequest, IDraftOrder } from './IDraftOrder';
 
@@ -21,8 +21,8 @@ import { throwCustomException } from '../../../common/error-handling';
 @Injectable()
 export class DraftOrder implements IDraftOrder {
   constructor(
-    private readonly customerRepository: CustomerRepository,
-    private readonly orderRepository: OrderRepository,
+    private readonly customerRepository: ICustomerRepository,
+    private readonly orderRepository: IOrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 

@@ -10,14 +10,14 @@ import {
   IConfirmOrderHandler,
   ConfirmOrderHandlerResult,
 } from './IConfirmOrderHandler';
-import { HostRepository } from '../../../../../host/persistence/HostRepository';
-import { OrderRepository } from '../../../../persistence/OrderRepository';
+import { IHostRepository } from '../../../../../host/persistence/IHostRepository';
+import { IOrderRepository } from '../../../../persistence/IOrderRepository';
 
 @Injectable()
 export class ConfirmOrderHandler implements IConfirmOrderHandler {
   constructor(
-    private readonly orderRepository: OrderRepository,
-    private readonly hostRepository: HostRepository,
+    private readonly orderRepository: IOrderRepository,
+    private readonly hostRepository: IHostRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 

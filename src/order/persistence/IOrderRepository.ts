@@ -5,7 +5,7 @@ import { Order, DraftedOrder, OrderFilter } from '../entity/Order';
 import { ItemPhotosUploadResult } from '../application/AddItemPhoto/IAddItemPhoto';
 import { Photo } from './OrderMongoMapper';
 
-export abstract class OrderRepository {
+export abstract class IOrderRepository {
   abstract addOrder(
     order: DraftedOrder,
     session?: ClientSession,

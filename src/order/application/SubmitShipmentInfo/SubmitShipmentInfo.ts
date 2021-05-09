@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { OrderRepository } from '../../persistence/OrderRepository';
+import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
@@ -15,7 +15,7 @@ import { UUID } from '../../../common/domain';
 @Injectable()
 export class SubmitShipmentInfo implements ISubmitShipmentInfo {
   constructor(
-    private readonly orderRepository: OrderRepository,
+    private readonly orderRepository: IOrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 

@@ -9,12 +9,12 @@ import {
   PayShipmentHandlerResult,
   IPayShipmentHandler,
 } from './IPayShipmentHandler';
-import { OrderRepository } from '../../../../persistence/OrderRepository';
+import { IOrderRepository } from '../../../../persistence/IOrderRepository';
 
 @Injectable()
 export class PayShipmentHandler implements IPayShipmentHandler {
   constructor(
-    private readonly orderRepository: OrderRepository,
+    private readonly orderRepository: IOrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 

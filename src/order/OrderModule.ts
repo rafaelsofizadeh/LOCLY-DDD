@@ -3,9 +3,9 @@ import { getDbToken, MongoModule } from 'nest-mongodb';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 import * as GridFsStorage from 'multer-gridfs-storage';
 
-import { CustomerRepository } from '../customer/persistence/CustomerRepository';
-import { HostRepository } from '../host/persistence/HostRepository';
-import { OrderRepository } from './persistence/OrderRepository';
+import { ICustomerRepository } from '../customer/persistence/ICustomerRepository';
+import { IHostRepository } from '../host/persistence/IHostRepository';
+import { IOrderRepository } from './persistence/IOrderRepository';
 import { ConfirmOrder } from './application/ConfirmOrder/ConfirmOrder';
 import { DraftOrder } from './application/DraftOrder/DraftOrder';
 import { IConfirmOrder } from './application/ConfirmOrder/IConfirmOrder';
@@ -102,9 +102,9 @@ const imports: DynamicModule[] = [
 ];
 
 const persistenceProviders: Provider[] = [
-  { provide: OrderRepository, useClass: OrderMongoRepositoryAdapter },
-  { provide: CustomerRepository, useClass: CustomerMongoRepositoryAdapter },
-  { provide: HostRepository, useClass: HostMongoRepositoryAdapter },
+  { provide: IOrderRepository, useClass: OrderMongoRepositoryAdapter },
+  { provide: ICustomerRepository, useClass: CustomerMongoRepositoryAdapter },
+  { provide: IHostRepository, useClass: HostMongoRepositoryAdapter },
 ];
 
 const useCaseProviders: Provider[] = [
