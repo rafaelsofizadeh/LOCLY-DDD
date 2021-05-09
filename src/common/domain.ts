@@ -9,14 +9,6 @@ export type WithoutId<T> = Omit<T, 'id'>;
 
 export type Modify<T, R> = Omit<T, keyof R> & R;
 
-export abstract class UseCase<TUseCasePort, TUseCaseResult> {
-  // TODO: abstract signature doesn't affect type checker anywhere else
-  abstract execute(
-    port: TUseCasePort,
-    session?: ClientSession,
-  ): Promise<TUseCaseResult>;
-}
-
 // TODO: Strict UUID type alias
 export type UUID = string;
 

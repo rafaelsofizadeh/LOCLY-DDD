@@ -1,6 +1,8 @@
-import { StripeEvent } from '../../../common/application';
-import { UseCase } from '../../../common/domain';
-import { ConfirmOrderRequest, ConfirmOrderResult } from '../ConfirmOrder/ConfirmOrderUseCase';
+import { StripeEvent, UseCase } from '../../../common/application';
+import {
+  ConfirmOrderRequest,
+  ConfirmOrderResult,
+} from '../ConfirmOrder/ConfirmOrderUseCase';
 import {
   PayOrderShipmentFeeRequest,
   PayOrderShipmentFeeResult,

@@ -1,4 +1,4 @@
-import { UseCase } from '../../../common/domain';
+import { UseCase } from '../../../common/application';
 import { UUID } from '../../../common/domain';
 import { Gram } from '../../entity/Item';
 import { Cost } from '../../entity/Order';

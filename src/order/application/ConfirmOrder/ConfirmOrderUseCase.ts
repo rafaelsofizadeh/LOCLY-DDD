@@ -1,6 +1,6 @@
-import { UseCase } from '../../../common/domain';
 import { Match } from '../PreConfirmOrder/PreConfirmOrderService';
 import { Address } from '../../entity/Order';
+import { UseCase } from '../../../common/application';
 
 export interface ConfirmOrderRequest extends Match {}
 

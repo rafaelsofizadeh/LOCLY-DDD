@@ -4,6 +4,14 @@ import { Cost } from '../order/entity/Order';
 import { StripeCheckoutCompletedWebhookPayload } from '../order/application/StripeCheckoutCompleted/StripeCheckoutCompletedUseCase';
 import { Exception } from './error-handling';
 
+export abstract class UseCase<TUseCasePort, TUseCaseResult> {
+  // TODO: abstract signature doesn't affect type checker anywhere else
+  abstract execute(
+    port: TUseCasePort,
+    session?: ClientSession,
+  ): Promise<TUseCaseResult>;
+}
+
 export async function withTransaction<T>(
   fn: (session: ClientSession) => Promise<T>,
   mongoClient: MongoClient,

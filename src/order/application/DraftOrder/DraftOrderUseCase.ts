@@ -1,4 +1,5 @@
-import { UseCase, WithoutId } from '../../../common/domain';
+import { UseCase } from '../../../common/application';
+import { WithoutId } from '../../../common/domain';
 import { DraftedItem } from '../../entity/Item';
 import { DraftedOrder } from '../../entity/Order';
 
