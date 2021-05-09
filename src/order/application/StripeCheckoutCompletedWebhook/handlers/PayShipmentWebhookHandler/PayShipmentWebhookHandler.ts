@@ -5,34 +5,33 @@ import { withTransaction } from '../../../../../common/application';
 
 import { OrderStatus } from '../../../../entity/Order';
 import {
-  PayOrderShipmentFeeRequest,
-  PayOrderShipmentFeeResult,
-  PayOrderShipmentFeeWebhookGateway,
-} from './PayOrderShipmentFeeWebhookGateway';
+  PayShipmentRequest,
+  PayShipmentResult,
+  PayShipmentWebhookGateway,
+} from './PayShipmentWebhookGateway';
 import { OrderRepository } from '../../../../persistence/OrderRepository';
 
 @Injectable()
-export class PayOrderShipmentFeeWebhookHandler
-  implements PayOrderShipmentFeeWebhookGateway {
+export class PayShipmentWebhookHandler implements PayShipmentWebhookGateway {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
   async execute(
-    payOrderShipmentFeeRequest: PayOrderShipmentFeeRequest,
+    payShipmentRequest: PayShipmentRequest,
     session?: ClientSession,
-  ): Promise<PayOrderShipmentFeeResult> {
+  ): Promise<PayShipmentResult> {
     await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.markOrderPaid(payOrderShipmentFeeRequest, sessionWithTransaction),
+        this.markOrderPaid(payShipmentRequest, sessionWithTransaction),
       this.mongoClient,
       session,
     );
   }
 
   private async markOrderPaid(
-    { orderId }: PayOrderShipmentFeeRequest,
+    { orderId }: PayShipmentRequest,
     session: ClientSession,
   ): Promise<void> {
     await this.orderRepository.setProperties(

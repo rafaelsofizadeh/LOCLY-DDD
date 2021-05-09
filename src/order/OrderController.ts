@@ -14,11 +14,11 @@ import {
   StripeCheckoutSessionResult,
   ConfirmOrderUseCase,
 } from './application/ConfirmOrder/ConfirmOrderUseCase';
-import { ReceiveOrderItemRequestAdapter } from './application/ReceiveOrderItem/ReceiveOrderItemRequestAdapter';
+import { ReceiveItemRequestAdapter } from './application/ReceiveItem/ReceiveItemRequestAdapter';
 import {
-  ReceiveOrderItemResult,
-  ReceiveOrderItemUseCase,
-} from './application/ReceiveOrderItem/ReceiveOrderItemUseCase';
+  ReceiveItemResult,
+  ReceiveItemUseCase,
+} from './application/ReceiveItem/ReceiveItemUseCase';
 import { DraftedOrder } from './entity/Order';
 import { SerializePrivatePropertiesInterceptor } from '../infrastructure/SerializePrivatePropertiesInterceptor';
 import { EditOrderUseCase } from './application/EditOrder/EditOrderUseCase';
@@ -39,8 +39,8 @@ import {
   SubmitShipmentInfoResult,
   SubmitShipmentInfoUseCase,
 } from './application/SubmitShipmentInfo/SubmitShipmentInfoUseCase';
-import { PayOrderShipmentFeeRequestAdapter } from './application/PayOrderShipmentFee/PayOrderShipmentFeeRequestAdapter';
-import { PayOrderShipmentFeeUseCase } from './application/PayOrderShipmentFee/PayOrderShipmentFeeUseCase';
+import { PayShipmentRequestAdapter } from './application/PayShipment/PayShipmentRequestAdapter';
+import { PayShipmentUseCase } from './application/PayShipment/PayShipmentUseCase';
 
 @Controller('order')
 export class OrderController {
@@ -49,10 +49,10 @@ export class OrderController {
     private readonly editOrderUseCase: EditOrderUseCase,
     private readonly deleteOrderUseCase: DeleteOrderUseCase,
     private readonly confirmOrderUseCase: ConfirmOrderUseCase,
-    private readonly receiveOrderItemUseCase: ReceiveOrderItemUseCase,
+    private readonly receiveItemUseCase: ReceiveItemUseCase,
     private readonly addItemPhotoUseCase: AddItemPhotoUseCase,
     private readonly submitShipmentInfoUseCase: SubmitShipmentInfoUseCase,
-    private readonly payOrderShipmentFeeUseCase: PayOrderShipmentFeeUseCase,
+    private readonly payShipmentUseCase: PayShipmentUseCase,
   ) {}
 
   @Post('draft')
@@ -98,11 +98,11 @@ export class OrderController {
   }
 
   @Post('receiveItem')
-  async receiveOrderItem(
-    @Body() receiveOrderItemRequest: ReceiveOrderItemRequestAdapter,
-  ): Promise<ReceiveOrderItemResult> {
-    const receivedDateResult = await this.receiveOrderItemUseCase.execute(
-      receiveOrderItemRequest,
+  async receiveItem(
+    @Body() receiveItemRequest: ReceiveItemRequestAdapter,
+  ): Promise<ReceiveItemResult> {
+    const receivedDateResult = await this.receiveItemUseCase.execute(
+      receiveItemRequest,
     );
 
     return receivedDateResult;
@@ -132,12 +132,12 @@ export class OrderController {
     );
   }
 
-  @Post('payShipmentFee')
-  async payOrderShipmentFee(
-    @Body() payOrderShipmentFeeRequest: PayOrderShipmentFeeRequestAdapter,
+  @Post('payShipment')
+  async payShipment(
+    @Body() payShipmentRequest: PayShipmentRequestAdapter,
   ): Promise<StripeCheckoutSessionResult> {
-    const stripeCheckoutSession = await this.payOrderShipmentFeeUseCase.execute(
-      payOrderShipmentFeeRequest,
+    const stripeCheckoutSession = await this.payShipmentUseCase.execute(
+      payShipmentRequest,
     );
 
     return stripeCheckoutSession;

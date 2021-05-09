@@ -1,7 +1,7 @@
 import { IsUUID, UUID } from '../../../common/domain';
-import { ReceiveOrderItemRequest } from './ReceiveOrderItemUseCase';
+import { ReceiveItemRequest } from './ReceiveItemUseCase';
 
-export class ReceiveOrderItemRequestAdapter implements ReceiveOrderItemRequest {
+export class ReceiveItemRequestAdapter implements ReceiveItemRequest {
   @IsUUID()
   readonly orderId: UUID;
 

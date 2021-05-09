@@ -3,10 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
 import {
-  PayOrderShipmentFeeRequest,
+  PayShipmentRequest,
   StripeCheckoutSessionResult,
-  PayOrderShipmentFeeUseCase,
-} from './PayOrderShipmentFeeUseCase';
+  PayShipmentUseCase,
+} from './PayShipmentUseCase';
 import { OrderRepository } from '../../persistence/OrderRepository';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
@@ -20,7 +20,7 @@ import { OrderStatus } from '../../entity/Order';
 import { StripeCheckoutCompletedWebhookFeeType } from '../StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookGateway';
 
 @Injectable()
-export class PayOrderShipmentFeeService implements PayOrderShipmentFeeUseCase {
+export class PayShipmentService implements PayShipmentUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
@@ -28,15 +28,12 @@ export class PayOrderShipmentFeeService implements PayOrderShipmentFeeUseCase {
   ) {}
 
   async execute(
-    payOrderShipmentFeeRequest: PayOrderShipmentFeeRequest,
+    payShipmentRequest: PayShipmentRequest,
     session?: ClientSession,
   ): Promise<StripeCheckoutSessionResult> {
     const checkoutSession: Stripe.Checkout.Session = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.createPaymentSession(
-          payOrderShipmentFeeRequest,
-          sessionWithTransaction,
-        ),
+        this.createPaymentSession(payShipmentRequest, sessionWithTransaction),
       this.mongoClient,
       session,
     );
@@ -48,7 +45,7 @@ export class PayOrderShipmentFeeService implements PayOrderShipmentFeeUseCase {
 
   // TODO: Error handling and rejection events
   private async createPaymentSession(
-    { orderId, customerId }: PayOrderShipmentFeeRequest,
+    { orderId, customerId }: PayShipmentRequest,
     session: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const { finalShipmentCost } = await this.orderRepository.findOrder(

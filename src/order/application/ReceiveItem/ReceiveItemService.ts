@@ -5,23 +5,23 @@ import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import {
-  ReceiveOrderItemRequest,
-  ReceiveOrderItemResult,
-  ReceiveOrderItemUseCase,
-} from './ReceiveOrderItemUseCase';
+  ReceiveItemRequest,
+  ReceiveItemResult,
+  ReceiveItemUseCase,
+} from './ReceiveItemUseCase';
 import { OrderStatus } from '../../entity/Order';
 
 @Injectable()
-export class ReceiveOrderItemService implements ReceiveOrderItemUseCase {
+export class ReceiveItemService implements ReceiveItemUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
   async execute(
-    { orderId, itemId, hostId }: ReceiveOrderItemRequest,
+    { orderId, itemId, hostId }: ReceiveItemRequest,
     session?: ClientSession,
-  ): Promise<ReceiveOrderItemResult> {
+  ): Promise<ReceiveItemResult> {
     const receivedDate: Date = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.handleOrderItemReceipt(

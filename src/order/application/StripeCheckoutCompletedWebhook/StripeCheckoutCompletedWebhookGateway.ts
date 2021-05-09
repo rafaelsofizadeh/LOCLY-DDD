@@ -4,9 +4,9 @@ import {
   ConfirmOrderResult,
 } from './handlers/ConfirmOrderWebhookHandler/ConfirmOrderWebhookGateway';
 import {
-  PayOrderShipmentFeeRequest,
-  PayOrderShipmentFeeResult,
-} from './handlers/PayOrderShipmentFeeWebhookHandler/PayOrderShipmentFeeWebhookGateway';
+  PayShipmentRequest,
+  PayShipmentResult,
+} from './handlers/PayShipmentWebhookHandler/PayShipmentWebhookGateway';
 
 export enum StripeCheckoutCompletedWebhookFeeType {
   Service = 'locly_fee',
@@ -17,12 +17,12 @@ export type StripeCheckoutCompletedRequest = StripeEvent;
 
 export type StripeCheckoutCompletedWebhookPayload = (
   | ConfirmOrderRequest
-  | PayOrderShipmentFeeRequest
+  | PayShipmentRequest
 ) & { feeType: StripeCheckoutCompletedWebhookFeeType };
 
 export type StripeCheckoutCompletedResult =
   | ConfirmOrderResult
-  | PayOrderShipmentFeeResult;
+  | PayShipmentResult;
 
 export abstract class StripeCheckoutCompletedWebhookGateway extends UseCase<
   StripeCheckoutCompletedRequest,

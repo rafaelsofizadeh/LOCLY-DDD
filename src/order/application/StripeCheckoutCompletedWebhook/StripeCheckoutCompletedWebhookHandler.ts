@@ -10,9 +10,9 @@ import {
   ConfirmOrderWebhookGateway,
 } from './handlers/ConfirmOrderWebhookHandler/ConfirmOrderWebhookGateway';
 import {
-  PayOrderShipmentFeeRequest,
-  PayOrderShipmentFeeWebhookGateway,
-} from './handlers/PayOrderShipmentFeeWebhookHandler/PayOrderShipmentFeeWebhookGateway';
+  PayShipmentRequest,
+  PayShipmentWebhookGateway,
+} from './handlers/PayShipmentWebhookHandler/PayShipmentWebhookGateway';
 import {
   StripeCheckoutCompletedResult,
   StripeCheckoutCompletedWebhookGateway,
@@ -25,7 +25,7 @@ export class StripeCheckoutCompletedWebhookHandler
   implements StripeCheckoutCompletedWebhookGateway {
   constructor(
     private readonly confirmOrderWebhookGateway: ConfirmOrderWebhookGateway,
-    private readonly payOrderShipmentFeeWebhookGateway: PayOrderShipmentFeeWebhookGateway,
+    private readonly payShipmentWebhookGateway: PayShipmentWebhookGateway,
   ) {}
 
   @StripeWebhookHandler('checkout.session.completed')
@@ -39,8 +39,8 @@ export class StripeCheckoutCompletedWebhookHandler
           webhookPayload as ConfirmOrderRequest,
         );
       case StripeCheckoutCompletedWebhookFeeType.Shipment:
-        return this.payOrderShipmentFeeWebhookGateway.execute(
-          webhookPayload as PayOrderShipmentFeeRequest,
+        return this.payShipmentWebhookGateway.execute(
+          webhookPayload as PayShipmentRequest,
         );
       default:
         throwCustomException(

@@ -17,8 +17,8 @@ import { OrderController } from './OrderController';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ConfirmOrderWebhookGateway } from './application/StripeCheckoutCompletedWebhook/handlers/ConfirmOrderWebhookHandler/ConfirmOrderWebhookGateway';
 import { ConfirmOrderWebhookHandler } from './application/StripeCheckoutCompletedWebhook/handlers/ConfirmOrderWebhookHandler/ConfirmOrderWebhookHandler';
-import { ReceiveOrderItemUseCase } from './application/ReceiveOrderItem/ReceiveOrderItemUseCase';
-import { ReceiveOrderItemService } from './application/ReceiveOrderItem/ReceiveOrderItemService';
+import { ReceiveItemUseCase } from './application/ReceiveItem/ReceiveItemUseCase';
+import { ReceiveItemService } from './application/ReceiveItem/ReceiveItemService';
 import { EditOrderService } from './application/EditOrder/EditOrderService';
 import { EditOrderUseCase } from './application/EditOrder/EditOrderUseCase';
 import { DeleteOrderUseCase } from './application/DeleteOrder/DeleteOrderUseCase';
@@ -38,10 +38,10 @@ import { uuidToMuuid } from '../common/persistence';
 import { Request } from 'express';
 import { SubmitShipmentInfoService } from './application/SubmitShipmentInfo/SubmitShipmentInfoService';
 import { SubmitShipmentInfoUseCase } from './application/SubmitShipmentInfo/SubmitShipmentInfoUseCase';
-import { PayOrderShipmentFeeUseCase } from './application/PayOrderShipmentFee/PayOrderShipmentFeeUseCase';
-import { PayOrderShipmentFeeService } from './application/PayOrderShipmentFee/PayOrderShipmentFeeService';
-import { PayOrderShipmentFeeWebhookGateway } from './application/StripeCheckoutCompletedWebhook/handlers/PayOrderShipmentFeeWebhookHandler/PayOrderShipmentFeeWebhookGateway';
-import { PayOrderShipmentFeeWebhookHandler } from './application/StripeCheckoutCompletedWebhook/handlers/PayOrderShipmentFeeWebhookHandler/PayOrderShipmentFeeWebhookHandler';
+import { PayShipmentUseCase } from './application/PayShipment/PayShipmentUseCase';
+import { PayShipmentService } from './application/PayShipment/PayShipmentService';
+import { PayShipmentWebhookGateway } from './application/StripeCheckoutCompletedWebhook/handlers/PayShipmentWebhookHandler/PayShipmentWebhookGateway';
+import { PayShipmentWebhookHandler } from './application/StripeCheckoutCompletedWebhook/handlers/PayShipmentWebhookHandler/PayShipmentWebhookHandler';
 import { StripeCheckoutCompletedWebhookGateway } from './application/StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookGateway';
 import { StripeCheckoutCompletedWebhookHandler } from './application/StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookHandler';
 
@@ -113,19 +113,19 @@ const useCaseProviders: Provider[] = [
   { provide: DeleteOrderUseCase, useClass: DeleteOrderService },
   { provide: ConfirmOrderUseCase, useClass: ConfirmOrderService },
   { provide: ConfirmOrderWebhookGateway, useClass: ConfirmOrderWebhookHandler },
-  { provide: ReceiveOrderItemUseCase, useClass: ReceiveOrderItemService },
+  { provide: ReceiveItemUseCase, useClass: ReceiveItemService },
   { provide: AddItemPhotoUseCase, useClass: AddItemPhotoService },
   {
     provide: SubmitShipmentInfoUseCase,
     useClass: SubmitShipmentInfoService,
   },
   {
-    provide: PayOrderShipmentFeeUseCase,
-    useClass: PayOrderShipmentFeeService,
+    provide: PayShipmentUseCase,
+    useClass: PayShipmentService,
   },
   {
-    provide: PayOrderShipmentFeeWebhookGateway,
-    useClass: PayOrderShipmentFeeWebhookHandler,
+    provide: PayShipmentWebhookGateway,
+    useClass: PayShipmentWebhookHandler,
   },
   {
     provide: StripeCheckoutCompletedWebhookGateway,
