@@ -9,11 +9,11 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { DraftOrderRequestAdapter } from './application/DraftOrder/DraftOrderRequestAdapter';
 import { DraftOrderUseCase } from './application/DraftOrder/DraftOrderUseCase';
-import { PreConfirmOrderRequestAdapter } from './application/PreConfirmOrder/PreConfirmOrderRequestAdapter';
+import { ConfirmOrderRequestAdapter } from './application/ConfirmOrder/ConfirmOrderRequestAdapter';
 import {
   StripeCheckoutSessionResult,
-  PreConfirmOrderUseCase,
-} from './application/PreConfirmOrder/PreConfirmOrderUseCase';
+  ConfirmOrderUseCase,
+} from './application/ConfirmOrder/ConfirmOrderUseCase';
 import { ReceiveOrderItemRequestAdapter } from './application/ReceiveOrderItem/ReceiveOrderItemRequestAdapter';
 import {
   ReceiveOrderItemResult,
@@ -39,8 +39,8 @@ import {
   SubmitShipmentInfoResult,
   SubmitShipmentInfoUseCase,
 } from './application/SubmitShipmentInfo/SubmitShipmentInfoUseCase';
-import { PrePayOrderShipmentFeeRequestAdapter } from './application/PrePayOrderShipmentFee/PrePayOrderShipmentFeeRequestAdapter';
-import { PrePayOrderShipmentFeeUseCase } from './application/PrePayOrderShipmentFee/PrePayOrderShipmentFeeUseCase';
+import { PayOrderShipmentFeeRequestAdapter } from './application/PayOrderShipmentFee/PayOrderShipmentFeeRequestAdapter';
+import { PayOrderShipmentFeeUseCase } from './application/PayOrderShipmentFee/PayOrderShipmentFeeUseCase';
 
 @Controller('order')
 export class OrderController {
@@ -48,11 +48,11 @@ export class OrderController {
     private readonly draftOrderUseCase: DraftOrderUseCase,
     private readonly editOrderUseCase: EditOrderUseCase,
     private readonly deleteOrderUseCase: DeleteOrderUseCase,
-    private readonly preConfirmOrderUseCase: PreConfirmOrderUseCase,
+    private readonly confirmOrderUseCase: ConfirmOrderUseCase,
     private readonly receiveOrderItemUseCase: ReceiveOrderItemUseCase,
     private readonly addItemPhotoUseCase: AddItemPhotoUseCase,
     private readonly submitShipmentInfoUseCase: SubmitShipmentInfoUseCase,
-    private readonly prePayOrderShipmentFeeUseCase: PrePayOrderShipmentFeeUseCase,
+    private readonly payOrderShipmentFeeUseCase: PayOrderShipmentFeeUseCase,
   ) {}
 
   @Post('draft')
@@ -87,10 +87,10 @@ export class OrderController {
   }
 
   @Post('confirm')
-  async preConfirmOrder(
-    @Body() confirmationRequest: PreConfirmOrderRequestAdapter,
+  async confirmOrder(
+    @Body() confirmationRequest: ConfirmOrderRequestAdapter,
   ): Promise<StripeCheckoutSessionResult> {
-    const stripeCheckoutSession = await this.preConfirmOrderUseCase.execute(
+    const stripeCheckoutSession = await this.confirmOrderUseCase.execute(
       confirmationRequest,
     );
 
@@ -133,11 +133,11 @@ export class OrderController {
   }
 
   @Post('payShipmentFee')
-  async prePayOrderShipmentFee(
-    @Body() prePayOrderShipmentFeeRequest: PrePayOrderShipmentFeeRequestAdapter,
+  async payOrderShipmentFee(
+    @Body() payOrderShipmentFeeRequest: PayOrderShipmentFeeRequestAdapter,
   ): Promise<StripeCheckoutSessionResult> {
-    const stripeCheckoutSession = await this.prePayOrderShipmentFeeUseCase.execute(
-      prePayOrderShipmentFeeRequest,
+    const stripeCheckoutSession = await this.payOrderShipmentFeeUseCase.execute(
+      payOrderShipmentFeeRequest,
     );
 
     return stripeCheckoutSession;

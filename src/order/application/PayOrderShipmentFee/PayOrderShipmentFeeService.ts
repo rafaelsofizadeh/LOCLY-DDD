@@ -3,10 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
 import {
-  PrePayOrderShipmentFeeRequest,
+  PayOrderShipmentFeeRequest,
   StripeCheckoutSessionResult,
-  PrePayOrderShipmentFeeUseCase,
-} from './PrePayOrderShipmentFeeUseCase';
+  PayOrderShipmentFeeUseCase,
+} from './PayOrderShipmentFeeUseCase';
 import { OrderRepository } from '../../persistence/OrderRepository';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
@@ -17,11 +17,10 @@ import {
   withTransaction,
 } from '../../../common/application';
 import { OrderStatus } from '../../entity/Order';
-import { StripeCheckoutCompletedWebhookFeeType } from '../StripeCheckoutCompleted/StripeCheckoutCompletedUseCase';
+import { StripeCheckoutCompletedWebhookFeeType } from '../StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookGateway';
 
 @Injectable()
-export class PrePayOrderShipmentFeeService
-  implements PrePayOrderShipmentFeeUseCase {
+export class PayOrderShipmentFeeService implements PayOrderShipmentFeeUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
@@ -29,7 +28,7 @@ export class PrePayOrderShipmentFeeService
   ) {}
 
   async execute(
-    payOrderShipmentFeeRequest: PrePayOrderShipmentFeeRequest,
+    payOrderShipmentFeeRequest: PayOrderShipmentFeeRequest,
     session?: ClientSession,
   ): Promise<StripeCheckoutSessionResult> {
     const checkoutSession: Stripe.Checkout.Session = await withTransaction(
@@ -49,7 +48,7 @@ export class PrePayOrderShipmentFeeService
 
   // TODO: Error handling and rejection events
   private async createPaymentSession(
-    { orderId, customerId }: PrePayOrderShipmentFeeRequest,
+    { orderId, customerId }: PayOrderShipmentFeeRequest,
     session: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const { finalShipmentCost } = await this.orderRepository.findOrder(

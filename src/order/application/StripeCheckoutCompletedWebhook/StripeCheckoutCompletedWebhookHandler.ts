@@ -7,25 +7,25 @@ import {
 import { throwCustomException } from '../../../common/error-handling';
 import {
   ConfirmOrderRequest,
-  ConfirmOrderUseCase,
-} from '../ConfirmOrder/ConfirmOrderUseCase';
+  ConfirmOrderWebhookGateway,
+} from './handlers/ConfirmOrderWebhookHandler/ConfirmOrderWebhookGateway';
 import {
   PayOrderShipmentFeeRequest,
-  PayOrderShipmentFeeUseCase,
-} from '../PayOrderShipmentFee/PayOrderShipmentFeeUseCase';
+  PayOrderShipmentFeeWebhookGateway,
+} from './handlers/PayOrderShipmentFeeWebhookHandler/PayOrderShipmentFeeWebhookGateway';
 import {
   StripeCheckoutCompletedResult,
-  StripeCheckoutCompletedUseCase,
+  StripeCheckoutCompletedWebhookGateway,
   StripeCheckoutCompletedWebhookFeeType,
   StripeCheckoutCompletedWebhookPayload,
-} from './StripeCheckoutCompletedUseCase';
+} from './StripeCheckoutCompletedWebhookGateway';
 
 @Injectable()
 export class StripeCheckoutCompletedWebhookHandler
-  implements StripeCheckoutCompletedUseCase {
+  implements StripeCheckoutCompletedWebhookGateway {
   constructor(
-    private readonly confirmOrderUseCase: ConfirmOrderUseCase,
-    private readonly payOrderShipmentFeeUseCase: PayOrderShipmentFeeUseCase,
+    private readonly confirmOrderWebhookGateway: ConfirmOrderWebhookGateway,
+    private readonly payOrderShipmentFeeWebhookGateway: PayOrderShipmentFeeWebhookGateway,
   ) {}
 
   @StripeWebhookHandler('checkout.session.completed')
@@ -35,11 +35,11 @@ export class StripeCheckoutCompletedWebhookHandler
 
     switch (webhookPayload.feeType) {
       case StripeCheckoutCompletedWebhookFeeType.Service:
-        return this.confirmOrderUseCase.execute(
+        return this.confirmOrderWebhookGateway.execute(
           webhookPayload as ConfirmOrderRequest,
         );
       case StripeCheckoutCompletedWebhookFeeType.Shipment:
-        return this.payOrderShipmentFeeUseCase.execute(
+        return this.payOrderShipmentFeeWebhookGateway.execute(
           webhookPayload as PayOrderShipmentFeeRequest,
         );
       default:

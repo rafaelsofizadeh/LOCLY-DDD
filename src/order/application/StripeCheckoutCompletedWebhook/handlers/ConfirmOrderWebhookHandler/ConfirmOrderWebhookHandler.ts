@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
-import { withTransaction } from '../../../common/application';
-import { Host } from '../../entity/Host';
+import { withTransaction } from '../../../../../common/application';
+import { Host } from '../../../../entity/Host';
 
-import { Address, OrderStatus } from '../../entity/Order';
+import { Address, OrderStatus } from '../../../../entity/Order';
 import {
   ConfirmOrderRequest,
-  ConfirmOrderUseCase,
+  ConfirmOrderWebhookGateway,
   ConfirmOrderResult,
-} from './ConfirmOrderUseCase';
-import { HostRepository } from '../../../host/persistence/HostRepository';
-import { OrderRepository } from '../../persistence/OrderRepository';
+} from './ConfirmOrderWebhookGateway';
+import { HostRepository } from '../../../../../host/persistence/HostRepository';
+import { OrderRepository } from '../../../../persistence/OrderRepository';
 
 @Injectable()
-export class ConfirmOrderWebhookHandler implements ConfirmOrderUseCase {
+export class ConfirmOrderWebhookHandler implements ConfirmOrderWebhookGateway {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,

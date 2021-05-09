@@ -3,10 +3,10 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
 import {
-  PreConfirmOrderRequest,
+  ConfirmOrderRequest,
   StripeCheckoutSessionResult,
-  PreConfirmOrderUseCase,
-} from './PreConfirmOrderUseCase';
+  ConfirmOrderUseCase,
+} from './ConfirmOrderUseCase';
 import { OrderRepository } from '../../persistence/OrderRepository';
 import { Host } from '../../entity/Host';
 import { UUID } from '../../../common/domain';
@@ -21,7 +21,7 @@ import {
 import { OrderStatus, DraftedOrder, Cost } from '../../entity/Order';
 import { HostRepository } from '../../../host/persistence/HostRepository';
 import { throwCustomException } from '../../../common/error-handling';
-import { StripeCheckoutCompletedWebhookFeeType } from '../StripeCheckoutCompleted/StripeCheckoutCompletedUseCase';
+import { StripeCheckoutCompletedWebhookFeeType } from '../StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookGateway';
 
 export type Match = {
   orderId: UUID;
@@ -29,7 +29,7 @@ export type Match = {
 };
 
 @Injectable()
-export class PreConfirmOrderService implements PreConfirmOrderUseCase {
+export class ConfirmOrderService implements ConfirmOrderUseCase {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly hostRepository: HostRepository,
@@ -38,16 +38,13 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
   ) {}
 
   async execute(
-    preConfirmOrderRequest: PreConfirmOrderRequest,
+    confirmOrderRequest: ConfirmOrderRequest,
     session?: ClientSession,
   ): Promise<StripeCheckoutSessionResult> {
     // TODO(GLOBAL): Transaction decorator
     const checkoutSession: Stripe.Checkout.Session = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.matchOrderAndCheckout(
-          preConfirmOrderRequest,
-          sessionWithTransaction,
-        ),
+        this.matchOrderAndCheckout(confirmOrderRequest, sessionWithTransaction),
       this.mongoClient,
       session,
     );
@@ -59,7 +56,7 @@ export class PreConfirmOrderService implements PreConfirmOrderUseCase {
 
   // TODO: Error handling and rejection events
   private async matchOrderAndCheckout(
-    { orderId, customerId }: PreConfirmOrderRequest,
+    { orderId, customerId }: ConfirmOrderRequest,
     session: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const draftOrder = (await this.orderRepository.findOrder(

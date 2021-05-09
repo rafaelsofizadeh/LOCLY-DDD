@@ -6,17 +6,17 @@ import * as GridFsStorage from 'multer-gridfs-storage';
 import { CustomerRepository } from '../customer/persistence/CustomerRepository';
 import { HostRepository } from '../host/persistence/HostRepository';
 import { OrderRepository } from './persistence/OrderRepository';
-import { PreConfirmOrderService } from './application/PreConfirmOrder/PreConfirmOrderService';
+import { ConfirmOrderService } from './application/ConfirmOrder/ConfirmOrderService';
 import { DraftOrderService } from './application/DraftOrder/DraftOrderService';
-import { PreConfirmOrderUseCase } from './application/PreConfirmOrder/PreConfirmOrderUseCase';
+import { ConfirmOrderUseCase } from './application/ConfirmOrder/ConfirmOrderUseCase';
 import { DraftOrderUseCase } from './application/DraftOrder/DraftOrderUseCase';
 import { CustomerMongoRepositoryAdapter } from '../customer/persistence/CustomerMongoRepositoryAdapter';
 import { HostMongoRepositoryAdapter } from '../host/persistence/HostMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from './persistence/OrderMongoRepositoryAdapter';
 import { OrderController } from './OrderController';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ConfirmOrderUseCase } from './application/ConfirmOrder/ConfirmOrderUseCase';
-import { ConfirmOrderWebhookHandler } from './application/ConfirmOrder/ConfirmOrderWebhookHandler';
+import { ConfirmOrderWebhookGateway } from './application/StripeCheckoutCompletedWebhook/handlers/ConfirmOrderWebhookHandler/ConfirmOrderWebhookGateway';
+import { ConfirmOrderWebhookHandler } from './application/StripeCheckoutCompletedWebhook/handlers/ConfirmOrderWebhookHandler/ConfirmOrderWebhookHandler';
 import { ReceiveOrderItemUseCase } from './application/ReceiveOrderItem/ReceiveOrderItemUseCase';
 import { ReceiveOrderItemService } from './application/ReceiveOrderItem/ReceiveOrderItemService';
 import { EditOrderService } from './application/EditOrder/EditOrderService';
@@ -38,12 +38,12 @@ import { uuidToMuuid } from '../common/persistence';
 import { Request } from 'express';
 import { SubmitShipmentInfoService } from './application/SubmitShipmentInfo/SubmitShipmentInfoService';
 import { SubmitShipmentInfoUseCase } from './application/SubmitShipmentInfo/SubmitShipmentInfoUseCase';
-import { PrePayOrderShipmentFeeUseCase } from './application/PrePayOrderShipmentFee/PrePayOrderShipmentFeeUseCase';
-import { PrePayOrderShipmentFeeService } from './application/PrePayOrderShipmentFee/PrePayOrderShipmentFeeService';
 import { PayOrderShipmentFeeUseCase } from './application/PayOrderShipmentFee/PayOrderShipmentFeeUseCase';
-import { PayOrderShipmentFeeWebhookHandler } from './application/PayOrderShipmentFee/PayOrderShipmentFeeWebhookHandler';
-import { StripeCheckoutCompletedUseCase } from './application/StripeCheckoutCompleted/StripeCheckoutCompletedUseCase';
-import { StripeCheckoutCompletedWebhookHandler } from './application/StripeCheckoutCompleted/StripeCheckoutCompletedWebhookHandler';
+import { PayOrderShipmentFeeService } from './application/PayOrderShipmentFee/PayOrderShipmentFeeService';
+import { PayOrderShipmentFeeWebhookGateway } from './application/StripeCheckoutCompletedWebhook/handlers/PayOrderShipmentFeeWebhookHandler/PayOrderShipmentFeeWebhookGateway';
+import { PayOrderShipmentFeeWebhookHandler } from './application/StripeCheckoutCompletedWebhook/handlers/PayOrderShipmentFeeWebhookHandler/PayOrderShipmentFeeWebhookHandler';
+import { StripeCheckoutCompletedWebhookGateway } from './application/StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookGateway';
+import { StripeCheckoutCompletedWebhookHandler } from './application/StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookHandler';
 
 const imports: DynamicModule[] = [
   ConfigModule.forRoot(),
@@ -111,8 +111,8 @@ const useCaseProviders: Provider[] = [
   { provide: DraftOrderUseCase, useClass: DraftOrderService },
   { provide: EditOrderUseCase, useClass: EditOrderService },
   { provide: DeleteOrderUseCase, useClass: DeleteOrderService },
-  { provide: PreConfirmOrderUseCase, useClass: PreConfirmOrderService },
-  { provide: ConfirmOrderUseCase, useClass: ConfirmOrderWebhookHandler },
+  { provide: ConfirmOrderUseCase, useClass: ConfirmOrderService },
+  { provide: ConfirmOrderWebhookGateway, useClass: ConfirmOrderWebhookHandler },
   { provide: ReceiveOrderItemUseCase, useClass: ReceiveOrderItemService },
   { provide: AddItemPhotoUseCase, useClass: AddItemPhotoService },
   {
@@ -120,15 +120,15 @@ const useCaseProviders: Provider[] = [
     useClass: SubmitShipmentInfoService,
   },
   {
-    provide: PrePayOrderShipmentFeeUseCase,
-    useClass: PrePayOrderShipmentFeeService,
+    provide: PayOrderShipmentFeeUseCase,
+    useClass: PayOrderShipmentFeeService,
   },
   {
-    provide: PayOrderShipmentFeeUseCase,
+    provide: PayOrderShipmentFeeWebhookGateway,
     useClass: PayOrderShipmentFeeWebhookHandler,
   },
   {
-    provide: StripeCheckoutCompletedUseCase,
+    provide: StripeCheckoutCompletedWebhookGateway,
     useClass: StripeCheckoutCompletedWebhookHandler,
   },
 ];

@@ -1,7 +1,7 @@
 import { ClientSession, MongoClient } from 'mongodb';
 import { Stripe } from 'stripe';
 import { Cost } from '../order/entity/Order';
-import { StripeCheckoutCompletedWebhookPayload } from '../order/application/StripeCheckoutCompleted/StripeCheckoutCompletedUseCase';
+import { StripeCheckoutCompletedWebhookPayload } from '../order/application/StripeCheckoutCompletedWebhook/StripeCheckoutCompletedWebhookGateway';
 import { Exception } from './error-handling';
 
 export abstract class UseCase<TUseCasePort, TUseCaseResult> {

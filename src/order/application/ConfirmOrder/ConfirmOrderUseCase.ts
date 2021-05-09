@@ -1,14 +1,16 @@
-import { Match } from '../PreConfirmOrder/PreConfirmOrderService';
-import { Address } from '../../entity/Order';
 import { UseCase } from '../../../common/application';
+import { UUID } from '../../../common/domain';
 
-export interface ConfirmOrderRequest extends Match {}
+export interface ConfirmOrderRequest {
+  orderId: UUID;
+  customerId: UUID;
+}
 
-export interface ConfirmOrderResult {
-  address: Address;
+export interface StripeCheckoutSessionResult {
+  checkoutId: string;
 }
 
 export abstract class ConfirmOrderUseCase extends UseCase<
   ConfirmOrderRequest,
-  ConfirmOrderResult
+  StripeCheckoutSessionResult
 > {}
