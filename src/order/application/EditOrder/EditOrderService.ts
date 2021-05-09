@@ -8,7 +8,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { DraftOrderUseCase } from '../DraftOrder/DraftOrderUseCase';
+import { DraftOrderUseCase } from '../DraftOrder/IDraftOrder';
 import { CustomerRepository } from '../../../customer/persistence/CustomerRepository';
 import { withTransaction } from '../../../common/application';
 import { OrderStatus, DraftedOrder } from '../../entity/Order';

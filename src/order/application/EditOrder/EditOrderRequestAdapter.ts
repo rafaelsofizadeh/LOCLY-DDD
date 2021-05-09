@@ -11,8 +11,8 @@ import { Country } from '../../entity/Country';
 import { EditOrderRequest } from './EditOrderUseCase';
 import {
   AddressValidationSchema,
-  ItemValidationSchema,
-} from '../DraftOrder/DraftOrderRequestAdapter';
+  DraftItemRequest,
+} from '../DraftOrder/IDraftOrder';
 
 export class EditOrderRequestAdapter implements EditOrderRequest {
   @IsUUID()
@@ -31,6 +31,6 @@ export class EditOrderRequestAdapter implements EditOrderRequest {
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @IsArray()
-  @Type(() => ItemValidationSchema)
-  readonly items: ItemValidationSchema[];
+  @Type(() => DraftItemRequest)
+  readonly items: DraftItemRequest[];
 }

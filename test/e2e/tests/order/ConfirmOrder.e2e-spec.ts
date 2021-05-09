@@ -11,7 +11,7 @@ import { Host } from '../../../../src/order/entity/Host';
 
 import { CustomerRepository } from '../../../../src/customer/persistence/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/persistence/OrderRepository';
-import { DraftOrderUseCase } from '../../../../src/order/application/DraftOrder/DraftOrderUseCase';
+import { DraftOrderUseCase } from '../../../../src/order/application/DraftOrder/IDraftOrder';
 import { Country } from '../../../../src/order/entity/Country';
 import { isString } from 'class-validator';
 import { HostRepository } from '../../../../src/host/persistence/HostRepository';
@@ -141,7 +141,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     await app.close();
   });
 
-  it.only(`Matches Order with a Host, updates Order's "hostId" property, and Host's "orderIds" property`, async (done) /* done() is needed for "awaiting" setTimeout */ => {
+  it(`Matches Order with a Host, updates Order's "hostId" property, and Host's "orderIds" property`, async (done) /* done() is needed for "awaiting" setTimeout */ => {
     // https://stackoverflow.com/a/49864436/6539857
     jest.setTimeout(55000);
 

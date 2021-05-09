@@ -7,9 +7,9 @@ import { CustomerRepository } from '../customer/persistence/CustomerRepository';
 import { HostRepository } from '../host/persistence/HostRepository';
 import { OrderRepository } from './persistence/OrderRepository';
 import { ConfirmOrder } from './application/ConfirmOrder/ConfirmOrder';
-import { DraftOrderService } from './application/DraftOrder/DraftOrderService';
+import { DraftOrder } from './application/DraftOrder/DraftOrder';
 import { IConfirmOrder } from './application/ConfirmOrder/IConfirmOrder';
-import { DraftOrderUseCase } from './application/DraftOrder/DraftOrderUseCase';
+import { DraftOrderUseCase } from './application/DraftOrder/IDraftOrder';
 import { CustomerMongoRepositoryAdapter } from '../customer/persistence/CustomerMongoRepositoryAdapter';
 import { HostMongoRepositoryAdapter } from '../host/persistence/HostMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from './persistence/OrderMongoRepositoryAdapter';
@@ -108,7 +108,7 @@ const persistenceProviders: Provider[] = [
 ];
 
 const useCaseProviders: Provider[] = [
-  { provide: DraftOrderUseCase, useClass: DraftOrderService },
+  { provide: DraftOrderUseCase, useClass: DraftOrder },
   { provide: EditOrderUseCase, useClass: EditOrderService },
   { provide: IDeleteOrder, useClass: DeleteOrder },
   { provide: IConfirmOrder, useClass: ConfirmOrder },

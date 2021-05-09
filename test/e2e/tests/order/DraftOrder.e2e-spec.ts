@@ -8,7 +8,7 @@ import { Customer } from '../../../../src/order/entity/Customer';
 import { OrderRepository } from '../../../../src/order/persistence/OrderRepository';
 import { UUID } from '../../../../src/common/domain';
 import { CustomerRepository } from '../../../../src/customer/persistence/CustomerRepository';
-import { DraftOrderRequest } from '../../../../src/order/application/DraftOrder/DraftOrderUseCase';
+import { DraftOrderRequest } from '../../../../src/order/application/DraftOrder/IDraftOrder';
 import { OrderStatus, DraftedOrder } from '../../../../src/order/entity/Order';
 import { Country } from '../../../../src/order/entity/Country';
 import { CustomExceptionFilter } from '../../../../src/infrastructure/CustomExceptionFilter';

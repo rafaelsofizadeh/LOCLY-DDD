@@ -1,7 +1,7 @@
 import { OrderRepository } from '../../persistence/OrderRepository';
 import { CustomerRepository } from '../../../customer/persistence/CustomerRepository';
 
-import { DraftOrderRequest, DraftOrderUseCase } from './DraftOrderUseCase';
+import { DraftOrderRequest, DraftOrderUseCase } from './IDraftOrder';
 
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
@@ -12,19 +12,14 @@ import {
   ShipmentCostQuote,
   ShipmentCostQuoteFn,
 } from '../../../calculator/getShipmentCostQuote';
-import { DraftedItem, Item } from '../../entity/Item';
+import { DraftedItem } from '../../entity/Item';
 import { UUID } from '../../../common/domain';
 import { Country } from '../../entity/Country';
-import {
-  Address,
-  DraftedOrder,
-  Cost,
-  OrderStatus,
-} from '../../entity/Order';
+import { Address, DraftedOrder, Cost, OrderStatus } from '../../entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
 
 @Injectable()
-export class DraftOrderService implements DraftOrderUseCase {
+export class DraftOrder implements DraftOrderUseCase {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,

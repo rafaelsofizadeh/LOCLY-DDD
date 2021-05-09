@@ -7,8 +7,10 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-import { DraftOrderRequestAdapter } from './application/DraftOrder/DraftOrderRequestAdapter';
-import { DraftOrderUseCase } from './application/DraftOrder/DraftOrderUseCase';
+import {
+  DraftOrderUseCase,
+  DraftOrderRequest,
+} from './application/DraftOrder/IDraftOrder';
 import { ConfirmOrderRequest } from './application/ConfirmOrder/IConfirmOrder';
 import {
   StripeCheckoutSessionResult,
@@ -58,7 +60,7 @@ export class OrderController {
   @Post('draft')
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async draftOrderHandler(
-    @Body() orderRequest: DraftOrderRequestAdapter,
+    @Body() orderRequest: DraftOrderRequest,
   ): Promise<DraftedOrder> {
     const draftOrder: DraftedOrder = await this.draftOrderUseCase.execute(
       orderRequest,
