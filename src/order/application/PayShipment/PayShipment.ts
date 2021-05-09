@@ -6,7 +6,7 @@ import {
   PayShipmentRequest,
   StripeCheckoutSessionResult,
   PayShipmentUseCase,
-} from './PayShipmentUseCase';
+} from './IPayShipment';
 import { OrderRepository } from '../../persistence/OrderRepository';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';

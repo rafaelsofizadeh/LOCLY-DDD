@@ -41,8 +41,8 @@ import {
   SubmitShipmentInfoResult,
   SubmitShipmentInfoUseCase,
 } from './application/SubmitShipmentInfo/SubmitShipmentInfoUseCase';
-import { PayShipmentRequestAdapter } from './application/PayShipment/PayShipmentRequestAdapter';
-import { PayShipmentUseCase } from './application/PayShipment/PayShipmentUseCase';
+import { PayShipment } from './application/PayShipment/IPayShipment';
+import { PayShipmentUseCase } from './application/PayShipment/IPayShipment';
 
 @Controller('order')
 export class OrderController {
@@ -136,7 +136,7 @@ export class OrderController {
 
   @Post('payShipment')
   async payShipmentHandler(
-    @Body() payShipmentRequest: PayShipmentRequestAdapter,
+    @Body() payShipmentRequest: PayShipment,
   ): Promise<StripeCheckoutSessionResult> {
     const stripeCheckoutSession = await this.payShipmentUseCase.execute(
       payShipmentRequest,
