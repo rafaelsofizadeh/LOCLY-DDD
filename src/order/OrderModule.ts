@@ -19,8 +19,8 @@ import { IConfirmOrderHandler } from './application/StripeCheckoutWebhook/handle
 import { ConfirmOrderHandler } from './application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/ConfirmOrderHandler';
 import { ReceiveItemUseCase } from './application/ReceiveItem/ReceiveItemUseCase';
 import { ReceiveItemService } from './application/ReceiveItem/ReceiveItemService';
-import { EditOrderService } from './application/EditOrder/EditOrderService';
-import { EditOrderUseCase } from './application/EditOrder/EditOrderUseCase';
+import { EditOrder } from './application/EditOrder/EditOrder';
+import { EditOrderUseCase } from './application/EditOrder/IEditOrder';
 import { IDeleteOrder } from './application/DeleteOrder/IDeleteOrder';
 import { DeleteOrder } from './application/DeleteOrder/DeleteOrder';
 import { Db } from 'mongodb';
@@ -109,7 +109,7 @@ const persistenceProviders: Provider[] = [
 
 const useCaseProviders: Provider[] = [
   { provide: DraftOrderUseCase, useClass: DraftOrder },
-  { provide: EditOrderUseCase, useClass: EditOrderService },
+  { provide: EditOrderUseCase, useClass: EditOrder },
   { provide: IDeleteOrder, useClass: DeleteOrder },
   { provide: IConfirmOrder, useClass: ConfirmOrder },
   { provide: IConfirmOrderHandler, useClass: ConfirmOrderHandler },

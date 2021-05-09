@@ -23,8 +23,8 @@ import {
 } from './application/ReceiveItem/ReceiveItemUseCase';
 import { DraftedOrder } from './entity/Order';
 import { SerializePrivatePropertiesInterceptor } from '../infrastructure/SerializePrivatePropertiesInterceptor';
-import { EditOrderUseCase } from './application/EditOrder/EditOrderUseCase';
-import { EditOrderRequestAdapter } from './application/EditOrder/EditOrderRequestAdapter';
+import { EditOrderUseCase } from './application/EditOrder/IEditOrder';
+import { EditOrderRequestAdapter } from './application/EditOrder/IEditOrder';
 import {
   DeleteOrderResult,
   IDeleteOrder,
