@@ -5,8 +5,8 @@ import { withTransaction } from '../../../../../common/application';
 
 import { OrderStatus } from '../../../../entity/Order';
 import {
-  PayShipmentRequest,
-  PayShipmentResult,
+  PayShipmentHandlerRequest,
+  PayShipmentHandlerResult,
   IPayShipmentHandler,
 } from './IPayShipmentHandler';
 import { OrderRepository } from '../../../../persistence/OrderRepository';
@@ -19,9 +19,9 @@ export class PayShipmentHandler implements IPayShipmentHandler {
   ) {}
 
   async execute(
-    payShipmentRequest: PayShipmentRequest,
+    payShipmentRequest: PayShipmentHandlerRequest,
     session?: ClientSession,
-  ): Promise<PayShipmentResult> {
+  ): Promise<PayShipmentHandlerResult> {
     await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.markOrderPaid(payShipmentRequest, sessionWithTransaction),
@@ -31,7 +31,7 @@ export class PayShipmentHandler implements IPayShipmentHandler {
   }
 
   private async markOrderPaid(
-    { orderId }: PayShipmentRequest,
+    { orderId }: PayShipmentHandlerRequest,
     session: ClientSession,
   ): Promise<void> {
     await this.orderRepository.setProperties(

@@ -11,7 +11,7 @@ import { Host } from '../../../../src/order/entity/Host';
 
 import { CustomerRepository } from '../../../../src/customer/persistence/CustomerRepository';
 import { OrderRepository } from '../../../../src/order/persistence/OrderRepository';
-import { DraftOrderUseCase } from '../../../../src/order/application/DraftOrder/IDraftOrder';
+import { IDraftOrder } from '../../../../src/order/application/DraftOrder/IDraftOrder';
 import { Country } from '../../../../src/order/entity/Country';
 import { isString } from 'class-validator';
 import { HostRepository } from '../../../../src/host/persistence/HostRepository';
@@ -41,7 +41,7 @@ describe('Confirm Order – POST /order/confirm', () => {
   let orderRepository: OrderRepository;
   let hostRepository: HostRepository;
 
-  let draftOrderUseCase: DraftOrderUseCase;
+  let draftOrderUseCase: IDraftOrder;
 
   let testCustomer: Customer;
   let testOrder: DraftedOrder;
@@ -80,9 +80,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       HostRepository,
     )) as HostRepository;
 
-    draftOrderUseCase = (await moduleRef.resolve(
-      DraftOrderUseCase,
-    )) as DraftOrderUseCase;
+    draftOrderUseCase = (await moduleRef.resolve(IDraftOrder)) as IDraftOrder;
 
     testCustomer = {
       id: UUID(),

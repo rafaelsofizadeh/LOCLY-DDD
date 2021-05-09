@@ -5,15 +5,15 @@ import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import {
   SubmitShipmentInfoRequest,
-  SubmitShipmentInfoUseCase,
-} from './SubmitShipmentInfoUseCase';
+  ISubmitShipmentInfo,
+} from './ISubmitShipmentInfo';
 import { Order, OrderStatus } from '../../entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
 import { Item } from '../../entity/Item';
 import { UUID } from '../../../common/domain';
 
 @Injectable()
-export class SubmitShipmentInfoService implements SubmitShipmentInfoUseCase {
+export class SubmitShipmentInfo implements ISubmitShipmentInfo {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,

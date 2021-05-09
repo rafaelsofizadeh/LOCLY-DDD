@@ -13,7 +13,7 @@ export class EditOrderRequestAdapter extends DraftOrderRequest
   readonly orderId: UUID;
 }
 
-export abstract class EditOrderUseCase extends UseCase<
+export abstract class IEditOrder extends UseCase<
   EditOrderRequest,
   DraftedOrder
 > {}

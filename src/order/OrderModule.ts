@@ -9,7 +9,7 @@ import { OrderRepository } from './persistence/OrderRepository';
 import { ConfirmOrder } from './application/ConfirmOrder/ConfirmOrder';
 import { DraftOrder } from './application/DraftOrder/DraftOrder';
 import { IConfirmOrder } from './application/ConfirmOrder/IConfirmOrder';
-import { DraftOrderUseCase } from './application/DraftOrder/IDraftOrder';
+import { IDraftOrder } from './application/DraftOrder/IDraftOrder';
 import { CustomerMongoRepositoryAdapter } from '../customer/persistence/CustomerMongoRepositoryAdapter';
 import { HostMongoRepositoryAdapter } from '../host/persistence/HostMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from './persistence/OrderMongoRepositoryAdapter';
@@ -17,16 +17,16 @@ import { OrderController } from './OrderController';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { IConfirmOrderHandler } from './application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/IConfirmOrderHandler';
 import { ConfirmOrderHandler } from './application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/ConfirmOrderHandler';
-import { ReceiveItemUseCase } from './application/ReceiveItem/ReceiveItemUseCase';
-import { ReceiveItemService } from './application/ReceiveItem/ReceiveItemService';
+import { IReceiveItem } from './application/ReceiveItem/IReceiveItem';
+import { ReceiveItem } from './application/ReceiveItem/ReceiveItem';
 import { EditOrder } from './application/EditOrder/EditOrder';
-import { EditOrderUseCase } from './application/EditOrder/IEditOrder';
+import { IEditOrder } from './application/EditOrder/IEditOrder';
 import { IDeleteOrder } from './application/DeleteOrder/IDeleteOrder';
 import { DeleteOrder } from './application/DeleteOrder/DeleteOrder';
 import { Db } from 'mongodb';
 import {
   AddItemPhotoRequest,
-  AddItemPhotoUseCase,
+  IAddItemPhoto,
   maxPhotoSizeBytes,
   maxSimulataneousPhotoCount,
 } from './application/AddItemPhoto/IAddItemPhoto';
@@ -36,9 +36,9 @@ import { throwCustomException } from '../common/error-handling';
 import { UUID } from '../common/domain';
 import { uuidToMuuid } from '../common/persistence';
 import { Request } from 'express';
-import { SubmitShipmentInfoService } from './application/SubmitShipmentInfo/SubmitShipmentInfoService';
-import { SubmitShipmentInfoUseCase } from './application/SubmitShipmentInfo/SubmitShipmentInfoUseCase';
-import { PayShipmentUseCase } from './application/PayShipment/IPayShipment';
+import { SubmitShipmentInfo } from './application/SubmitShipmentInfo/SubmitShipmentInfo';
+import { ISubmitShipmentInfo } from './application/SubmitShipmentInfo/ISubmitShipmentInfo';
+import { IPayShipment } from './application/PayShipment/IPayShipment';
 import { PayShipmentService } from './application/PayShipment/PayShipment';
 import { IPayShipmentHandler } from './application/StripeCheckoutWebhook/handlers/PayShipmentHandler/IPayShipmentHandler';
 import { PayShipmentHandler } from './application/StripeCheckoutWebhook/handlers/PayShipmentHandler/PayShipmentHandler';
@@ -108,19 +108,19 @@ const persistenceProviders: Provider[] = [
 ];
 
 const useCaseProviders: Provider[] = [
-  { provide: DraftOrderUseCase, useClass: DraftOrder },
-  { provide: EditOrderUseCase, useClass: EditOrder },
+  { provide: IDraftOrder, useClass: DraftOrder },
+  { provide: IEditOrder, useClass: EditOrder },
   { provide: IDeleteOrder, useClass: DeleteOrder },
   { provide: IConfirmOrder, useClass: ConfirmOrder },
   { provide: IConfirmOrderHandler, useClass: ConfirmOrderHandler },
-  { provide: ReceiveItemUseCase, useClass: ReceiveItemService },
-  { provide: AddItemPhotoUseCase, useClass: AddItemPhoto },
+  { provide: IReceiveItem, useClass: ReceiveItem },
+  { provide: IAddItemPhoto, useClass: AddItemPhoto },
   {
-    provide: SubmitShipmentInfoUseCase,
-    useClass: SubmitShipmentInfoService,
+    provide: ISubmitShipmentInfo,
+    useClass: SubmitShipmentInfo,
   },
   {
-    provide: PayShipmentUseCase,
+    provide: IPayShipment,
     useClass: PayShipmentService,
   },
   {

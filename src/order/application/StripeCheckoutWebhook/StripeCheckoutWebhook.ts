@@ -10,7 +10,7 @@ import {
   IConfirmOrderHandler,
 } from './handlers/ConfirmOrderHandler/IConfirmOrderHandler';
 import {
-  PayShipmentRequest,
+  PayShipmentHandlerRequest,
   IPayShipmentHandler,
 } from './handlers/PayShipmentHandler/IPayShipmentHandler';
 import {
@@ -39,7 +39,7 @@ export class StripeCheckoutWebhook implements IStripeCheckoutWebhook {
         );
       case FeeType.Shipment:
         return this.payShipmentWebhookGateway.execute(
-          webhookPayload as PayShipmentRequest,
+          webhookPayload as PayShipmentHandlerRequest,
         );
       default:
         throwCustomException(

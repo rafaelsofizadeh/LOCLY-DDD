@@ -2,7 +2,7 @@ import { UUID } from '../../common/domain';
 import { EntityFilter } from '../../common/persistence';
 import { Country } from './Country';
 import { Currency } from './Currency';
-import { URL } from '../application/SubmitShipmentInfo/SubmitShipmentInfoUseCase';
+import { URL } from '../application/SubmitShipmentInfo/ISubmitShipmentInfo';
 import {
   DraftedItem,
   FinalizedItem,
@@ -12,10 +12,11 @@ import {
   ReceivedItem,
 } from './Item';
 
-export type Cost = Readonly<{
-  currency: Currency;
-  amount: number;
-}>;
+export interface Cost
+  extends Readonly<{
+    currency: Currency;
+    amount: number;
+  }> {}
 
 export type Address = Readonly<{
   country: Country;

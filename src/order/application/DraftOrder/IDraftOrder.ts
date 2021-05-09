@@ -66,7 +66,7 @@ export class DraftOrderRequest implements DraftOrderRequest {
   readonly items: DraftItemRequest[];
 }
 
-export abstract class DraftOrderUseCase extends UseCase<
+export abstract class IDraftOrder extends UseCase<
   DraftOrderRequest,
   DraftedOrder
 > {}

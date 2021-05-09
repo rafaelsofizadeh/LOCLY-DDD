@@ -1,19 +1,19 @@
 import { OrderRepository } from '../../persistence/OrderRepository';
 
-import { EditOrderRequest, EditOrderUseCase } from './IEditOrder';
+import { EditOrderRequest, IEditOrder } from './IEditOrder';
 
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { DraftOrderUseCase } from '../DraftOrder/IDraftOrder';
+import { IDraftOrder } from '../DraftOrder/IDraftOrder';
 import { CustomerRepository } from '../../../customer/persistence/CustomerRepository';
 import { withTransaction } from '../../../common/application';
 import { OrderStatus, DraftedOrder } from '../../entity/Order';
 
 @Injectable()
-export class EditOrder implements EditOrderUseCase {
+export class EditOrder implements IEditOrder {
   constructor(
-    private readonly draftOrderUseCase: DraftOrderUseCase,
+    private readonly draftOrderUseCase: IDraftOrder,
     private readonly orderRepository: OrderRepository,
     private readonly customerRepository: CustomerRepository,
     @InjectClient() private readonly mongoClient: MongoClient,

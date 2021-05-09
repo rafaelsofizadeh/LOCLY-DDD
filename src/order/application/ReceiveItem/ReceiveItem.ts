@@ -7,12 +7,12 @@ import { withTransaction } from '../../../common/application';
 import {
   ReceiveItemRequest,
   ReceiveItemResult,
-  ReceiveItemUseCase,
-} from './ReceiveItemUseCase';
+  IReceiveItem,
+} from './IReceiveItem';
 import { OrderStatus } from '../../entity/Order';
 
 @Injectable()
-export class ReceiveItemService implements ReceiveItemUseCase {
+export class ReceiveItem implements IReceiveItem {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,

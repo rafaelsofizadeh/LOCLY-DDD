@@ -2,11 +2,11 @@ import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
 
 export interface PayShipmentRequest {
-  orderId: UUID;
-  customerId: UUID;
+  readonly orderId: UUID;
+  readonly customerId: UUID;
 }
 
-export class PayShipmentRequestAdapter implements PayShipmentRequest {
+export class PayShipmentRequest implements PayShipmentRequest {
   @IsUUID()
   readonly orderId: UUID;
 
@@ -18,7 +18,7 @@ export interface StripeCheckoutSessionResult {
   checkoutId: string;
 }
 
-export abstract class PayShipmentUseCase extends UseCase<
+export abstract class IPayShipment extends UseCase<
   PayShipmentRequest,
   StripeCheckoutSessionResult
 > {}

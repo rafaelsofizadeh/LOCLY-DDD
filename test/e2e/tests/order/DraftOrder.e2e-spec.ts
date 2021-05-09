@@ -19,7 +19,7 @@ import {
 
 // TODO(GLOBAL)(TESTING): Substitute database name in tests
 
-describe('[POST /order/draft] DraftOrderUseCase', () => {
+describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
 
   let customerRepository: CustomerRepository;
@@ -249,7 +249,7 @@ describe('[POST /order/draft] DraftOrderUseCase', () => {
      * TODO: Test for transaction rollback success.
      *
      * 1. Count the number of documents in collection
-     * 2. DraftOrderUseCase -> failure
+     * 2. IDraftOrder -> failure
      * 3. Count the number of documents in collection again. 3 === 1, else failure
      *
      * You can either knowingly make the UseCase fail (like in 'fails on nonexistent customer'),

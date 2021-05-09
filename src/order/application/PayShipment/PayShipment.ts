@@ -5,7 +5,7 @@ import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 import {
   PayShipmentRequest,
   StripeCheckoutSessionResult,
-  PayShipmentUseCase,
+  IPayShipment,
 } from './IPayShipment';
 import { OrderRepository } from '../../persistence/OrderRepository';
 import { InjectClient } from 'nest-mongodb';
@@ -20,7 +20,7 @@ import { OrderStatus } from '../../entity/Order';
 import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
 
 @Injectable()
-export class PayShipmentService implements PayShipmentUseCase {
+export class PayShipmentService implements IPayShipment {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectStripeClient() private readonly stripe: Stripe,

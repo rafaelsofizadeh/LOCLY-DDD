@@ -8,53 +8,57 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 import {
-  DraftOrderUseCase,
+  IDraftOrder,
   DraftOrderRequest,
 } from './application/DraftOrder/IDraftOrder';
-import { ConfirmOrderRequest } from './application/ConfirmOrder/IConfirmOrder';
 import {
+  ConfirmOrderRequest,
   StripeCheckoutSessionResult,
   IConfirmOrder,
 } from './application/ConfirmOrder/IConfirmOrder';
-import { ReceiveItemRequestAdapter } from './application/ReceiveItem/ReceiveItemRequestAdapter';
 import {
   ReceiveItemResult,
-  ReceiveItemUseCase,
-} from './application/ReceiveItem/ReceiveItemUseCase';
+  IReceiveItem,
+  ReceiveItemRequest,
+} from './application/ReceiveItem/IReceiveItem';
 import { DraftedOrder } from './entity/Order';
 import { SerializePrivatePropertiesInterceptor } from '../infrastructure/SerializePrivatePropertiesInterceptor';
-import { EditOrderUseCase } from './application/EditOrder/IEditOrder';
-import { EditOrderRequestAdapter } from './application/EditOrder/IEditOrder';
 import {
+  IEditOrder,
+  EditOrderRequestAdapter,
+} from './application/EditOrder/IEditOrder';
+import {
+  DeleteOrderRequest,
   DeleteOrderResult,
   IDeleteOrder,
 } from './application/DeleteOrder/IDeleteOrder';
-import { DeleteOrderRequest } from './application/DeleteOrder/IDeleteOrder';
-import { AddItemPhotoRequestBody } from './application/AddItemPhoto/IAddItemPhoto';
 import {
-  AddItemPhotoUseCase,
+  AddItemPhotoRequestBody,
+  IAddItemPhoto,
   photoPropertyName,
 } from './application/AddItemPhoto/IAddItemPhoto';
 import { Photo } from './persistence/OrderMongoMapper';
-import { SubmitShipmentInfoRequestAdapter } from './application/SubmitShipmentInfo/SubmitShipmentInfoRequestAdapter';
 import {
+  SubmitShipmentInfoRequest,
   SubmitShipmentInfoResult,
-  SubmitShipmentInfoUseCase,
-} from './application/SubmitShipmentInfo/SubmitShipmentInfoUseCase';
-import { PayShipment } from './application/PayShipment/IPayShipment';
-import { PayShipmentUseCase } from './application/PayShipment/IPayShipment';
+  ISubmitShipmentInfo,
+} from './application/SubmitShipmentInfo/ISubmitShipmentInfo';
+import {
+  IPayShipment,
+  PayShipmentRequest,
+} from './application/PayShipment/IPayShipment';
 
 @Controller('order')
 export class OrderController {
   constructor(
-    private readonly draftOrderUseCase: DraftOrderUseCase,
-    private readonly editOrderUseCase: EditOrderUseCase,
+    private readonly draftOrderUseCase: IDraftOrder,
+    private readonly editOrderUseCase: IEditOrder,
     private readonly deleteOrder: IDeleteOrder,
     private readonly confirmOrder: IConfirmOrder,
-    private readonly receiveItemUseCase: ReceiveItemUseCase,
-    private readonly addItemPhotoUseCase: AddItemPhotoUseCase,
-    private readonly submitShipmentInfoUseCase: SubmitShipmentInfoUseCase,
-    private readonly payShipmentUseCase: PayShipmentUseCase,
+    private readonly receiveItemUseCase: IReceiveItem,
+    private readonly addItemPhotoUseCase: IAddItemPhoto,
+    private readonly submitShipmentInfoUseCase: ISubmitShipmentInfo,
+    private readonly payShipmentUseCase: IPayShipment,
   ) {}
 
   @Post('draft')
@@ -101,7 +105,7 @@ export class OrderController {
 
   @Post('receiveItem')
   async receiveItemHandler(
-    @Body() receiveItemRequest: ReceiveItemRequestAdapter,
+    @Body() receiveItemRequest: ReceiveItemRequest,
   ): Promise<ReceiveItemResult> {
     const receivedDateResult = await this.receiveItemUseCase.execute(
       receiveItemRequest,
@@ -127,7 +131,7 @@ export class OrderController {
 
   @Post('submitShipmentInfo')
   async submitOrderShipmentInfoHandler(
-    @Body() submitOrderShipmentInfoRequest: SubmitShipmentInfoRequestAdapter,
+    @Body() submitOrderShipmentInfoRequest: SubmitShipmentInfoRequest,
   ): Promise<SubmitShipmentInfoResult> {
     await this.submitShipmentInfoUseCase.execute(
       submitOrderShipmentInfoRequest,
@@ -136,7 +140,7 @@ export class OrderController {
 
   @Post('payShipment')
   async payShipmentHandler(
-    @Body() payShipmentRequest: PayShipment,
+    @Body() payShipmentRequest: PayShipmentRequest,
   ): Promise<StripeCheckoutSessionResult> {
     const stripeCheckoutSession = await this.payShipmentUseCase.execute(
       payShipmentRequest,

@@ -18,8 +18,7 @@ export interface AddItemPhotoRequest extends AddItemPhotoRequestBody {
   [photoPropertyName]: Photo[];
 }
 
-export class AddItemPhotoRequestBodyAdapter
-  implements AddItemPhotoRequestBody {
+export class AddItemPhotoRequestBodyAdapter implements AddItemPhotoRequestBody {
   @IsUUID()
   readonly orderId: UUID;
 
@@ -30,7 +29,7 @@ export class AddItemPhotoRequestBodyAdapter
   readonly itemId: UUID;
 }
 
-export abstract class AddItemPhotoUseCase extends UseCase<
+export abstract class IAddItemPhoto extends UseCase<
   AddItemPhotoRequest,
   ItemPhotosUploadResult
 > {}

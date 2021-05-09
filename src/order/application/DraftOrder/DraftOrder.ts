@@ -1,7 +1,7 @@
 import { OrderRepository } from '../../persistence/OrderRepository';
 import { CustomerRepository } from '../../../customer/persistence/CustomerRepository';
 
-import { DraftOrderRequest, DraftOrderUseCase } from './IDraftOrder';
+import { DraftOrderRequest, IDraftOrder } from './IDraftOrder';
 
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
@@ -19,7 +19,7 @@ import { Address, DraftedOrder, Cost, OrderStatus } from '../../entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
 
 @Injectable()
-export class DraftOrder implements DraftOrderUseCase {
+export class DraftOrder implements IDraftOrder {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly orderRepository: OrderRepository,

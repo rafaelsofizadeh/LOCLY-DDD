@@ -5,13 +5,13 @@ import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import {
   AddItemPhotoRequest,
-  AddItemPhotoUseCase,
+  IAddItemPhoto,
   ItemPhotosUploadResult,
 } from './IAddItemPhoto';
 import { OrderStatus } from '../../entity/Order';
 
 @Injectable()
-export class AddItemPhoto implements AddItemPhotoUseCase {
+export class AddItemPhoto implements IAddItemPhoto {
   constructor(
     private readonly orderRepository: OrderRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
