@@ -232,15 +232,16 @@ describe('Confirm Order – POST /order/confirm', () => {
 
       let updatedTestOrder: ConfirmedOrder;
 
-      // Expect to resolve and not throw/reject
-      await expect(
-        (async () => {
-          updatedTestOrder = (await orderRepository.findOrder({
-            orderId: testOrder.id,
-            status: OrderStatus.Confirmed,
-          })) as ConfirmedOrder;
-        })(),
-      ).resolves.toBeUndefined();
+      updatedTestOrder = (await orderRepository.findOrder(
+        {
+          orderId: testOrder.id,
+          status: OrderStatus.Confirmed,
+        },
+        undefined,
+        false,
+      )) as ConfirmedOrder;
+
+      expect(updatedTestOrder).toBeDefined();
 
       expect(updatedTestOrder.hostId).toBeDefined();
       expect(updatedTestOrder.hostId).toBe(testMatchedHost.id);

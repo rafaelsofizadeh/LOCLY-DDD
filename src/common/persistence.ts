@@ -16,8 +16,8 @@ export function uuidToMuuid(id: UUID): Binary {
   return MUUID.from(id);
 }
 
-export type EntityFilter<T extends { id: UUID }, Id> = Partial<Omit<WithoutId<T>, 'status'> & {status: OrderStatus | OrderStatus[]}> &
-  Id;
+export type EntityFilter<T extends { id: UUID }, Id> = Partial<Omit<T, 'id' | 'status'> & {status: OrderStatus | OrderStatus[]} &
+  Id>;
 
 // https://stackoverflow.com/a/47058976/6539857
 type PathsToStringProps<T> = T extends string ? [] : {

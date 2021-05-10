@@ -14,6 +14,7 @@ export abstract class IOrderRepository {
   abstract findOrder(
     filter: OrderFilter,
     mongoTransactionSession?: ClientSession,
+    throwIfNotFound?: boolean,
   ): Promise<Order>;
 
   abstract findOrders(

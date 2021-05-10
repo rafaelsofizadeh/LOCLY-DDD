@@ -15,13 +15,13 @@ import {
   mongoDocumentToCustomer,
   CustomerMongoDocument,
   customerToMongoDocument,
+  normalizeCustomerFilter,
 } from './CustomerMongoMapper';
 import {
   expectOnlySingleResult,
   throwCustomException,
 } from '../../common/error-handling';
 import { mongoQuery, uuidToMuuid } from '../../common/persistence';
-import { normalizeCustomerFilter } from '../../order/persistence/OrderMongoMapper';
 
 @Injectable()
 export class CustomerMongoRepositoryAdapter implements ICustomerRepository {

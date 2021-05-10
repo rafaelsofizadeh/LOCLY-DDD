@@ -1,6 +1,6 @@
 import { Binary } from 'mongodb';
 
-import { Customer } from '../entity/Customer';
+import { Customer, CustomerFilter } from '../entity/Customer';
 import { Address } from '../../order/entity/Order';
 import {
   convertToMongoDocument,
@@ -41,5 +41,15 @@ export function customerToMongoDocument(
     _id,
     orderIds,
     addresses: [{ ...selectedAddress, selected: true }],
+  };
+}
+
+export function normalizeCustomerFilter({
+  customerId,
+  ...restFilter
+}: CustomerFilter) {
+  return {
+    id: customerId,
+    ...restFilter,
   };
 }

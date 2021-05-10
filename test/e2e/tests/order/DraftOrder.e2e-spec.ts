@@ -111,13 +111,17 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
       // 2. order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
       // should be a DraftedOrder
-      await expect(
-        orderRepository.findOrder({
+      const addedOrder: DraftedOrder = (await orderRepository.findOrder(
+        {
           orderId: testOrderId,
           status: OrderStatus.Drafted,
           customerId: testCustomer.id,
-        }),
-      ).resolves.toHaveProperty('status', OrderStatus.Drafted);
+        },
+        undefined,
+        false,
+      )) as DraftedOrder;
+
+      expect(addedOrder.status).toBe(OrderStatus.Drafted);
 
       // Load the test customer from the database
       const updatedTestCustomer: Customer = await customerRepository.findCustomer(

@@ -93,6 +93,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
   async findOrder(
     filter: OrderFilter,
     mongoTransactionSession?: ClientSession,
+    throwIfNotFound: boolean = true,
   ): Promise<Order> {
     // TODO: better typing using FilterQuery
     const filterWithId = normalizeOrderFilter(filter);
@@ -104,7 +105,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       .findOne(filterQuery, { session: mongoTransactionSession })
       .catch(throwCustomException('Error searching for an order', filter));
 
-    if (!orderDocument) {
+    if (!orderDocument && throwIfNotFound) {
       throwCustomException('No order found', filter)();
     }
 
