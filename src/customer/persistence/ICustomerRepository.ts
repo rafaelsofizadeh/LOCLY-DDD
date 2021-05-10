@@ -5,28 +5,28 @@ import { Customer } from '../../order/entity/Customer';
 export abstract class ICustomerRepository {
   abstract addCustomer(
     customer: Customer,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract deleteCustomer(
     customerId: UUID,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract addOrderToCustomer(
     customerId: UUID,
     orderId: UUID,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract removeOrderFromCustomer(
     customerId: UUID,
     orderId: UUID,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract findCustomer(
     customerId: UUID,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<Customer>; // throws new Exception(Code.ENTITY_NOT_FOUND_ERROR, 'Customer not found.')
 }

@@ -21,13 +21,13 @@ export class EditOrder implements IEditOrder {
 
   async execute(
     editOrderRequest: EditOrderRequest,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<DraftedOrder> {
     const draftOrder: DraftedOrder = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.editOrder(editOrderRequest, sessionWithTransaction),
       this.mongoClient,
-      session,
+      mongoTransactionSession,
     );
 
     return draftOrder;
@@ -35,7 +35,7 @@ export class EditOrder implements IEditOrder {
 
   private async editOrder(
     { orderId, customerId, ...restEditOrderRequest }: EditOrderRequest,
-    session: ClientSession,
+    mongoTransactionSession: ClientSession,
   ): Promise<DraftedOrder> {
     await this.orderRepository.deleteOrder(
       {
@@ -43,17 +43,17 @@ export class EditOrder implements IEditOrder {
         status: OrderStatus.Drafted,
         customerId,
       },
-      session,
+      mongoTransactionSession,
     );
     await this.customerRepository.removeOrderFromCustomer(
       customerId,
       orderId,
-      session,
+      mongoTransactionSession,
     );
 
     const draftOrder: DraftedOrder = await this.draftOrderUseCase.execute(
       { customerId, ...restEditOrderRequest },
-      session,
+      mongoTransactionSession,
     );
 
     return draftOrder;

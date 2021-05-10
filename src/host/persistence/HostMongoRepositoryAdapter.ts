@@ -32,11 +32,14 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
   ) {}
 
   // For testing
-  async addManyHosts(hosts: Host[], session?: ClientSession): Promise<void> {
+  async addManyHosts(
+    hosts: Host[],
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void> {
     const hostDocuments: HostMongoDocument[] = hosts.map(hostToMongoDocument);
 
     const result: InsertWriteOpResult<HostMongoDocument> = await this.hostCollection
-      .insertMany(hostDocuments, { session })
+      .insertMany(hostDocuments, { session: mongoTransactionSession })
       .catch(throwCustomException('Error adding many hosts', { hosts }));
 
     expectOnlyNResults(hosts.length, [result.insertedCount], {
@@ -45,25 +48,26 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
     });
   }
 
-  async addHost(host: Host, session?: ClientSession): Promise<void> {
+  async addHost(
+    host: Host,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void> {
     const hostDocument: HostMongoDocument = hostToMongoDocument(host);
 
     await this.hostCollection
-      .insertOne(hostDocument, { session })
+      .insertOne(hostDocument, { session: mongoTransactionSession })
       .catch(throwCustomException('Error adding host', { host }));
   }
 
   // For testing
   async deleteManyHosts(
     hostIds: UUID[],
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     const result: DeleteWriteOpResultObject = await this.hostCollection
       .deleteMany(
-        {
-          _id: { $in: hostIds.map(hostId => uuidToMuuid(hostId)) },
-        },
-        { session },
+        { _id: { $in: hostIds.map(hostId => uuidToMuuid(hostId)) } },
+        { session: mongoTransactionSession },
       )
       .catch(throwCustomException('Error deleting many hosts', { hostIds }));
 
@@ -73,15 +77,14 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
     });
   }
 
-  async deleteHost(hostId: UUID, session?: ClientSession): Promise<void> {
+  async deleteHost(
+    hostId: UUID,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void> {
     const deleteResult: DeleteWriteOpResultObject = await this.hostCollection
       .deleteOne(
-        {
-          _id: uuidToMuuid(hostId),
-        },
-        {
-          session,
-        },
+        { _id: uuidToMuuid(hostId) },
+        { session: mongoTransactionSession },
       )
       .catch(
         throwCustomException("Couldn't delete host", {
@@ -99,13 +102,13 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
   async addOrderToHost(
     hostId: UUID,
     orderId: UUID,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     const updateResult: UpdateWriteOpResult = await this.hostCollection
       .updateOne(
         { _id: uuidToMuuid(hostId) },
         { $push: { orderIds: uuidToMuuid(orderId) } },
-        { session },
+        { session: mongoTransactionSession },
       )
       .catch(
         throwCustomException('Error adding order to host', {
@@ -123,9 +126,15 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
     );
   }
 
-  async findHost(hostId: UUID, session?: ClientSession): Promise<Host> {
+  async findHost(
+    hostId: UUID,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<Host> {
     const hostDocument: HostMongoDocument = await this.hostCollection
-      .findOne({ _id: uuidToMuuid(hostId) }, { session })
+      .findOne(
+        { _id: uuidToMuuid(hostId) },
+        { session: mongoTransactionSession },
+      )
       .catch(throwCustomException('Error searching for a host', { hostId }));
 
     if (!hostDocument) {
@@ -137,7 +146,7 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
 
   async findHostAvailableInCountryWithMinimumNumberOfOrders(
     country: Country,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<Host> {
     // Finding max value in array:
     // https://stackoverflow.com/questions/32076382/mongodb-how-to-get-max-value-from-collections
@@ -170,7 +179,7 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
           },
           { $limit: 1 },
         ],
-        { session },
+        { session: mongoTransactionSession },
       )
       .toArray()
       .catch(

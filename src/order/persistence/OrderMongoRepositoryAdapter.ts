@@ -41,12 +41,12 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
 
   async addOrder(
     draftOrder: DraftedOrder,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     const draftOrderDocument = convertToMongoDocument(draftOrder);
 
     await this.orderCollection
-      .insertOne(draftOrderDocument, { session })
+      .insertOne(draftOrderDocument, { session: mongoTransactionSession })
       .catch(
         throwCustomException(
           'Error creating a new draftOrder in the database',
@@ -60,7 +60,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     filter: OrderFilter,
     // TODO: better type naming for OrderFilter here
     properties: WithoutId<OrderFilter>,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ) {
     const filterWithId = normalizeOrderFilter(filter);
     const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(
@@ -68,7 +68,11 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     );
 
     const updateResult: UpdateWriteOpResult = await this.orderCollection
-      .updateOne(filterQuery, { $set: mongoQuery(properties) }, { session })
+      .updateOne(
+        filterQuery,
+        { $set: mongoQuery(properties) },
+        { session: mongoTransactionSession },
+      )
       .catch(
         throwCustomException('Error updating order', {
           filter,
@@ -88,7 +92,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
 
   async findOrder(
     filter: OrderFilter,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<Order> {
     // TODO: better typing using FilterQuery
     const filterWithId = normalizeOrderFilter(filter);
@@ -97,7 +101,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     );
 
     const orderDocument: OrderMongoDocument = await this.orderCollection
-      .findOne(filterQuery, { session })
+      .findOne(filterQuery, { session: mongoTransactionSession })
       .catch(throwCustomException('Error searching for an order', filter));
 
     if (!orderDocument) {
@@ -109,14 +113,17 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
 
   async findOrders(
     orderIds: UUID[],
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<Order[]> {
     const orderMongoBinaryIds: Binary[] = orderIds.map(orderId =>
       uuidToMuuid(orderId),
     );
 
     const orderDocuments: OrderMongoDocument[] = await this.orderCollection
-      .find({ _id: { $in: orderMongoBinaryIds } }, { session })
+      .find(
+        { _id: { $in: orderMongoBinaryIds } },
+        { session: mongoTransactionSession },
+      )
       .toArray();
 
     // To access all orderIds and failedOrderIds, catch the exception and access its 'data' property
@@ -141,7 +148,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
 
   async deleteOrder(
     filter: OrderFilter,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     const filterWithId = normalizeOrderFilter(filter);
     const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(
@@ -150,7 +157,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
 
     const deleteResult: DeleteWriteOpResultObject = await this.orderCollection
       .deleteOne(filterQuery, {
-        session,
+        session: mongoTransactionSession,
       })
       .catch(
         throwCustomException('Error deleting order', {
@@ -173,7 +180,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
     properties: WithoutId<ItemFilter>,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     const orderFilterWithId = normalizeOrderFilter(orderFilter);
     const itemFilterWithId = normalizeItemFilter(itemFilter);
@@ -188,7 +195,11 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     const itemSetQuery = mongoQuery({ 'items.$': properties });
 
     const updateResult: UpdateWriteOpResult = await this.orderCollection
-      .updateOne(filterQuery, { $set: itemSetQuery }, { session })
+      .updateOne(
+        filterQuery,
+        { $set: itemSetQuery },
+        { session: mongoTransactionSession },
+      )
       .catch(
         throwCustomException('Error updating order item', {
           filter,
@@ -215,7 +226,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
     photos: Photo[],
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
     const { status, ...restOrderFilterWithId } = normalizeOrderFilter(
       orderFilter,
@@ -269,7 +280,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
             },
           },
         },
-        { session },
+        { session: mongoTransactionSession },
       )
       .catch(
         throwCustomException('Error adding photo file id to order item', {

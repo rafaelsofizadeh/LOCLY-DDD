@@ -36,14 +36,14 @@ export class ConfirmOrder implements IConfirmOrder {
 
   async execute(
     confirmOrderRequest: ConfirmOrderRequest,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<StripeCheckoutSessionResult> {
     // TODO(GLOBAL): Transaction decorator
     const checkoutSession: Stripe.Checkout.Session = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.matchOrderAndCheckout(confirmOrderRequest, sessionWithTransaction),
       this.mongoClient,
-      session,
+      mongoTransactionSession,
     );
 
     return {
@@ -53,14 +53,17 @@ export class ConfirmOrder implements IConfirmOrder {
 
   private async matchOrderAndCheckout(
     { orderId, customerId }: ConfirmOrderRequest,
-    session: ClientSession,
+    mongoTransactionSession: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const draftOrder = (await this.orderRepository.findOrder(
       { orderId, status: OrderStatus.Drafted, customerId },
-      session,
+      mongoTransactionSession,
     )) as DraftedOrder;
 
-    const hostId: UUID = await this.findMatchingHost(draftOrder, session);
+    const hostId: UUID = await this.findMatchingHost(
+      draftOrder,
+      mongoTransactionSession,
+    );
 
     const checkoutSession: StripeCheckoutSession = await this.createStripeCheckoutSession(
       draftOrder,
@@ -72,12 +75,12 @@ export class ConfirmOrder implements IConfirmOrder {
 
   private async findMatchingHost(
     { originCountry }: DraftedOrder,
-    session: ClientSession,
+    mongoTransactionSession: ClientSession,
   ): Promise<UUID> {
     try {
       const matchedHost: Host = await this.hostRepository.findHostAvailableInCountryWithMinimumNumberOfOrders(
         originCountry,
-        session,
+        mongoTransactionSession,
       );
 
       return matchedHost.id;

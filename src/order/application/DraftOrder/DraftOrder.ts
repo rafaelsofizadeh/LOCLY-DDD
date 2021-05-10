@@ -28,13 +28,13 @@ export class DraftOrder implements IDraftOrder {
 
   async execute(
     draftOrderRequest: DraftOrderRequest,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<DraftedOrder> {
     const draftOrder: DraftedOrder = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.draftOrder(draftOrderRequest, sessionWithTransaction),
       this.mongoClient,
-      session,
+      mongoTransactionSession,
     );
 
     return draftOrder;
@@ -42,7 +42,7 @@ export class DraftOrder implements IDraftOrder {
 
   private async draftOrder(
     draftOrderRequest: DraftOrderRequest,
-    session: ClientSession,
+    mongoTransactionSession: ClientSession,
   ): Promise<DraftedOrder> {
     const draftOrder: DraftedOrder = this.constructDraftOrder(
       draftOrderRequest,
@@ -52,11 +52,11 @@ export class DraftOrder implements IDraftOrder {
     // https://jira.mongodb.org/browse/SERVER-36428?focusedCommentId=2136170&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-2136170
     // (GLOBAL) DON'T parallelize this. Promise.all()'ing these, together with transactions, will lead to random
     // TransientTransactionError errors.
-    await this.orderRepository.addOrder(draftOrder, session);
+    await this.orderRepository.addOrder(draftOrder, mongoTransactionSession);
     await this.customerRepository.addOrderToCustomer(
       draftOrder.customerId,
       draftOrder.id,
-      session,
+      mongoTransactionSession,
     );
 
     return draftOrder;

@@ -20,7 +20,7 @@ export class ReceiveItem implements IReceiveItem {
 
   async execute(
     { orderId, itemId, hostId }: ReceiveItemRequest,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<ReceiveItemResult> {
     const receivedDate: Date = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
@@ -31,7 +31,7 @@ export class ReceiveItem implements IReceiveItem {
           sessionWithTransaction,
         ),
       this.mongoClient,
-      session,
+      mongoTransactionSession,
     );
 
     return {
@@ -43,7 +43,7 @@ export class ReceiveItem implements IReceiveItem {
     orderId: UUID,
     hostId: UUID,
     itemId: UUID,
-    session: ClientSession,
+    mongoTransactionSession: ClientSession,
   ): Promise<Date> {
     const receivedDate = new Date();
 
@@ -60,7 +60,7 @@ export class ReceiveItem implements IReceiveItem {
         receivedDate: null,
       },
       { receivedDate },
-      session,
+      mongoTransactionSession,
     );
 
     return receivedDate;

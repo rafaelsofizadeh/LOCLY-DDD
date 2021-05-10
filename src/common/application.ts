@@ -8,49 +8,51 @@ export abstract class UseCase<TUseCasePort, TUseCaseResult> {
   // TODO: abstract signature doesn't affect type checker anywhere else
   abstract execute(
     port: TUseCasePort,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<TUseCaseResult>;
 }
 
 export async function withTransaction<T>(
-  fn: (session: ClientSession) => Promise<T>,
+  fn: (mongoTransactionSession: ClientSession) => Promise<T>,
   mongoClient: MongoClient,
-  session?: ClientSession,
+  mongoTransactionSession?: ClientSession,
 ): Promise<T> {
-  const wrappedFn = (session: ClientSession) =>
-    abortTransactionOnNonMongoException(session, fn);
+  const wrappedFn = (mongoTransactionSession: ClientSession) =>
+    abortTransactionOnNonMongoException(mongoTransactionSession, fn);
   // Session takes precendence over mongoClient
-  return session === undefined
+  return mongoTransactionSession === undefined
     ? await withNewSessionTransaction(mongoClient, fn)
-    : await withExistingSessionTransaction(session, wrappedFn);
+    : await withExistingSessionTransaction(mongoTransactionSession, wrappedFn);
 }
 
 async function withExistingSessionTransaction<T>(
-  session: ClientSession,
-  fn: (session: ClientSession) => Promise<T>,
+  mongoTransactionSession: ClientSession,
+  fn: (mongoTransactionSession: ClientSession) => Promise<T>,
 ): Promise<T> {
-  // Session already in transaction, program will assume it's already wrapped in session.withTransaction
-  if (session.inTransaction()) {
+  // Session already in transaction, program will assume it's already wrapped in mongoTransactionSession.withTransaction
+  if (mongoTransactionSession.inTransaction()) {
     console.warn(
-      "Session already in transaction, program will assume it's already wrapped in session.withTransaction",
+      "Session already in transaction, program will assume it's already wrapped in mongoTransactionSession.withTransaction",
     );
-    return fn(session);
+    return fn(mongoTransactionSession);
   }
 
   let result: T;
-  await session.withTransaction(async () => (result = await fn(session)));
+  await mongoTransactionSession.withTransaction(
+    async () => (result = await fn(mongoTransactionSession)),
+  );
   return result;
 }
 
 async function withNewSessionTransaction<T>(
   mongoClient: MongoClient,
-  fn: (session: ClientSession) => Promise<T>,
+  fn: (mongoTransactionSession: ClientSession) => Promise<T>,
 ): Promise<T> {
   let result: T;
 
   await mongoClient.withSession(
-    async (session: ClientSession) =>
-      await session.withTransaction(
+    async (mongoTransactionSession: ClientSession) =>
+      await mongoTransactionSession.withTransaction(
         async (sessionWithTransaction: ClientSession) =>
           (result = await fn(sessionWithTransaction)),
       ),
@@ -60,21 +62,21 @@ async function withNewSessionTransaction<T>(
 }
 
 async function abortTransactionOnNonMongoException<T>(
-  session: ClientSession,
-  fn: (session: ClientSession) => Promise<T>,
+  mongoTransactionSession: ClientSession,
+  fn: (mongoTransactionSession: ClientSession) => Promise<T>,
 ): Promise<T> {
-  // Test if session has a transaction initialized (to abort that transaction)
-  if (!session.inTransaction()) {
+  // Test if mongoTransactionSession has a transaction initialized (to abort that transaction)
+  if (!mongoTransactionSession.inTransaction()) {
     throw new Error(
-      "Can't abort transaction as session isn't in transaction state",
+      "Can't abort transaction as mongoTransactionSession isn't in transaction state",
     );
   }
 
   try {
-    return await fn(session);
+    return await fn(mongoTransactionSession);
   } catch (exceptionOrMongoError) {
     if (exceptionOrMongoError instanceof Exception) {
-      await session.abortTransaction();
+      await mongoTransactionSession.abortTransaction();
       console.log('Transaction aborted');
     }
 

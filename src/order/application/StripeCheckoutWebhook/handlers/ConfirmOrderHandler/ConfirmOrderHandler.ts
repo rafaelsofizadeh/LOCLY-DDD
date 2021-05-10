@@ -23,13 +23,13 @@ export class ConfirmOrderHandler implements IConfirmOrderHandler {
 
   async execute(
     confirmOrderHandlerRequest: ConfirmOrderHandlerRequest,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<ConfirmOrderHandlerResult> {
     const matchedHostAddress: Address = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.confirmOrder(confirmOrderHandlerRequest, sessionWithTransaction),
       this.mongoClient,
-      session,
+      mongoTransactionSession,
     );
 
     return { address: matchedHostAddress };
@@ -37,19 +37,23 @@ export class ConfirmOrderHandler implements IConfirmOrderHandler {
 
   private async confirmOrder(
     { orderId, hostId }: ConfirmOrderHandlerRequest,
-    session: ClientSession,
+    mongoTransactionSession: ClientSession,
   ): Promise<Address> {
     await this.orderRepository.setProperties(
       { orderId, status: OrderStatus.Drafted },
       { status: OrderStatus.Confirmed, hostId },
-      session,
+      mongoTransactionSession,
     );
 
-    await this.hostRepository.addOrderToHost(hostId, orderId, session);
+    await this.hostRepository.addOrderToHost(
+      hostId,
+      orderId,
+      mongoTransactionSession,
+    );
 
     const { address }: Host = await this.hostRepository.findHost(
       hostId,
-      session,
+      mongoTransactionSession,
     );
 
     return address;

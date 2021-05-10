@@ -18,28 +18,28 @@ export class DeleteOrder implements IDeleteOrder {
 
   async execute(
     deleteOrderRequest: DeleteOrderRequest,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.deleteOrder(deleteOrderRequest, sessionWithTransaction),
       this.mongoClient,
-      session,
+      mongoTransactionSession,
     );
   }
 
   private async deleteOrder(
     { orderId, customerId }: DeleteOrderRequest,
-    session: ClientSession,
+    mongoTransactionSession: ClientSession,
   ): Promise<void> {
     await this.orderRepository.deleteOrder(
       { orderId, status: OrderStatus.Drafted, customerId },
-      session,
+      mongoTransactionSession,
     );
     await this.customerRepository.removeOrderFromCustomer(
       customerId,
       orderId,
-      session,
+      mongoTransactionSession,
     );
   }
 }

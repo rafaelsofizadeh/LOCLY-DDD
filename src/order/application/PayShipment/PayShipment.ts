@@ -29,13 +29,13 @@ export class PayShipmentService implements IPayShipment {
 
   async execute(
     payShipmentRequest: PayShipmentRequest,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<StripeCheckoutSessionResult> {
     const checkoutSession: Stripe.Checkout.Session = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.createPaymentSession(payShipmentRequest, sessionWithTransaction),
       this.mongoClient,
-      session,
+      mongoTransactionSession,
     );
 
     return {
@@ -46,11 +46,11 @@ export class PayShipmentService implements IPayShipment {
   // TODO: Error handling and rejection events
   private async createPaymentSession(
     { orderId, customerId }: PayShipmentRequest,
-    session: ClientSession,
+    mongoTransactionSession: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const { finalShipmentCost } = await this.orderRepository.findOrder(
       { orderId, status: OrderStatus.Finalized, customerId },
-      session,
+      mongoTransactionSession,
     );
 
     const price: StripePrice = stripePrice(finalShipmentCost);

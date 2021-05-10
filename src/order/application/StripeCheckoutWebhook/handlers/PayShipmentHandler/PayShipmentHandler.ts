@@ -20,24 +20,24 @@ export class PayShipmentHandler implements IPayShipmentHandler {
 
   async execute(
     payShipmentRequest: PayShipmentHandlerRequest,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<PayShipmentHandlerResult> {
     await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.markOrderPaid(payShipmentRequest, sessionWithTransaction),
       this.mongoClient,
-      session,
+      mongoTransactionSession,
     );
   }
 
   private async markOrderPaid(
     { orderId }: PayShipmentHandlerRequest,
-    session: ClientSession,
+    mongoTransactionSession: ClientSession,
   ): Promise<void> {
     await this.orderRepository.setProperties(
       { orderId, status: OrderStatus.Finalized },
       { status: OrderStatus.Paid },
-      session,
+      mongoTransactionSession,
     );
   }
 }

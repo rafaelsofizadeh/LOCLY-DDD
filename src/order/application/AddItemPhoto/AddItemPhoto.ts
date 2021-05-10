@@ -19,13 +19,13 @@ export class AddItemPhoto implements IAddItemPhoto {
 
   async execute(
     addItemPhotoRequest: AddItemPhotoRequest,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
     const itemPhotoUploadResults = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.uploadItemPhoto(addItemPhotoRequest, sessionWithTransaction),
       this.mongoClient,
-      session,
+      mongoTransactionSession,
     );
 
     return itemPhotoUploadResults;
@@ -33,7 +33,7 @@ export class AddItemPhoto implements IAddItemPhoto {
 
   private uploadItemPhoto(
     { orderId, hostId, itemId, photos }: AddItemPhotoRequest,
-    session: ClientSession,
+    mongoTransactionSession: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
     return this.orderRepository.addItemPhotos(
       {
@@ -43,7 +43,7 @@ export class AddItemPhoto implements IAddItemPhoto {
       },
       { itemId },
       photos,
-      session,
+      mongoTransactionSession,
     );
   }
 }

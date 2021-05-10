@@ -8,42 +8,42 @@ import { Photo } from './OrderMongoMapper';
 export abstract class IOrderRepository {
   abstract addOrder(
     order: DraftedOrder,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract findOrder(
     filter: OrderFilter,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<Order>;
 
   abstract findOrders(
     orderIds: UUID[],
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<Order[]>;
 
   abstract deleteOrder(
     filter: OrderFilter,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract setProperties(
     filter: OrderFilter,
     // TODO: type is almost the same as OrderFilter
     properties: Omit<OrderFilter, 'orderId'>,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract setItemProperties(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
     properties: Omit<ItemFilter, 'itemId'>,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract addItemPhotos(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
     photos: Photo[],
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<ItemPhotosUploadResult>;
 }

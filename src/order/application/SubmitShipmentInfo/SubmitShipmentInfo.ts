@@ -21,13 +21,13 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
 
   async execute(
     finalizeOrderRequest: SubmitShipmentInfoRequest,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.finalizeOrder(finalizeOrderRequest, sessionWithTransaction),
       this.mongoClient,
-      session,
+      mongoTransactionSession,
     );
   }
 
@@ -39,7 +39,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
       shipmentCost: finalShipmentCost,
       calculatorResultUrl,
     }: SubmitShipmentInfoRequest,
-    session: ClientSession,
+    mongoTransactionSession: ClientSession,
   ): Promise<void> {
     const notFinalizedItems: Item[] = await this.getUnfinalizedItems(
       orderId,
@@ -65,7 +65,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
         status: OrderStatus.Finalized,
         ...(calculatorResultUrl ? { calculatorResultUrl } : {}),
       },
-      session,
+      mongoTransactionSession,
     );
   }
 

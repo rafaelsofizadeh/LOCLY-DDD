@@ -30,14 +30,14 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
 
   async addCustomer(
     customer: Customer,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     const customerDocument: CustomerMongoDocument = customerToMongoDocument(
       customer,
     );
 
     await this.customerCollection
-      .insertOne(customerDocument, { session })
+      .insertOne(customerDocument, { session: mongoTransactionSession })
       .catch(
         throwCustomException('Error adding a customer', {
           customer,
@@ -47,10 +47,13 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
 
   async deleteCustomer(
     customerId: UUID,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     const deleteResult: DeleteWriteOpResultObject = await this.customerCollection
-      .deleteOne({ _id: uuidToMuuid(customerId) }, { session })
+      .deleteOne(
+        { _id: uuidToMuuid(customerId) },
+        { session: mongoTransactionSession },
+      )
       .catch(throwCustomException('Error deleting a customer', { customerId }));
 
     expectOnlySingleResult([deleteResult.deletedCount], {
@@ -62,13 +65,13 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
   async addOrderToCustomer(
     customerId: UUID,
     orderId: UUID,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     const updateResult: UpdateWriteOpResult = await this.customerCollection
       .updateOne(
         { _id: uuidToMuuid(customerId) },
         { $push: { orderIds: uuidToMuuid(orderId) } },
-        { session },
+        { session: mongoTransactionSession },
       )
       .catch(
         throwCustomException('Error adding order to a customer', {
@@ -90,13 +93,13 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
   async removeOrderFromCustomer(
     customerId: UUID,
     orderId: UUID,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     const updateResult: UpdateWriteOpResult = await this.customerCollection
       .updateOne(
         { _id: uuidToMuuid(customerId) },
         { $pull: { orderIds: uuidToMuuid(orderId) } },
-        { session },
+        { session: mongoTransactionSession },
       )
       .catch(
         throwCustomException('Error removing order from customer', {
@@ -116,10 +119,13 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
 
   async findCustomer(
     customerId: UUID,
-    session?: ClientSession,
+    mongoTransactionSession?: ClientSession,
   ): Promise<Customer> {
     const customerDocument: CustomerMongoDocument = await this.customerCollection
-      .findOne({ _id: uuidToMuuid(customerId) }, { session })
+      .findOne(
+        { _id: uuidToMuuid(customerId) },
+        { session: mongoTransactionSession },
+      )
       .catch(throwCustomException('Error finding a customer', { customerId }));
 
     if (!customerDocument) {
