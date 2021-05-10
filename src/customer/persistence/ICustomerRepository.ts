@@ -1,6 +1,6 @@
 import { ClientSession } from 'mongodb';
 import { UUID } from '../../common/domain';
-import { Customer } from '../../order/entity/Customer';
+import { Customer, CustomerFilter } from '../entity/Customer';
 
 export abstract class ICustomerRepository {
   abstract addCustomer(
@@ -9,24 +9,24 @@ export abstract class ICustomerRepository {
   ): Promise<void>;
 
   abstract deleteCustomer(
-    customerId: UUID,
+    filter: CustomerFilter,
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract addOrderToCustomer(
-    customerId: UUID,
+    filter: CustomerFilter,
     orderId: UUID,
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract removeOrderFromCustomer(
-    customerId: UUID,
+    filter: CustomerFilter,
     orderId: UUID,
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract findCustomer(
-    customerId: UUID,
+    filter: CustomerFilter,
     mongoTransactionSession?: ClientSession,
   ): Promise<Customer>; // throws new Exception(Code.ENTITY_NOT_FOUND_ERROR, 'Customer not found.')
 }

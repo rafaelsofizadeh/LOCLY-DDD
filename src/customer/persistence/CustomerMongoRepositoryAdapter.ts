@@ -2,6 +2,7 @@ import {
   ClientSession,
   Collection,
   DeleteWriteOpResultObject,
+  FilterQuery,
   UpdateWriteOpResult,
 } from 'mongodb';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -9,7 +10,7 @@ import { InjectCollection } from 'nest-mongodb';
 
 import { UUID } from '../../common/domain';
 import { ICustomerRepository } from './ICustomerRepository';
-import { Customer } from '../../order/entity/Customer';
+import { Customer, CustomerFilter } from '../entity/Customer';
 import {
   mongoDocumentToCustomer,
   CustomerMongoDocument,
@@ -19,7 +20,8 @@ import {
   expectOnlySingleResult,
   throwCustomException,
 } from '../../common/error-handling';
-import { uuidToMuuid } from '../../common/persistence';
+import { mongoQuery, uuidToMuuid } from '../../common/persistence';
+import { normalizeCustomerFilter } from '../../order/persistence/OrderMongoMapper';
 
 @Injectable()
 export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
@@ -46,15 +48,17 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
   }
 
   async deleteCustomer(
-    customerId: UUID,
+    filter: CustomerFilter,
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
+    const filterWithId = normalizeCustomerFilter(filter);
+    const filterQuery: FilterQuery<CustomerMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+
     const deleteResult: DeleteWriteOpResultObject = await this.customerCollection
-      .deleteOne(
-        { _id: uuidToMuuid(customerId) },
-        { session: mongoTransactionSession },
-      )
-      .catch(throwCustomException('Error deleting a customer', { customerId }));
+      .deleteOne(filterQuery, { session: mongoTransactionSession })
+      .catch(throwCustomException('Error deleting a customer', filter));
 
     expectOnlySingleResult([deleteResult.deletedCount], {
       operation: 'deleting',
@@ -63,20 +67,25 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
   }
 
   async addOrderToCustomer(
-    customerId: UUID,
+    filter: CustomerFilter,
     orderId: UUID,
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
+    const filterWithId = normalizeCustomerFilter(filter);
+    const filterQuery: FilterQuery<CustomerMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+
     const updateResult: UpdateWriteOpResult = await this.customerCollection
       .updateOne(
-        { _id: uuidToMuuid(customerId) },
+        filterQuery,
         { $push: { orderIds: uuidToMuuid(orderId) } },
         { session: mongoTransactionSession },
       )
       .catch(
         throwCustomException('Error adding order to a customer', {
           orderId,
-          customerId,
+          customerFilter: filter,
         }),
       );
 
@@ -86,25 +95,30 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
         operation: 'adding order to',
         entity: 'customer',
       },
-      { customerId, orderId },
+      { customerFilter: filter, orderId },
     );
   }
 
   async removeOrderFromCustomer(
-    customerId: UUID,
+    filter: CustomerFilter,
     orderId: UUID,
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
+    const filterWithId = normalizeCustomerFilter(filter);
+    const filterQuery: FilterQuery<CustomerMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+
     const updateResult: UpdateWriteOpResult = await this.customerCollection
       .updateOne(
-        { _id: uuidToMuuid(customerId) },
+        filterQuery,
         { $pull: { orderIds: uuidToMuuid(orderId) } },
         { session: mongoTransactionSession },
       )
       .catch(
         throwCustomException('Error removing order from customer', {
           orderId,
-          customerId,
+          customerFilter: filter,
         }),
       );
 
@@ -118,22 +132,20 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
   }
 
   async findCustomer(
-    customerId: UUID,
+    filter: CustomerFilter,
     mongoTransactionSession?: ClientSession,
   ): Promise<Customer> {
+    const filterWithId = normalizeCustomerFilter(filter);
+    const filterQuery: FilterQuery<CustomerMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+
     const customerDocument: CustomerMongoDocument = await this.customerCollection
-      .findOne(
-        { _id: uuidToMuuid(customerId) },
-        { session: mongoTransactionSession },
-      )
-      .catch(throwCustomException('Error finding a customer', { customerId }));
+      .findOne(filterQuery, { session: mongoTransactionSession })
+      .catch(throwCustomException('Error finding a customer', filter));
 
     if (!customerDocument) {
-      throwCustomException(
-        'No customer found',
-        { customerId },
-        HttpStatus.NOT_FOUND,
-      )();
+      throwCustomException('No customer found', filter, HttpStatus.NOT_FOUND)();
     }
 
     return mongoDocumentToCustomer(customerDocument);

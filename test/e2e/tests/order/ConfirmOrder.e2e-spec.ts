@@ -6,7 +6,7 @@ import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../../../../src/AppModule';
-import { Customer } from '../../../../src/order/entity/Customer';
+import { Customer } from '../../../../src/customer/entity/Customer';
 import { Host } from '../../../../src/order/entity/Host';
 
 import { ICustomerRepository } from '../../../../src/customer/persistence/ICustomerRepository';
@@ -132,7 +132,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
   afterAll(async () => {
     await Promise.allSettled([
-      customerRepository.deleteCustomer(testCustomer.id),
+      customerRepository.deleteCustomer({ customerId: testCustomer.id }),
     ]);
 
     stripeListener.kill();

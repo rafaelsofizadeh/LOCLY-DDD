@@ -1,6 +1,6 @@
 import { Binary } from 'mongodb';
 
-import { Customer } from '../../order/entity/Customer';
+import { Customer } from '../entity/Customer';
 import { Address } from '../../order/entity/Order';
 import {
   convertToMongoDocument,

@@ -159,11 +159,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       .deleteOne(filterQuery, {
         session: mongoTransactionSession,
       })
-      .catch(
-        throwCustomException('Error deleting order', {
-          filter,
-        }),
-      );
+      .catch(throwCustomException('Error deleting order', filter));
 
     expectOnlySingleResult(
       [deleteResult.deletedCount],

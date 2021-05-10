@@ -4,7 +4,7 @@ import { Test } from '@nestjs/testing';
 import { isUUID } from 'class-validator';
 
 import { AppModule } from '../../../../src/AppModule';
-import { Customer } from '../../../../src/order/entity/Customer';
+import { Customer } from '../../../../src/customer/entity/Customer';
 import { IOrderRepository } from '../../../../src/order/persistence/IOrderRepository';
 import { UUID } from '../../../../src/common/domain';
 import { ICustomerRepository } from '../../../../src/customer/persistence/ICustomerRepository';
@@ -77,7 +77,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
     afterEach(() =>
       Promise.all([
-        customerRepository.deleteCustomer(testCustomer.id),
+        customerRepository.deleteCustomer({ customerId: testCustomer.id }),
         orderRepository.deleteOrder({ orderId: testOrderId }),
       ]),
     );
@@ -121,7 +121,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
       // Load the test customer from the database
       const updatedTestCustomer: Customer = await customerRepository.findCustomer(
-        testCustomer.id,
+        { customerId: testCustomer.id },
       );
 
       // 3. order customerId should be the same as customer id

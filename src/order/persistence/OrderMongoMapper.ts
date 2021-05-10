@@ -8,6 +8,7 @@ import {
 } from '../entity/Order';
 import { PhysicalItem } from '../entity/Item';
 import { MongoDocument } from '../../common/persistence';
+import { CustomerFilter } from '../../customer/entity/Customer';
 
 export type ItemMongoSubdocument = MongoDocument<Item>;
 export type PhysicalItemMongoSubdocument = MongoDocument<PhysicalItem>;
@@ -27,4 +28,14 @@ export function normalizeOrderFilter({ orderId, ...restFilter }: OrderFilter) {
 
 export function normalizeItemFilter({ itemId, ...restFilter }: ItemFilter) {
   return { id: itemId, ...restFilter };
+}
+
+export function normalizeCustomerFilter({
+  customerId,
+  ...restFilter
+}: CustomerFilter) {
+  return {
+    id: customerId,
+    ...restFilter,
+  };
 }

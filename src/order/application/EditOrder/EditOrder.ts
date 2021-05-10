@@ -46,7 +46,7 @@ export class EditOrder implements IEditOrder {
       mongoTransactionSession,
     );
     await this.customerRepository.removeOrderFromCustomer(
-      customerId,
+      { customerId },
       orderId,
       mongoTransactionSession,
     );

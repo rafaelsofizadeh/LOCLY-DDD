@@ -54,7 +54,7 @@ export class DraftOrder implements IDraftOrder {
     // TransientTransactionError errors.
     await this.orderRepository.addOrder(draftOrder, mongoTransactionSession);
     await this.customerRepository.addOrderToCustomer(
-      draftOrder.customerId,
+      { customerId: draftOrder.customerId },
       draftOrder.id,
       mongoTransactionSession,
     );

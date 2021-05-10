@@ -37,7 +37,7 @@ export class DeleteOrder implements IDeleteOrder {
       mongoTransactionSession,
     );
     await this.customerRepository.removeOrderFromCustomer(
-      customerId,
+      { customerId },
       orderId,
       mongoTransactionSession,
     );
