@@ -1,28 +1,30 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import {
-  AuthnCustomerRequest,
-  IAuthnCustomer,
-} from './application/AuthnCustomer/IAuthnCustomer';
-import { IVerifyAuthn } from './application/VerifyAuthn/IVerifyAuthn';
+  RequestAuthnCustomerRequest,
+  IRequestAuthnCustomer,
+} from './application/RequestAuthnCustomer/IRequestAuthnCustomer';
+import { IVerifyAuthnCustomer } from './application/VerifyAuthnCustomer/IVerifyAuthnCustomer';
 import { Token } from './entity/Customer';
 
 @Controller('authn')
 export class CustomerController {
   constructor(
-    private readonly authnCustomer: IAuthnCustomer,
-    private readonly verifyAuthn: IVerifyAuthn,
+    private readonly requestAuthnCustomer: IRequestAuthnCustomer,
+    private readonly verifyAuthnCustomer: IVerifyAuthnCustomer,
   ) {}
 
   @Post('customer')
-  async authnCustomerHandler(
-    @Body() authnCustomerRequest: AuthnCustomerRequest,
+  async requestAuthnCustomerHandler(
+    @Body() requestAuthnCustomerRequest: RequestAuthnCustomerRequest,
   ): Promise<void> {
-    await this.authnCustomer.execute(authnCustomerRequest);
+    await this.requestAuthnCustomer.execute(requestAuthnCustomerRequest);
   }
 
   @Get('verify/:token')
-  async verifyAuthnHandler(@Param('token') token: string): Promise<Token> {
-    const authnToken = this.verifyAuthn.execute(token);
+  async verifyAuthnCustomerHandler(
+    @Param('token') token: string,
+  ): Promise<Token> {
+    const authnToken = this.verifyAuthnCustomer.execute(token);
     return authnToken;
   }
 }

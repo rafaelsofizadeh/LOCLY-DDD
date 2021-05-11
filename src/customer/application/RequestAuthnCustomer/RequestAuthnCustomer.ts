@@ -9,14 +9,14 @@ import { IEmailService } from '../../../infrastructure/email/IEmailService';
 import { Customer } from '../../entity/Customer';
 import { ICustomerRepository } from '../../persistence/ICustomerRepository';
 import {
-  AuthnCustomerRequest,
-  AuthnCustomerResult,
-  IAuthnCustomer,
+  RequestAuthnCustomerRequest,
+  RequestAuthnCustomerResult,
+  IRequestAuthnCustomer,
   VerificationPayload,
-} from './IAuthnCustomer';
+} from './IRequestAuthnCustomer';
 
 @Injectable()
-export class AuthnCustomer implements IAuthnCustomer {
+export class RequestAuthnCustomer implements IRequestAuthnCustomer {
   constructor(
     private readonly customerRepository: ICustomerRepository,
     private readonly configService: ConfigService,
@@ -25,19 +25,22 @@ export class AuthnCustomer implements IAuthnCustomer {
   ) {}
 
   async execute(
-    authnCustomerRequest: AuthnCustomerRequest,
+    requestAuthnCustomerRequest: RequestAuthnCustomerRequest,
     mongoTransactionSession?: ClientSession,
-  ): Promise<AuthnCustomerResult> {
+  ): Promise<RequestAuthnCustomerResult> {
     await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.authnCustomer(authnCustomerRequest, sessionWithTransaction),
+        this.requestAuthnCustomer(
+          requestAuthnCustomerRequest,
+          sessionWithTransaction,
+        ),
       this.mongoClient,
       mongoTransactionSession,
     );
   }
 
-  private async authnCustomer(
-    { email }: AuthnCustomerRequest,
+  private async requestAuthnCustomer(
+    { email }: RequestAuthnCustomerRequest,
     mongoTransactionSession: ClientSession,
   ): Promise<void> {
     let customer: Customer = await this.customerRepository.findCustomer(

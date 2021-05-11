@@ -3,11 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import { throwCustomException } from '../../../common/error-handling';
 import { Token } from '../../entity/Customer';
-import { VerificationPayload } from '../AuthnCustomer/IAuthnCustomer';
-import { IVerifyAuthn } from './IVerifyAuthn';
+import { VerificationPayload } from '../RequestAuthnCustomer/IRequestAuthnCustomer';
+import { IVerifyAuthnCustomer } from './IVerifyAuthnCustomer';
 
 @Injectable()
-export class VerifyAuthn implements IVerifyAuthn {
+export class VerifyAuthnCustomer implements IVerifyAuthnCustomer {
   constructor(private readonly configService: ConfigService) {}
 
   execute(verificationToken: Token): Token {

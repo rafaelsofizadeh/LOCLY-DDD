@@ -4,17 +4,17 @@ import { MongoModule } from 'nest-mongodb';
 import { EmailService } from '../infrastructure/email/EmailService';
 import { IEmailService } from '../infrastructure/email/IEmailService';
 import { OrderModule } from '../order/OrderModule';
-import { AuthnCustomer } from './application/AuthnCustomer/AuthnCustomer';
-import { IAuthnCustomer } from './application/AuthnCustomer/IAuthnCustomer';
-import { IVerifyAuthn } from './application/VerifyAuthn/IVerifyAuthn';
-import { VerifyAuthn } from './application/VerifyAuthn/VerifyAuthn';
+import { RequestAuthnCustomer } from './application/RequestAuthnCustomer/RequestAuthnCustomer';
+import { IRequestAuthnCustomer } from './application/RequestAuthnCustomer/IRequestAuthnCustomer';
+import { IVerifyAuthnCustomer } from './application/VerifyAuthnCustomer/IVerifyAuthnCustomer';
+import { VerifyAuthnCustomer } from './application/VerifyAuthnCustomer/VerifyAuthnCustomer';
 import { CustomerController } from './CustomerController';
 import { CustomerMongoRepositoryAdapter } from './persistence/CustomerMongoRepositoryAdapter';
 import { ICustomerRepository } from './persistence/ICustomerRepository';
 
 const useCaseProviders: Provider[] = [
-  { provide: IAuthnCustomer, useClass: AuthnCustomer },
-  { provide: IVerifyAuthn, useClass: VerifyAuthn },
+  { provide: IRequestAuthnCustomer, useClass: RequestAuthnCustomer },
+  { provide: IVerifyAuthnCustomer, useClass: VerifyAuthnCustomer },
   { provide: IEmailService, useClass: EmailService },
 ];
 

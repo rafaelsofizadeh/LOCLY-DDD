@@ -3,20 +3,21 @@ import { UseCase } from '../../../common/application';
 import { UUID } from '../../../common/domain';
 import { Email } from '../../entity/Customer';
 
-export interface AuthnCustomerRequest {
+export interface RequestAuthnCustomerRequest {
   readonly email: Email;
 }
 
-export class AuthnCustomerRequest implements AuthnCustomerRequest {
+export class RequestAuthnCustomerRequest
+  implements RequestAuthnCustomerRequest {
   @IsEmail()
   readonly email: Email;
 }
 
-export type AuthnCustomerResult = void;
+export type RequestAuthnCustomerResult = void;
 
-export abstract class IAuthnCustomer extends UseCase<
-  AuthnCustomerRequest,
-  AuthnCustomerResult
+export abstract class IRequestAuthnCustomer extends UseCase<
+  RequestAuthnCustomerRequest,
+  RequestAuthnCustomerResult
 > {}
 
 export type VerificationPayload = { customerId: UUID };
