@@ -1,4 +1,5 @@
 import {
+  Global,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -13,11 +14,14 @@ import {
 
 import { OrderModule } from './order/OrderModule';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CustomerModule } from './customer/CustomerModule';
+import { NestSessionOptions, SessionModule } from 'nestjs-session';
+import { StripeModule } from '@golevelup/nestjs-stripe';
 
 @Module({
   imports: [
-    // { isGlobal: true } doesn't work — environment variables still undefined.
-    ConfigModule.forRoot(),
+    // TODO: { isGlobal: true } doesn't work — environment variables still undefined.
+    ConfigModule.forRoot({ isGlobal: true }),
     MongoModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -26,12 +30,37 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService],
     }),
+    SessionModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (
+        configService: ConfigService,
+      ): Promise<NestSessionOptions> => ({
+        session: {
+          secret: configService.get<string>('EXPRESS_SESSION_SIGNING_KEY'),
+          resave: false,
+          saveUninitialized: false,
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    MongoModule.forFeature(['orders', 'customers', 'hosts']),
+    StripeModule.forRootAsync(StripeModule, {
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        apiKey: configService.get<string>('STRIPE_SECRET_API_TEST_KEY'),
+        webhookConfig: {
+          stripeWebhookSecret: configService.get<string>(
+            'STRIPE_WEBHOOK_SECRET',
+          ),
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    CustomerModule,
     OrderModule,
     JsonBodyMiddleware,
     RawBodyMiddleware,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

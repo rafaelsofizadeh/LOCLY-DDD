@@ -28,5 +28,6 @@ export abstract class ICustomerRepository {
   abstract findCustomer(
     filter: CustomerFilter,
     mongoTransactionSession?: ClientSession,
+    throwIfNotFound?: boolean,
   ): Promise<Customer>; // throws new Exception(Code.ENTITY_NOT_FOUND_ERROR, 'Customer not found.')
 }

@@ -1,4 +1,4 @@
-import { DynamicModule, Module, Provider } from '@nestjs/common';
+import { DynamicModule, forwardRef, Module, Provider } from '@nestjs/common';
 import { getDbToken, MongoModule } from 'nest-mongodb';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 import * as GridFsStorage from 'multer-gridfs-storage';
@@ -44,10 +44,11 @@ import { IPayShipmentHandler } from './application/StripeCheckoutWebhook/handler
 import { PayShipmentHandler } from './application/StripeCheckoutWebhook/handlers/PayShipmentHandler/PayShipmentHandler';
 import { IStripeCheckoutWebhook } from './application/StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { StripeCheckoutWebhook } from './application/StripeCheckoutWebhook/StripeCheckoutWebhook';
+import { CustomerModule } from '../customer/CustomerModule';
 
 const imports: DynamicModule[] = [
   ConfigModule.forRoot(),
-  MongoModule.forFeature(['orders', 'customers', 'hosts']),
+  MongoModule.forFeature(['orders', 'hosts']),
   StripeModule.forRootAsync(StripeModule, {
     imports: [ConfigModule],
     useFactory: async (configService: ConfigService) => ({
@@ -103,7 +104,6 @@ const imports: DynamicModule[] = [
 
 const persistenceProviders: Provider[] = [
   { provide: IOrderRepository, useClass: OrderMongoRepositoryAdapter },
-  { provide: ICustomerRepository, useClass: CustomerMongoRepositoryAdapter },
   { provide: IHostRepository, useClass: HostMongoRepositoryAdapter },
 ];
 
@@ -137,9 +137,16 @@ const useCaseProviders: Provider[] = [
 // ATTENTION: Cool thing. Polymorphism (?) through interface injections.
 const testProviders: Provider[] = [];
 
+const providers: Provider[] = [
+  ...persistenceProviders,
+  ...useCaseProviders,
+  ...testProviders,
+];
+
 @Module({
-  imports,
+  imports: [...imports, forwardRef(() => CustomerModule)],
   controllers: [OrderController],
-  providers: [...persistenceProviders, ...useCaseProviders, ...testProviders],
+  providers,
+  exports: [...persistenceProviders],
 })
 export class OrderModule {}

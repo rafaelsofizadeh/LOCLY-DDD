@@ -3,6 +3,7 @@ import { Stripe } from 'stripe';
 import { Cost } from '../order/entity/Order';
 import { StripeCheckoutWebhookPayload } from '../order/application/StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { Exception } from './error-handling';
+import { Session, SessionData } from 'express-session';
 
 export abstract class UseCase<TUseCasePort, TUseCaseResult> {
   // TODO: abstract signature doesn't affect type checker anywhere else
@@ -103,3 +104,7 @@ export type StripeEvent = Omit<Stripe.Event, 'type'> & {
 export type StripeCheckoutSession = Stripe.Checkout.Session & {
   metadata: StripeCheckoutWebhookPayload;
 };
+
+export type ExpressSession = Session &
+  Partial<SessionData> &
+  Record<string, any>;

@@ -35,11 +35,13 @@ export function mongoDocumentToCustomer({
 export function customerToMongoDocument(
   customer: Customer,
 ): CustomerMongoDocument {
-  const { _id, selectedAddress, orderIds } = convertToMongoDocument(customer);
+  const { _id, selectedAddress, ...restCustomer } = convertToMongoDocument(
+    customer,
+  );
 
   return {
+    ...restCustomer,
     _id,
-    orderIds,
     addresses: [{ ...selectedAddress, selected: true }],
   };
 }
@@ -49,7 +51,7 @@ export function normalizeCustomerFilter({
   ...restFilter
 }: CustomerFilter) {
   return {
-    id: customerId,
+    ...(customerId ? { id: customerId } : {}),
     ...restFilter,
   };
 }

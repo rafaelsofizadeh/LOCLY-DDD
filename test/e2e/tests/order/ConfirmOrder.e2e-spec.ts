@@ -84,6 +84,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     testCustomer = {
       id: UUID(),
+      email: 'random@email.com',
       selectedAddress: { country: destinationCountry },
       orderIds: [],
     };

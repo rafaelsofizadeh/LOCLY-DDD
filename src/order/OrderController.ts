@@ -51,14 +51,14 @@ import {
 @Controller('order')
 export class OrderController {
   constructor(
-    private readonly draftOrderUseCase: IDraftOrder,
-    private readonly editOrderUseCase: IEditOrder,
+    private readonly draftOrder: IDraftOrder,
+    private readonly editOrder: IEditOrder,
     private readonly deleteOrder: IDeleteOrder,
     private readonly confirmOrder: IConfirmOrder,
-    private readonly receiveItemUseCase: IReceiveItem,
-    private readonly addItemPhotoUseCase: IAddItemPhoto,
-    private readonly submitShipmentInfoUseCase: ISubmitShipmentInfo,
-    private readonly payShipmentUseCase: IPayShipment,
+    private readonly receiveItem: IReceiveItem,
+    private readonly addItemPhoto: IAddItemPhoto,
+    private readonly submitShipmentInfo: ISubmitShipmentInfo,
+    private readonly payShipment: IPayShipment,
   ) {}
 
   @Post('draft')
@@ -66,7 +66,7 @@ export class OrderController {
   async draftOrderHandler(
     @Body() orderRequest: DraftOrderRequest,
   ): Promise<DraftedOrder> {
-    const draftOrder: DraftedOrder = await this.draftOrderUseCase.execute(
+    const draftOrder: DraftedOrder = await this.draftOrder.execute(
       orderRequest,
     );
 
@@ -78,7 +78,7 @@ export class OrderController {
   async editOrderHandler(
     @Body() editOrderRequest: EditOrderRequestAdapter,
   ): Promise<DraftedOrder> {
-    const editedDraftOrder: DraftedOrder = await this.editOrderUseCase.execute(
+    const editedDraftOrder: DraftedOrder = await this.editOrder.execute(
       editOrderRequest,
     );
 
@@ -107,7 +107,7 @@ export class OrderController {
   async receiveItemHandler(
     @Body() receiveItemRequest: ReceiveItemRequest,
   ): Promise<ReceiveItemResult> {
-    const receivedDateResult = await this.receiveItemUseCase.execute(
+    const receivedDateResult = await this.receiveItem.execute(
       receiveItemRequest,
     );
 
@@ -121,7 +121,7 @@ export class OrderController {
     @Body() addItemPhotoRequestBody: AddItemPhotoRequestBody,
     @UploadedFiles() photos: Photo[],
   ) {
-    const receivedDateResult = await this.addItemPhotoUseCase.execute({
+    const receivedDateResult = await this.addItemPhoto.execute({
       ...addItemPhotoRequestBody,
       photos,
     });
@@ -133,16 +133,14 @@ export class OrderController {
   async submitOrderShipmentInfoHandler(
     @Body() submitOrderShipmentInfoRequest: SubmitShipmentInfoRequest,
   ): Promise<SubmitShipmentInfoResult> {
-    await this.submitShipmentInfoUseCase.execute(
-      submitOrderShipmentInfoRequest,
-    );
+    await this.submitShipmentInfo.execute(submitOrderShipmentInfoRequest);
   }
 
   @Post('payShipment')
   async payShipmentHandler(
     @Body() payShipmentRequest: PayShipmentRequest,
   ): Promise<StripeCheckoutSessionResult> {
-    const stripeCheckoutSession = await this.payShipmentUseCase.execute(
+    const stripeCheckoutSession = await this.payShipment.execute(
       payShipmentRequest,
     );
 

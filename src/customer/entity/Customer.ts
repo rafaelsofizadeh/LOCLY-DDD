@@ -3,10 +3,13 @@ import { EntityFilter } from '../../common/persistence';
 
 import { Address } from '../../order/entity/Order';
 
+export type Email = string;
+
 export type Customer = Readonly<{
   id: UUID;
-  selectedAddress: Address;
-  orderIds: UUID[];
+  email: Email;
+  selectedAddress?: Address;
+  orderIds?: UUID[];
 }>;
 
 export type CustomerFilter = EntityFilter<Customer, { customerId: UUID }>;

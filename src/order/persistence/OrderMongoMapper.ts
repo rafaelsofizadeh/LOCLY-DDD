@@ -20,11 +20,11 @@ export type Photo = Omit<Express.Multer.File, 'id'> & { id: Binary };
 
 export function normalizeOrderFilter({ orderId, ...restFilter }: OrderFilter) {
   return {
-    id: orderId,
+    ...(orderId ? { id: orderId } : {}),
     ...restFilter,
   };
 }
 
 export function normalizeItemFilter({ itemId, ...restFilter }: ItemFilter) {
-  return { id: itemId, ...restFilter };
+  return { ...(itemId ? { id: itemId } : {}), ...restFilter };
 }

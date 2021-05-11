@@ -134,6 +134,7 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
   async findCustomer(
     filter: CustomerFilter,
     mongoTransactionSession?: ClientSession,
+    throwIfNotFound: boolean = true,
   ): Promise<Customer> {
     const filterWithId = normalizeCustomerFilter(filter);
     const filterQuery: FilterQuery<CustomerMongoDocument> = mongoQuery(
@@ -145,7 +146,15 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
       .catch(throwCustomException('Error finding a customer', filter));
 
     if (!customerDocument) {
-      throwCustomException('No customer found', filter, HttpStatus.NOT_FOUND)();
+      if (throwIfNotFound) {
+        throwCustomException(
+          'No customer found',
+          filter,
+          HttpStatus.NOT_FOUND,
+        )();
+      }
+
+      return;
     }
 
     return mongoDocumentToCustomer(customerDocument);

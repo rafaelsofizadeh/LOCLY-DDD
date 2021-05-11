@@ -66,6 +66,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     beforeEach(async () => {
       testCustomer = {
         id: UUID(),
+        email: 'random@email.com',
         selectedAddress: {
           country: getDestinationCountriesAvailable(originCountry)[0],
         },

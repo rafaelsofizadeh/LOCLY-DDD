@@ -105,8 +105,12 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       .findOne(filterQuery, { session: mongoTransactionSession })
       .catch(throwCustomException('Error searching for an order', filter));
 
-    if (!orderDocument && throwIfNotFound) {
-      throwCustomException('No order found', filter)();
+    if (!orderDocument) {
+      if (throwIfNotFound) {
+        throwCustomException('No order found', filter)();
+      }
+
+      return;
     }
 
     return serializeMongoData(orderDocument);
