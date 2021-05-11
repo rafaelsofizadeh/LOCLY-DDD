@@ -6,7 +6,7 @@ import { InjectClient } from 'nest-mongodb';
 import { withTransaction } from '../../../common/application';
 import { UUID } from '../../../common/domain';
 import { IEmailService } from '../../../infrastructure/email/IEmailService';
-import { Customer, Email } from '../../entity/Customer';
+import { Customer } from '../../entity/Customer';
 import { ICustomerRepository } from '../../persistence/ICustomerRepository';
 import {
   AuthnCustomerRequest,
@@ -60,7 +60,7 @@ export class AuthnCustomer implements IAuthnCustomer {
       );
     }
 
-    const token: string = this.createVerificationToken(email);
+    const token: string = this.createVerificationToken(customer.id);
 
     await this.emailService.sendEmail({
       to: email,
@@ -69,13 +69,14 @@ export class AuthnCustomer implements IAuthnCustomer {
     });
   }
 
-  private createVerificationToken(email: Email): string {
-    const payload: VerificationPayload = { email };
-    const token: string = jwt.sign(
-      payload,
-      this.configService.get<string>('VERIFICATION_JWT_SIGNING_KEY'),
-      { expiresIn: '30m' },
+  private createVerificationToken(customerId: UUID): string {
+    const key = this.configService.get<string>('VERIFICATION_JWT_SIGNING_KEY');
+    const expiresIn = this.configService.get<string>(
+      'VERIFICATION_JWT_EXPIRES_IN',
     );
+
+    const payload: VerificationPayload = { customerId };
+    const token: string = jwt.sign(payload, key, { expiresIn });
 
     return token;
   }

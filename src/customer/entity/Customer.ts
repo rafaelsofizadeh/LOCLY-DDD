@@ -5,6 +5,8 @@ import { Address } from '../../order/entity/Order';
 
 export type Email = string;
 
+export type Token = string;
+
 export type Customer = Readonly<{
   id: UUID;
   email: Email;

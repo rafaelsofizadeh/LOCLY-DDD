@@ -1,13 +1,10 @@
-import { Body, Controller, Get, Param, Post, Session } from '@nestjs/common';
-import { ExpressSession } from '../common/application';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import {
   AuthnCustomerRequest,
   IAuthnCustomer,
 } from './application/AuthnCustomer/IAuthnCustomer';
-import {
-  IVerifyAuthn,
-  VerifyAuthnResult,
-} from './application/VerifyAuthn/IVerifyAuthn';
+import { IVerifyAuthn } from './application/VerifyAuthn/IVerifyAuthn';
+import { Token } from './entity/Customer';
 
 @Controller('authn')
 export class CustomerController {
@@ -24,14 +21,8 @@ export class CustomerController {
   }
 
   @Get('verify/:token')
-  async verifyAuthnHandler(
-    @Param('token') token: string,
-    @Session() expressSession: ExpressSession,
-  ): Promise<void> {
-    const { customerId }: VerifyAuthnResult = await this.verifyAuthn.execute({
-      token,
-    });
-
-    expressSession.customerId = customerId;
+  async verifyAuthnHandler(@Param('token') token: string): Promise<Token> {
+    const authnToken = this.verifyAuthn.execute(token);
+    return authnToken;
   }
 }

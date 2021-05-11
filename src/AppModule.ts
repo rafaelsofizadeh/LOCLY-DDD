@@ -1,5 +1,4 @@
 import {
-  Global,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -15,7 +14,6 @@ import {
 import { OrderModule } from './order/OrderModule';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CustomerModule } from './customer/CustomerModule';
-import { NestSessionOptions, SessionModule } from 'nestjs-session';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 
 @Module({
@@ -27,19 +25,6 @@ import { StripeModule } from '@golevelup/nestjs-stripe';
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('MONGO_LOCLY_CONNECTION_STRING'),
         dbName: configService.get<string>('MONGO_LOCLY_DB_NAME'),
-      }),
-      inject: [ConfigService],
-    }),
-    SessionModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (
-        configService: ConfigService,
-      ): Promise<NestSessionOptions> => ({
-        session: {
-          secret: configService.get<string>('EXPRESS_SESSION_SIGNING_KEY'),
-          resave: false,
-          saveUninitialized: false,
-        },
       }),
       inject: [ConfigService],
     }),

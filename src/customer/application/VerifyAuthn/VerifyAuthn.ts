@@ -1,57 +1,22 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
-import { ClientSession, MongoClient } from 'mongodb';
-import { InjectClient } from 'nest-mongodb';
-import { withTransaction } from '../../../common/application';
 import { throwCustomException } from '../../../common/error-handling';
-import { Customer } from '../../entity/Customer';
-import { ICustomerRepository } from '../../persistence/ICustomerRepository';
+import { Token } from '../../entity/Customer';
 import { VerificationPayload } from '../AuthnCustomer/IAuthnCustomer';
-import {
-  VerifyAuthnRequest,
-  VerifyAuthnResult,
-  IVerifyAuthn,
-} from './IVerifyAuthn';
+import { IVerifyAuthn } from './IVerifyAuthn';
 
 @Injectable()
 export class VerifyAuthn implements IVerifyAuthn {
-  constructor(
-    private readonly customerRepository: ICustomerRepository,
-    private readonly configService: ConfigService,
-    @InjectClient() private readonly mongoClient: MongoClient,
-  ) {}
+  constructor(private readonly configService: ConfigService) {}
 
-  async execute(
-    verifyAuthnRequest: VerifyAuthnRequest,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<VerifyAuthnResult> {
-    return withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.verifyAuthn(verifyAuthnRequest, sessionWithTransaction),
-      this.mongoClient,
-      mongoTransactionSession,
-    );
+  execute(verificationToken: Token): Token {
+    const verificationPayload = this.decodeVerificationToken(verificationToken);
+
+    return this.createAuthnToken(verificationPayload);
   }
 
-  private async verifyAuthn(
-    { token }: VerifyAuthnRequest,
-    mongoTransactionSession: ClientSession,
-  ): Promise<VerifyAuthnResult> {
-    // TODO: Handle token expiration
-    const { email }: VerificationPayload = this.decodeVerificationToken(token);
-
-    const {
-      id: customerId,
-    }: Customer = await this.customerRepository.findCustomer(
-      { email },
-      mongoTransactionSession,
-    );
-
-    return { email, customerId };
-  }
-
-  private decodeVerificationToken(token: string): VerificationPayload {
+  private decodeVerificationToken(token: Token): VerificationPayload {
     try {
       const key = this.configService.get<string>(
         'VERIFICATION_JWT_SIGNING_KEY',
@@ -67,5 +32,14 @@ export class VerifyAuthn implements IVerifyAuthn {
         throwCustomException(message)();
       }
     }
+  }
+
+  private createAuthnToken(verificationPayload: VerificationPayload): string {
+    const key = this.configService.get<string>('AUTHN_JWT_SIGNING_KEY');
+    const expiresIn = this.configService.get<string>('AUTHN_JWT_EXPIRES_IN');
+
+    const { ...authnPayload } = verificationPayload;
+
+    return jwt.sign(authnPayload, key, { expiresIn });
   }
 }

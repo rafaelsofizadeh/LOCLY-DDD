@@ -1,15 +1,5 @@
-import { UseCase } from '../../../common/application';
-import { UUID } from '../../../common/domain';
-import { Email } from '../../entity/Customer';
-import { VerificationPayload } from '../AuthnCustomer/IAuthnCustomer';
+import { Token } from '../../entity/Customer';
 
-export interface VerifyAuthnRequest {
-  readonly token: string;
+export abstract class IVerifyAuthn {
+  abstract execute(verificationToken: Token): Token;
 }
-
-export type VerifyAuthnResult = { customerId: UUID } & VerificationPayload;
-
-export abstract class IVerifyAuthn extends UseCase<
-  VerifyAuthnRequest,
-  VerifyAuthnResult
-> {}

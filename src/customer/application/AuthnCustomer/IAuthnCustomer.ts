@@ -1,5 +1,6 @@
 import { IsEmail } from 'class-validator';
 import { UseCase } from '../../../common/application';
+import { UUID } from '../../../common/domain';
 import { Email } from '../../entity/Customer';
 
 export interface AuthnCustomerRequest {
@@ -18,4 +19,4 @@ export abstract class IAuthnCustomer extends UseCase<
   AuthnCustomerResult
 > {}
 
-export type VerificationPayload = { email: Email };
+export type VerificationPayload = { customerId: UUID };
