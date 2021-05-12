@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import jwt from 'jsonwebtoken';
 import { throwCustomException } from '../../../common/error-handling';
 import { Token } from '../../entity/Customer';
-import { VerificationPayload } from '../RequestAuthnCustomer/IRequestAuthnCustomer';
+import { CustomerAuthnVerificationPayload } from '../RequestAuthnCustomer/IRequestAuthnCustomer';
 import { IVerifyAuthnCustomer } from './IVerifyAuthnCustomer';
 
 @Injectable()
@@ -16,13 +16,15 @@ export class VerifyAuthnCustomer implements IVerifyAuthnCustomer {
     return this.createAuthnToken(verificationPayload);
   }
 
-  private decodeVerificationToken(token: Token): VerificationPayload {
+  private decodeVerificationToken(
+    token: Token,
+  ): CustomerAuthnVerificationPayload {
     try {
       const key = this.configService.get<string>(
-        'VERIFICATION_JWT_SIGNING_KEY',
+        'VERIFICATION_COOKIE_SIGNING_KEY',
       );
 
-      return jwt.verify(token, key) as VerificationPayload;
+      return jwt.verify(token, key) as CustomerAuthnVerificationPayload;
     } catch ({ name: errorName, message }) {
       if (errorName === 'TokenExpiredError') {
         throwCustomException(message, undefined, HttpStatus.REQUEST_TIMEOUT)();
@@ -34,12 +36,14 @@ export class VerifyAuthnCustomer implements IVerifyAuthnCustomer {
     }
   }
 
-  private createAuthnToken(verificationPayload: VerificationPayload): string {
+  private createAuthnToken(
+    verificationPayload: CustomerAuthnVerificationPayload,
+  ): string {
     const key = this.configService.get<string>('AUTHN_JWT_SIGNING_KEY');
-    const expiresIn = this.configService.get<string>('AUTHN_JWT_EXPIRES_IN');
+    const expiresIn = this.configService.get<string>('AUTHN_COOKIE_EXPIRES_IN');
 
-    const { ...authnPayload } = verificationPayload;
+    const { customerId, ...restVerificationPayload } = verificationPayload;
 
-    return jwt.sign(authnPayload, key, { expiresIn });
+    return jwt.sign({ customerId }, key, { expiresIn });
   }
 }

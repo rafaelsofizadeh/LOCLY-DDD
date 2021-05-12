@@ -12,7 +12,7 @@ import {
   RequestAuthnCustomerRequest,
   RequestAuthnCustomerResult,
   IRequestAuthnCustomer,
-  VerificationPayload,
+  CustomerAuthnVerificationPayload,
 } from './IRequestAuthnCustomer';
 
 @Injectable()
@@ -49,8 +49,6 @@ export class RequestAuthnCustomer implements IRequestAuthnCustomer {
       false,
     );
 
-    console.log({ customer });
-
     if (!customer) {
       customer = {
         id: UUID(),
@@ -73,12 +71,14 @@ export class RequestAuthnCustomer implements IRequestAuthnCustomer {
   }
 
   private createVerificationToken(customerId: UUID): string {
-    const key = this.configService.get<string>('VERIFICATION_JWT_SIGNING_KEY');
+    const key = this.configService.get<string>(
+      'VERIFICATION_COOKIE_SIGNING_KEY',
+    );
     const expiresIn = this.configService.get<string>(
-      'VERIFICATION_JWT_EXPIRES_IN',
+      'VERIFICATION_COOKIE_EXPIRES_IN',
     );
 
-    const payload: VerificationPayload = { customerId };
+    const payload: CustomerAuthnVerificationPayload = { customerId };
     const token: string = jwt.sign(payload, key, { expiresIn });
 
     return token;

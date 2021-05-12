@@ -4,6 +4,7 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 import { MongoModule } from 'nest-mongodb';
 import {
   applyRawBodyOnlyTo,
@@ -15,6 +16,8 @@ import { OrderModule } from './order/OrderModule';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CustomerModule } from './customer/CustomerModule';
 import { StripeModule } from '@golevelup/nestjs-stripe';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthnTokenGuard } from './infrastructure/authn/AuthnTokenGuard';
 
 @Module({
   imports: [
@@ -46,12 +49,21 @@ import { StripeModule } from '@golevelup/nestjs-stripe';
     JsonBodyMiddleware,
     RawBodyMiddleware,
   ],
+  // Register global guard
+  providers: [{ provide: APP_GUARD, useClass: AuthnTokenGuard }],
 })
 export class AppModule implements NestModule {
+  constructor(private readonly configService: ConfigService) {}
+
   configure(consumer: MiddlewareConsumer) {
     applyRawBodyOnlyTo(consumer, {
       method: RequestMethod.ALL,
       path: 'stripe/webhook',
     });
+
+    // Register global cookie parser middleware
+    consumer
+      .apply(cookieParser(this.configService.get<string>('COOKIE_SIGNING_KEY')))
+      .forRoutes('*');
   }
 }
