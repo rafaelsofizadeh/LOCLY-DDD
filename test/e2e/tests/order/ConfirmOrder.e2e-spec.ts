@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs';
-import * as child_process from 'child_process';
-import * as path from 'path';
-import * as supertest from 'supertest';
+import child_process from 'child_process';
+import path from 'path';
+import supertest from 'supertest';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 

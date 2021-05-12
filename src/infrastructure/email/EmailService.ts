@@ -28,7 +28,5 @@ export class EmailService implements IEmailService {
     const emailSendingResult = await this.transporter
       .sendMail(options)
       .catch(throwCustomException('Error sending email', options));
-
-    console.log(emailSendingResult);
   }
 }

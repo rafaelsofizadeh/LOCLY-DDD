@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { throwCustomException } from '../../../common/error-handling';
 import { Token } from '../../entity/Customer';
 import { VerificationPayload } from '../RequestAuthnCustomer/IRequestAuthnCustomer';

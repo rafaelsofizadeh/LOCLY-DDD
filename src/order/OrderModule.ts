@@ -1,16 +1,14 @@
 import { DynamicModule, forwardRef, Module, Provider } from '@nestjs/common';
 import { getDbToken, MongoModule } from 'nest-mongodb';
 import { StripeModule } from '@golevelup/nestjs-stripe';
-import * as GridFsStorage from 'multer-gridfs-storage';
+import GridFsStorage from 'multer-gridfs-storage';
 
-import { ICustomerRepository } from '../customer/persistence/ICustomerRepository';
 import { IHostRepository } from '../host/persistence/IHostRepository';
 import { IOrderRepository } from './persistence/IOrderRepository';
 import { ConfirmOrder } from './application/ConfirmOrder/ConfirmOrder';
 import { DraftOrder } from './application/DraftOrder/DraftOrder';
 import { IConfirmOrder } from './application/ConfirmOrder/IConfirmOrder';
 import { IDraftOrder } from './application/DraftOrder/IDraftOrder';
-import { CustomerMongoRepositoryAdapter } from '../customer/persistence/CustomerMongoRepositoryAdapter';
 import { HostMongoRepositoryAdapter } from '../host/persistence/HostMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from './persistence/OrderMongoRepositoryAdapter';
 import { OrderController } from './OrderController';

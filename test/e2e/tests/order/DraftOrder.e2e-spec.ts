@@ -1,4 +1,4 @@
-import * as supertest from 'supertest';
+import supertest from 'supertest';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { isUUID } from 'class-validator';

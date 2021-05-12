@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
 import { withTransaction } from '../../../common/application';
