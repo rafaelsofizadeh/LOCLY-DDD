@@ -19,5 +19,3 @@ export abstract class IRequestAuthnCustomer extends UseCase<
   RequestAuthnCustomerRequest,
   RequestAuthnCustomerResult
 > {}
-
-export type CustomerAuthnVerificationPayload = { customerId: UUID };

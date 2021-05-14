@@ -2,48 +2,70 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import jwt from 'jsonwebtoken';
 import { throwCustomException } from '../../../common/error-handling';
-import { Token } from '../../entity/Customer';
-import { CustomerAuthnVerificationPayload } from '../RequestAuthnCustomer/IRequestAuthnCustomer';
+import { validateAndDecodeTokenPayload } from '../../../infrastructure/authn/AuthxInterceptor';
+import {
+  EntityTokenPayload,
+  VerificationTokenPayload,
+} from '../../../infrastructure/authn/Token';
 import { IVerifyAuthnCustomer } from './IVerifyAuthnCustomer';
+
+// TODO: Rename VerifyAuthnCustomer to VerifyAuthn
 
 @Injectable()
 export class VerifyAuthnCustomer implements IVerifyAuthnCustomer {
   constructor(private readonly configService: ConfigService) {}
 
-  execute(verificationToken: Token): Token {
-    const verificationPayload = this.decodeVerificationToken(verificationToken);
-
-    return this.createAuthnToken(verificationPayload);
-  }
-
-  private decodeVerificationToken(
-    token: Token,
-  ): CustomerAuthnVerificationPayload {
-    try {
-      const key = this.configService.get<string>(
-        'VERIFICATION_COOKIE_SIGNING_KEY',
-      );
-
-      return jwt.verify(token, key) as CustomerAuthnVerificationPayload;
-    } catch ({ name: errorName, message }) {
-      if (errorName === 'TokenExpiredError') {
-        throwCustomException(message, undefined, HttpStatus.REQUEST_TIMEOUT)();
-      }
-
-      if (errorName === 'JsonWebTokenError') {
-        throwCustomException(message)();
-      }
+  execute(verificationTokenString: string): string {
+    // TODO: Combine with AuthxInterceptor [RELATED: AuthxInterceptor TODO]
+    if (!verificationTokenString.length) {
+      throwCustomException(
+        'No token provided',
+        undefined,
+        HttpStatus.UNAUTHORIZED,
+      )();
     }
+
+    const key = this.configService.get<string>('AUTHN_COOKIE_SIGNING_KEY');
+    const { payload, expiredAt, errorMessage } = validateAndDecodeTokenPayload(
+      verificationTokenString,
+      key,
+    );
+
+    if (!payload) {
+      throwCustomException(
+        `Invalid token – ${errorMessage}`,
+        { token: verificationTokenString },
+        HttpStatus.UNAUTHORIZED,
+      )();
+    }
+
+    if (expiredAt) {
+      throwCustomException(
+        `Token expired – ${errorMessage}`,
+        { token: verificationTokenString },
+        HttpStatus.UNAUTHORIZED,
+      )();
+    }
+
+    // TODO: Check if payload is following VerificationTokenPayload type
+    return this.createAuthnToken(payload as VerificationTokenPayload);
   }
 
-  private createAuthnToken(
-    verificationPayload: CustomerAuthnVerificationPayload,
-  ): string {
-    const key = this.configService.get<string>('AUTHN_JWT_SIGNING_KEY');
+  private createAuthnToken({
+    for: entityType,
+    type,
+    ...restVerificationTokenPayload
+  }: VerificationTokenPayload): string {
+    const key = this.configService.get<string>('AUTHN_COOKIE_SIGNING_KEY');
     const expiresIn = this.configService.get<string>('AUTHN_COOKIE_EXPIRES_IN');
 
-    const { customerId, ...restVerificationPayload } = verificationPayload;
+    // TODO: Extract to a fn
+    const entityTokenPayload: EntityTokenPayload = {
+      ...restVerificationTokenPayload,
+      type: entityType,
+    };
 
-    return jwt.sign({ customerId }, key, { expiresIn });
+    // TODO: Token payload creation functions/classes
+    return jwt.sign(entityTokenPayload, key, { expiresIn });
   }
 }

@@ -3,15 +3,11 @@ import ms from 'ms';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import {
-  AuthnDisallowed,
-  AuthnRequired,
-} from '../infrastructure/authn/AuthnDecorators';
-import {
   RequestAuthnCustomerRequest,
   IRequestAuthnCustomer,
 } from './application/RequestAuthnCustomer/IRequestAuthnCustomer';
 import { IVerifyAuthnCustomer } from './application/VerifyAuthnCustomer/IVerifyAuthnCustomer';
-import { Token } from './entity/Customer';
+import { AuthnDisallowed, AuthnRequired } from '@eropple/nestjs-auth';
 
 @Controller('authn')
 export class CustomerController {
@@ -34,7 +30,7 @@ export class CustomerController {
   async verifyAuthnCustomerHandler(
     // passthrough: https://docs.nestjs.com/controllers#library-specific-approach
     @Res({ passthrough: true }) response: Response,
-    @Param('token') token: Token,
+    @Param('token') token: string,
   ): Promise<void> {
     const authnToken = this.verifyAuthnCustomer.execute(token);
     const authnCookieName = this.configService.get<string>('AUTHN_COOKIE_NAME');
