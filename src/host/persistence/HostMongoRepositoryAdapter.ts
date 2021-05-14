@@ -2,6 +2,7 @@ import {
   ClientSession,
   Collection,
   DeleteWriteOpResultObject,
+  FilterQuery,
   InsertWriteOpResult,
   UpdateWriteOpResult,
 } from 'mongodb';
@@ -9,11 +10,12 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
 import { IHostRepository } from './IHostRepository';
-import { Host } from '../../order/entity/Host';
+import { Host, HostFilter } from '../entity/Host';
 import {
   mongoDocumentToHost,
   HostMongoDocument,
   hostToMongoDocument,
+  normalizeHostFilter,
 } from './HostMongoMapper';
 import {
   expectOnlyNResults,
@@ -22,7 +24,7 @@ import {
 } from '../../common/error-handling';
 import { UUID } from '../../common/domain';
 import { Country } from '../../order/entity/Country';
-import { uuidToMuuid } from '../../common/persistence';
+import { mongoQuery, uuidToMuuid } from '../../common/persistence';
 
 @Injectable()
 export class HostMongoRepositoryAdapter implements IHostRepository {
@@ -78,19 +80,17 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
   }
 
   async deleteHost(
-    hostId: UUID,
+    filter: HostFilter,
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
+    const filterWithId = normalizeHostFilter(filter);
+    const filterQuery: FilterQuery<HostMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+
     const deleteResult: DeleteWriteOpResultObject = await this.hostCollection
-      .deleteOne(
-        { _id: uuidToMuuid(hostId) },
-        { session: mongoTransactionSession },
-      )
-      .catch(
-        throwCustomException("Couldn't delete host", {
-          hostId,
-        }),
-      );
+      .deleteOne(filterQuery, { session: mongoTransactionSession })
+      .catch(throwCustomException("Couldn't delete host", filter));
 
     expectOnlySingleResult([deleteResult.deletedCount], {
       operation: 'deleting',
@@ -100,19 +100,24 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
 
   // This should always be used together with IOrderRepository.addHostToOrder
   async addOrderToHost(
-    hostId: UUID,
+    filter: HostFilter,
     orderId: UUID,
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
+    const filterWithId = normalizeHostFilter(filter);
+    const filterQuery: FilterQuery<HostMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+
     const updateResult: UpdateWriteOpResult = await this.hostCollection
       .updateOne(
-        { _id: uuidToMuuid(hostId) },
+        filterQuery,
         { $push: { orderIds: uuidToMuuid(orderId) } },
         { session: mongoTransactionSession },
       )
       .catch(
         throwCustomException('Error adding order to host', {
-          hostId,
+          hostFilter: filter,
           orderId,
         }),
       );
@@ -127,18 +132,20 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
   }
 
   async findHost(
-    hostId: UUID,
+    filter: HostFilter,
     mongoTransactionSession?: ClientSession,
   ): Promise<Host> {
+    const filterWithId = normalizeHostFilter(filter);
+    const filterQuery: FilterQuery<HostMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+
     const hostDocument: HostMongoDocument = await this.hostCollection
-      .findOne(
-        { _id: uuidToMuuid(hostId) },
-        { session: mongoTransactionSession },
-      )
-      .catch(throwCustomException('Error searching for a host', { hostId }));
+      .findOne(filterQuery, { session: mongoTransactionSession })
+      .catch(throwCustomException('Error searching for a host', filter));
 
     if (!hostDocument) {
-      throwCustomException('No host found', { hostId }, HttpStatus.NOT_FOUND)();
+      throwCustomException('No host found', filter, HttpStatus.NOT_FOUND)();
     }
 
     return mongoDocumentToHost(hostDocument);
@@ -162,6 +169,7 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
           {
             $match: {
               'address.country': country,
+              verified: true,
               available: true,
             },
           },

@@ -1,6 +1,6 @@
 import { Binary } from 'mongodb';
 
-import { Host } from '../../order/entity/Host';
+import { Host, HostFilter } from '../entity/Host';
 import { Address } from '../../order/entity/Order';
 import {
   serializeMongoData,
@@ -26,5 +26,12 @@ export function hostToMongoDocument(host: Host): HostMongoDocument {
   return {
     ...restHost,
     _id,
+  };
+}
+
+export function normalizeHostFilter({ hostId, ...restFilter }: HostFilter) {
+  return {
+    ...(hostId ? { id: hostId } : {}),
+    ...restFilter,
   };
 }

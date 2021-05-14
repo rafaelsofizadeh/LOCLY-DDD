@@ -1,7 +1,7 @@
 import { ClientSession } from 'mongodb';
 import { UUID } from '../../common/domain';
 import { Country } from '../../order/entity/Country';
-import { Host } from '../../order/entity/Host';
+import { Host, HostFilter } from '../entity/Host';
 
 export abstract class IHostRepository {
   abstract addHost(
@@ -16,18 +16,18 @@ export abstract class IHostRepository {
 
   // This should always be used together with IOrderRepository.addHostToOrder
   abstract addOrderToHost(
-    hostId: UUID,
+    filter: HostFilter,
     orderId: UUID,
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
   abstract findHost(
-    hostId: UUID,
+    filter: HostFilter,
     mongoTransactionSession?: ClientSession,
   ): Promise<Host>;
 
   abstract deleteHost(
-    hostId: UUID,
+    filter: HostFilter,
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 

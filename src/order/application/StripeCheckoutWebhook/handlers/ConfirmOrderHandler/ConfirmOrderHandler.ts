@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
 import { withTransaction } from '../../../../../common/application';
-import { Host } from '../../../../entity/Host';
+import { Host } from '../../../../../host/entity/Host';
 
 import { Address, OrderStatus } from '../../../../entity/Order';
 import {
@@ -46,13 +46,13 @@ export class ConfirmOrderHandler implements IConfirmOrderHandler {
     );
 
     await this.hostRepository.addOrderToHost(
-      hostId,
+      { hostId },
       orderId,
       mongoTransactionSession,
     );
 
     const { address }: Host = await this.hostRepository.findHost(
-      hostId,
+      { hostId },
       mongoTransactionSession,
     );
 

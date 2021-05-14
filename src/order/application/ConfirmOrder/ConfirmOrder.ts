@@ -4,7 +4,7 @@ import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
 import { StripeCheckoutSessionResult, IConfirmOrder } from './IConfirmOrder';
 import { IOrderRepository } from '../../persistence/IOrderRepository';
-import { Host } from '../../entity/Host';
+import { Host } from '../../../host/entity/Host';
 import { UUID } from '../../../common/domain';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';

@@ -7,7 +7,7 @@ import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/customer/entity/Customer';
-import { Host } from '../../../../src/order/entity/Host';
+import { Host } from '../../../../src/host/entity/Host';
 
 import { ICustomerRepository } from '../../../../src/customer/persistence/ICustomerRepository';
 import { IOrderRepository } from '../../../../src/order/persistence/IOrderRepository';
@@ -21,7 +21,7 @@ import {
   ConfirmedOrder,
   OrderStatus,
 } from '../../../../src/order/entity/Order';
-import { UUID } from '../../../../src/common/domain';
+import { Email, UUID } from '../../../../src/common/domain';
 import { CustomExceptionFilter } from '../../../../src/infrastructure/CustomExceptionFilter';
 import {
   getDestinationCountriesAvailable,
@@ -29,6 +29,8 @@ import {
 } from '../../../../src/calculator/data/PriceGuide';
 
 type HostConfig = {
+  email: Email;
+  verified: boolean;
   country: Country;
   available: boolean;
   orderCount: number;
@@ -144,6 +146,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     // https://stackoverflow.com/a/49864436/6539857
     jest.setTimeout(55000);
 
+    // TODO: Vary 'verified' true-false
     const testHostConfigs: HostConfig[] = [
       /*
       Test host #1 (will be selected):
@@ -152,6 +155,8 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✔ lowest number of orders (1)
       */
       {
+        email: 'johndoe@example.com',
+        verified: true,
         country: originCountry,
         available: true,
         orderCount: 1,
@@ -163,6 +168,8 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✔ lowest number of orders (1)
       */
       {
+        email: 'johndoe@example.com',
+        verified: true,
         country: originCountry,
         available: false,
         orderCount: 1,
@@ -174,6 +181,8 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✔ lowest number of orders (1)
       */
       {
+        email: 'johndoe@example.com',
+        verified: true,
         country: originCountriesAvailable[1] || ('XXX' as Country),
         available: true,
         orderCount: 1,
@@ -185,6 +194,8 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✔ available
       */
       {
+        email: 'johndoe@example.com',
+        verified: true,
         country: originCountry,
         available: true,
         orderCount: 2,
@@ -196,6 +207,8 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✗ NOT available
       */
       {
+        email: 'johndoe@example.com',
+        verified: true,
         country: originCountriesAvailable[2] || ('ZZZ' as Country),
         available: false,
         orderCount: 3,
@@ -247,9 +260,9 @@ describe('Confirm Order – POST /order/confirm', () => {
       expect(updatedTestOrder.hostId).toBeDefined();
       expect(updatedTestOrder.hostId).toBe(testMatchedHost.id);
 
-      const updatedTestHost: Host = await hostRepository.findHost(
-        testMatchedHost.id,
-      );
+      const updatedTestHost: Host = await hostRepository.findHost({
+        hostId: testMatchedHost.id,
+      });
 
       expect(updatedTestHost.orderIds).toContain(testOrder.id);
       expect(updatedTestHost.orderIds.length).toBe(
@@ -271,7 +284,13 @@ describe('Confirm Order – POST /order/confirm', () => {
     ] as unknown[]) as Country[];
 
     const testHostConfigs: HostConfig[] = incompatibleCountries.map(
-      country => ({ country, available: true, orderCount: 1 }),
+      country => ({
+        country,
+        available: true,
+        orderCount: 1,
+        verified: true,
+        email: 'johndoe@example.com',
+      }),
     );
     testHosts = configsToHosts(testHostConfigs);
     await hostRepository.addManyHosts(testHosts);
@@ -360,10 +379,14 @@ function generateUuids(n: number) {
 }
 
 function configsToHosts(hostConfigs: HostConfig[]): Host[] {
-  return hostConfigs.map(({ country, available, orderCount }) => ({
-    id: UUID(),
-    address: { country },
-    available,
-    orderIds: generateUuids(orderCount),
-  }));
+  return hostConfigs.map(
+    ({ email, country, available, orderCount, verified }) => ({
+      id: UUID(),
+      email,
+      address: { country },
+      verified,
+      available,
+      orderIds: generateUuids(orderCount),
+    }),
+  );
 }
