@@ -16,8 +16,9 @@ import { OrderModule } from './order/OrderModule';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CustomerModule } from './customer/CustomerModule';
 import { StripeModule } from '@golevelup/nestjs-stripe';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthnTokenGuard } from './infrastructure/authn/AuthnTokenGuard';
+import { AuthModule } from './auth/AuthModule';
+import { HostModule } from './host/HostModule';
+import { EmailModule } from './infrastructure/email/EmailModule';
 
 @Module({
   imports: [
@@ -44,13 +45,14 @@ import { AuthnTokenGuard } from './infrastructure/authn/AuthnTokenGuard';
       }),
       inject: [ConfigService],
     }),
+    EmailModule,
+    AuthModule,
+    HostModule,
     CustomerModule,
     OrderModule,
     JsonBodyMiddleware,
     RawBodyMiddleware,
   ],
-  // Register global guard
-  providers: [{ provide: APP_GUARD, useClass: AuthnTokenGuard }],
 })
 export class AppModule implements NestModule {
   constructor(private readonly configService: ConfigService) {}

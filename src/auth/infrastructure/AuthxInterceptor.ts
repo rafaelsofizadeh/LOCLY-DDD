@@ -9,12 +9,12 @@ import {
   EntityTokenType,
   HostGrants,
   Identity,
+  MiscTokenType,
   Token,
   TokenPayload,
-  TokenType,
   UnverifiedHostGrants,
   VerificationTokenPayload,
-} from './Token';
+} from '../entity/Token';
 
 /*
 1. Customer
@@ -64,22 +64,23 @@ import {
 export const AuthxInterceptorFactory: FactoryProvider = {
   provide: APP_INTERCEPTOR,
   useFactory: (configService: ConfigService) => {
-    // TODO: Extract to a separate fn [RELATED: VerifyAuthnCustomer TODO]
+    // TODO: Extract to a separate fn [RELATED: VerifyAuthn TODO]
     const cookieAuthnFn: CookieAuthnFn<Identity> = async cookies => {
-      const authnCookieName = configService.get<string>('AUTHN_COOKIE_NAME');
+      const authnCookieName = configService.get<string>(
+        'AUTHN_TOKEN_COOKIE_NAME',
+      );
       const tokenString: string = cookies?.[authnCookieName];
 
       if (!tokenString) {
         return null;
       }
 
-      const key = configService.get<string>('AUTHN_COOKIE_SIGNING_KEY');
+      const key = configService.get<string>('AUTHN_TOKEN_SIGNING_KEY');
 
-      const {
-        payload,
-        expiredAt,
-        errorMessage,
-      } = validateAndDecodeTokenPayload(tokenString, key);
+      const { payload, expiredAt } = validateAndDecodeTokenPayload(
+        tokenString,
+        key,
+      );
 
       if (!payload) {
         // TODO: Error message
@@ -133,25 +134,25 @@ export function payloadToToken({
   ...restTokenPayload
 }: TokenPayload): Token {
   switch (type) {
-    case TokenType.Customer:
+    case EntityTokenType.Customer:
       return {
         customerId: entityId,
         grants: CustomerGrants,
         refresh: true,
       };
-    case TokenType.UnverifiedHost:
+    case EntityTokenType.UnverifiedHost:
       return {
         hostId: entityId,
         grants: UnverifiedHostGrants,
         refresh: true,
       };
-    case TokenType.Host:
+    case EntityTokenType.Host:
       return {
         hostId: entityId,
         grants: HostGrants,
         refresh: true,
       };
-    case TokenType.Verification:
+    case MiscTokenType.Verification:
       const { for: forEntity } = restTokenPayload as Omit<
         VerificationTokenPayload,
         'type' | 'entityId'
@@ -164,7 +165,7 @@ export function payloadToToken({
 
       return {
         ...entityIdObj,
-        type: TokenType.Verification,
+        type: MiscTokenType.Verification,
         grants: [],
         refresh: false,
       };

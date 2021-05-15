@@ -2,17 +2,17 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import jwt from 'jsonwebtoken';
 import { throwCustomException } from '../../../common/error-handling';
-import { validateAndDecodeTokenPayload } from '../../../infrastructure/authn/AuthxInterceptor';
+import { validateAndDecodeTokenPayload } from '../../infrastructure/AuthxInterceptor';
 import {
   EntityTokenPayload,
   VerificationTokenPayload,
-} from '../../../infrastructure/authn/Token';
-import { IVerifyAuthnCustomer } from './IVerifyAuthnCustomer';
+} from '../../entity/Token';
+import { IVerifyAuthn } from './IVerifyAuthn';
 
-// TODO: Rename VerifyAuthnCustomer to VerifyAuthn
+// TODO: Rename VerifyAuthn to VerifyAuthn
 
 @Injectable()
-export class VerifyAuthnCustomer implements IVerifyAuthnCustomer {
+export class VerifyAuthn implements IVerifyAuthn {
   constructor(private readonly configService: ConfigService) {}
 
   execute(verificationTokenString: string): string {
@@ -25,7 +25,9 @@ export class VerifyAuthnCustomer implements IVerifyAuthnCustomer {
       )();
     }
 
-    const key = this.configService.get<string>('AUTHN_COOKIE_SIGNING_KEY');
+    const key = this.configService.get<string>(
+      'VERIFICATION_TOKEN_SIGNING_KEY',
+    );
     const { payload, expiredAt, errorMessage } = validateAndDecodeTokenPayload(
       verificationTokenString,
       key,
@@ -54,10 +56,12 @@ export class VerifyAuthnCustomer implements IVerifyAuthnCustomer {
   private createAuthnToken({
     for: entityType,
     type,
+    // @ts-ignore
+    exp,
     ...restVerificationTokenPayload
   }: VerificationTokenPayload): string {
-    const key = this.configService.get<string>('AUTHN_COOKIE_SIGNING_KEY');
-    const expiresIn = this.configService.get<string>('AUTHN_COOKIE_EXPIRES_IN');
+    const key = this.configService.get<string>('AUTHN_TOKEN_SIGNING_KEY');
+    const expiresIn = this.configService.get<string>('AUTHN_TOKEN_EXPIRES_IN');
 
     // TODO: Extract to a fn
     const entityTokenPayload: EntityTokenPayload = {

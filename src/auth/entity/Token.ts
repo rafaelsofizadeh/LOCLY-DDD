@@ -13,18 +13,28 @@ export const UnverifiedHostGrants = ['account/host/unverified/*'] as const;
 
 export const HostGrants = ['account/host/*', 'order/host/*'] as const;
 
+// TODO: merge/intersect enums
+export enum EntityType {
+  Customer = 'customer',
+  Host = 'host',
+}
+
 export enum EntityTokenType {
   Customer = 'customer',
-  UnverifiedHost = 'unverified_host',
   Host = 'host',
+  UnverifiedHost = 'unverified_host',
 }
 
 export enum MiscTokenType {
   Verification = 'verification',
 }
 
-export const TokenType = { ...EntityTokenType, ...MiscTokenType };
-export type TokenType = typeof TokenType;
+export enum TokenType {
+  Customer = 'customer',
+  Host = 'host',
+  UnverifiedHost = 'unverified_host',
+  Verification = 'verification',
+}
 
 export type EntityTokenPayload = Readonly<{
   entityId: UUID;

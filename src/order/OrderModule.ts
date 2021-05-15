@@ -3,13 +3,11 @@ import { getDbToken, MongoModule } from 'nest-mongodb';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 import GridFsStorage from 'multer-gridfs-storage';
 
-import { IHostRepository } from '../host/persistence/IHostRepository';
 import { IOrderRepository } from './persistence/IOrderRepository';
 import { ConfirmOrder } from './application/ConfirmOrder/ConfirmOrder';
 import { DraftOrder } from './application/DraftOrder/DraftOrder';
 import { IConfirmOrder } from './application/ConfirmOrder/IConfirmOrder';
 import { IDraftOrder } from './application/DraftOrder/IDraftOrder';
-import { HostMongoRepositoryAdapter } from '../host/persistence/HostMongoRepositoryAdapter';
 import { OrderMongoRepositoryAdapter } from './persistence/OrderMongoRepositoryAdapter';
 import { OrderController } from './OrderController';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -43,6 +41,7 @@ import { PayShipmentHandler } from './application/StripeCheckoutWebhook/handlers
 import { IStripeCheckoutWebhook } from './application/StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { StripeCheckoutWebhook } from './application/StripeCheckoutWebhook/StripeCheckoutWebhook';
 import { CustomerModule } from '../customer/CustomerModule';
+import { HostModule } from '../host/HostModule';
 
 const imports: DynamicModule[] = [
   ConfigModule.forRoot(),
@@ -102,7 +101,6 @@ const imports: DynamicModule[] = [
 
 const persistenceProviders: Provider[] = [
   { provide: IOrderRepository, useClass: OrderMongoRepositoryAdapter },
-  { provide: IHostRepository, useClass: HostMongoRepositoryAdapter },
 ];
 
 const useCaseProviders: Provider[] = [
@@ -142,7 +140,11 @@ const providers: Provider[] = [
 ];
 
 @Module({
-  imports: [...imports, forwardRef(() => CustomerModule)],
+  imports: [
+    ...imports,
+    forwardRef(() => CustomerModule),
+    forwardRef(() => HostModule),
+  ],
   controllers: [OrderController],
   providers,
   exports: [...persistenceProviders],
