@@ -1,21 +1,20 @@
 import { forwardRef, Module, Provider } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongoModule } from 'nest-mongodb';
-import { EmailService } from '../infrastructure/email/EmailService';
-import { IEmailService } from '../infrastructure/email/IEmailService';
 import { OrderModule } from '../order/OrderModule';
-import { RequestAuthnCustomer } from './application/RequestAuthnCustomer/RequestAuthnCustomer';
-import { IRequestAuthnCustomer } from './application/RequestAuthnCustomer/IRequestAuthnCustomer';
-import { IVerifyAuthnCustomer } from './application/VerifyAuthnCustomer/IVerifyAuthnCustomer';
-import { VerifyAuthnCustomer } from './application/VerifyAuthnCustomer/VerifyAuthnCustomer';
-import { CustomerController } from './CustomerController';
+import { CreateCustomer } from './application/CreateCustomer/CreateCustomer';
+import { ICreateCustomer } from './application/CreateCustomer/ICreateCustomer';
+import { GetCustomer } from './application/GetCustomer/GetCustomer';
+import { IGetCustomer } from './application/GetCustomer/IGetCustomer';
+import { GetCustomerUpsert } from './application/GetCustomerUpsert/GetCustomerUpsert';
+import { IGetCustomerUpsert } from './application/GetCustomerUpsert/IGetCustomerUpsert';
 import { CustomerMongoRepositoryAdapter } from './persistence/CustomerMongoRepositoryAdapter';
 import { ICustomerRepository } from './persistence/ICustomerRepository';
 
 const useCaseProviders: Provider[] = [
-  { provide: IRequestAuthnCustomer, useClass: RequestAuthnCustomer },
-  { provide: IVerifyAuthnCustomer, useClass: VerifyAuthnCustomer },
-  { provide: IEmailService, useClass: EmailService },
+  { provide: ICreateCustomer, useClass: CreateCustomer },
+  { provide: IGetCustomer, useClass: GetCustomer },
+  { provide: IGetCustomerUpsert, useClass: GetCustomerUpsert },
 ];
 
 const persistenceProviders: Provider[] = [
@@ -33,8 +32,7 @@ const providers: Provider[] = [...useCaseProviders, ...persistenceProviders];
     MongoModule.forFeature(['customers']),
     forwardRef(() => OrderModule),
   ],
-  controllers: [CustomerController],
   providers,
-  exports: [...persistenceProviders],
+  exports: [...persistenceProviders, ...useCaseProviders],
 })
 export class CustomerModule {}
