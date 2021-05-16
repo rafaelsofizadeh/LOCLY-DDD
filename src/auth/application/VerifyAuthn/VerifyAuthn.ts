@@ -1,17 +1,12 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import jwt from 'jsonwebtoken';
-import { throwCustomException } from '../../../common/error-handling';
-import { validateAndDecodeTokenPayload } from '../../infrastructure/AuthxInterceptor';
 import {
   EntityTokenPayload,
   EntityTokenType,
-  EntityType,
   VerificationToken,
-  VerificationTokenPayload,
 } from '../../entity/Token';
 import { IVerifyAuthn } from './IVerifyAuthn';
-import { UUID } from '../../../common/domain';
 
 @Injectable()
 export class VerifyAuthn implements IVerifyAuthn {

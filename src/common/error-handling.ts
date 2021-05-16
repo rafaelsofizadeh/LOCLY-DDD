@@ -17,11 +17,11 @@ export class Exception {
   }
 }
 
-export function throwCustomException(
+function CustomException(
   message: string,
   fnMainArgs: Record<string, any> = {},
   errorStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-) {
+): new (error?: Error) => Exception {
   const debugOutput = Object.entries(fnMainArgs)
     .map(([key, arg]) => `${key}: ${inspect(arg).replace(/\r?\n/g, '')}`)
     .join(', ');
@@ -30,8 +30,27 @@ export function throwCustomException(
     debugOutput.length ? `: (${debugOutput})` : ''
   }`;
 
+  return Exception.bind({}, errorStatus, finalMessage, fnMainArgs);
+}
+
+export function createCustomException(
+  message: string,
+  fnMainArgs: Record<string, any> = {},
+  errorStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+  error?: Error,
+): Exception {
+  const exceptionCtor = CustomException(message, fnMainArgs, errorStatus);
+  return new exceptionCtor(error);
+}
+
+export function throwCustomException(
+  message: string,
+  fnMainArgs: Record<string, any> = {},
+  errorStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+) {
+  const exceptionCtor = CustomException(message, fnMainArgs, errorStatus);
   return (error?: Error) => {
-    throw new Exception(errorStatus, finalMessage, fnMainArgs, error);
+    throw new exceptionCtor(error);
   };
 }
 
