@@ -8,12 +8,11 @@ import {
   CustomerGrants,
   EntityTokenType,
   HostGrants,
-  Identity,
+  TokenIdentity,
   MiscTokenType,
   Token,
   TokenPayload,
   UnverifiedHostGrants,
-  VerificationTokenPayload,
 } from '../entity/Token';
 
 /*
@@ -65,17 +64,15 @@ export const AuthxInterceptorFactory: FactoryProvider = {
   provide: APP_INTERCEPTOR,
   useFactory: (configService: ConfigService) => {
     // TODO: Extract to a separate fn [RELATED: VerifyAuthn TODO]
-    const cookieAuthnFn: CookieAuthnFn<Identity> = async cookies => {
-      const authnCookieName = configService.get<string>(
-        'AUTHN_TOKEN_COOKIE_NAME',
-      );
+    const cookieAuthnFn: CookieAuthnFn<TokenIdentity> = async cookies => {
+      const authnCookieName = configService.get<string>('TOKEN_COOKIE_NAME');
       const tokenString: string = cookies?.[authnCookieName];
 
       if (!tokenString) {
         return null;
       }
 
-      const key = configService.get<string>('AUTHN_TOKEN_SIGNING_KEY');
+      const key = configService.get<string>('TOKEN_SIGNING_KEY');
 
       const { payload, expiredAt } = validateAndDecodeTokenPayload(
         tokenString,
@@ -92,6 +89,9 @@ export const AuthxInterceptorFactory: FactoryProvider = {
         // TODO: remove isIdentified requirement from IdentityBill
         return { ...token, isIdentified: true };
       }
+
+      // TODO: Refresh token?
+      return false;
     };
 
     return new CookieAuthxInterceptor({
@@ -128,44 +128,29 @@ export function validateAndDecodeTokenPayload(
   }
 }
 
-export function payloadToToken({
-  type,
-  entityId,
-  ...restTokenPayload
-}: TokenPayload): Token {
-  switch (type) {
+export function payloadToToken(payload: TokenPayload): Token {
+  switch (payload.type) {
     case EntityTokenType.Customer:
       return {
-        customerId: entityId,
+        ...payload,
         grants: CustomerGrants,
         refresh: true,
       };
     case EntityTokenType.UnverifiedHost:
       return {
-        hostId: entityId,
+        ...payload,
         grants: UnverifiedHostGrants,
         refresh: true,
       };
     case EntityTokenType.Host:
       return {
-        hostId: entityId,
+        ...payload,
         grants: HostGrants,
         refresh: true,
       };
     case MiscTokenType.Verification:
-      const { for: forEntity } = restTokenPayload as Omit<
-        VerificationTokenPayload,
-        'type' | 'entityId'
-      >;
-
-      const entityIdObj =
-        forEntity === EntityTokenType.Customer
-          ? { customerId: entityId }
-          : { hostId: entityId };
-
       return {
-        ...entityIdObj,
-        type: MiscTokenType.Verification,
+        ...payload,
         grants: [],
         refresh: false,
       };

@@ -83,9 +83,7 @@ export class RequestAuthn implements IRequestAuthn {
   private createVerificationTokenString(
     payload: Omit<VerificationTokenPayload, 'type'>,
   ): string {
-    const key = this.configService.get<string>(
-      'VERIFICATION_TOKEN_SIGNING_KEY',
-    );
+    const key = this.configService.get<string>('TOKEN_SIGNING_KEY');
     const expiresIn = this.configService.get<string>(
       'VERIFICATION_TOKEN_EXPIRES_IN',
     );

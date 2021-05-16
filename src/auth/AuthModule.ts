@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { CustomerModule } from '../customer/CustomerModule';
 import { HostModule } from '../host/HostModule';
 import { EmailModule } from '../infrastructure/email/EmailModule';
 import { IRequestAuthn } from './application/RequestAuthn/IRequestAuthn';
 import { RequestAuthn } from './application/RequestAuthn/RequestAuthn';
 import { IVerifyAuthn } from './application/VerifyAuthn/IVerifyAuthn';
+import { VerificationTokenParamToBodyMiddleware } from './application/VerifyAuthn/TokenParamToBodyMiddleware';
 import { VerifyAuthn } from './application/VerifyAuthn/VerifyAuthn';
 import { AuthController } from './AuthController';
 import { AuthxInterceptorFactory } from './infrastructure/AuthxInterceptor';
@@ -18,4 +19,10 @@ import { AuthxInterceptorFactory } from './infrastructure/AuthxInterceptor';
     { provide: IVerifyAuthn, useClass: VerifyAuthn },
   ],
 })
-export class AuthModule {}
+export class AuthModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(VerificationTokenParamToBodyMiddleware)
+      .forRoutes({ path: 'auth/verify/:token', method: RequestMethod.GET });
+  }
+}

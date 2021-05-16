@@ -21,8 +21,8 @@ export enum EntityType {
 
 export enum EntityTokenType {
   Customer = 'customer',
-  Host = 'host',
   UnverifiedHost = 'unverified_host',
+  Host = 'host',
 }
 
 export enum MiscTokenType {
@@ -50,23 +50,18 @@ export type VerificationTokenPayload = Readonly<{
 
 export type TokenPayload = EntityTokenPayload | VerificationTokenPayload;
 
-export type EntityId = { customerId: UUID } | { hostId: UUID };
-
-export type EntityToken = Readonly<
-  EntityId & {
+export type EntityToken = EntityTokenPayload &
+  Readonly<{
     grants: Grants;
     refresh: true;
-  }
->;
+  }>;
 
-export type VerificationToken = Readonly<
-  EntityId & {
-    type: MiscTokenType.Verification;
+export type VerificationToken = VerificationTokenPayload &
+  Readonly<{
     grants: Grants;
     refresh: false;
-  }
->;
+  }>;
 
 export type Token = EntityToken | VerificationToken;
 
-export type Identity = Token & { isIdentified: true };
+export type TokenIdentity = Token & { isIdentified: true };

@@ -7,7 +7,8 @@ import {
   IRequestAuthn,
 } from './application/RequestAuthn/IRequestAuthn';
 import { IVerifyAuthn } from './application/VerifyAuthn/IVerifyAuthn';
-import { AuthnDisallowed, AuthnRequired } from '@eropple/nestjs-auth';
+import { AuthnDisallowed, AuthnRequired, Identity } from '@eropple/nestjs-auth';
+import { EntityToken, TokenIdentity, VerificationToken } from './entity/Token';
 
 @Controller('auth')
 export class AuthController {
@@ -25,17 +26,17 @@ export class AuthController {
     await this.requestAuthn.execute(requestAuthnRequest);
   }
 
-  @AuthnDisallowed()
+  // Why AuthnRequired? TokenParamToBodyMiddleware will move the :token URL param to request cookies, for
+  // AuthInterceptor to operate on the token cookie.
+  @AuthnRequired()
   @Get('verify/:token')
   async verifyAuthnHandler(
     // passthrough: https://docs.nestjs.com/controllers#library-specific-approach
     @Res({ passthrough: true }) response: Response,
-    @Param('token') token: string,
+    @Identity() verificationToken: VerificationToken,
   ): Promise<void> {
-    const authnToken = this.verifyAuthn.execute(token);
-    const authnCookieName = this.configService.get<string>(
-      'AUTHN_TOKEN_COOKIE_NAME',
-    );
+    const authnToken: string = this.verifyAuthn.execute(verificationToken);
+    const authnCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
     const authnCookieMaxAge = ms(
       this.configService.get<string>('AUTHN_TOKEN_EXPIRES_IN'),
     );
@@ -52,9 +53,7 @@ export class AuthController {
   async logoutHandler(
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
-    const authnCookieName = this.configService.get<string>(
-      'AUTHN_TOKEN_COOKIE_NAME',
-    );
+    const authnCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
 
     response.clearCookie(authnCookieName);
   }
