@@ -1,9 +1,15 @@
-import { CookieAuthxInterceptor, CookieAuthnFn } from '@eropple/nestjs-auth';
+import {
+  CookieAuthxInterceptor,
+  CookieAuthnFn,
+} from '@rafaelsofizadeh/nestjs-auth';
 import jwt from 'jsonwebtoken';
 import { FactoryProvider, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { throwCustomException } from '../../common/error-handling';
+import {
+  createCustomException,
+  throwCustomException,
+} from '../../common/error-handling';
 import {
   CustomerGrants,
   EntityTokenType,
@@ -96,6 +102,9 @@ export const AuthxInterceptorFactory: FactoryProvider = {
 
     return new CookieAuthxInterceptor({
       authn: { cookieAuthnFn, anonymousScopes: [] },
+      throwResponse: (message: string, fnMainArgs: Record<string, any>) => {
+        throw createCustomException(message, fnMainArgs);
+      },
     });
   },
   inject: [ConfigService],
