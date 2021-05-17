@@ -62,7 +62,7 @@ export class GetHostDashboardLinks implements IGetHostDashboardLinks {
           refresh_url: 'https://example.com',
           // TODO
           return_url: 'https://example.com',
-          type: 'account_onboarding',
+          type: 'account_update',
         }),
       ])
     ).map(({ expires_at, url }) => ({
