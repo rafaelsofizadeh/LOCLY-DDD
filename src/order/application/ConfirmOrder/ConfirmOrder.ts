@@ -18,7 +18,7 @@ import { OrderStatus, DraftedOrder, Cost } from '../../entity/Order';
 import { IHostRepository } from '../../../host/persistence/IHostRepository';
 import { throwCustomException } from '../../../common/error-handling';
 import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
-import { ConfirmOrderRequest } from './IConfirmOrder';
+import { ConfirmOrderPayload } from './IConfirmOrder';
 
 export type Match = {
   orderId: UUID;
@@ -35,13 +35,13 @@ export class ConfirmOrder implements IConfirmOrder {
   ) {}
 
   async execute(
-    confirmOrderRequest: ConfirmOrderRequest,
+    confirmOrderPayload: ConfirmOrderPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<StripeCheckoutSessionResult> {
     // TODO(GLOBAL): Transaction decorator
     const checkoutSession: Stripe.Checkout.Session = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.matchOrderAndCheckout(confirmOrderRequest, sessionWithTransaction),
+        this.matchOrderAndCheckout(confirmOrderPayload, sessionWithTransaction),
       this.mongoClient,
       mongoTransactionSession,
     );
@@ -52,7 +52,7 @@ export class ConfirmOrder implements IConfirmOrder {
   }
 
   private async matchOrderAndCheckout(
-    { orderId, customerId }: ConfirmOrderRequest,
+    { orderId, customerId }: ConfirmOrderPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const draftOrder = (await this.orderRepository.findOrder(

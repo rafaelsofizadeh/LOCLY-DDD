@@ -8,7 +8,7 @@ import { Customer } from '../../../../src/customer/entity/Customer';
 import { IOrderRepository } from '../../../../src/order/persistence/IOrderRepository';
 import { UUID } from '../../../../src/common/domain';
 import { ICustomerRepository } from '../../../../src/customer/persistence/ICustomerRepository';
-import { DraftOrderRequest } from '../../../../src/order/application/DraftOrder/IDraftOrder';
+import { DraftOrderPayload } from '../../../../src/order/application/DraftOrder/IDraftOrder';
 import { OrderStatus, DraftedOrder } from '../../../../src/order/entity/Order';
 import { Country } from '../../../../src/order/entity/Country';
 import { CustomExceptionFilter } from '../../../../src/infrastructure/CustomExceptionFilter';
@@ -85,7 +85,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     );
 
     it('successfully creates a Order', async () => {
-      const testOrderRequest: DraftOrderRequest = {
+      const testOrderRequest: DraftOrderPayload = {
         customerId: testCustomer.id,
         originCountry: originCountriesAvailable[0],
         destination: testCustomer.selectedAddress,
@@ -189,7 +189,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       // TODO: [allCountries - originCountry].chooseRandom()
       const unavailableOriginCountry: Country = 'ITA';
 
-      const testOrderRequest: DraftOrderRequest = {
+      const testOrderRequest: DraftOrderPayload = {
         customerId: testCustomer.id,
         originCountry: unavailableOriginCountry,
         destination: testCustomer.selectedAddress,
@@ -222,7 +222,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     it('fails on nonexistent customer', async () => {
       const nonexistentCustomerId: UUID = UUID();
 
-      const invalidTestOrderRequest: DraftOrderRequest = {
+      const invalidTestOrderRequest: DraftOrderPayload = {
         customerId: nonexistentCustomerId,
         originCountry: originCountriesAvailable[0],
         destination: testCustomer.selectedAddress,

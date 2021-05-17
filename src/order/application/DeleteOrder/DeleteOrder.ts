@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
-import { DeleteOrderRequest, IDeleteOrder } from './IDeleteOrder';
+import { DeleteOrderPayload, IDeleteOrder } from './IDeleteOrder';
 import { OrderStatus } from '../../entity/Order';
 
 @Injectable()
@@ -17,19 +17,19 @@ export class DeleteOrder implements IDeleteOrder {
   ) {}
 
   async execute(
-    deleteOrderRequest: DeleteOrderRequest,
+    deleteOrderPayload: DeleteOrderPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.deleteOrder(deleteOrderRequest, sessionWithTransaction),
+        this.deleteOrder(deleteOrderPayload, sessionWithTransaction),
       this.mongoClient,
       mongoTransactionSession,
     );
   }
 
   private async deleteOrder(
-    { orderId, customerId }: DeleteOrderRequest,
+    { orderId, customerId }: DeleteOrderPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<void> {
     await this.orderRepository.deleteOrder(

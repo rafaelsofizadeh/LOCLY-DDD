@@ -1,25 +1,24 @@
 import { UseCase } from '../../../common/application';
 
 import { IsUUID, UUID } from '../../../common/domain';
+import { UnidCustomerOrderRequest } from '../../entity/Order';
 
-export interface ConfirmOrderRequest {
+export interface ConfirmOrderPayload {
   readonly orderId: UUID;
   readonly customerId: UUID;
 }
 
-export class ConfirmOrderRequest {
+export class ConfirmOrderRequest
+  implements UnidCustomerOrderRequest<ConfirmOrderPayload> {
   @IsUUID()
   readonly orderId: UUID;
-
-  @IsUUID()
-  readonly customerId: UUID;
 }
 
 export interface StripeCheckoutSessionResult {
-  checkoutId: string;
+  readonly checkoutId: string;
 }
 
 export abstract class IConfirmOrder extends UseCase<
-  ConfirmOrderRequest,
+  ConfirmOrderPayload,
   StripeCheckoutSessionResult
 > {}

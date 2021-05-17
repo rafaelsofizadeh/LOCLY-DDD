@@ -12,7 +12,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { IsUUID, UUID } from '../../../common/domain';
 import { Country } from '../../entity/Country';
 import { Gram } from '../../entity/Item';
 import { UseCase } from '../../../common/application';
@@ -20,14 +19,14 @@ import { WithoutId } from '../../../common/domain';
 import { DraftedItem } from '../../entity/Item';
 import { DraftedOrder } from '../../entity/Order';
 
-export interface DraftItemRequest extends WithoutId<DraftedItem> {}
+interface DraftItemRequest extends WithoutId<DraftedItem> {}
 
-export interface DraftOrderRequest
+export interface DraftOrderPayload
   extends Pick<DraftedOrder, 'customerId' | 'originCountry' | 'destination'> {
   readonly items: DraftItemRequest[];
 }
 
-export class DraftItemRequest implements DraftItemRequest {
+class DraftItemRequestSchema implements DraftItemRequest {
   @IsString()
   @Length(5, 280)
   title: string;
@@ -41,32 +40,30 @@ export class DraftItemRequest implements DraftItemRequest {
   weight: Gram;
 }
 
-export class AddressValidationSchema {
+class AddressRequestSchema {
   @IsISO31661Alpha3()
   country: Country;
 }
 
-export class DraftOrderRequest implements DraftOrderRequest {
-  @IsUUID()
-  readonly customerId: UUID;
-
+export class DraftOrderRequest
+  implements Omit<DraftOrderPayload, 'customerId'> {
   @IsISO31661Alpha3()
   readonly originCountry: Country;
 
   @ValidateNested()
   @IsNotEmptyObject()
   @IsDefined()
-  @Type(() => AddressValidationSchema)
-  readonly destination: AddressValidationSchema;
+  @Type(() => AddressRequestSchema)
+  readonly destination: AddressRequestSchema;
 
   @ValidateNested({ each: true })
   @ArrayMinSize(1)
   @IsArray()
-  @Type(() => DraftItemRequest)
-  readonly items: DraftItemRequest[];
+  @Type(() => DraftItemRequestSchema)
+  readonly items: DraftItemRequestSchema[];
 }
 
 export abstract class IDraftOrder extends UseCase<
-  DraftOrderRequest,
+  DraftOrderPayload,
   DraftedOrder
 > {}

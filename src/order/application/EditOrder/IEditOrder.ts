@@ -1,19 +1,22 @@
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
-import { DraftedOrder } from '../../entity/Order';
-import { DraftOrderRequest } from '../DraftOrder/IDraftOrder';
+import { DraftedOrder, UnidCustomerOrderRequest } from '../../entity/Order';
+import {
+  DraftOrderPayload,
+  DraftOrderRequest,
+} from '../DraftOrder/IDraftOrder';
 
-export interface EditOrderRequest extends DraftOrderRequest {
+export interface EditOrderPayload extends DraftOrderPayload {
   orderId: UUID;
 }
 
-export class EditOrderRequestAdapter extends DraftOrderRequest
-  implements EditOrderRequest {
+export class EditOrderRequest extends DraftOrderRequest
+  implements UnidCustomerOrderRequest<EditOrderPayload> {
   @IsUUID()
   readonly orderId: UUID;
 }
 
 export abstract class IEditOrder extends UseCase<
-  EditOrderRequest,
+  EditOrderPayload,
   DraftedOrder
 > {}

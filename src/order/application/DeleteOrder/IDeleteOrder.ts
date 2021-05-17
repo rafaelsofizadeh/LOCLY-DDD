@@ -1,22 +1,21 @@
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
+import { UnidCustomerOrderRequest } from '../../entity/Order';
 
-export interface DeleteOrderRequest {
+export interface DeleteOrderPayload {
   orderId: UUID;
   customerId: UUID;
 }
 
-export class DeleteOrderRequestAdapter implements DeleteOrderRequest {
+export class DeleteOrderRequest
+  implements UnidCustomerOrderRequest<DeleteOrderPayload> {
   @IsUUID()
   readonly orderId: UUID;
-
-  @IsUUID()
-  readonly customerId: UUID;
 }
 
 export type DeleteOrderResult = void;
 
 export abstract class IDeleteOrder extends UseCase<
-  DeleteOrderRequest,
+  DeleteOrderPayload,
   DeleteOrderResult
 > {}

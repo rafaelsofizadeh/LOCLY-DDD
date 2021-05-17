@@ -4,14 +4,11 @@ export type Grant = string;
 
 export type Grants = ReadonlyArray<Grant>;
 
-export const CustomerGrants = [
-  'account/customer/*',
-  'order/customer/*',
-] as const;
+export const CustomerGrants = ['account/customer', 'order/customer'] as const;
 
-export const UnverifiedHostGrants = ['account/host/unverified/*'] as const;
+export const UnverifiedHostGrants = ['account/host/unverified'] as const;
 
-export const HostGrants = ['account/host/*', 'order/host/*'] as const;
+export const HostGrants = ['account/host', 'order/host'] as const;
 
 // TODO: merge/intersect enums
 export enum EntityType {

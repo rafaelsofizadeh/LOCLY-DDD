@@ -1,7 +1,7 @@
 import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
 
-import { DraftOrderRequest, IDraftOrder } from './IDraftOrder';
+import { DraftOrderPayload, IDraftOrder } from './IDraftOrder';
 
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
@@ -27,12 +27,12 @@ export class DraftOrder implements IDraftOrder {
   ) {}
 
   async execute(
-    draftOrderRequest: DraftOrderRequest,
+    draftOrderPayload: DraftOrderPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<DraftedOrder> {
     const draftOrder: DraftedOrder = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.draftOrder(draftOrderRequest, sessionWithTransaction),
+        this.draftOrder(draftOrderPayload, sessionWithTransaction),
       this.mongoClient,
       mongoTransactionSession,
     );
@@ -41,11 +41,11 @@ export class DraftOrder implements IDraftOrder {
   }
 
   private async draftOrder(
-    draftOrderRequest: DraftOrderRequest,
+    draftOrderPayload: DraftOrderPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<DraftedOrder> {
     const draftOrder: DraftedOrder = this.constructDraftOrder(
-      draftOrderRequest,
+      draftOrderPayload,
     );
 
     // TODO(IMPORANT): Document MongoDb concurrent transaction limitations.
@@ -67,7 +67,7 @@ export class DraftOrder implements IDraftOrder {
     originCountry,
     items: itemsWithoutId,
     destination,
-  }: DraftOrderRequest): DraftedOrder {
+  }: DraftOrderPayload): DraftedOrder {
     // TODO: class-validator decorator https://github.com/typestack/class-validator/issues/486
     if (originCountry === destination.country) {
       throwCustomException(

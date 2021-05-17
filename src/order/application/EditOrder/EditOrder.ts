@@ -1,6 +1,6 @@
 import { IOrderRepository } from '../../persistence/IOrderRepository';
 
-import { EditOrderRequest, IEditOrder } from './IEditOrder';
+import { EditOrderPayload, IEditOrder } from './IEditOrder';
 
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
@@ -20,12 +20,12 @@ export class EditOrder implements IEditOrder {
   ) {}
 
   async execute(
-    editOrderRequest: EditOrderRequest,
+    editOrderPayload: EditOrderPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<DraftedOrder> {
     const draftOrder: DraftedOrder = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.editOrder(editOrderRequest, sessionWithTransaction),
+        this.editOrder(editOrderPayload, sessionWithTransaction),
       this.mongoClient,
       mongoTransactionSession,
     );
@@ -34,7 +34,7 @@ export class EditOrder implements IEditOrder {
   }
 
   private async editOrder(
-    { orderId, customerId, ...restEditOrderRequest }: EditOrderRequest,
+    { orderId, customerId, ...restEditOrderRequest }: EditOrderPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<DraftedOrder> {
     await this.orderRepository.deleteOrder(

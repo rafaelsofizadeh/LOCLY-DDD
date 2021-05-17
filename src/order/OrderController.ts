@@ -25,9 +25,10 @@ import { DraftedOrder } from './entity/Order';
 import { SerializePrivatePropertiesInterceptor } from '../infrastructure/SerializePrivatePropertiesInterceptor';
 import {
   IEditOrder,
-  EditOrderRequestAdapter,
+  EditOrderRequest,
 } from './application/EditOrder/IEditOrder';
 import {
+  DeleteOrderPayload,
   DeleteOrderRequest,
   DeleteOrderResult,
   IDeleteOrder,
@@ -47,6 +48,8 @@ import {
   IPayShipment,
   PayShipmentRequest,
 } from './application/PayShipment/IPayShipment';
+import { AuthzScope, Identity } from '@rafaelsofizadeh/nestjs-auth/dist';
+import { EntityToken } from '../auth/entity/Token';
 
 @Controller('order')
 export class OrderController {
@@ -62,22 +65,37 @@ export class OrderController {
   ) {}
 
   @Post('draft')
+  @AuthzScope('order/customer')
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async draftOrderHandler(
-    @Body() orderRequest: DraftOrderRequest,
+    @Body() unidDraftOrderRequest: DraftOrderRequest,
+    @Identity() customerIdentity: EntityToken,
   ): Promise<DraftedOrder> {
+    // TODO: Decorator for attaching identity id to request
+    const draftOrderRequest = {
+      ...unidDraftOrderRequest,
+      customerId: customerIdentity.entityId,
+    };
+
     const draftOrder: DraftedOrder = await this.draftOrder.execute(
-      orderRequest,
+      draftOrderRequest,
     );
 
     return draftOrder;
   }
 
   @Post('edit')
+  @AuthzScope('order/customer')
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async editOrderHandler(
-    @Body() editOrderRequest: EditOrderRequestAdapter,
+    @Body() unidEditOrderRequest: EditOrderRequest,
+    @Identity() customerIdentity: EntityToken,
   ): Promise<DraftedOrder> {
+    const editOrderRequest = {
+      ...unidEditOrderRequest,
+      customerId: customerIdentity.entityId,
+    };
+
     const editedDraftOrder: DraftedOrder = await this.editOrder.execute(
       editOrderRequest,
     );
@@ -86,24 +104,39 @@ export class OrderController {
   }
 
   @Post('delete')
+  @AuthzScope('order/customer')
   async deleteOrderHandler(
-    @Body() deleteOrderRequest: DeleteOrderRequest,
+    @Body() unidDeleteOrderRequest: DeleteOrderRequest,
+    @Identity() customerIdentity: EntityToken,
   ): Promise<DeleteOrderResult> {
+    const deleteOrderRequest = {
+      ...unidDeleteOrderRequest,
+      customerId: customerIdentity.entityId,
+    };
+
     await this.deleteOrder.execute(deleteOrderRequest);
   }
 
   @Post('confirm')
+  @AuthzScope('order/customer')
   async confirmOrderHandler(
-    @Body() confirmationRequest: ConfirmOrderRequest,
+    @Body() unidConfirmaOrderRequest: ConfirmOrderRequest,
+    @Identity() customerIdentity: EntityToken,
   ): Promise<StripeCheckoutSessionResult> {
+    const confirmOrderRequest = {
+      ...unidConfirmaOrderRequest,
+      customerId: customerIdentity.entityId,
+    };
+
     const stripeCheckoutSession = await this.confirmOrder.execute(
-      confirmationRequest,
+      confirmOrderRequest,
     );
 
     return stripeCheckoutSession;
   }
 
   @Post('receiveItem')
+  @AuthzScope('order/host')
   async receiveItemHandler(
     @Body() receiveItemRequest: ReceiveItemRequest,
   ): Promise<ReceiveItemResult> {
@@ -115,6 +148,7 @@ export class OrderController {
   }
 
   @Post('addItemPhotos')
+  @AuthzScope('order/host')
   // file control/validation is done by MulterModule registration
   @UseInterceptors(FilesInterceptor(photoPropertyName))
   async addItemPhotoHandler(
@@ -130,6 +164,7 @@ export class OrderController {
   }
 
   @Post('submitShipmentInfo')
+  @AuthzScope('order/host')
   async submitOrderShipmentInfoHandler(
     @Body() submitOrderShipmentInfoRequest: SubmitShipmentInfoRequest,
   ): Promise<SubmitShipmentInfoResult> {
@@ -137,9 +172,16 @@ export class OrderController {
   }
 
   @Post('payShipment')
+  @AuthzScope('order/customer')
   async payShipmentHandler(
-    @Body() payShipmentRequest: PayShipmentRequest,
+    @Body() unidPayShipmentRequest: PayShipmentRequest,
+    @Identity() customerIdentity: EntityToken,
   ): Promise<StripeCheckoutSessionResult> {
+    const payShipmentRequest = {
+      ...unidPayShipmentRequest,
+      customerId: customerIdentity.entityId,
+    };
+
     const stripeCheckoutSession = await this.payShipment.execute(
       payShipmentRequest,
     );
