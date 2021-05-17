@@ -73,6 +73,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
         orderIds: [],
       };
 
+      // TODO: Use CreateCustomer usecase
       await customerRepository.addCustomer(testCustomer);
     });
 

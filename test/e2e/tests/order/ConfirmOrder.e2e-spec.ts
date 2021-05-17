@@ -215,6 +215,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       },
     ];
     testHosts = configsToHosts(testHostConfigs);
+    // TODO: use CreateHost usecase instead
     await hostRepository.addManyHosts(testHosts);
 
     const testMatchedHost = testHosts[0];
