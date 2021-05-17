@@ -6,7 +6,8 @@ import { Address } from '../../order/entity/Order';
 export type Host = Readonly<{
   id: UUID;
   email: Email;
-  verified: boolean;
+  stripeAccountId: string;
+  onboarded: boolean;
   available: boolean;
   address?: Address;
   orderIds?: UUID[];

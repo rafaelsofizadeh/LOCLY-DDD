@@ -169,7 +169,7 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
           {
             $match: {
               'address.country': country,
-              verified: true,
+              onboarded: true,
               available: true,
             },
           },

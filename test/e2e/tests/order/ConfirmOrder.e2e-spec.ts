@@ -30,7 +30,7 @@ import {
 
 type HostConfig = {
   email: Email;
-  verified: boolean;
+  onboarded: boolean;
   country: Country;
   available: boolean;
   orderCount: number;
@@ -146,7 +146,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     // https://stackoverflow.com/a/49864436/6539857
     jest.setTimeout(55000);
 
-    // TODO: Vary 'verified' true-false
+    // TODO: Vary 'onboarded' true-false
     const testHostConfigs: HostConfig[] = [
       /*
       Test host #1 (will be selected):
@@ -156,7 +156,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       */
       {
         email: 'johndoe@example.com',
-        verified: true,
+        onboarded: true,
         country: originCountry,
         available: true,
         orderCount: 1,
@@ -169,7 +169,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       */
       {
         email: 'johndoe@example.com',
-        verified: true,
+        onboarded: true,
         country: originCountry,
         available: false,
         orderCount: 1,
@@ -182,7 +182,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       */
       {
         email: 'johndoe@example.com',
-        verified: true,
+        onboarded: true,
         country: originCountriesAvailable[1] || ('XXX' as Country),
         available: true,
         orderCount: 1,
@@ -195,7 +195,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       */
       {
         email: 'johndoe@example.com',
-        verified: true,
+        onboarded: true,
         country: originCountry,
         available: true,
         orderCount: 2,
@@ -208,7 +208,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       */
       {
         email: 'johndoe@example.com',
-        verified: true,
+        onboarded: true,
         country: originCountriesAvailable[2] || ('ZZZ' as Country),
         available: false,
         orderCount: 3,
@@ -288,7 +288,7 @@ describe('Confirm Order – POST /order/confirm', () => {
         country,
         available: true,
         orderCount: 1,
-        verified: true,
+        onboarded: true,
         email: 'johndoe@example.com',
       }),
     );
@@ -380,11 +380,11 @@ function generateUuids(n: number) {
 
 function configsToHosts(hostConfigs: HostConfig[]): Host[] {
   return hostConfigs.map(
-    ({ email, country, available, orderCount, verified }) => ({
+    ({ email, country, available, orderCount, onboarded }) => ({
       id: UUID(),
       email,
       address: { country },
-      verified,
+      onboarded,
       available,
       orderIds: generateUuids(orderCount),
     }),
