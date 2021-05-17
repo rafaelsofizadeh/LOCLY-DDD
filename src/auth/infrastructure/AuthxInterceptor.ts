@@ -19,6 +19,7 @@ import {
   Token,
   TokenPayload,
   UnverifiedHostGrants,
+  VerificationTokenPayload,
 } from '../entity/Token';
 
 /*
@@ -79,7 +80,7 @@ export const AuthxInterceptorFactory: FactoryProvider = {
       }
 
       const key = configService.get<string>('TOKEN_SIGNING_KEY');
-
+      // TODO(NOW): expiredAt isn't present, exp is
       const { payload, expiredAt } = validateAndDecodeTokenPayload(
         tokenString,
         key,
@@ -114,16 +115,22 @@ export function validateAndDecodeTokenPayload(
   token: string,
   key: string,
 ): { payload?: TokenPayload; expiredAt?: number; errorMessage?: string } {
-  let payload: TokenPayload;
-
   try {
-    payload = jwt.verify(token, key) as TokenPayload;
+    const { entityId, type, ...restPayload }: TokenPayload = jwt.verify(
+      token,
+      key,
+    ) as TokenPayload;
 
-    return { payload };
+    return {
+      payload: {
+        entityId,
+        type,
+        for: (restPayload as VerificationTokenPayload).for,
+      },
+    };
   } catch ({ name, expiredAt, message: errorMessage }) {
     if (name === 'TokenExpiredError') {
       return {
-        payload,
         expiredAt,
         errorMessage,
       };
