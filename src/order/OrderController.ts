@@ -22,6 +22,7 @@ import {
   ReceiveItemResult,
   IReceiveItem,
   ReceiveItemRequest,
+  ReceiveItemPayload,
 } from './application/ReceiveItem/IReceiveItem';
 import { DraftedOrder } from './entity/Order';
 import { SerializePrivatePropertiesInterceptor } from '../infrastructure/SerializePrivatePropertiesInterceptor';
@@ -40,13 +41,13 @@ import {
   AddItemPhotoPayload,
   AddItemPhotoRequest,
   IAddItemPhoto,
-  photoPropertyName,
 } from './application/AddItemPhoto/IAddItemPhoto';
 import { Photo } from './persistence/OrderMongoMapper';
 import {
   SubmitShipmentInfoRequest,
   SubmitShipmentInfoResult,
   ISubmitShipmentInfo,
+  SubmitShipmentInfoPayload,
 } from './application/SubmitShipmentInfo/ISubmitShipmentInfo';
 import {
   IPayShipment,
@@ -143,10 +144,16 @@ export class OrderController {
   @Post('receiveItem')
   @AuthzScope('order/host')
   async receiveItemHandler(
-    @Body() receiveItemRequest: ReceiveItemRequest,
+    @Body() unidReceiveItemRequest: ReceiveItemRequest,
+    @Identity() hostIdentity: EntityToken,
   ): Promise<ReceiveItemResult> {
+    const receiveItemPayload: ReceiveItemPayload = {
+      ...unidReceiveItemRequest,
+      hostId: hostIdentity.entityId,
+    };
+
     const receivedDateResult = await this.receiveItem.execute(
-      receiveItemRequest,
+      receiveItemPayload,
     );
 
     return receivedDateResult;
@@ -155,7 +162,7 @@ export class OrderController {
   @Post('addItemPhotos')
   @AuthzScope('order/host')
   // file control/validation is done by MulterModule registration
-  @UseInterceptors(FilesInterceptor(photoPropertyName))
+  @UseInterceptors(FilesInterceptor('photos'))
   async addItemPhotoHandler(
     @Body() unidAddItemPhotoRequest: AddItemPhotoRequest,
     @UploadedFiles() photos: Photo[],
@@ -176,10 +183,16 @@ export class OrderController {
 
   @Post('submitShipmentInfo')
   @AuthzScope('order/host')
-  async submitOrderShipmentInfoHandler(
-    @Body() submitOrderShipmentInfoRequest: SubmitShipmentInfoRequest,
+  async submitShipmentInfoHandler(
+    @Body() unidSubmitShipmentInfoRequest: SubmitShipmentInfoRequest,
+    @Identity() hostIdentity: EntityToken,
   ): Promise<SubmitShipmentInfoResult> {
-    await this.submitShipmentInfo.execute(submitOrderShipmentInfoRequest);
+    const submitShipmentInfoPayload: SubmitShipmentInfoPayload = {
+      ...unidSubmitShipmentInfoRequest,
+      hostId: hostIdentity.entityId,
+    };
+
+    await this.submitShipmentInfo.execute(submitShipmentInfoPayload);
   }
 
   @Post('payShipment')

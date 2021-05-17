@@ -1,36 +1,30 @@
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
+import { UnidHostOrderRequest } from '../../entity/Order';
 import { Photo } from '../../persistence/OrderMongoMapper';
-
-export const photoPropertyName = 'photos';
 
 export const maxSimulataneousPhotoCount = 4;
 
 export const maxPhotoSizeBytes = 7000000;
 
-export interface AddItemPhotoRequestBody {
+export interface AddItemPhotoPayload {
   orderId: UUID;
   hostId: UUID;
   itemId: UUID;
+  photos: Photo[];
 }
 
-export interface AddItemPhotoRequest extends AddItemPhotoRequestBody {
-  [photoPropertyName]: Photo[];
-}
-
-export class AddItemPhotoRequestBodyAdapter implements AddItemPhotoRequestBody {
+export class AddItemPhotoRequest
+  implements Omit<UnidHostOrderRequest<AddItemPhotoPayload>, 'photos'> {
   @IsUUID()
   readonly orderId: UUID;
-
-  @IsUUID()
-  readonly hostId: UUID;
 
   @IsUUID()
   readonly itemId: UUID;
 }
 
 export abstract class IAddItemPhoto extends UseCase<
-  AddItemPhotoRequest,
+  AddItemPhotoPayload,
   ItemPhotosUploadResult
 > {}
 

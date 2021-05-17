@@ -4,7 +4,7 @@ import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import {
-  AddItemPhotoRequest,
+  AddItemPhotoPayload,
   IAddItemPhoto,
   ItemPhotosUploadResult,
 } from './IAddItemPhoto';
@@ -18,12 +18,12 @@ export class AddItemPhoto implements IAddItemPhoto {
   ) {}
 
   async execute(
-    addItemPhotoRequest: AddItemPhotoRequest,
+    addItemPhotoPayload: AddItemPhotoPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
     const itemPhotoUploadResults = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.uploadItemPhoto(addItemPhotoRequest, sessionWithTransaction),
+        this.uploadItemPhoto(addItemPhotoPayload, sessionWithTransaction),
       this.mongoClient,
       mongoTransactionSession,
     );
@@ -32,7 +32,7 @@ export class AddItemPhoto implements IAddItemPhoto {
   }
 
   private uploadItemPhoto(
-    { orderId, hostId, itemId, photos }: AddItemPhotoRequest,
+    { orderId, hostId, itemId, photos }: AddItemPhotoPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
     return this.orderRepository.addItemPhotos(

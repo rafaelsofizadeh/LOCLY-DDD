@@ -21,7 +21,7 @@ import { IDeleteOrder } from './application/DeleteOrder/IDeleteOrder';
 import { DeleteOrder } from './application/DeleteOrder/DeleteOrder';
 import { Db } from 'mongodb';
 import {
-  AddItemPhotoRequest,
+  AddItemPhotoPayload,
   IAddItemPhoto,
   maxPhotoSizeBytes,
   maxSimulataneousPhotoCount,
@@ -65,7 +65,7 @@ const imports: DynamicModule[] = [
         // IMPORTANT: ALWAYS PUT REQUEST BODY FIELDS BEFORE FILE FIELD, or else req.body might be unpopulated
         // https://stackoverflow.com/a/43197040
         file: (request: Request) => {
-          const { hostId, itemId } = request.body as AddItemPhotoRequest;
+          const { hostId, itemId } = request.body as AddItemPhotoPayload;
 
           const photoId = UUID();
 

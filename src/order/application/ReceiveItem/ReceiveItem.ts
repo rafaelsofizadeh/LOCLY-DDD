@@ -5,7 +5,7 @@ import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import {
-  ReceiveItemRequest,
+  ReceiveItemPayload,
   ReceiveItemResult,
   IReceiveItem,
 } from './IReceiveItem';
@@ -19,7 +19,7 @@ export class ReceiveItem implements IReceiveItem {
   ) {}
 
   async execute(
-    { orderId, itemId, hostId }: ReceiveItemRequest,
+    { orderId, itemId, hostId }: ReceiveItemPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<ReceiveItemResult> {
     const receivedDate: Date = await withTransaction(

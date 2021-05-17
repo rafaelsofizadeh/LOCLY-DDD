@@ -63,3 +63,5 @@ export type OrderFilter = EntityFilter<Order, { orderId: UUID }>;
 export type OrderItemFilter = OrderFilter & { item: ItemFilter };
 
 export type UnidCustomerOrderRequest<T> = Omit<T, 'customerId'>;
+
+export type UnidHostOrderRequest<T> = Omit<T, 'hostId'>;

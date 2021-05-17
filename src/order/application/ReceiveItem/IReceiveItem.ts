@@ -1,28 +1,28 @@
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
+import { UnidHostOrderRequest } from '../../entity/Order';
 
-export interface ReceiveItemRequest {
-  readonly orderId: UUID;
-  readonly hostId: UUID;
-  readonly itemId: UUID;
-}
+export interface ReceiveItemPayload
+  extends Readonly<{
+    orderId: UUID;
+    hostId: UUID;
+    itemId: UUID;
+  }> {}
 
-export class ReceiveItemRequest implements ReceiveItemRequest {
+export class ReceiveItemRequest
+  implements UnidHostOrderRequest<ReceiveItemPayload> {
   @IsUUID()
   readonly orderId: UUID;
-
-  @IsUUID()
-  readonly hostId: UUID;
 
   @IsUUID()
   readonly itemId: UUID;
 }
 
 export interface ReceiveItemResult {
-  receivedDate: Date;
+  readonly receivedDate: Date;
 }
 
 export abstract class IReceiveItem extends UseCase<
-  ReceiveItemRequest,
+  ReceiveItemPayload,
   ReceiveItemResult
 > {}

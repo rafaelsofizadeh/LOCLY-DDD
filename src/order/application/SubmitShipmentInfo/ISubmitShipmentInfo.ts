@@ -12,17 +12,18 @@ import {
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
 import { Gram } from '../../entity/Item';
-import { Cost as ICost } from '../../entity/Order';
+import { Cost as ICost, UnidHostOrderRequest } from '../../entity/Order';
 
 export type URL = string;
 
-export interface SubmitShipmentInfoRequest {
-  readonly orderId: UUID;
-  readonly hostId: UUID;
-  readonly totalWeight: Gram;
-  readonly shipmentCost: Cost;
-  readonly calculatorResultUrl?: URL;
-}
+export interface SubmitShipmentInfoPayload
+  extends Readonly<{
+    orderId: UUID;
+    hostId: UUID;
+    totalWeight: Gram;
+    shipmentCost: Cost;
+    calculatorResultUrl?: URL;
+  }> {}
 
 class Cost implements ICost {
   @IsInt()
@@ -34,12 +35,10 @@ class Cost implements ICost {
   currency: 'USD';
 }
 
-export class SubmitShipmentInfoRequest implements SubmitShipmentInfoRequest {
+export class SubmitShipmentInfoRequest
+  implements UnidHostOrderRequest<SubmitShipmentInfoPayload> {
   @IsUUID()
   readonly orderId: UUID;
-
-  @IsUUID()
-  readonly hostId: UUID;
 
   @IsInt()
   @IsPositive()
@@ -59,6 +58,6 @@ export class SubmitShipmentInfoRequest implements SubmitShipmentInfoRequest {
 export type SubmitShipmentInfoResult = void;
 
 export abstract class ISubmitShipmentInfo extends UseCase<
-  SubmitShipmentInfoRequest,
+  SubmitShipmentInfoPayload,
   SubmitShipmentInfoResult
 > {}

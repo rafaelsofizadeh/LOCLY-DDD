@@ -4,7 +4,7 @@ import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import {
-  SubmitShipmentInfoRequest,
+  SubmitShipmentInfoPayload,
   ISubmitShipmentInfo,
 } from './ISubmitShipmentInfo';
 import { Order, OrderStatus } from '../../entity/Order';
@@ -20,7 +20,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
   ) {}
 
   async execute(
-    finalizeOrderRequest: SubmitShipmentInfoRequest,
+    finalizeOrderRequest: SubmitShipmentInfoPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     await withTransaction(
@@ -38,7 +38,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
       totalWeight,
       shipmentCost: finalShipmentCost,
       calculatorResultUrl,
-    }: SubmitShipmentInfoRequest,
+    }: SubmitShipmentInfoPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<void> {
     const notFinalizedItems: Item[] = await this.getUnfinalizedItems(
