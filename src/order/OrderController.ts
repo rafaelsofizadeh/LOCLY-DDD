@@ -10,11 +10,13 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   IDraftOrder,
   DraftOrderRequest,
+  DraftOrderPayload,
 } from './application/DraftOrder/IDraftOrder';
 import {
   ConfirmOrderRequest,
   StripeCheckoutSessionResult,
   IConfirmOrder,
+  ConfirmOrderPayload,
 } from './application/ConfirmOrder/IConfirmOrder';
 import {
   ReceiveItemResult,
@@ -26,6 +28,7 @@ import { SerializePrivatePropertiesInterceptor } from '../infrastructure/Seriali
 import {
   IEditOrder,
   EditOrderRequest,
+  EditOrderPayload,
 } from './application/EditOrder/IEditOrder';
 import {
   DeleteOrderPayload,
@@ -34,7 +37,8 @@ import {
   IDeleteOrder,
 } from './application/DeleteOrder/IDeleteOrder';
 import {
-  AddItemPhotoRequestBody,
+  AddItemPhotoPayload,
+  AddItemPhotoRequest,
   IAddItemPhoto,
   photoPropertyName,
 } from './application/AddItemPhoto/IAddItemPhoto';
@@ -46,6 +50,7 @@ import {
 } from './application/SubmitShipmentInfo/ISubmitShipmentInfo';
 import {
   IPayShipment,
+  PayShipmentPayload,
   PayShipmentRequest,
 } from './application/PayShipment/IPayShipment';
 import { AuthzScope, Identity } from '@rafaelsofizadeh/nestjs-auth/dist';
@@ -72,13 +77,13 @@ export class OrderController {
     @Identity() customerIdentity: EntityToken,
   ): Promise<DraftedOrder> {
     // TODO: Decorator for attaching identity id to request
-    const draftOrderRequest = {
+    const draftOrderPayload: DraftOrderPayload = {
       ...unidDraftOrderRequest,
       customerId: customerIdentity.entityId,
     };
 
     const draftOrder: DraftedOrder = await this.draftOrder.execute(
-      draftOrderRequest,
+      draftOrderPayload,
     );
 
     return draftOrder;
@@ -91,13 +96,13 @@ export class OrderController {
     @Body() unidEditOrderRequest: EditOrderRequest,
     @Identity() customerIdentity: EntityToken,
   ): Promise<DraftedOrder> {
-    const editOrderRequest = {
+    const editOrderPayload: EditOrderPayload = {
       ...unidEditOrderRequest,
       customerId: customerIdentity.entityId,
     };
 
     const editedDraftOrder: DraftedOrder = await this.editOrder.execute(
-      editOrderRequest,
+      editOrderPayload,
     );
 
     return editedDraftOrder;
@@ -109,12 +114,12 @@ export class OrderController {
     @Body() unidDeleteOrderRequest: DeleteOrderRequest,
     @Identity() customerIdentity: EntityToken,
   ): Promise<DeleteOrderResult> {
-    const deleteOrderRequest = {
+    const deleteOrderPayload: DeleteOrderPayload = {
       ...unidDeleteOrderRequest,
       customerId: customerIdentity.entityId,
     };
 
-    await this.deleteOrder.execute(deleteOrderRequest);
+    await this.deleteOrder.execute(deleteOrderPayload);
   }
 
   @Post('confirm')
@@ -123,13 +128,13 @@ export class OrderController {
     @Body() unidConfirmaOrderRequest: ConfirmOrderRequest,
     @Identity() customerIdentity: EntityToken,
   ): Promise<StripeCheckoutSessionResult> {
-    const confirmOrderRequest = {
+    const confirmOrderPayload: ConfirmOrderPayload = {
       ...unidConfirmaOrderRequest,
       customerId: customerIdentity.entityId,
     };
 
     const stripeCheckoutSession = await this.confirmOrder.execute(
-      confirmOrderRequest,
+      confirmOrderPayload,
     );
 
     return stripeCheckoutSession;
@@ -152,12 +157,18 @@ export class OrderController {
   // file control/validation is done by MulterModule registration
   @UseInterceptors(FilesInterceptor(photoPropertyName))
   async addItemPhotoHandler(
-    @Body() addItemPhotoRequestBody: AddItemPhotoRequestBody,
+    @Body() unidAddItemPhotoRequest: AddItemPhotoRequest,
     @UploadedFiles() photos: Photo[],
+    @Identity() hostIdentity: EntityToken,
   ) {
-    const receivedDateResult = await this.addItemPhoto.execute({
-      ...addItemPhotoRequestBody,
+    const addItemPhotoPayload: AddItemPhotoPayload = {
+      ...unidAddItemPhotoRequest,
+      hostId: hostIdentity.entityId,
       photos,
+    };
+
+    const receivedDateResult = await this.addItemPhoto.execute({
+      ...addItemPhotoPayload,
     });
 
     return receivedDateResult;
@@ -177,13 +188,13 @@ export class OrderController {
     @Body() unidPayShipmentRequest: PayShipmentRequest,
     @Identity() customerIdentity: EntityToken,
   ): Promise<StripeCheckoutSessionResult> {
-    const payShipmentRequest = {
+    const payShipmentPayload: PayShipmentPayload = {
       ...unidPayShipmentRequest,
       customerId: customerIdentity.entityId,
     };
 
     const stripeCheckoutSession = await this.payShipment.execute(
-      payShipmentRequest,
+      payShipmentPayload,
     );
 
     return stripeCheckoutSession;
