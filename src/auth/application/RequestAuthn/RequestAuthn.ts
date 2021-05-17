@@ -76,7 +76,7 @@ export class RequestAuthn implements IRequestAuthn {
     await this.emailService.sendEmail({
       to: email,
       subject: 'Locly authentication link!',
-      html: `<a href="localhost:3000/authn/verify/${token}">Click on this link to log in to Locly!</a>`,
+      html: `<a href="localhost:3000/auth/verify/${token}">Click on this link to log in to Locly!</a>`,
     });
   }
 

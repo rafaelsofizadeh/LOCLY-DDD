@@ -7,8 +7,12 @@ import {
   IRequestAuthn,
 } from './application/RequestAuthn/IRequestAuthn';
 import { IVerifyAuthn } from './application/VerifyAuthn/IVerifyAuthn';
-import { AuthnDisallowed, AuthnRequired, Identity } from '@eropple/nestjs-auth';
-import { EntityToken, TokenIdentity, VerificationToken } from './entity/Token';
+import {
+  AuthnDisallowed,
+  AuthnRequired,
+  Identity,
+} from '@rafaelsofizadeh/nestjs-auth';
+import { VerificationToken } from './entity/Token';
 
 @Controller('auth')
 export class AuthController {

@@ -19,7 +19,7 @@ export class VerifyAuthn implements IVerifyAuthn {
 
   private createAuthnToken(verificationToken: VerificationToken): string {
     const key = this.configService.get<string>('TOKEN_SIGNING_KEY');
-    const expiresIn = this.configService.get<string>('AUTH_TOKEN_EXPIRES_IN');
+    const expiresIn = this.configService.get<string>('AUTHN_TOKEN_EXPIRES_IN');
 
     // TODO: Proper union typing
     const { customerId, hostId } = verificationToken as any;
