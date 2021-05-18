@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import jwt from 'jsonwebtoken';
 import {
+  EntityToken,
   EntityTokenPayload,
-  EntityTokenType,
   VerificationToken,
 } from '../../entity/Token';
+import { payloadToToken } from '../../infrastructure/AuthxInterceptor';
 import { IVerifyAuthn } from './IVerifyAuthn';
 
 @Injectable()
@@ -17,17 +18,18 @@ export class VerifyAuthn implements IVerifyAuthn {
     return this.createAuthnToken(verificationToken);
   }
 
+  // TODO: Unify with function in AuthInteceptor. Unified token-creation method ?
   private createAuthnToken(verificationToken: VerificationToken): string {
     const key = this.configService.get<string>('TOKEN_SIGNING_KEY');
     const expiresIn = this.configService.get<string>('AUTHN_TOKEN_EXPIRES_IN');
 
-    // TODO: Proper union typing
-    const { customerId, hostId } = verificationToken as any;
-    const entityTokenPayload: EntityTokenPayload = customerId
-      ? { type: EntityTokenType.Customer, entityId: customerId }
-      : { type: EntityTokenType.Host, entityId: hostId };
+    const { for: forEntity, type, ...restToken } = verificationToken;
 
-    // TODO: Token payload creation functions/classes
-    return jwt.sign(entityTokenPayload, key, { expiresIn });
+    const entityToken = payloadToToken({
+      ...restToken,
+      type: forEntity,
+    }) as EntityToken;
+
+    return jwt.sign(entityToken, key, { expiresIn });
   }
 }
