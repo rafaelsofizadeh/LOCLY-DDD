@@ -1,5 +1,5 @@
-import { VerificationToken } from '../../entity/Token';
+import { Token } from '../../entity/Token';
 
 export abstract class IVerifyAuthn {
-  abstract execute(verificationToken: VerificationToken): string;
+  abstract execute(verificationToken: Token): string;
 }

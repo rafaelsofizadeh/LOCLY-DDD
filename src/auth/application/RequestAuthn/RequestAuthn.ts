@@ -11,13 +11,9 @@ import {
   IRequestAuthn,
 } from './IRequestAuthn';
 import { IGetCustomerUpsert } from '../../../customer/application/GetCustomerUpsert/IGetCustomerUpsert';
-import {
-  EntityTokenType,
-  EntityType,
-  MiscTokenType,
-  VerificationTokenPayload,
-} from '../../entity/Token';
+import { TokenEntityType, EntityType, Token } from '../../entity/Token';
 import { IGetHostUpsert } from '../../../host/application/GetHostUpsert/IGetHostUpsert';
+import { completeToken } from '../utils';
 
 @Injectable()
 export class RequestAuthn implements IRequestAuthn {
@@ -53,24 +49,30 @@ export class RequestAuthn implements IRequestAuthn {
         mongoTransactionSession,
       );
 
-      token = this.createVerificationTokenString({
-        entityId: customer.id,
-        for: EntityTokenType.Customer,
-      });
+      token = this.createVerificationTokenString(
+        completeToken({
+          entityId: customer.id,
+          forEntity: TokenEntityType.Customer,
+          isVerification: true,
+        }),
+      );
     } else if (type === EntityType.Host) {
       const { host, upsert } = await this.getHostUpsert.execute(
         { email },
         mongoTransactionSession,
       );
 
-      const hostType: EntityTokenType = upsert
-        ? EntityTokenType.UnverifiedHost
-        : EntityTokenType.Host;
+      const hostType: TokenEntityType = upsert
+        ? TokenEntityType.UnverifiedHost
+        : TokenEntityType.Host;
 
-      token = this.createVerificationTokenString({
-        entityId: host.id,
-        for: hostType,
-      });
+      token = this.createVerificationTokenString(
+        completeToken({
+          entityId: host.id,
+          forEntity: hostType,
+          isVerification: true,
+        }),
+      );
     }
 
     await this.emailService.sendEmail({
@@ -80,20 +82,14 @@ export class RequestAuthn implements IRequestAuthn {
     });
   }
 
-  private createVerificationTokenString(
-    payload: Omit<VerificationTokenPayload, 'type'>,
-  ): string {
+  private createVerificationTokenString(token: Token): string {
     const key = this.configService.get<string>('TOKEN_SIGNING_KEY');
     const expiresIn = this.configService.get<string>(
       'VERIFICATION_TOKEN_EXPIRES_IN',
     );
 
-    const token: string = jwt.sign(
-      { ...payload, type: MiscTokenType.Verification },
-      key,
-      { expiresIn },
-    );
+    const tokenString: string = jwt.sign(token, key, { expiresIn });
 
-    return token;
+    return tokenString;
   }
 }

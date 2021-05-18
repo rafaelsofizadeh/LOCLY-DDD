@@ -1,14 +1,18 @@
 import { UUID } from '../../common/domain';
 
-export type Grant = string;
-
-export type Grants = ReadonlyArray<Grant>;
-
 export const CustomerGrants = ['account/customer', 'order/customer'] as const;
 
 export const UnverifiedHostGrants = ['account/host/unverified'] as const;
 
 export const HostGrants = ['account/host', 'order/host'] as const;
+
+export const VerificationGrants = [] as const;
+
+export type Grants =
+  | typeof CustomerGrants
+  | typeof UnverifiedHostGrants
+  | typeof HostGrants
+  | typeof VerificationGrants;
 
 // TODO: merge/intersect enums
 export enum EntityType {
@@ -16,49 +20,18 @@ export enum EntityType {
   Host = 'host',
 }
 
-export enum EntityTokenType {
+export enum TokenEntityType {
   Customer = 'customer',
   UnverifiedHost = 'unverified_host',
   Host = 'host',
 }
 
-export enum MiscTokenType {
-  Verification = 'verification',
-}
-
-export enum TokenType {
-  Customer = 'customer',
-  Host = 'host',
-  UnverifiedHost = 'unverified_host',
-  Verification = 'verification',
-}
-
-export type EntityTokenPayload = Readonly<{
+export type Token = Readonly<{
+  forEntity: TokenEntityType;
   entityId: UUID;
-  type: EntityTokenType;
+  isVerification: boolean;
+  grants: Grants;
+  refresh: boolean;
 }>;
-
-export type VerificationTokenPayload = Readonly<{
-  // TODO: Rename 'for'
-  for: EntityTokenType;
-  entityId: UUID;
-  type: MiscTokenType.Verification;
-}>;
-
-export type TokenPayload = EntityTokenPayload | VerificationTokenPayload;
-
-export type EntityToken = EntityTokenPayload &
-  Readonly<{
-    grants: Grants;
-    refresh: true;
-  }>;
-
-export type VerificationToken = VerificationTokenPayload &
-  Readonly<{
-    grants: Grants;
-    refresh: false;
-  }>;
-
-export type Token = EntityToken | VerificationToken;
 
 export type TokenIdentity = Token & { isIdentified: true };

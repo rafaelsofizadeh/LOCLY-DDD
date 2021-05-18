@@ -2,25 +2,12 @@ import {
   CookieAuthxInterceptor,
   CookieAuthnFn,
 } from '@rafaelsofizadeh/nestjs-auth';
-import jwt from 'jsonwebtoken';
-import { FactoryProvider, HttpStatus } from '@nestjs/common';
+import { FactoryProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import {
-  createCustomException,
-  throwCustomException,
-} from '../../common/error-handling';
-import {
-  CustomerGrants,
-  EntityTokenType,
-  HostGrants,
-  TokenIdentity,
-  MiscTokenType,
-  Token,
-  TokenPayload,
-  UnverifiedHostGrants,
-  VerificationTokenPayload,
-} from '../entity/Token';
+import { createCustomException } from '../../common/error-handling';
+import { TokenIdentity } from '../entity/Token';
+import { stringToToken } from '../application/utils';
 
 /*
 1. Customer
@@ -61,7 +48,7 @@ import {
 
 {
   entityId: UUID;
-  for: 'customer' | 'unverified_host' | 'host';
+  forEntity: 'customer' | 'unverified_host' | 'host';
   type: 'verification';
   refresh: false;
 }
@@ -81,18 +68,14 @@ export const AuthxInterceptorFactory: FactoryProvider = {
 
       const key = configService.get<string>('TOKEN_SIGNING_KEY');
       // TODO(NOW): expiredAt isn't present, exp is
-      const { payload, expiredAt } = validateAndDecodeTokenPayload(
-        tokenString,
-        key,
-      );
+      const { token, expiredAt } = stringToToken(tokenString, key);
 
-      if (!payload) {
+      if (!token) {
         // TODO: Error message
         return false;
       }
 
       if (!expiredAt) {
-        const token: Token = payloadToToken(payload);
         // TODO: remove isIdentified requirement from IdentityBill
         return { ...token, isIdentified: true };
       }
@@ -110,71 +93,3 @@ export const AuthxInterceptorFactory: FactoryProvider = {
   },
   inject: [ConfigService],
 };
-
-export function validateAndDecodeTokenPayload(
-  token: string,
-  key: string,
-): { payload?: TokenPayload; expiredAt?: number; errorMessage?: string } {
-  try {
-    const { entityId, type, ...restPayload }: TokenPayload = jwt.verify(
-      token,
-      key,
-    ) as TokenPayload;
-
-    return {
-      payload: {
-        entityId,
-        type,
-        for: (restPayload as VerificationTokenPayload).for,
-      },
-    };
-  } catch ({ name, expiredAt, message: errorMessage }) {
-    if (name === 'TokenExpiredError') {
-      return {
-        expiredAt,
-        errorMessage,
-      };
-    }
-
-    if (name === 'JsonWebTokenError') {
-      return {
-        errorMessage,
-      };
-    }
-  }
-}
-
-export function payloadToToken(payload: TokenPayload): Token {
-  switch (payload.type) {
-    case EntityTokenType.Customer:
-      return {
-        ...payload,
-        grants: CustomerGrants,
-        refresh: true,
-      };
-    case EntityTokenType.UnverifiedHost:
-      return {
-        ...payload,
-        grants: UnverifiedHostGrants,
-        refresh: true,
-      };
-    case EntityTokenType.Host:
-      return {
-        ...payload,
-        grants: HostGrants,
-        refresh: true,
-      };
-    case MiscTokenType.Verification:
-      return {
-        ...payload,
-        grants: [],
-        refresh: false,
-      };
-    default:
-      throwCustomException(
-        'Invalid token',
-        arguments[0],
-        HttpStatus.UNAUTHORIZED,
-      )();
-  }
-}

@@ -1,6 +1,6 @@
 import { Controller, Post } from '@nestjs/common';
 import { AuthzScope, Identity } from '@rafaelsofizadeh/nestjs-auth/dist';
-import { EntityToken } from '../auth/entity/Token';
+import { TokenIdentity } from '../auth/entity/Token';
 import {
   GetHostDashboardLinksPayload,
   HostDashboardLinks,
@@ -14,7 +14,7 @@ export class HostController {
   @Post('dashboard')
   @AuthzScope('account/host/unverified')
   async getHostDashbordLinksController(
-    @Identity() hostIdentity: EntityToken,
+    @Identity() hostIdentity: TokenIdentity,
   ): Promise<HostDashboardLinks> {
     const dashboardLinksPayload: GetHostDashboardLinksPayload = {
       hostId: hostIdentity.entityId,

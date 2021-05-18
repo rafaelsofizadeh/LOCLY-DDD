@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import ms from 'ms';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
@@ -12,7 +12,7 @@ import {
   AuthnRequired,
   Identity,
 } from '@rafaelsofizadeh/nestjs-auth';
-import { VerificationToken } from './entity/Token';
+import { Token } from './entity/Token';
 
 @Controller('auth')
 export class AuthController {
@@ -37,7 +37,7 @@ export class AuthController {
   async verifyAuthnHandler(
     // passthrough: https://docs.nestjs.com/controllers#library-specific-approach
     @Res({ passthrough: true }) response: Response,
-    @Identity() verificationToken: VerificationToken,
+    @Identity() verificationToken: Token,
   ): Promise<void> {
     const authnToken: string = this.verifyAuthn.execute(verificationToken);
     const authnCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');

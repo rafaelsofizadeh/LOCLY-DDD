@@ -55,7 +55,7 @@ import {
   PayShipmentRequest,
 } from './application/PayShipment/IPayShipment';
 import { AuthzScope, Identity } from '@rafaelsofizadeh/nestjs-auth/dist';
-import { EntityToken } from '../auth/entity/Token';
+import { Token } from '../auth/entity/Token';
 
 @Controller('order')
 export class OrderController {
@@ -72,10 +72,11 @@ export class OrderController {
 
   @Post('draft')
   @AuthzScope('order/customer')
+  // TODO: where else to apply SerializePrivatePropertiesInterceptor?
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async draftOrderHandler(
     @Body() unidDraftOrderRequest: DraftOrderRequest,
-    @Identity() customerIdentity: EntityToken,
+    @Identity() customerIdentity: Token,
   ): Promise<DraftedOrder> {
     // TODO: Decorator for attaching identity id to request
     const draftOrderPayload: DraftOrderPayload = {
@@ -95,7 +96,7 @@ export class OrderController {
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async editOrderHandler(
     @Body() unidEditOrderRequest: EditOrderRequest,
-    @Identity() customerIdentity: EntityToken,
+    @Identity() customerIdentity: Token,
   ): Promise<DraftedOrder> {
     const editOrderPayload: EditOrderPayload = {
       ...unidEditOrderRequest,
@@ -113,7 +114,7 @@ export class OrderController {
   @AuthzScope('order/customer')
   async deleteOrderHandler(
     @Body() unidDeleteOrderRequest: DeleteOrderRequest,
-    @Identity() customerIdentity: EntityToken,
+    @Identity() customerIdentity: Token,
   ): Promise<DeleteOrderResult> {
     const deleteOrderPayload: DeleteOrderPayload = {
       ...unidDeleteOrderRequest,
@@ -127,7 +128,7 @@ export class OrderController {
   @AuthzScope('order/customer')
   async confirmOrderHandler(
     @Body() unidConfirmaOrderRequest: ConfirmOrderRequest,
-    @Identity() customerIdentity: EntityToken,
+    @Identity() customerIdentity: Token,
   ): Promise<StripeCheckoutSessionResult> {
     const confirmOrderPayload: ConfirmOrderPayload = {
       ...unidConfirmaOrderRequest,
@@ -145,7 +146,7 @@ export class OrderController {
   @AuthzScope('order/host')
   async receiveItemHandler(
     @Body() unidReceiveItemRequest: ReceiveItemRequest,
-    @Identity() hostIdentity: EntityToken,
+    @Identity() hostIdentity: Token,
   ): Promise<ReceiveItemResult> {
     const receiveItemPayload: ReceiveItemPayload = {
       ...unidReceiveItemRequest,
@@ -166,7 +167,7 @@ export class OrderController {
   async addItemPhotoHandler(
     @Body() unidAddItemPhotoRequest: AddItemPhotoRequest,
     @UploadedFiles() photos: Photo[],
-    @Identity() hostIdentity: EntityToken,
+    @Identity() hostIdentity: Token,
   ) {
     const addItemPhotoPayload: AddItemPhotoPayload = {
       ...unidAddItemPhotoRequest,
@@ -185,7 +186,7 @@ export class OrderController {
   @AuthzScope('order/host')
   async submitShipmentInfoHandler(
     @Body() unidSubmitShipmentInfoRequest: SubmitShipmentInfoRequest,
-    @Identity() hostIdentity: EntityToken,
+    @Identity() hostIdentity: Token,
   ): Promise<SubmitShipmentInfoResult> {
     const submitShipmentInfoPayload: SubmitShipmentInfoPayload = {
       ...unidSubmitShipmentInfoRequest,
@@ -199,7 +200,7 @@ export class OrderController {
   @AuthzScope('order/customer')
   async payShipmentHandler(
     @Body() unidPayShipmentRequest: PayShipmentRequest,
-    @Identity() customerIdentity: EntityToken,
+    @Identity() customerIdentity: Token,
   ): Promise<StripeCheckoutSessionResult> {
     const payShipmentPayload: PayShipmentPayload = {
       ...unidPayShipmentRequest,
