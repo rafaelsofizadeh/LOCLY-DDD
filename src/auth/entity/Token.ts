@@ -1,11 +1,8 @@
 import { UUID } from '../../common/domain';
 
 export const CustomerGrants = ['account/customer', 'order/customer'] as const;
-
 export const UnverifiedHostGrants = ['account/host/unverified'] as const;
-
 export const HostGrants = ['account/host', 'order/host'] as const;
-
 export const VerificationGrants = [] as const;
 
 export type Grants =
@@ -20,14 +17,14 @@ export enum EntityType {
   Host = 'host',
 }
 
-export enum TokenEntityType {
+export enum EntityTypeWithStatus {
   Customer = 'customer',
   UnverifiedHost = 'unverified_host',
   Host = 'host',
 }
 
 export type Token = Readonly<{
-  forEntity: TokenEntityType;
+  entityType: EntityTypeWithStatus;
   entityId: UUID;
   isVerification: boolean;
   grants: Grants;

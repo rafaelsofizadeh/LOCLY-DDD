@@ -9,55 +9,9 @@ import { createCustomException } from '../../common/error-handling';
 import { TokenIdentity } from '../entity/Token';
 import { stringToToken } from '../application/utils';
 
-/*
-1. Customer
-
-{
-  entityId: UUID;
-  type: 'customer';
-  grants: ['account/customer/*', 'order/customer/*'];
-  refresh: true;
-}
-
-2. Unverified Host
-
-{
-  entityId: UUID;
-  type: 'unverified_host';
-  grants: ['account/host/unverified/*'];
-  refresh: true;
-}
-
-3. Host
-
-{
-  entityId: UUID;
-  type: 'host';
-  grants: ['account/host/*', 'order/host/*'];
-  refresh: true;
-}
-
-4. Admin
-
-{
-  type: 'admin';
-  grants: ['*'];
-}
-
-5. Verification
-
-{
-  entityId: UUID;
-  forEntity: 'customer' | 'unverified_host' | 'host';
-  type: 'verification';
-  refresh: false;
-}
-*/
-
 export const AuthxInterceptorFactory: FactoryProvider = {
   provide: APP_INTERCEPTOR,
   useFactory: (configService: ConfigService) => {
-    // TODO: Extract to a separate fn [RELATED: VerifyAuthn TODO]
     const cookieAuthnFn: CookieAuthnFn<TokenIdentity> = async cookies => {
       const authnCookieName = configService.get<string>('TOKEN_COOKIE_NAME');
       const tokenString: string = cookies?.[authnCookieName];
@@ -71,7 +25,6 @@ export const AuthxInterceptorFactory: FactoryProvider = {
       const { token, expiredAt } = stringToToken(tokenString, key);
 
       if (!token) {
-        // TODO: Error message
         return false;
       }
 

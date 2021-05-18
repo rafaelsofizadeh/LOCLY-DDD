@@ -5,7 +5,7 @@ import { throwCustomException } from '../../common/error-handling';
 import {
   Token,
   VerificationGrants,
-  TokenEntityType,
+  EntityTypeWithStatus,
   CustomerGrants,
   UnverifiedHostGrants,
   HostGrants,
@@ -16,6 +16,7 @@ export function stringToToken(
   key: string,
 ): { token?: Token; expiredAt?: number; errorMessage?: string } {
   try {
+    // TODO: Serialize out JWT properties
     const token: Token = jwt.verify(tokenString, key) as Token;
 
     return {
@@ -37,14 +38,24 @@ export function stringToToken(
   }
 }
 
+export function tokenToString(
+  token: Token,
+  key: string,
+  expiresIn: string,
+): string {
+  const tokenString: string = jwt.sign(token, key, { expiresIn });
+
+  return tokenString;
+}
+
 export function completeToken(
   incompleteToken: Omit<Token, 'grants' | 'refresh'>,
 ): Token {
   if (incompleteToken.isVerification) {
-    if (incompleteToken.forEntity in tokenEntityConstants) {
+    if (incompleteToken.entityType in tokenEntityConstants) {
       return {
         ...incompleteToken,
-        ...tokenEntityConstants[incompleteToken.forEntity],
+        ...tokenEntityConstants[incompleteToken.entityType],
       } as Token;
     } else {
       throwCustomException(
@@ -59,13 +70,13 @@ export function completeToken(
 }
 
 const tokenEntityConstants: Record<
-  TokenEntityType,
+  EntityTypeWithStatus,
   { grants: ReadonlyArray<string>; refresh: boolean }
 > = {
-  [TokenEntityType.Customer]: { grants: CustomerGrants, refresh: true },
-  [TokenEntityType.UnverifiedHost]: {
+  [EntityTypeWithStatus.Customer]: { grants: CustomerGrants, refresh: true },
+  [EntityTypeWithStatus.UnverifiedHost]: {
     grants: UnverifiedHostGrants,
     refresh: true,
   },
-  [TokenEntityType.Host]: { grants: HostGrants, refresh: true },
+  [EntityTypeWithStatus.Host]: { grants: HostGrants, refresh: true },
 };
