@@ -5,8 +5,8 @@ import { withTransaction } from '../../../../../common/application';
 
 import { OrderStatus } from '../../../../entity/Order';
 import {
-  PayShipmentHandlerRequest,
-  PayShipmentHandlerResult,
+  PayShipmentRequest,
+  PayShipmentResult,
   IPayShipmentHandler,
 } from './IPayShipmentHandler';
 import { IOrderRepository } from '../../../../persistence/IOrderRepository';
@@ -19,9 +19,9 @@ export class PayShipmentHandler implements IPayShipmentHandler {
   ) {}
 
   async execute(
-    payShipmentRequest: PayShipmentHandlerRequest,
+    payShipmentRequest: PayShipmentRequest,
     mongoTransactionSession?: ClientSession,
-  ): Promise<PayShipmentHandlerResult> {
+  ): Promise<PayShipmentResult> {
     await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.markOrderPaid(payShipmentRequest, sessionWithTransaction),
@@ -31,7 +31,7 @@ export class PayShipmentHandler implements IPayShipmentHandler {
   }
 
   private async markOrderPaid(
-    { orderId }: PayShipmentHandlerRequest,
+    { orderId }: PayShipmentRequest,
     mongoTransactionSession: ClientSession,
   ): Promise<void> {
     await this.orderRepository.setProperties(

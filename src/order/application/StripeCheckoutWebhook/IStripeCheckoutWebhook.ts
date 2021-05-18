@@ -1,11 +1,11 @@
 import { StripeEvent, UseCase } from '../../../common/application';
 import {
-  ConfirmOrderHandlerRequest,
-  ConfirmOrderHandlerResult,
+  ConfirmOrderRequest,
+  ConfirmOrderResult,
 } from './handlers/ConfirmOrderHandler/IConfirmOrderHandler';
 import {
-  PayShipmentHandlerRequest,
-  PayShipmentHandlerResult,
+  PayShipmentRequest,
+  PayShipmentResult,
 } from './handlers/PayShipmentHandler/IPayShipmentHandler';
 
 export enum FeeType {
@@ -16,13 +16,11 @@ export enum FeeType {
 export type StripeCheckoutEvent = StripeEvent;
 
 export type StripeCheckoutWebhookPayload = (
-  | ConfirmOrderHandlerRequest
-  | PayShipmentHandlerRequest
+  | ConfirmOrderRequest
+  | PayShipmentRequest
 ) & { feeType: FeeType };
 
-export type StripeCheckoutResult =
-  | ConfirmOrderHandlerResult
-  | PayShipmentHandlerResult;
+export type StripeCheckoutResult = ConfirmOrderResult | PayShipmentResult;
 
 export abstract class IStripeCheckoutWebhook extends UseCase<
   StripeCheckoutEvent,
