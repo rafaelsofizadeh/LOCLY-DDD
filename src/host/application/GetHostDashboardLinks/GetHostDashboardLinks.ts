@@ -46,31 +46,21 @@ export class GetHostDashboardLinks implements IGetHostDashboardLinks {
       mongoTransactionSession,
     );
 
-    const [onboardingLink, editProfileLink]: StripeAccountLink[] = (
-      await Promise.all([
-        this.stripe.accountLinks.create({
-          account: stripeAccountId,
-          // TODO
-          refresh_url: 'https://example.com',
-          // TODO
-          return_url: 'https://example.com',
-          type: 'account_onboarding',
-        }),
-        this.stripe.accountLinks.create({
-          account: stripeAccountId,
-          // TODO
-          refresh_url: 'https://example.com',
-          // TODO
-          return_url: 'https://example.com',
-          type: 'account_update',
-        }),
-      ])
-    ).map(({ expires_at, url }) => ({
+    const onboardingLink: StripeAccountLink = (({ expires_at, url }) => ({
       url,
       // expires_at is Unix Epoch, which is in seconds; Date accepts milliseconds
       expiresAt: new Date(expires_at * 1000),
-    }));
+    }))(
+      await this.stripe.accountLinks.create({
+        account: stripeAccountId,
+        // TODO
+        refresh_url: 'https://example.com',
+        // TODO
+        return_url: 'https://example.com',
+        type: 'account_onboarding',
+      }),
+    );
 
-    return { onboardingLink, editProfileLink };
+    return { onboardingLink };
   }
 }

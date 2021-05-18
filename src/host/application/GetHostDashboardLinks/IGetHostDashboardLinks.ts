@@ -16,7 +16,6 @@ export type StripeAccountLink = {
 export interface HostDashboardLinks
   extends Readonly<{
     onboardingLink: StripeAccountLink;
-    editProfileLink: StripeAccountLink;
   }> {}
 
 export abstract class IGetHostDashboardLinks extends UseCase<
