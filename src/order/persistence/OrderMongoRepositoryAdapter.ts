@@ -9,7 +9,7 @@ import {
 } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
 
-import { UUID, WithoutId } from '../../common/domain';
+import { UUID } from '../../common/domain';
 import {
   expectOnlySingleResult,
   throwCustomException,
@@ -59,7 +59,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
   async setProperties(
     filter: OrderFilter,
     // TODO: better type naming for OrderFilter here
-    properties: WithoutId<OrderFilter>,
+    properties: Omit<OrderFilter, 'orderId'>,
     mongoTransactionSession?: ClientSession,
   ) {
     const filterWithId = normalizeOrderFilter(filter);
@@ -180,7 +180,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
   async setItemProperties(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
-    properties: WithoutId<ItemFilter>,
+    properties: Omit<ItemFilter, 'itemId'>,
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     const orderFilterWithId = normalizeOrderFilter(orderFilter);
