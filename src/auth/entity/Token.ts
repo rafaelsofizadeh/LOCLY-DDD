@@ -25,11 +25,13 @@ export enum EntityTypeWithStatus {
 }
 
 export type Token = Readonly<{
-  entityType: EntityTypeWithStatus;
   entityId: UUID;
   isVerification: boolean;
   grants: Grants;
   refresh: boolean;
-}>;
+}> & {
+  // EntityType can be changed, e.g. from Host to VerifiedHost, in the course of auth flow
+  entityType: EntityTypeWithStatus;
+};
 
 export type TokenIdentity = Token & { isIdentified: true };
