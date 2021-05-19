@@ -1,7 +1,8 @@
 import { UUID } from '../../common/domain';
 
+// TODO: Think through grants & scopes
 export const CustomerGrants = ['account/customer', 'order/customer'] as const;
-export const UnverifiedHostGrants = ['account/host/unverified'] as const;
+export const UnverifiedHostGrants = ['account/host'] as const;
 export const HostGrants = ['account/host', 'order/host'] as const;
 export const VerificationGrants = [] as const;
 

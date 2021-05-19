@@ -12,13 +12,13 @@ export class HostController {
   constructor(private readonly getHostDashboardLinks: IGetHostDashboardLinks) {}
 
   @Post('dashboard')
-  @AuthzScope('account/host/unverified')
   async getHostDashbordLinksController(
     @Identity() hostIdentity: TokenIdentity,
   ): Promise<HostDashboardLinks> {
     const dashboardLinksPayload: GetHostDashboardLinksPayload = {
       hostId: hostIdentity.entityId,
     };
+  @AuthzScope(['account/host'])
 
     const dashboardLinks: HostDashboardLinks = await this.getHostDashboardLinks.execute(
       dashboardLinksPayload,
