@@ -63,8 +63,6 @@ const useCaseProviders: Provider[] = [
   },
 ];
 
-// TODO(NOW): find a better place to initialize testing dependencies (through .env? npm scripts?)
-// ATTENTION: Cool thing. Polymorphism (?) through interface injections.
 const testProviders: Provider[] = [];
 
 @Module({
