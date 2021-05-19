@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
 import Stripe from 'stripe';
-import { inspect } from 'util';
 import { withTransaction } from '../../../../../common/application';
+import { IHostRepository } from '../../../../persistence/IHostRepository';
 import {
   IUpdateHostAccount,
   UpdateHostAccountRequest,
@@ -11,7 +11,10 @@ import {
 
 @Injectable()
 export class UpdateHostAccountHandler implements IUpdateHostAccount {
-  constructor(@InjectClient() private readonly mongoClient: MongoClient) {}
+  constructor(
+    private readonly hostRepository: IHostRepository,
+    @InjectClient() private readonly mongoClient: MongoClient,
+  ) {}
 
   async execute(
     updateHostAccountRequest: UpdateHostAccountRequest,
@@ -29,9 +32,21 @@ export class UpdateHostAccountHandler implements IUpdateHostAccount {
   }
 
   private async updateHostAccount(
-    hostAccount: Stripe.Account,
+    hostStripeAccount: Stripe.Account,
     mongoTransactionSession: ClientSession,
   ) {
-    console.log(hostAccount);
+    const isHostCurrentlyVerified =
+      hostStripeAccount.charges_enabled &&
+      hostStripeAccount.payouts_enabled &&
+      hostStripeAccount.requirements.currently_due.length === 0 &&
+      // TODO(NOW): Should I check capabilities?
+      hostStripeAccount.capabilities.card_payments === 'active' &&
+      hostStripeAccount.capabilities.transfers === 'active';
+
+    await this.hostRepository.setProperties(
+      { stripeAccountId: hostStripeAccount.id },
+      { verified: isHostCurrentlyVerified },
+      mongoTransactionSession,
+    );
   }
 }

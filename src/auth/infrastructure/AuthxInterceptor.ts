@@ -1,28 +1,19 @@
-import {
-  CookieAuthxInterceptor,
-  CookieAuthnFn,
-} from '@rafaelsofizadeh/nestjs-auth';
+import { CookieAuthxInterceptor, CookieAuthnFn } from '@eropple/nestjs-auth';
 import { FactoryProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+
 import { createCustomException } from '../../common/error-handling';
 import { EntityTypeWithStatus, Token } from '../entity/Token';
 import { stringToToken } from '../application/utils';
 import { IHostRepository } from '../../host/persistence/IHostRepository';
 import { Host } from '../../host/entity/Host';
-import Stripe from 'stripe';
-import {
-  InjectStripeClient,
-  STRIPE_CLIENT_TOKEN,
-} from '@golevelup/nestjs-stripe';
-import { inspect } from 'util';
 
 export const AuthxInterceptorFactory: FactoryProvider = {
   provide: APP_INTERCEPTOR,
   useFactory: (
     configService: ConfigService,
     hostRepository: IHostRepository,
-    stripe: Stripe,
   ) => {
     const cookieAuthnFn: CookieAuthnFn<Token> = async cookies => {
       const authnCookieName = configService.get<string>('TOKEN_COOKIE_NAME');
@@ -33,8 +24,11 @@ export const AuthxInterceptorFactory: FactoryProvider = {
       }
 
       const key = configService.get<string>('TOKEN_SIGNING_KEY');
-      // TODO(NOW): expiredAt isn't present, exp is
-      const { token, expiredAt } = stringToToken(tokenString, key);
+      // TODO: Error message pass to CookieAuthxInterceptorOptions.throwResponse
+      const { token, expiredAt, errorMessage } = stringToToken(
+        tokenString,
+        key,
+      );
 
       if (!token) {
         return false;
@@ -46,27 +40,21 @@ export const AuthxInterceptorFactory: FactoryProvider = {
       }
 
       if (
-        token.entityType === EntityTypeWithStatus.Host ||
-        token.entityType === EntityTypeWithStatus.UnverifiedHost
+        [
+          EntityTypeWithStatus.Host,
+          EntityTypeWithStatus.UnverifiedHost,
+        ].includes(token.entityType)
       ) {
-        const { stripeAccountId }: Host = await hostRepository.findHost({
+        // TODO: Do I really need any properties in HostToken apart from { entityId, entityType } if I query
+        // hostRepository on every request anyway?
+
+        // TODO: Should I populate the identity with the entire Host object and not have to query it again
+        // down the line?
+        const { verified }: Host = await hostRepository.findHost({
           hostId: token.entityId,
         });
 
-        // TODO: Move to AccountUpdated webhook and set a property on host db document
-        const hostStripeAccount: Stripe.Account = await stripe.accounts.retrieve(
-          stripeAccountId,
-        );
-
-        const isHostCurrentlyVerified =
-          hostStripeAccount.charges_enabled && //
-          hostStripeAccount.payouts_enabled && //
-          hostStripeAccount.requirements.currently_due.length === 0 && //
-          // TODO: Should I check capabilities?
-          hostStripeAccount.capabilities.card_payments === 'active' && // 
-          hostStripeAccount.capabilities.transfers === 'active'; //
-
-        token.entityType = isHostCurrentlyVerified
+        token.entityType = verified
           ? EntityTypeWithStatus.Host
           : EntityTypeWithStatus.UnverifiedHost;
       }
@@ -81,5 +69,5 @@ export const AuthxInterceptorFactory: FactoryProvider = {
       },
     });
   },
-  inject: [ConfigService, IHostRepository, STRIPE_CLIENT_TOKEN],
+  inject: [ConfigService, IHostRepository],
 };
