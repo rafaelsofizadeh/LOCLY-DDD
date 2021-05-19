@@ -83,7 +83,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     applyRawBodyOnlyTo(consumer, {
       method: RequestMethod.ALL,
-      path: 'stripe/webhook',
+      path: this.configService.get<string>('STRIPE_WEBHOOK_PATH'),
     });
 
     // Register global cookie parser middleware

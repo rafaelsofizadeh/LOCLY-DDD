@@ -27,6 +27,7 @@ import {
   getDestinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../../src/calculator/data/PriceGuide';
+import { ConfigService } from '@nestjs/config';
 
 type HostConfig = {
   email: Email;
@@ -70,6 +71,10 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     await app.listen(3000);
 
+    const configService = (await moduleRef.resolve(
+      ConfigService,
+    )) as ConfigService;
+
     customerRepository = (await moduleRef.resolve(
       ICustomerRepository,
     )) as ICustomerRepository;
@@ -96,7 +101,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     stripeListener = child_process.spawn('stripe', [
       'listen',
       '--forward-to',
-      'localhost:3000/stripe/webhook',
+      `localhost:3000/${configService.get<string>('STRIPE_WEBHOOK_PATH')}`,
     ]);
 
     await new Promise(resolve => {
