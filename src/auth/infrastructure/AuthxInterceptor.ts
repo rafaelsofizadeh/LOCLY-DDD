@@ -6,7 +6,7 @@ import { FactoryProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { createCustomException } from '../../common/error-handling';
-import { EntityTypeWithStatus, TokenIdentity } from '../entity/Token';
+import { EntityTypeWithStatus, Token } from '../entity/Token';
 import { stringToToken } from '../application/utils';
 import { IHostRepository } from '../../host/persistence/IHostRepository';
 import { Host } from '../../host/entity/Host';
@@ -24,7 +24,7 @@ export const AuthxInterceptorFactory: FactoryProvider = {
     hostRepository: IHostRepository,
     stripe: Stripe,
   ) => {
-    const cookieAuthnFn: CookieAuthnFn<TokenIdentity> = async cookies => {
+    const cookieAuthnFn: CookieAuthnFn<Token> = async cookies => {
       const authnCookieName = configService.get<string>('TOKEN_COOKIE_NAME');
       const tokenString: string = cookies?.[authnCookieName];
 
@@ -71,11 +71,7 @@ export const AuthxInterceptorFactory: FactoryProvider = {
           : EntityTypeWithStatus.UnverifiedHost;
       }
 
-      // TODO: remove isIdentified requirement from IdentityBill
-      return {
-        ...token,
-        isIdentified: true,
-      };
+      return token;
     };
 
     return new CookieAuthxInterceptor({

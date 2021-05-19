@@ -54,7 +54,7 @@ import {
   PayShipmentPayload,
   PayShipmentRequest,
 } from './application/PayShipment/IPayShipment';
-import { AuthzScope, Identity } from '@rafaelsofizadeh/nestjs-auth/dist';
+import { AuthzScope, Identity } from '@eropple/nestjs-auth/dist';
 import { Token } from '../auth/entity/Token';
 
 @Controller('order')
