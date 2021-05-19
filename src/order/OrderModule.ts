@@ -1,16 +1,12 @@
-import { DynamicModule, forwardRef, Module, Provider } from '@nestjs/common';
-import { getDbToken, MongoModule } from 'nest-mongodb';
-import { StripeModule } from '@golevelup/nestjs-stripe';
+import { Module, Provider } from '@nestjs/common';
+import { getDbToken } from 'nest-mongodb';
 import GridFsStorage from 'multer-gridfs-storage';
 
-import { IOrderRepository } from './persistence/IOrderRepository';
 import { ConfirmOrder } from './application/ConfirmOrder/ConfirmOrder';
 import { DraftOrder } from './application/DraftOrder/DraftOrder';
 import { IConfirmOrder } from './application/ConfirmOrder/IConfirmOrder';
 import { IDraftOrder } from './application/DraftOrder/IDraftOrder';
-import { OrderMongoRepositoryAdapter } from './persistence/OrderMongoRepositoryAdapter';
 import { OrderController } from './OrderController';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { IConfirmOrderHandler } from './application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/IConfirmOrderHandler';
 import { ConfirmOrderHandler } from './application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/ConfirmOrderHandler';
 import { IReceiveItem } from './application/ReceiveItem/IReceiveItem';
@@ -40,68 +36,6 @@ import { IPayShipmentHandler } from './application/StripeCheckoutWebhook/handler
 import { PayShipmentHandler } from './application/StripeCheckoutWebhook/handlers/PayShipmentHandler/PayShipmentHandler';
 import { IStripeCheckoutWebhook } from './application/StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { StripeCheckoutWebhook } from './application/StripeCheckoutWebhook/StripeCheckoutWebhook';
-import { CustomerModule } from '../customer/CustomerModule';
-import { HostModule } from '../host/HostModule';
-
-const imports: DynamicModule[] = [
-  ConfigModule.forRoot(),
-  MongoModule.forFeature(['orders', 'hosts']),
-  StripeModule.forRootAsync(StripeModule, {
-    imports: [ConfigModule],
-    useFactory: async (configService: ConfigService) => ({
-      apiKey: configService.get<string>('STRIPE_SECRET_API_TEST_KEY'),
-      webhookConfig: {
-        stripeWebhookSecret: configService.get<string>('STRIPE_WEBHOOK_SECRET'),
-      },
-    }),
-    inject: [ConfigService],
-  }),
-  MulterModule.registerAsync({
-    imports: [ConfigModule],
-    useFactory: async (db: Db) => ({
-      storage: new GridFsStorage({
-        db,
-        // TODO: Better 'file' function typing
-        // IMPORTANT: ALWAYS PUT REQUEST BODY FIELDS BEFORE FILE FIELD, or else req.body might be unpopulated
-        // https://stackoverflow.com/a/43197040
-        file: (request: Request) => {
-          const { hostId, itemId } = request.body as AddItemPhotoPayload;
-
-          const photoId = UUID();
-
-          return {
-            id: uuidToMuuid(photoId),
-            bucketName: 'host_item_photos',
-            filename: `${photoId}_hostId:${hostId}_itemId:${itemId}`,
-          };
-        },
-      }),
-      limits: {
-        fileSize: maxPhotoSizeBytes,
-        files: maxSimulataneousPhotoCount,
-      },
-      fileFilter: (req, { mimetype }, cb) => {
-        if (!/image\/jpeg|jpg|png|gif|heic/.test(mimetype)) {
-          try {
-            throwCustomException('Unsupported file mimetype', {
-              allowedFileMimetypes: ['jpeg', 'jpg', 'png', 'gif', 'heic'],
-              actualFileMimetype: mimetype,
-            })();
-          } catch (exception) {
-            cb(exception, false);
-          }
-        }
-
-        cb(undefined, true);
-      },
-    }),
-    inject: [getDbToken()],
-  }),
-];
-
-const persistenceProviders: Provider[] = [
-  { provide: IOrderRepository, useClass: OrderMongoRepositoryAdapter },
-];
 
 const useCaseProviders: Provider[] = [
   { provide: IDraftOrder, useClass: DraftOrder },
@@ -133,20 +67,51 @@ const useCaseProviders: Provider[] = [
 // ATTENTION: Cool thing. Polymorphism (?) through interface injections.
 const testProviders: Provider[] = [];
 
-const providers: Provider[] = [
-  ...persistenceProviders,
-  ...useCaseProviders,
-  ...testProviders,
-];
-
 @Module({
   imports: [
-    ...imports,
-    forwardRef(() => CustomerModule),
-    forwardRef(() => HostModule),
+    MulterModule.registerAsync({
+      useFactory: async (db: Db) => ({
+        storage: new GridFsStorage({
+          db,
+          // TODO: Better 'file' function typing
+          // IMPORTANT: ALWAYS PUT REQUEST BODY FIELDS BEFORE FILE FIELD, or else req.body might be unpopulated
+          // https://stackoverflow.com/a/43197040
+          file: (request: Request) => {
+            const { hostId, itemId } = request.body as AddItemPhotoPayload;
+
+            const photoId = UUID();
+
+            return {
+              id: uuidToMuuid(photoId),
+              bucketName: 'host_item_photos',
+              filename: `${photoId}_hostId:${hostId}_itemId:${itemId}`,
+            };
+          },
+        }),
+        limits: {
+          fileSize: maxPhotoSizeBytes,
+          files: maxSimulataneousPhotoCount,
+        },
+        fileFilter: (req, { mimetype }, cb) => {
+          if (!/image\/jpeg|jpg|png|gif|heic/.test(mimetype)) {
+            try {
+              throwCustomException('Unsupported file mimetype', {
+                allowedFileMimetypes: ['jpeg', 'jpg', 'png', 'gif', 'heic'],
+                actualFileMimetype: mimetype,
+              })();
+            } catch (exception) {
+              cb(exception, false);
+            }
+          }
+
+          cb(undefined, true);
+        },
+      }),
+      inject: [getDbToken()],
+    }),
   ],
   controllers: [OrderController],
-  providers,
-  exports: [...persistenceProviders],
+  providers: [...useCaseProviders, ...testProviders],
+  exports: [...useCaseProviders],
 })
 export class OrderModule {}
