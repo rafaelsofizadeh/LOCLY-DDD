@@ -16,27 +16,19 @@ export function stringToToken(
   key: string,
 ): { token?: Token; expiredAt?: number; errorMessage?: string } {
   try {
-    // TODO: Serialize out JWT properties (more reliable, with typing, maybe change library)
     const { exp, iat, ...token } = jwt.verify(tokenString, key) as Token & {
       exp: number;
       iat: number;
     };
 
-    return {
-      token: completeToken(token),
-    };
+    return { token };
   } catch ({ name, expiredAt, message: errorMessage }) {
     if (name === 'TokenExpiredError') {
-      return {
-        expiredAt,
-        errorMessage,
-      };
+      return { expiredAt, errorMessage };
     }
 
     if (name === 'JsonWebTokenError') {
-      return {
-        errorMessage,
-      };
+      return { errorMessage };
     }
   }
 }

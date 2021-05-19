@@ -7,7 +7,7 @@ export type Host = Readonly<{
   id: UUID;
   email: Email;
   stripeAccountId: string;
-  onboarded: boolean;
+  verified: boolean;
   available: boolean;
   address?: Address;
   orderIds?: UUID[];

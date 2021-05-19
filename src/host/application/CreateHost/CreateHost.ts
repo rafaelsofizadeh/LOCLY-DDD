@@ -57,7 +57,7 @@ export class CreateHost implements ICreateHost {
       email,
       stripeAccountId: hostAccount.id,
       available: false,
-      onboarded: false,
+      verified: false,
     };
 
     await this.hostRepository.addHost(host, mongoTransactionSession);
