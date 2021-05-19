@@ -33,5 +33,3 @@ export type Token = Readonly<{
   // EntityType can be changed, e.g. from Host to VerifiedHost, in the course of auth flow
   entityType: EntityTypeWithStatus;
 };
-
-export type TokenIdentity = Token & { isIdentified: true };
