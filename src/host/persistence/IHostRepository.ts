@@ -36,6 +36,13 @@ export abstract class IHostRepository {
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
+  abstract setProperties(
+    filter: HostFilter,
+    // TODO: type is almost the same as OrderFilter
+    properties: Omit<HostFilter, 'hostId'>,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void>;
+
   abstract findHostAvailableInCountryWithMinimumNumberOfOrders(
     country: Country,
     mongoTransactionSession?: ClientSession,

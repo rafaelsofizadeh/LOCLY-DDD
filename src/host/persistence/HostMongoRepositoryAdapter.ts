@@ -22,7 +22,7 @@ import {
   expectOnlySingleResult,
   throwCustomException,
 } from '../../common/error-handling';
-import { UUID } from '../../common/domain';
+import { UUID, WithoutId } from '../../common/domain';
 import { Country } from '../../order/entity/Country';
 import { mongoQuery, uuidToMuuid } from '../../common/persistence';
 
@@ -98,6 +98,40 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
     });
   }
 
+  async setProperties(
+    filter: HostFilter,
+    // TODO: better type naming for OrderFilter here
+    properties: Omit<HostFilter, 'hostId'>,
+    mongoTransactionSession?: ClientSession,
+  ) {
+    const filterWithId = normalizeHostFilter(filter);
+    const filterQuery: FilterQuery<HostMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+
+    const updateResult: UpdateWriteOpResult = await this.hostCollection
+      .updateOne(
+        filterQuery,
+        { $set: mongoQuery(properties) },
+        { session: mongoTransactionSession },
+      )
+      .catch(
+        throwCustomException('Error updating host', {
+          filter,
+          properties,
+        }),
+      );
+
+    expectOnlySingleResult(
+      [updateResult.matchedCount, updateResult.modifiedCount],
+      {
+        operation: 'setting properties on',
+        entity: 'host',
+      },
+      { filter, properties },
+    );
+  }
+
   // This should always be used together with IOrderRepository.addHostToOrder
   async addOrderToHost(
     filter: HostFilter,
@@ -169,7 +203,7 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
           {
             $match: {
               'address.country': country,
-              onboarded: true,
+              verified: true,
               available: true,
             },
           },
