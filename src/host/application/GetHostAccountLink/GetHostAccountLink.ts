@@ -13,6 +13,9 @@ import {
 import { Host } from '../../entity/Host';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
+export const HostOnboardingLinkType = 'account_onboarding' as const;
+export type HostOnboardingLinkType = 'account_onboarding';
+
 @Injectable()
 export class GetHostAccountLink implements IGetHostAccountLink {
   constructor(
@@ -36,14 +39,12 @@ export class GetHostAccountLink implements IGetHostAccountLink {
   }
 
   private async generateHostStripeAccountLink(
-    { hostId, accountLinkType }: GetHostAccountLinkPayload,
+    { hostId }: GetHostAccountLinkPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<HostAccountLink> {
     // TODO(NOW): Put stripeAccountId into token
     const { stripeAccountId }: Host = await this.hostRepository.findHost(
-      {
-        hostId,
-      },
+      { hostId },
       mongoTransactionSession,
     );
 
@@ -58,7 +59,7 @@ export class GetHostAccountLink implements IGetHostAccountLink {
         refresh_url: 'https://example.com',
         // TODO
         return_url: 'https://example.com',
-        type: accountLinkType,
+        type: HostOnboardingLinkType,
       }),
     );
 
