@@ -16,8 +16,11 @@ export function stringToToken(
   key: string,
 ): { token?: Token; expiredAt?: number; errorMessage?: string } {
   try {
-    // TODO: Serialize out JWT properties
-    const token: Token = jwt.verify(tokenString, key) as Token;
+    // TODO: Serialize out JWT properties (more reliable, with typing, maybe change library)
+    const { exp, iat, ...token } = jwt.verify(tokenString, key) as Token & {
+      exp: number;
+      iat: number;
+    };
 
     return {
       token: completeToken(token),
@@ -48,25 +51,26 @@ export function tokenToString(
   return tokenString;
 }
 
+// TODO(NOW): Attach grants & refresh to token body
 export function completeToken(
   incompleteToken: Omit<Token, 'grants' | 'refresh'>,
 ): Token {
   if (incompleteToken.isVerification) {
-    if (incompleteToken.entityType in tokenEntityConstants) {
-      return {
-        ...incompleteToken,
-        ...tokenEntityConstants[incompleteToken.entityType],
-      } as Token;
-    } else {
-      throwCustomException(
-        'Invalid token',
-        arguments[0],
-        HttpStatus.UNAUTHORIZED,
-      )();
-    }
-  } else {
     return { ...incompleteToken, grants: VerificationGrants, refresh: false };
   }
+
+  if (incompleteToken.entityType in tokenEntityConstants) {
+    return {
+      ...incompleteToken,
+      ...tokenEntityConstants[incompleteToken.entityType],
+    } as Token;
+  }
+
+  throwCustomException(
+    'Invalid token',
+    arguments[0],
+    HttpStatus.UNAUTHORIZED,
+  )();
 }
 
 const tokenEntityConstants: Record<
