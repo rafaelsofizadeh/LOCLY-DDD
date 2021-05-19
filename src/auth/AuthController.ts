@@ -39,13 +39,15 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
     @Identity() verificationToken: Token,
   ): Promise<void> {
-    const authnToken: string = this.verifyAuthn.execute(verificationToken);
+    const authnTokenString: string = this.verifyAuthn.execute(
+      verificationToken,
+    );
     const authnCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
     const authnCookieMaxAge = ms(
       this.configService.get<string>('AUTHN_TOKEN_EXPIRES_IN'),
     );
 
-    response.cookie(authnCookieName, authnToken, {
+    response.cookie(authnCookieName, authnTokenString, {
       maxAge: authnCookieMaxAge,
       signed: true,
       httpOnly: true,
