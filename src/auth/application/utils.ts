@@ -1,15 +1,5 @@
-import { HttpStatus } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
-
-import { throwCustomException } from '../../common/error-handling';
-import {
-  Token,
-  VerificationGrants,
-  EntityTypeWithStatus,
-  CustomerGrants,
-  UnverifiedHostGrants,
-  HostGrants,
-} from '../entity/Token';
+import { Token } from '../entity/Token';
 
 export function stringToToken(
   tokenString: string,
@@ -42,37 +32,3 @@ export function tokenToString(
 
   return tokenString;
 }
-
-// TODO(NOW): Attach grants & refresh to token body
-export function completeToken(
-  incompleteToken: Omit<Token, 'grants' | 'refresh'>,
-): Token {
-  if (incompleteToken.isVerification) {
-    return { ...incompleteToken, grants: VerificationGrants, refresh: false };
-  }
-
-  if (incompleteToken.entityType in tokenEntityConstants) {
-    return {
-      ...incompleteToken,
-      ...tokenEntityConstants[incompleteToken.entityType],
-    } as Token;
-  }
-
-  throwCustomException(
-    'Invalid token',
-    arguments[0],
-    HttpStatus.UNAUTHORIZED,
-  )();
-}
-
-const tokenEntityConstants: Record<
-  EntityTypeWithStatus,
-  { grants: ReadonlyArray<string>; refresh: boolean }
-> = {
-  [EntityTypeWithStatus.Customer]: { grants: CustomerGrants, refresh: true },
-  [EntityTypeWithStatus.UnverifiedHost]: {
-    grants: UnverifiedHostGrants,
-    refresh: true,
-  },
-  [EntityTypeWithStatus.Host]: { grants: HostGrants, refresh: true },
-};

@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import ms from 'ms';
+import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import {
@@ -7,8 +7,9 @@ import {
   IRequestAuthn,
 } from './application/RequestAuthn/IRequestAuthn';
 import { IVerifyAuthn } from './application/VerifyAuthn/IVerifyAuthn';
-import { AuthnDisallowed, AuthnRequired, Identity } from '@eropple/nestjs-auth';
 import { Token } from './entity/Token';
+import { Authn, AuthnStatus } from './infrastructure/decorators/authn';
+import { VerificationTokenIdentity } from './infrastructure/decorators/identity';
 
 @Controller('auth')
 export class AuthController {
@@ -18,7 +19,7 @@ export class AuthController {
     private readonly verifyAuthn: IVerifyAuthn,
   ) {}
 
-  @AuthnDisallowed()
+  @Authn(AuthnStatus.Disallowed)
   @Post()
   async requestAuthnHandler(
     @Body() requestAuthnRequest: RequestAuthnRequest,
@@ -28,12 +29,12 @@ export class AuthController {
 
   // Why AuthnRequired? TokenParamToBodyMiddleware will move the :token URL param to request cookies, for
   // AuthInterceptor to operate on the token cookie.
-  @AuthnRequired()
+  @Authn(AuthnStatus.Required)
   @Get('verify/:token')
   async verifyAuthnHandler(
     // passthrough: https://docs.nestjs.com/controllers#library-specific-approach
     @Res({ passthrough: true }) response: Response,
-    @Identity() verificationToken: Token,
+    @VerificationTokenIdentity() verificationToken: Token,
   ): Promise<void> {
     const authnTokenString: string = this.verifyAuthn.execute(
       verificationToken,
@@ -50,7 +51,7 @@ export class AuthController {
     });
   }
 
-  @AuthnRequired()
+  @Authn(AuthnStatus.Required)
   @Post('logout')
   async logoutHandler(
     @Res({ passthrough: true }) response: Response,

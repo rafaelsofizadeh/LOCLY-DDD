@@ -54,8 +54,12 @@ import {
   PayShipmentPayload,
   PayShipmentRequest,
 } from './application/PayShipment/IPayShipment';
-import { AuthzScope, Identity } from '@eropple/nestjs-auth/dist';
-import { Token } from '../auth/entity/Token';
+import {
+  CustomerIdentity,
+  HostIdentity,
+} from '../auth/infrastructure/decorators/identity';
+import { UUID } from '../common/domain';
+import { Host } from '../host/entity/Host';
 
 @Controller('order')
 export class OrderController {
@@ -71,17 +75,16 @@ export class OrderController {
   ) {}
 
   @Post('draft')
-  @AuthzScope('order/customer')
   // TODO: where else to apply SerializePrivatePropertiesInterceptor?
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async draftOrderHandler(
     @Body() unidDraftOrderRequest: DraftOrderRequest,
-    @Identity() customerIdentity: Token,
+    @CustomerIdentity() customerId: UUID,
   ): Promise<DraftedOrder> {
     // TODO: Decorator for attaching identity id to request
     const draftOrderPayload: DraftOrderPayload = {
       ...unidDraftOrderRequest,
-      customerId: customerIdentity.entityId,
+      customerId,
     };
 
     const draftOrder: DraftedOrder = await this.draftOrder.execute(
@@ -92,15 +95,14 @@ export class OrderController {
   }
 
   @Post('edit')
-  @AuthzScope('order/customer')
   @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async editOrderHandler(
     @Body() unidEditOrderRequest: EditOrderRequest,
-    @Identity() customerIdentity: Token,
+    @CustomerIdentity() customerId: UUID,
   ): Promise<DraftedOrder> {
     const editOrderPayload: EditOrderPayload = {
       ...unidEditOrderRequest,
-      customerId: customerIdentity.entityId,
+      customerId,
     };
 
     const editedDraftOrder: DraftedOrder = await this.editOrder.execute(
@@ -111,28 +113,26 @@ export class OrderController {
   }
 
   @Post('delete')
-  @AuthzScope('order/customer')
   async deleteOrderHandler(
     @Body() unidDeleteOrderRequest: DeleteOrderRequest,
-    @Identity() customerIdentity: Token,
+    @CustomerIdentity() customerId: UUID,
   ): Promise<DeleteOrderResult> {
     const deleteOrderPayload: DeleteOrderPayload = {
       ...unidDeleteOrderRequest,
-      customerId: customerIdentity.entityId,
+      customerId,
     };
 
     await this.deleteOrder.execute(deleteOrderPayload);
   }
 
   @Post('confirm')
-  @AuthzScope('order/customer')
   async confirmOrderHandler(
     @Body() unidConfirmaOrderRequest: ConfirmOrderRequest,
-    @Identity() customerIdentity: Token,
+    @CustomerIdentity() customerId: UUID,
   ): Promise<StripeCheckoutSessionResult> {
     const confirmOrderPayload: ConfirmOrderPayload = {
       ...unidConfirmaOrderRequest,
-      customerId: customerIdentity.entityId,
+      customerId,
     };
 
     const stripeCheckoutSession = await this.confirmOrder.execute(
@@ -143,14 +143,13 @@ export class OrderController {
   }
 
   @Post('receiveItem')
-  @AuthzScope('order/host')
   async receiveItemHandler(
     @Body() unidReceiveItemRequest: ReceiveItemRequest,
-    @Identity() hostIdentity: Token,
+    @HostIdentity() { id: hostId }: Host,
   ): Promise<ReceiveItemResult> {
     const receiveItemPayload: ReceiveItemPayload = {
       ...unidReceiveItemRequest,
-      hostId: hostIdentity.entityId,
+      hostId,
     };
 
     const receivedDateResult = await this.receiveItem.execute(
@@ -161,17 +160,16 @@ export class OrderController {
   }
 
   @Post('addItemPhotos')
-  @AuthzScope('order/host')
   // file control/validation is done by MulterModule registration
   @UseInterceptors(FilesInterceptor('photos'))
   async addItemPhotoHandler(
     @Body() unidAddItemPhotoRequest: AddItemPhotoRequest,
     @UploadedFiles() photos: Photo[],
-    @Identity() hostIdentity: Token,
+    @HostIdentity() { id: hostId }: Host,
   ) {
     const addItemPhotoPayload: AddItemPhotoPayload = {
       ...unidAddItemPhotoRequest,
-      hostId: hostIdentity.entityId,
+      hostId,
       photos,
     };
 
@@ -183,28 +181,26 @@ export class OrderController {
   }
 
   @Post('submitShipmentInfo')
-  @AuthzScope('order/host')
   async submitShipmentInfoHandler(
     @Body() unidSubmitShipmentInfoRequest: SubmitShipmentInfoRequest,
-    @Identity() hostIdentity: Token,
+    @HostIdentity() { id: hostId }: Host,
   ): Promise<SubmitShipmentInfoResult> {
     const submitShipmentInfoPayload: SubmitShipmentInfoPayload = {
       ...unidSubmitShipmentInfoRequest,
-      hostId: hostIdentity.entityId,
+      hostId,
     };
 
     await this.submitShipmentInfo.execute(submitShipmentInfoPayload);
   }
 
   @Post('payShipment')
-  @AuthzScope('order/customer')
   async payShipmentHandler(
     @Body() unidPayShipmentRequest: PayShipmentRequest,
-    @Identity() customerIdentity: Token,
+    @CustomerIdentity() customerId: UUID,
   ): Promise<StripeCheckoutSessionResult> {
     const payShipmentPayload: PayShipmentPayload = {
       ...unidPayShipmentRequest,
-      customerId: customerIdentity.entityId,
+      customerId,
     };
 
     const stripeCheckoutSession = await this.payShipment.execute(

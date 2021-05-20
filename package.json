@@ -22,7 +22,6 @@
     "test:draft-order": "jest -i 'DraftOrder'"
   },
   "dependencies": {
-    "@eropple/nestjs-auth": "git+https://github.com/rafaelsofizadeh/nestjs-auth.git",
     "@golevelup/nestjs-stripe": "^0.1.0",
     "@golevelup/nestjs-webhooks": "^0.2.6",
     "@nestjs/common": "^7.0.0",

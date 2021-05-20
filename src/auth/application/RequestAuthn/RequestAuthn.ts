@@ -10,9 +10,9 @@ import {
   IRequestAuthn,
 } from './IRequestAuthn';
 import { IGetCustomerUpsert } from '../../../customer/application/GetCustomerUpsert/IGetCustomerUpsert';
-import { EntityTypeWithStatus, EntityType } from '../../entity/Token';
+import { EntityType } from '../../entity/Token';
 import { IGetHostUpsert } from '../../../host/application/GetHostUpsert/IGetHostUpsert';
-import { completeToken, tokenToString } from '../utils';
+import { tokenToString } from '../utils';
 import { Email, UUID } from '../../../common/domain';
 import { throwCustomException } from '../../../common/error-handling';
 
@@ -54,11 +54,7 @@ export class RequestAuthn implements IRequestAuthn {
     );
 
     const tokenString: string = tokenToString(
-      completeToken({
-        entityId,
-        entityType,
-        isVerification: true,
-      }),
+      { entityId, entityType, isVerification: true },
       key,
       expiresIn,
     );
@@ -74,7 +70,7 @@ export class RequestAuthn implements IRequestAuthn {
     email: Email,
     entityType: EntityType,
     mongoTransactionSession: ClientSession,
-  ): Promise<{ entityId: UUID; entityType: EntityTypeWithStatus }> {
+  ): Promise<{ entityId: UUID; entityType: EntityType }> {
     if (entityType === EntityType.Customer) {
       const { customer } = await this.getCustomerUpsert.execute(
         { email },
@@ -83,21 +79,19 @@ export class RequestAuthn implements IRequestAuthn {
 
       return {
         entityId: customer.id,
-        entityType: EntityTypeWithStatus.Customer,
+        entityType: EntityType.Customer,
       };
     }
 
     if (entityType === EntityType.Host) {
-      const { host, upsert } = await this.getHostUpsert.execute(
+      const { host } = await this.getHostUpsert.execute(
         { email },
         mongoTransactionSession,
       );
 
       return {
         entityId: host.id,
-        entityType: upsert
-          ? EntityTypeWithStatus.UnverifiedHost
-          : EntityTypeWithStatus.Host,
+        entityType: EntityType.Host,
       };
     }
 

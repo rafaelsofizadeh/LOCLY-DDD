@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Token } from '../../entity/Token';
-import { completeToken, tokenToString } from '../utils';
+import { tokenToString } from '../utils';
 import { IVerifyAuthn } from './IVerifyAuthn';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class VerifyAuthn implements IVerifyAuthn {
     const expiresIn = this.configService.get<string>('AUTHN_TOKEN_EXPIRES_IN');
 
     return tokenToString(
-      completeToken({ entityId, entityType, isVerification: false }),
+      { entityId, entityType, isVerification: false },
       key,
       expiresIn,
     );

@@ -1,23 +1,22 @@
 import { Controller, Get } from '@nestjs/common';
-import { AuthzScope, Identity } from '@eropple/nestjs-auth/dist';
-import { Token } from '../auth/entity/Token';
 import {
   HostAccountLink,
   IGetHostAccountLink,
 } from './application/GetHostAccountLink/IGetHostAccountLink';
+import { HostIdentity } from '../auth/infrastructure/decorators/identity';
+import { Host } from './entity/Host';
 
 @Controller('host')
 export class HostController {
   constructor(private readonly getHostAccountLink: IGetHostAccountLink) {}
 
   @Get('dashboard')
-  @AuthzScope(['account/host'])
   async getHostAccountLinkController(
-    @Identity() { entityId: hostId }: Token,
+    @HostIdentity() host: Host,
   ): Promise<HostAccountLink> {
-    const accountLink: HostAccountLink = await this.getHostAccountLink.execute({
-      hostId,
-    });
+    const accountLink: HostAccountLink = await this.getHostAccountLink.execute(
+      host,
+    );
 
     return accountLink;
   }

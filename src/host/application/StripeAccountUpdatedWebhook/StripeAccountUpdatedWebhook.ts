@@ -8,7 +8,10 @@ import {
   IStripeAccountUpdatedWebhook,
   StripeAccountUpdatedResult,
 } from './IStripeAccountUpdatedWebhook';
-import { AuthnSkip } from '@eropple/nestjs-auth/dist';
+import {
+  Authn,
+  AuthnStatus,
+} from '../../../auth/infrastructure/decorators/authn';
 
 @Injectable()
 export class StripeAccountUpdatedWebhook
@@ -18,7 +21,7 @@ export class StripeAccountUpdatedWebhook
   ) {}
 
   @StripeWebhookHandler('account.updated')
-  @AuthnSkip()
+  @Authn(AuthnStatus.Skip)
   execute(event: StripeEvent): Promise<StripeAccountUpdatedResult> {
     // TODO: event.data.object extracting decorator
     const webhookPayload = event.data.object as Stripe.Account;
