@@ -1,7 +1,6 @@
 import { UseCase } from '../../../common/application';
-import { UUID } from '../../../common/domain';
 
-export type GetHostAccountLinkPayload = Readonly<{ hostId: UUID }>;
+export type GetHostAccountLinkPayload = Readonly<{ stripeAccountId: string }>;
 
 export type StripeAccountLink = {
   url: string;

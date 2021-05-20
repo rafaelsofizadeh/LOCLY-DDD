@@ -1,7 +1,6 @@
 import Stripe from 'stripe';
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
-import { IHostRepository } from '../../persistence/IHostRepository';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import {
@@ -10,7 +9,6 @@ import {
   IGetHostAccountLink,
   StripeAccountLink,
 } from './IGetHostAccountLink';
-import { Host } from '../../entity/Host';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
 export const HostOnboardingLinkType = 'account_onboarding' as const;
@@ -19,7 +17,6 @@ export type HostOnboardingLinkType = 'account_onboarding';
 @Injectable()
 export class GetHostAccountLink implements IGetHostAccountLink {
   constructor(
-    private readonly hostRepository: IHostRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
     @InjectStripeClient() private readonly stripe: Stripe,
   ) {}
@@ -39,15 +36,9 @@ export class GetHostAccountLink implements IGetHostAccountLink {
   }
 
   private async generateHostStripeAccountLink(
-    { hostId }: GetHostAccountLinkPayload,
+    { stripeAccountId }: GetHostAccountLinkPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<HostAccountLink> {
-    // TODO(NOW): Put stripeAccountId into token
-    const { stripeAccountId }: Host = await this.hostRepository.findHost(
-      { hostId },
-      mongoTransactionSession,
-    );
-
     const onboardingLink: StripeAccountLink = (({ expires_at, url }) => ({
       url,
       // expires_at is Unix Epoch, which is in seconds; Date accepts milliseconds
