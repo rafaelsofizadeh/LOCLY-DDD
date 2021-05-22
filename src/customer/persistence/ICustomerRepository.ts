@@ -1,5 +1,6 @@
 import { ClientSession } from 'mongodb';
 import { UUID } from '../../common/domain';
+import { Address } from '../../order/entity/Order';
 import { Customer, CustomerFilter } from '../entity/Customer';
 
 export abstract class ICustomerRepository {
@@ -13,15 +14,27 @@ export abstract class ICustomerRepository {
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
-  abstract addOrderToCustomer(
+  abstract addOrder(
     filter: CustomerFilter,
     orderId: UUID,
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
-  abstract removeOrderFromCustomer(
+  abstract removeOrder(
     filter: CustomerFilter,
     orderId: UUID,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void>;
+
+  abstract addAddress(
+    filter: CustomerFilter,
+    address: Address,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void>;
+
+  abstract removeAddress(
+    filter: CustomerFilter,
+    address: Address,
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 

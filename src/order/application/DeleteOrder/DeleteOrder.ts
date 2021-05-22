@@ -36,7 +36,7 @@ export class DeleteOrder implements IDeleteOrder {
       { orderId, status: OrderStatus.Drafted, customerId },
       mongoTransactionSession,
     );
-    await this.customerRepository.removeOrderFromCustomer(
+    await this.customerRepository.removeOrder(
       { customerId },
       orderId,
       mongoTransactionSession,

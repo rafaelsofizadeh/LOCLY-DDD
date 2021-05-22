@@ -53,7 +53,7 @@ export class DraftOrder implements IDraftOrder {
     // (GLOBAL) DON'T parallelize this. Promise.all()'ing these, together with transactions, will lead to random
     // TransientTransactionError errors.
     await this.orderRepository.addOrder(draftOrder, mongoTransactionSession);
-    await this.customerRepository.addOrderToCustomer(
+    await this.customerRepository.addOrder(
       { customerId: draftOrder.customerId },
       draftOrder.id,
       mongoTransactionSession,
