@@ -3,7 +3,7 @@ import {
   HostAccountLink,
   IGetHostAccountLink,
 } from './application/GetHostAccountLink/IGetHostAccountLink';
-import { HostIdentity } from '../auth/infrastructure/decorators/identity';
+import { AnyHostIdentity } from '../auth/infrastructure/decorators/identity';
 import { Host } from './entity/Host';
 
 @Controller('host')
@@ -12,7 +12,7 @@ export class HostController {
 
   @Get('dashboard')
   async getHostAccountLinkController(
-    @HostIdentity() host: Host,
+    @AnyHostIdentity() host: Host,
   ): Promise<HostAccountLink> {
     const accountLink: HostAccountLink = await this.getHostAccountLink.execute(
       host,

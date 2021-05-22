@@ -56,7 +56,7 @@ import {
 } from './application/PayShipment/IPayShipment';
 import {
   CustomerIdentity,
-  HostIdentity,
+  VerifiedHostIdentity,
 } from '../auth/infrastructure/decorators/identity';
 import { UUID } from '../common/domain';
 import { Host } from '../host/entity/Host';
@@ -145,7 +145,7 @@ export class OrderController {
   @Post('receiveItem')
   async receiveItemHandler(
     @Body() unidReceiveItemRequest: ReceiveItemRequest,
-    @HostIdentity() { id: hostId }: Host,
+    @VerifiedHostIdentity() { id: hostId }: Host,
   ): Promise<ReceiveItemResult> {
     const receiveItemPayload: ReceiveItemPayload = {
       ...unidReceiveItemRequest,
@@ -165,7 +165,7 @@ export class OrderController {
   async addItemPhotoHandler(
     @Body() unidAddItemPhotoRequest: AddItemPhotoRequest,
     @UploadedFiles() photos: Photo[],
-    @HostIdentity() { id: hostId }: Host,
+    @VerifiedHostIdentity() { id: hostId }: Host,
   ) {
     const addItemPhotoPayload: AddItemPhotoPayload = {
       ...unidAddItemPhotoRequest,
@@ -183,7 +183,7 @@ export class OrderController {
   @Post('submitShipmentInfo')
   async submitShipmentInfoHandler(
     @Body() unidSubmitShipmentInfoRequest: SubmitShipmentInfoRequest,
-    @HostIdentity() { id: hostId }: Host,
+    @VerifiedHostIdentity() { id: hostId }: Host,
   ): Promise<SubmitShipmentInfoResult> {
     const submitShipmentInfoPayload: SubmitShipmentInfoPayload = {
       ...unidSubmitShipmentInfoRequest,

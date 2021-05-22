@@ -9,15 +9,15 @@ import { Exception } from '../common/error-handling';
 
 @Catch(Exception)
 export class CustomExceptionFilter implements ExceptionFilter {
-  catch({ error, status, data }: Exception, host: ArgumentsHost) {
+  catch(exception: Exception, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    console.error(error);
+    console.error(exception?.error || 'Undefined error');
 
-    return response.status(status).json({
-      message: `${HttpStatus[status]} | ${error.message}`,
-      data,
+    return response.status(exception?.status).json({
+      message: `${HttpStatus[exception?.status]} | ${exception?.error.message}`,
+      data: exception?.data,
     });
   }
 }

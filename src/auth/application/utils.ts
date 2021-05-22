@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { Token } from '../entity/Token';
 
 export function stringToToken(
-  tokenString: string,
+  tokenString: string | undefined | null,
   key: string,
 ): { token?: Token; expiredAt?: number; errorMessage?: string } {
   try {

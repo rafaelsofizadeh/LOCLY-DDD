@@ -1,10 +1,6 @@
 import { StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { Injectable } from '@nestjs/common';
 import {
-  Authn,
-  AuthnStatus,
-} from '../../../auth/infrastructure/decorators/authn';
-import {
   StripeCheckoutSession,
   StripeEvent,
 } from '../../../common/application';
@@ -33,7 +29,6 @@ export class StripeCheckoutWebhook implements IStripeCheckoutWebhook {
 
   // TODO: Don't run AuthInterceptor on webhooks
   @StripeWebhookHandler('checkout.session.completed')
-  @Authn(AuthnStatus.Skip)
   execute(event: StripeEvent): Promise<StripeCheckoutResult> {
     const webhookPayload = (event.data.object as StripeCheckoutSession)
       .metadata as StripeCheckoutWebhookPayload;

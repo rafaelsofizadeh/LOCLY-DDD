@@ -8,10 +8,6 @@ import {
   IStripeAccountUpdatedWebhook,
   StripeAccountUpdatedResult,
 } from './IStripeAccountUpdatedWebhook';
-import {
-  Authn,
-  AuthnStatus,
-} from '../../../auth/infrastructure/decorators/authn';
 
 @Injectable()
 export class StripeAccountUpdatedWebhook
@@ -21,7 +17,6 @@ export class StripeAccountUpdatedWebhook
   ) {}
 
   @StripeWebhookHandler('account.updated')
-  @Authn(AuthnStatus.Skip)
   execute(event: StripeEvent): Promise<StripeAccountUpdatedResult> {
     // TODO: event.data.object extracting decorator
     const webhookPayload = event.data.object as Stripe.Account;

@@ -7,16 +7,17 @@ import { UUID } from '../../../common/domain';
 import { throwCustomException } from '../../../common/error-handling';
 import { Host } from '../../../host/entity/Host';
 import { Token } from '../../entity/Token';
-
 import { IdentifiedRequest, Identity, IdentityType } from '../types';
 
-function identityDecoratorFactory<TIdentity>(identityType: IdentityType) {
-  return function(ctx: ExecutionContext): TIdentity {
+function identityDecoratorFactory<TIdentity>(
+  ...allowedIdentityTypes: IdentityType[]
+) {
+  return function(_: unknown, ctx: ExecutionContext): TIdentity {
     const {
       identity,
     }: IdentifiedRequest<Identity> = ctx.switchToHttp().getRequest();
 
-    if (!identity) {
+    if (identity === undefined) {
       throwCustomException(
         'No identity provided',
         undefined,
@@ -24,7 +25,7 @@ function identityDecoratorFactory<TIdentity>(identityType: IdentityType) {
       )();
     }
 
-    if (identity.type !== identityType) {
+    if (!allowedIdentityTypes.includes(identity.type)) {
       throwCustomException(
         'Invalid entity type',
         undefined,
@@ -36,21 +37,6 @@ function identityDecoratorFactory<TIdentity>(identityType: IdentityType) {
   };
 }
 
-function hostIdentityDecoratorFactory(verified: boolean, errorMessage: string) {
-  return function(ctx: ExecutionContext): Host {
-    const host: Host = identityDecoratorFactory<Host>(IdentityType.Host)(ctx);
-
-    if (host.verified !== verified) {
-      // TODO(NOW)(IMPORTANT): Better typing/error status for front-end to know that host needs to be verified
-      throwCustomException(errorMessage, undefined, HttpStatus.FORBIDDEN)();
-    }
-
-    return host;
-  };
-}
-
-// TODO(NOW): Anonymous identity
-
 export const VerificationTokenIdentity = createParamDecorator<any, any, Token>(
   identityDecoratorFactory<Token>(IdentityType.VerificationToken),
 );
@@ -59,14 +45,21 @@ export const CustomerIdentity = createParamDecorator<any, any, UUID>(
   identityDecoratorFactory<UUID>(IdentityType.Customer),
 );
 
-export const HostIdentity = createParamDecorator<any, any, Host>(
+export const VerifiedHostIdentity = createParamDecorator<any, any, Host>(
   identityDecoratorFactory<Host>(IdentityType.Host),
 );
 
-export const VerifiedHostIdentity = createParamDecorator<any, any, Host>(
-  hostIdentityDecoratorFactory(true, 'Host is not verified'),
+export const AnonymousIdentity = createParamDecorator<any, any, null>(
+  identityDecoratorFactory<null>(IdentityType.Anonymous),
 );
 
 export const UnverifiedHostIdentity = createParamDecorator<any, any, Host>(
-  hostIdentityDecoratorFactory(false, 'Only available to unverified hosts'),
+  identityDecoratorFactory<Host>(IdentityType.UnverifiedHost),
+);
+
+export const AnyHostIdentity = createParamDecorator<any, any, Host>(
+  identityDecoratorFactory<Host>(
+    IdentityType.UnverifiedHost,
+    IdentityType.Host,
+  ),
 );

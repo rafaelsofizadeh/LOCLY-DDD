@@ -8,7 +8,6 @@ import {
 } from './application/RequestAuthn/IRequestAuthn';
 import { IVerifyAuthn } from './application/VerifyAuthn/IVerifyAuthn';
 import { Token } from './entity/Token';
-import { Authn, AuthnStatus } from './infrastructure/decorators/authn';
 import { VerificationTokenIdentity } from './infrastructure/decorators/identity';
 
 @Controller('auth')
@@ -19,7 +18,6 @@ export class AuthController {
     private readonly verifyAuthn: IVerifyAuthn,
   ) {}
 
-  @Authn(AuthnStatus.Disallowed)
   @Post()
   async requestAuthnHandler(
     @Body() requestAuthnRequest: RequestAuthnRequest,
@@ -27,9 +25,8 @@ export class AuthController {
     await this.requestAuthn.execute(requestAuthnRequest);
   }
 
-  // Why AuthnRequired? TokenParamToBodyMiddleware will move the :token URL param to request cookies, for
+  // TokenParamToBodyMiddleware will move the :token URL param to request cookies, for
   // AuthInterceptor to operate on the token cookie.
-  @Authn(AuthnStatus.Required)
   @Get('verify/:token')
   async verifyAuthnHandler(
     // passthrough: https://docs.nestjs.com/controllers#library-specific-approach
@@ -51,7 +48,6 @@ export class AuthController {
     });
   }
 
-  @Authn(AuthnStatus.Required)
   @Post('logout')
   async logoutHandler(
     @Res({ passthrough: true }) response: Response,
