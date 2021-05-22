@@ -15,14 +15,16 @@ import {
 import { Country } from '../../entity/Country';
 import { Gram } from '../../entity/Item';
 import { UseCase } from '../../../common/application';
-import { WithoutId } from '../../../common/domain';
+import { UUID, WithoutId } from '../../../common/domain';
 import { DraftedItem } from '../../entity/Item';
-import { DraftedOrder } from '../../entity/Order';
+import { DraftedOrder, UnidCustomerOrderRequest } from '../../entity/Order';
+import { AddAddressRequest } from '../../../customer/application/address/AddAddress/IAddAddress';
 
 interface DraftItemRequest extends WithoutId<DraftedItem> {}
 
 export interface DraftOrderPayload
   extends Pick<DraftedOrder, 'customerId' | 'originCountry' | 'destination'> {
+  readonly orderId?: UUID;
   readonly items: DraftItemRequest[];
 }
 
@@ -40,13 +42,8 @@ class DraftItemRequestSchema implements DraftItemRequest {
   weight: Gram;
 }
 
-class AddressRequestSchema {
-  @IsISO31661Alpha3()
-  country: Country;
-}
-
 export class DraftOrderRequest
-  implements Omit<DraftOrderPayload, 'customerId'> {
+  implements Omit<UnidCustomerOrderRequest<DraftOrderPayload>, 'orderId'> {
   @IsISO31661Alpha3()
   readonly originCountry: Country;
 

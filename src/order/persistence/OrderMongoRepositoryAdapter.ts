@@ -5,6 +5,7 @@ import {
   Collection,
   DeleteWriteOpResultObject,
   FilterQuery,
+  ReplaceWriteOpResult,
   UpdateWriteOpResult,
 } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
@@ -45,14 +46,30 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
   ): Promise<void> {
     const draftOrderDocument = convertToMongoDocument(draftOrder);
 
-    await this.orderCollection
-      .insertOne(draftOrderDocument, { session: mongoTransactionSession })
+    const {
+      matchedCount,
+      modifiedCount,
+      upsertedCount,
+    }: ReplaceWriteOpResult = await this.orderCollection
+      .replaceOne({ _id: draftOrderDocument }, draftOrderDocument, {
+        upsert: true,
+        session: mongoTransactionSession,
+      })
       .catch(
         throwCustomException(
           'Error creating a new draftOrder in the database',
           { draftOrder, draftOrderDocument },
         ),
       );
+
+    expectOnlySingleResult(
+      [matchedCount, modifiedCount + upsertedCount],
+      {
+        operation: 'setting properties on',
+        entity: 'order',
+      },
+      { orderId: draftOrder.id },
+    );
   }
 
   // TODO: Vary allowed properties based on OrderStatus

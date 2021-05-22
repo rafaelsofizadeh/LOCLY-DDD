@@ -1,21 +1,16 @@
-import { IOrderRepository } from '../../persistence/IOrderRepository';
-
 import { EditOrderPayload, IEditOrder } from './IEditOrder';
 
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { IDraftOrder } from '../DraftOrder/IDraftOrder';
-import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
 import { withTransaction } from '../../../common/application';
-import { OrderStatus, DraftedOrder } from '../../entity/Order';
+import { DraftedOrder } from '../../entity/Order';
 
 @Injectable()
 export class EditOrder implements IEditOrder {
   constructor(
     private readonly draftOrderUseCase: IDraftOrder,
-    private readonly orderRepository: IOrderRepository,
-    private readonly customerRepository: ICustomerRepository,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
@@ -34,25 +29,11 @@ export class EditOrder implements IEditOrder {
   }
 
   private async editOrder(
-    { orderId, customerId, ...restEditOrderRequest }: EditOrderPayload,
+    editOrderRequest: EditOrderPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<DraftedOrder> {
-    await this.orderRepository.deleteOrder(
-      {
-        orderId,
-        status: OrderStatus.Drafted,
-        customerId,
-      },
-      mongoTransactionSession,
-    );
-    await this.customerRepository.removeOrderFromCustomer(
-      { customerId },
-      orderId,
-      mongoTransactionSession,
-    );
-
     const draftOrder: DraftedOrder = await this.draftOrderUseCase.execute(
-      { customerId, ...restEditOrderRequest },
+      editOrderRequest,
       mongoTransactionSession,
     );
 
