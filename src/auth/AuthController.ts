@@ -48,7 +48,7 @@ export class AuthController {
     });
   }
 
-  @Post('logout')
+  @Get('logout')
   async logoutHandler(
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
