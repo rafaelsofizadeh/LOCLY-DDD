@@ -87,8 +87,6 @@ export class AppModule implements NestModule {
     });
 
     // Register global cookie parser middleware
-    consumer
-      .apply(cookieParser(this.configService.get<string>('COOKIE_SIGNING_KEY')))
-      .forRoutes('*');
+    consumer.apply(cookieParser()).forRoutes('*');
   }
 }
