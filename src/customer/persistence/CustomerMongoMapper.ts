@@ -7,42 +7,28 @@ import {
   serializeMongoData,
 } from '../../common/persistence';
 
-type CustomerAddress = Address & { selected: boolean };
-
 export type CustomerMongoDocument = {
   _id: Binary;
   // https://devblogs.microsoft.com/typescript/announcing-typescript-4-1/#template-literal-types
-  addresses: CustomerAddress[];
+  addresses: Address[];
   orderIds: Binary[];
 };
 
-export function mongoDocumentToCustomer({
-  addresses,
-  ...restCustomerMongoDocument
-}: CustomerMongoDocument): Customer {
-  const { selected, ...selectedAddress } = addresses.find(
-    ({ selected }) => selected,
-  );
-
-  const serializedCustomerMongoDocument = serializeMongoData({
-    ...restCustomerMongoDocument,
-    selectedAddress,
-  });
-
-  return serializedCustomerMongoDocument;
+export function mongoDocumentToCustomer(
+  customerMongoDocument: CustomerMongoDocument,
+): Customer {
+  return serializeMongoData(customerMongoDocument);
 }
 
 export function customerToMongoDocument(
   customer: Customer,
 ): CustomerMongoDocument {
-  const { _id, selectedAddress, ...restCustomer } = convertToMongoDocument(
-    customer,
-  );
+  const { _id, ...restCustomer } = convertToMongoDocument(customer);
+  console.log('restCustomer', restCustomer);
 
   return {
     ...restCustomer,
     _id,
-    addresses: [{ ...selectedAddress, selected: true }],
   };
 }
 

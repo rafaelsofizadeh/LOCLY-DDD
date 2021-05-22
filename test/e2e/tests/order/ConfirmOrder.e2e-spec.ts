@@ -92,7 +92,13 @@ describe('Confirm Order – POST /order/confirm', () => {
     testCustomer = {
       id: UUID(),
       email: 'random@email.com',
-      selectedAddress: { country: destinationCountry },
+      addresses: [
+        {
+          addressLine1: '10 Bandz',
+          locality: 'Juicy',
+          country: destinationCountry,
+        },
+      ],
       orderIds: [],
     };
 
@@ -120,7 +126,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     testOrder = await draftOrderUseCase.execute({
       customerId: testCustomer.id,
       originCountry,
-      destination: testCustomer.selectedAddress,
+      destination: testCustomer.addresses[0],
       items: [
         {
           title: 'Laptop',

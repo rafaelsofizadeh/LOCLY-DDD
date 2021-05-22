@@ -1,12 +1,11 @@
 import { Email, UUID } from '../../common/domain';
 import { EntityFilter } from '../../common/persistence';
-
 import { Address } from '../../order/entity/Order';
 
 export type Customer = Readonly<{
   id: UUID;
   email: Email;
-  selectedAddress?: Address;
+  addresses: Address[];
   orderIds: UUID[];
 }>;
 

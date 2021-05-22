@@ -53,8 +53,8 @@ export class DraftOrderRequest
   @ValidateNested()
   @IsNotEmptyObject()
   @IsDefined()
-  @Type(() => AddressRequestSchema)
-  readonly destination: AddressRequestSchema;
+  @Type(() => AddAddressRequest)
+  readonly destination: AddAddressRequest;
 
   @ValidateNested({ each: true })
   @ArrayMinSize(1)

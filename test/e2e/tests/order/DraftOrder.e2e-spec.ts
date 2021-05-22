@@ -9,7 +9,11 @@ import { IOrderRepository } from '../../../../src/order/persistence/IOrderReposi
 import { UUID } from '../../../../src/common/domain';
 import { ICustomerRepository } from '../../../../src/customer/persistence/ICustomerRepository';
 import { DraftOrderPayload } from '../../../../src/order/application/DraftOrder/IDraftOrder';
-import { OrderStatus, DraftedOrder } from '../../../../src/order/entity/Order';
+import {
+  OrderStatus,
+  DraftedOrder,
+  Address,
+} from '../../../../src/order/entity/Order';
 import { Country } from '../../../../src/order/entity/Country';
 import { CustomExceptionFilter } from '../../../../src/infrastructure/CustomExceptionFilter';
 import {
@@ -27,6 +31,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
   let testOrderId: UUID;
   let testCustomer: Customer;
+  let testCustomerAddress: Address;
 
   const originCountry = originCountriesAvailable[0];
 
@@ -64,12 +69,16 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
   describe('interact with DB and require invididual teardown', () => {
     beforeEach(async () => {
+      testCustomerAddress = {
+        addressLine1: '10 Bandz',
+        locality: 'Juicy',
+        country: getDestinationCountriesAvailable(originCountry)[0],
+      };
+
       testCustomer = {
         id: UUID(),
         email: 'random@email.com',
-        selectedAddress: {
-          country: getDestinationCountriesAvailable(originCountry)[0],
-        },
+        addresses: [testCustomerAddress],
         orderIds: [],
       };
 
@@ -88,7 +97,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       const testOrderRequest: DraftOrderPayload = {
         customerId: testCustomer.id,
         originCountry: originCountriesAvailable[0],
-        destination: testCustomer.selectedAddress,
+        destination: testCustomerAddress,
         items: [
           {
             title: 'Laptop',
@@ -134,8 +143,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
       expect(customerId).toEqual(updatedTestCustomer.id);
       // 4. order id should be added to customer orderIds (i.e. order is assigned to customer)
       expect(updatedTestCustomer.orderIds).toContain(testOrderId);
-      // 5. customer.selectedAddress should be set on the order
-      expect(destination).toEqual(testCustomer.selectedAddress);
+      // 5. customer's address should be set on the order
+      expect(destination).toEqual(testCustomerAddress);
     });
   });
 
@@ -192,7 +201,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       const testOrderRequest: DraftOrderPayload = {
         customerId: testCustomer.id,
         originCountry: unavailableOriginCountry,
-        destination: testCustomer.selectedAddress,
+        destination: testCustomerAddress,
         items: [
           {
             title: 'Laptop',
@@ -225,7 +234,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       const invalidTestOrderRequest: DraftOrderPayload = {
         customerId: nonexistentCustomerId,
         originCountry: originCountriesAvailable[0],
-        destination: testCustomer.selectedAddress,
+        destination: testCustomerAddress,
         items: [
           {
             title: 'Laptop',
@@ -259,7 +268,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
      * 3. Count the number of documents in collection again. 3 === 1, else failure
      *
      * You can either knowingly make the UseCase fail (like in 'fails on nonexistent customer'),
-     * or mock a function to __always__ fail. But how to mock the function, for example, addOrderToCustomer?
+     * or mock a function to __always__ fail. But how to mock the function, for example, addOrder?
      *
      * TODO: Test for all granular calculator errors
      */

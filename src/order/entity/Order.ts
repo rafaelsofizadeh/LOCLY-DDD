@@ -19,7 +19,12 @@ export interface Cost
   }> {}
 
 export type Address = Readonly<{
+  addressLine1: string;
+  addressLine2?: string;
+  locality: string;
+  administrativeArea?: string;
   country: Country;
+  postalCode?: string;
 }>;
 
 export enum OrderStatus {
