@@ -21,7 +21,13 @@ import {
   expectOnlySingleResult,
   throwCustomException,
 } from '../../common/error-handling';
-import { mongoQuery, uuidToMuuid } from '../../common/persistence';
+import { mongoQuery } from '../../common/persistence';
+import { Address } from '../../order/entity/Order';
+
+enum EntityAction {
+  Add = 'add',
+  Remove = 'remove',
+}
 
 @Injectable()
 export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
@@ -56,52 +62,83 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
       filterWithId,
     );
 
-    const deleteResult: DeleteWriteOpResultObject = await this.customerCollection
+    const {
+      deletedCount,
+    }: DeleteWriteOpResultObject = await this.customerCollection
       .deleteOne(filterQuery, { session: mongoTransactionSession })
       .catch(throwCustomException('Error deleting a customer', filter));
 
-    expectOnlySingleResult([deleteResult.deletedCount], {
+    expectOnlySingleResult([deletedCount], {
       operation: 'deleting',
       entity: 'customer',
     });
   }
 
-  async addOrderToCustomer(
+  async addOrder(
     filter: CustomerFilter,
     orderId: UUID,
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
-    const filterWithId = normalizeCustomerFilter(filter);
-    const filterQuery: FilterQuery<CustomerMongoDocument> = mongoQuery(
-      filterWithId,
-    );
-
-    const updateResult: UpdateWriteOpResult = await this.customerCollection
-      .updateOne(
-        filterQuery,
-        { $push: { orderIds: uuidToMuuid(orderId) } },
-        { session: mongoTransactionSession },
-      )
-      .catch(
-        throwCustomException('Error adding order to a customer', {
-          orderId,
-          customerFilter: filter,
-        }),
-      );
-
-    expectOnlySingleResult(
-      [updateResult.matchedCount, updateResult.modifiedCount],
-      {
-        operation: 'adding order to',
-        entity: 'customer',
-      },
-      { customerFilter: filter, orderId },
+    await this.addOrRemoveEntityToArrayProp(
+      EntityAction.Add,
+      filter,
+      'orderIds',
+      orderId,
+      mongoTransactionSession,
     );
   }
 
-  async removeOrderFromCustomer(
+  async removeOrder(
     filter: CustomerFilter,
     orderId: UUID,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void> {
+    await this.addOrRemoveEntityToArrayProp(
+      EntityAction.Remove,
+      filter,
+      'orderIds',
+      orderId,
+      mongoTransactionSession,
+    );
+  }
+
+  async addAddress(
+    filter: CustomerFilter,
+    address: Address,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void> {
+    await this.addOrRemoveEntityToArrayProp(
+      EntityAction.Add,
+      filter,
+      'addresses',
+      address,
+      mongoTransactionSession,
+    );
+  }
+
+  async removeAddress(
+    filter: CustomerFilter,
+    address: Address,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void> {
+    await this.addOrRemoveEntityToArrayProp(
+      EntityAction.Remove,
+      filter,
+      'addresses',
+      address,
+      mongoTransactionSession,
+    );
+  }
+
+  // TODO: Apply to Host and Order repositories
+  async addOrRemoveEntityToArrayProp<
+    P extends keyof Customer,
+    R extends Pick<Customer, P>[P] extends Array<infer E> ? E : never
+  >(
+    action: EntityAction,
+    filter: CustomerFilter,
+    prop: Pick<Customer, P>[P] extends any[] ? P : never,
+    entity: R,
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     const filterWithId = normalizeCustomerFilter(filter);
@@ -109,25 +146,33 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
       filterWithId,
     );
 
-    const updateResult: UpdateWriteOpResult = await this.customerCollection
-      .updateOne(
-        filterQuery,
-        { $pull: { orderIds: uuidToMuuid(orderId) } },
-        { session: mongoTransactionSession },
-      )
+    const updateQuery =
+      action === 'add'
+        ? { $push: { prop: entity } }
+        : { $pull: { $elemMatch: { prop: entity } } };
+
+    const errorAction = `${action === 'add' ? 'adding to' : 'removing from'}`;
+
+    const {
+      matchedCount,
+      modifiedCount,
+    }: UpdateWriteOpResult = await this.customerCollection
+      .updateOne(filterQuery, updateQuery, { session: mongoTransactionSession })
       .catch(
-        throwCustomException('Error removing order from customer', {
-          orderId,
+        throwCustomException(`Error ${errorAction} a customer ${prop}`, {
+          action,
+          [prop]: entity,
           customerFilter: filter,
         }),
       );
 
     expectOnlySingleResult(
-      [updateResult.matchedCount, updateResult.modifiedCount],
+      [matchedCount, modifiedCount],
       {
-        operation: 'removing order from',
+        operation: `${errorAction} ${prop} of`,
         entity: 'customer',
       },
+      { customerFilter: filter, [prop]: entity },
     );
   }
 
