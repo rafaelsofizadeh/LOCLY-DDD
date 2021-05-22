@@ -22,7 +22,7 @@ import {
   expectOnlySingleResult,
   throwCustomException,
 } from '../../common/error-handling';
-import { UUID, WithoutId } from '../../common/domain';
+import { UUID } from '../../common/domain';
 import { Country } from '../../order/entity/Country';
 import { mongoQuery, uuidToMuuid } from '../../common/persistence';
 
@@ -122,14 +122,9 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
         }),
       );
 
-    expectOnlySingleResult(
-      [updateResult.matchedCount, updateResult.modifiedCount],
-      {
-        operation: 'setting properties on',
-        entity: 'host',
-      },
-      { filter, properties },
-    );
+    // https://docs.mongodb.com/manual/reference/method/WriteResult/#mongodb-data-WriteResult.nModified
+    // "If the update/replacement operation results in no change to the document, such as setting the
+    // value of the field to its current value, nModified can be less than nMatched."
   }
 
   // This should always be used together with IOrderRepository.addHostToOrder
