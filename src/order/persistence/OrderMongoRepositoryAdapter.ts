@@ -67,7 +67,10 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       filterWithId,
     );
 
-    const updateResult: UpdateWriteOpResult = await this.orderCollection
+    const {
+      matchedCount,
+      modifiedCount,
+    }: UpdateWriteOpResult = await this.orderCollection
       .updateOne(
         filterQuery,
         { $set: mongoQuery(properties) },
@@ -81,7 +84,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       );
 
     expectOnlySingleResult(
-      [updateResult.matchedCount, updateResult.modifiedCount],
+      [matchedCount, modifiedCount],
       {
         operation: 'setting properties on',
         entity: 'order',
@@ -160,14 +163,16 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       filterWithId,
     );
 
-    const deleteResult: DeleteWriteOpResultObject = await this.orderCollection
+    const {
+      deletedCount,
+    }: DeleteWriteOpResultObject = await this.orderCollection
       .deleteOne(filterQuery, {
         session: mongoTransactionSession,
       })
       .catch(throwCustomException('Error deleting order', filter));
 
     expectOnlySingleResult(
-      [deleteResult.deletedCount],
+      [deletedCount],
       {
         operation: 'deleting',
         entity: 'order',
@@ -195,7 +200,10 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
 
     const itemSetQuery = mongoQuery({ 'items.$': properties });
 
-    const updateResult: UpdateWriteOpResult = await this.orderCollection
+    const {
+      matchedCount,
+      modifiedCount,
+    }: UpdateWriteOpResult = await this.orderCollection
       .updateOne(
         filterQuery,
         { $set: itemSetQuery },
@@ -209,7 +217,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       );
 
     expectOnlySingleResult(
-      [updateResult.matchedCount, updateResult.modifiedCount],
+      [matchedCount, modifiedCount],
       {
         operation: 'setting properties on',
         entity: 'order item',
@@ -269,7 +277,10 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     );
 
     // https://docs.mongodb.com/manual/reference/operator/update/positional/
-    const result: UpdateWriteOpResult = await this.orderCollection
+    const {
+      matchedCount,
+      modifiedCount,
+    }: UpdateWriteOpResult = await this.orderCollection
       .updateOne(
         filterQuery,
         // $each: https://docs.mongodb.com/manual/reference/operator/update/push/#append-multiple-values-to-an-array
@@ -294,7 +305,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       );
 
     expectOnlySingleResult(
-      [result.matchedCount, result.modifiedCount],
+      [matchedCount, modifiedCount],
       {
         operation: 'adding photo id to',
         entity: 'order item',

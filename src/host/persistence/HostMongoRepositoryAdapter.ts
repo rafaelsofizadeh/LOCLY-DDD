@@ -40,11 +40,13 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
   ): Promise<void> {
     const hostDocuments: HostMongoDocument[] = hosts.map(hostToMongoDocument);
 
-    const result: InsertWriteOpResult<HostMongoDocument> = await this.hostCollection
+    const {
+      insertedCount,
+    }: InsertWriteOpResult<HostMongoDocument> = await this.hostCollection
       .insertMany(hostDocuments, { session: mongoTransactionSession })
       .catch(throwCustomException('Error adding many hosts', { hosts }));
 
-    expectOnlyNResults(hosts.length, [result.insertedCount], {
+    expectOnlyNResults(hosts.length, [insertedCount], {
       operation: 'inserting',
       entity: 'host',
     });
@@ -66,14 +68,16 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
     hostIds: UUID[],
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
-    const result: DeleteWriteOpResultObject = await this.hostCollection
+    const {
+      deletedCount,
+    }: DeleteWriteOpResultObject = await this.hostCollection
       .deleteMany(
         { _id: { $in: hostIds.map(hostId => uuidToMuuid(hostId)) } },
         { session: mongoTransactionSession },
       )
       .catch(throwCustomException('Error deleting many hosts', { hostIds }));
 
-    expectOnlyNResults(hostIds.length, [result.deletedCount], {
+    expectOnlyNResults(hostIds.length, [deletedCount], {
       operation: 'deleting',
       entity: 'host',
     });
@@ -88,11 +92,13 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
       filterWithId,
     );
 
-    const deleteResult: DeleteWriteOpResultObject = await this.hostCollection
+    const {
+      deletedCount,
+    }: DeleteWriteOpResultObject = await this.hostCollection
       .deleteOne(filterQuery, { session: mongoTransactionSession })
       .catch(throwCustomException("Couldn't delete host", filter));
 
-    expectOnlySingleResult([deleteResult.deletedCount], {
+    expectOnlySingleResult([deletedCount], {
       operation: 'deleting',
       entity: 'host',
     });
@@ -109,7 +115,10 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
       filterWithId,
     );
 
-    const updateResult: UpdateWriteOpResult = await this.hostCollection
+    // https://docs.mongodb.com/manual/reference/method/WriteResult/#mongodb-data-WriteResult.nModified
+    // "If the update/replacement operation results in no change to the document, such as setting the
+    // value of the field to its current value, nModified can be less than nMatched."
+    await this.hostCollection
       .updateOne(
         filterQuery,
         { $set: mongoQuery(properties) },
@@ -121,10 +130,6 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
           properties,
         }),
       );
-
-    // https://docs.mongodb.com/manual/reference/method/WriteResult/#mongodb-data-WriteResult.nModified
-    // "If the update/replacement operation results in no change to the document, such as setting the
-    // value of the field to its current value, nModified can be less than nMatched."
   }
 
   // This should always be used together with IOrderRepository.addHostToOrder
@@ -138,7 +143,10 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
       filterWithId,
     );
 
-    const updateResult: UpdateWriteOpResult = await this.hostCollection
+    const {
+      matchedCount,
+      modifiedCount,
+    }: UpdateWriteOpResult = await this.hostCollection
       .updateOne(
         filterQuery,
         { $push: { orderIds: uuidToMuuid(orderId) } },
@@ -151,13 +159,10 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
         }),
       );
 
-    expectOnlySingleResult(
-      [updateResult.matchedCount, updateResult.modifiedCount],
-      {
-        operation: 'adding order to',
-        entity: 'host',
-      },
-    );
+    expectOnlySingleResult([matchedCount, modifiedCount], {
+      operation: 'adding order to',
+      entity: 'host',
+    });
   }
 
   async findHost(
