@@ -21,12 +21,9 @@ export function mongoDocumentToHost(
 }
 
 export function hostToMongoDocument(host: Host): HostMongoDocument {
-  const { _id, ...restHost } = convertToMongoDocument(host);
+  const hostMongoDocument: HostMongoDocument = convertToMongoDocument(host);
 
-  return {
-    ...restHost,
-    _id,
-  };
+  return hostMongoDocument;
 }
 
 export function normalizeHostFilter({ hostId, ...restFilter }: HostFilter) {

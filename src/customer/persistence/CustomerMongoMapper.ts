@@ -23,13 +23,12 @@ export function mongoDocumentToCustomer(
 export function customerToMongoDocument(
   customer: Customer,
 ): CustomerMongoDocument {
-  const { _id, ...restCustomer } = convertToMongoDocument(customer);
-  console.log('restCustomer', restCustomer);
+  const customerMongoDocument: CustomerMongoDocument = convertToMongoDocument(
+    customer,
+  );
+  console.log('customerMongoDocument', customerMongoDocument);
 
-  return {
-    ...restCustomer,
-    _id,
-  };
+  return customerMongoDocument;
 }
 
 export function normalizeCustomerFilter({

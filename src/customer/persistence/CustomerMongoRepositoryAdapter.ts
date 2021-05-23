@@ -21,7 +21,8 @@ import {
   expectOnlySingleResult,
   throwCustomException,
 } from '../../common/error-handling';
-import { mongoQuery } from '../../common/persistence';
+import { convertToMongoDocument, mongoQuery } from '../../common/persistence';
+import { isNotEmptyObject } from 'class-validator';
 
 enum EntityAction {
   Add = 'add',
@@ -211,10 +212,18 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
     properties: Omit<CustomerFilter, 'orderId'>,
     mongoTransactionSession?: ClientSession,
   ) {
+    if (!isNotEmptyObject(filter) || !isNotEmptyObject(properties)) {
+      return;
+    }
+
     const filterWithId = normalizeCustomerFilter(filter);
     const filterQuery: FilterQuery<CustomerMongoDocument> = mongoQuery(
       filterWithId,
     );
+
+    // The reason not to use mongoQuery here is because mongoQuery flattens array objects, which has effects on
+    // $set: { addresses: [...] }
+    const updateQuery = convertToMongoDocument(properties);
 
     const {
       matchedCount,
@@ -222,7 +231,7 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
     }: UpdateWriteOpResult = await this.customerCollection
       .updateOne(
         filterQuery,
-        { $set: mongoQuery(properties) },
+        { $set: updateQuery },
         { session: mongoTransactionSession },
       )
       .catch(

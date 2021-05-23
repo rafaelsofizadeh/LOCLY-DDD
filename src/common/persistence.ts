@@ -213,7 +213,7 @@ export function mongoQuery(input: object) {
   const convertedToMongo = convertToMongoDocument(input);
   const convertedToMongoDotNotation = flattenObject(convertedToMongo);
 
-  return convertedToMongoDotNotation;
+  return convertedToMongoDotNotation || {};
 }
 
 /* 

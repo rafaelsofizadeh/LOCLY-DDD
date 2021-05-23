@@ -9,6 +9,7 @@ import {
   UpdateWriteOpResult,
 } from 'mongodb';
 import { InjectCollection } from 'nest-mongodb';
+import { isNotEmptyObject } from 'class-validator';
 
 import { UUID } from '../../common/domain';
 import {
@@ -79,10 +80,16 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     properties: Omit<OrderFilter, 'orderId'>,
     mongoTransactionSession?: ClientSession,
   ) {
+    if (!isNotEmptyObject(filter) || !isNotEmptyObject(properties)) {
+      return;
+    }
+
     const filterWithId = normalizeOrderFilter(filter);
     const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(
       filterWithId,
     );
+
+    const updateQuery = mongoQuery(properties);
 
     const {
       matchedCount,
@@ -90,7 +97,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     }: UpdateWriteOpResult = await this.orderCollection
       .updateOne(
         filterQuery,
-        { $set: mongoQuery(properties) },
+        { $set: updateQuery },
         { session: mongoTransactionSession },
       )
       .catch(
@@ -205,6 +212,14 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     properties: Omit<ItemFilter, 'itemId'>,
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
+    if (
+      !isNotEmptyObject(orderFilter) ||
+      !isNotEmptyObject(itemFilter) ||
+      !isNotEmptyObject(properties)
+    ) {
+      return;
+    }
+
     const orderFilterWithId = normalizeOrderFilter(orderFilter);
     const itemFilterWithId = normalizeItemFilter(itemFilter);
 
@@ -212,7 +227,6 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       ...orderFilterWithId,
       items: itemFilterWithId,
     };
-
     const filterQuery = mongoQuery(filter);
 
     const itemSetQuery = mongoQuery({ 'items.$': properties });

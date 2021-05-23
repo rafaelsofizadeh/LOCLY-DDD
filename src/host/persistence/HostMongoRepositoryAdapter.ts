@@ -25,6 +25,7 @@ import {
 import { UUID } from '../../common/domain';
 import { Country } from '../../order/entity/Country';
 import { mongoQuery, uuidToMuuid } from '../../common/persistence';
+import { isNotEmptyObject } from 'class-validator';
 
 @Injectable()
 export class HostMongoRepositoryAdapter implements IHostRepository {
@@ -110,10 +111,16 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
     properties: Omit<HostFilter, 'hostId'>,
     mongoTransactionSession?: ClientSession,
   ) {
+    if (!isNotEmptyObject(filter) || !isNotEmptyObject(properties)) {
+      return;
+    }
+
     const filterWithId = normalizeHostFilter(filter);
     const filterQuery: FilterQuery<HostMongoDocument> = mongoQuery(
       filterWithId,
     );
+
+    const updateQuery = mongoQuery(properties);
 
     // https://docs.mongodb.com/manual/reference/method/WriteResult/#mongodb-data-WriteResult.nModified
     // "If the update/replacement operation results in no change to the document, such as setting the
@@ -121,7 +128,7 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
     await this.hostCollection
       .updateOne(
         filterQuery,
-        { $set: mongoQuery(properties) },
+        { $set: updateQuery },
         { session: mongoTransactionSession },
       )
       .catch(
