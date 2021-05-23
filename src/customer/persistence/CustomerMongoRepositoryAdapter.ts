@@ -8,7 +8,7 @@ import {
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
-import { Address, UUID } from '../../common/domain';
+import { UUID } from '../../common/domain';
 import { ICustomerRepository } from './ICustomerRepository';
 import { Customer, CustomerFilter } from '../entity/Customer';
 import {
@@ -98,34 +98,6 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
       filter,
       'orderIds',
       orderId,
-      mongoTransactionSession,
-    );
-  }
-
-  async addAddress(
-    filter: CustomerFilter,
-    address: Address,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<void> {
-    await this.addOrRemoveEntityToArrayProp(
-      EntityAction.Add,
-      filter,
-      'addresses',
-      address,
-      mongoTransactionSession,
-    );
-  }
-
-  async removeAddress(
-    filter: CustomerFilter,
-    address: Address,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<void> {
-    await this.addOrRemoveEntityToArrayProp(
-      EntityAction.Remove,
-      filter,
-      'addresses',
-      address,
       mongoTransactionSession,
     );
   }
