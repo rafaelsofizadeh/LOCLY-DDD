@@ -48,6 +48,7 @@ export class AddressValidationSchema implements Address {
   @Length(1, 256)
   readonly locality: string;
 
+  @IsOptional()
   @IsString()
   @Length(1, 256)
   readonly administrativeArea?: string;

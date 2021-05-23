@@ -6,7 +6,7 @@ import { ICustomerRepository } from '../../persistence/ICustomerRepository';
 import { EditCustomerPayload, IEditCustomer } from './IEditCustomer';
 
 @Injectable()
-export class AddAddress implements IEditCustomer {
+export class EditCustomer implements IEditCustomer {
   constructor(
     private readonly customerRepository: ICustomerRepository,
     @InjectClient() private readonly mongoClient: MongoClient,

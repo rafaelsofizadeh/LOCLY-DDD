@@ -36,6 +36,7 @@ export class CreateCustomer implements ICreateCustomer {
       id: UUID(),
       email,
       orderIds: [],
+      addresses: [],
     };
 
     await this.customerRepository.addCustomer(
