@@ -15,7 +15,6 @@ import { IDraftOrder } from '../../../../src/order/application/DraftOrder/IDraft
 import { Country } from '../../../../src/order/entity/Country';
 import { isString } from 'class-validator';
 import { IHostRepository } from '../../../../src/host/persistence/IHostRepository';
-import { StripeCheckoutSessionResult } from '../../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import {
   DraftedOrder,
   ConfirmedOrder,
@@ -28,6 +27,7 @@ import {
   originCountriesAvailable,
 } from '../../../../src/calculator/data/PriceGuide';
 import { ConfigService } from '@nestjs/config';
+import { ConfirmOrderResult } from '../../../../src/order/application/ConfirmOrder/IConfirmOrder';
 
 type HostConfig = {
   email: Email;
@@ -240,7 +240,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     expect(response.status).toBe(HttpStatus.CREATED);
 
-    const { checkoutId } = response.body as StripeCheckoutSessionResult;
+    const { checkoutId } = response.body as ConfirmOrderResult;
 
     expect(checkoutId).toBeDefined();
     expect(isString(checkoutId)).toBe(true);

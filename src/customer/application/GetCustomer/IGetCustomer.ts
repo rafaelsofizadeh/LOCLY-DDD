@@ -3,12 +3,12 @@ import { UseCase } from '../../../common/application';
 import { Email, IsUUID, UUID } from '../../../common/domain';
 import { Customer } from '../../entity/Customer';
 
-export interface GetCustomerRequest {
+export interface GetCustomerPayload {
   readonly customerId?: UUID;
   readonly email?: Email;
 }
 
-export class GetCustomerRequest implements GetCustomerRequest {
+export class GetCustomerRequest implements GetCustomerPayload {
   @IsOptional()
   @IsEmail()
   readonly email?: Email;
@@ -19,6 +19,6 @@ export class GetCustomerRequest implements GetCustomerRequest {
 }
 
 export abstract class IGetCustomer extends UseCase<
-  GetCustomerRequest,
+  GetCustomerPayload,
   Customer
 > {}

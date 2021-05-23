@@ -5,7 +5,7 @@ import { ICustomerRepository } from '../../persistence/ICustomerRepository';
 import { withTransaction } from '../../../common/application';
 import { UUID } from '../../../common/domain';
 import { Customer } from '../../entity/Customer';
-import { CreateCustomerRequest, ICreateCustomer } from './ICreateCustomer';
+import { CreateCustomerPayload, ICreateCustomer } from './ICreateCustomer';
 
 @Injectable()
 export class CreateCustomer implements ICreateCustomer {
@@ -15,12 +15,12 @@ export class CreateCustomer implements ICreateCustomer {
   ) {}
 
   async execute(
-    createCustomerRequest: CreateCustomerRequest,
+    createCustomerPayload: CreateCustomerPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<Customer> {
     const customer: Customer = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.createCustomer(createCustomerRequest, sessionWithTransaction),
+        this.createCustomer(createCustomerPayload, sessionWithTransaction),
       this.mongoClient,
       mongoTransactionSession,
     );
@@ -29,7 +29,7 @@ export class CreateCustomer implements ICreateCustomer {
   }
 
   private async createCustomer(
-    { email }: CreateCustomerRequest,
+    { email }: CreateCustomerPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<Customer> {
     const customer: Customer = {

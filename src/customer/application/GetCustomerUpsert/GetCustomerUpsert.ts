@@ -3,7 +3,7 @@ import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import {
-  GetCustomerUpsertRequest,
+  GetCustomerUpsertPayload,
   GetCustomerUpsertResult,
   IGetCustomerUpsert,
 } from './IGetCustomerUpsert';
@@ -19,13 +19,13 @@ export class GetCustomerUpsert implements IGetCustomerUpsert {
   ) {}
 
   async execute(
-    getCustomerUpsertRequest: GetCustomerUpsertRequest,
+    getCustomerUpsertPayload: GetCustomerUpsertPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<GetCustomerUpsertResult> {
     return withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.getCustomerUpsert(
-          getCustomerUpsertRequest,
+          getCustomerUpsertPayload,
           sessionWithTransaction,
         ),
       this.mongoClient,
@@ -34,13 +34,13 @@ export class GetCustomerUpsert implements IGetCustomerUpsert {
   }
 
   async getCustomerUpsert(
-    getCustomerUpsertRequest: GetCustomerUpsertRequest,
+    getCustomerUpsertPayload: GetCustomerUpsertPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<GetCustomerUpsertResult> {
     try {
       return {
         customer: await this.getCustomer.execute(
-          getCustomerUpsertRequest,
+          getCustomerUpsertPayload,
           mongoTransactionSession,
         ),
         upsert: false,
@@ -48,7 +48,7 @@ export class GetCustomerUpsert implements IGetCustomerUpsert {
     } catch (exception) {
       return {
         customer: await this.createCustomer.execute(
-          getCustomerUpsertRequest,
+          getCustomerUpsertPayload,
           mongoTransactionSession,
         ),
         upsert: true,

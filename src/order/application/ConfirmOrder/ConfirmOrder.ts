@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
-import { StripeCheckoutSessionResult, IConfirmOrder } from './IConfirmOrder';
+import { ConfirmOrderResult, IConfirmOrder } from './IConfirmOrder';
 import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { Host } from '../../../host/entity/Host';
 import { UUID } from '../../../common/domain';
@@ -37,7 +37,7 @@ export class ConfirmOrder implements IConfirmOrder {
   async execute(
     confirmOrderPayload: ConfirmOrderPayload,
     mongoTransactionSession?: ClientSession,
-  ): Promise<StripeCheckoutSessionResult> {
+  ): Promise<ConfirmOrderResult> {
     // TODO(GLOBAL): Transaction decorator
     const checkoutSession: Stripe.Checkout.Session = await withTransaction(
       (sessionWithTransaction: ClientSession) =>

@@ -4,8 +4,8 @@ import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
 import {
   PayShipmentPayload,
-  StripeCheckoutSessionResult,
   IPayShipment,
+  PayShipmentResult,
 } from './IPayShipment';
 import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { InjectClient } from 'nest-mongodb';
@@ -30,7 +30,7 @@ export class PayShipmentService implements IPayShipment {
   async execute(
     payShipmentPayload: PayShipmentPayload,
     mongoTransactionSession?: ClientSession,
-  ): Promise<StripeCheckoutSessionResult> {
+  ): Promise<PayShipmentResult> {
     const checkoutSession: Stripe.Checkout.Session = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.createPaymentSession(payShipmentPayload, sessionWithTransaction),

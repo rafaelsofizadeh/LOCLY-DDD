@@ -1,4 +1,7 @@
-import { UseCase } from '../../../common/application';
+import {
+  StripeCheckoutSessionResult,
+  UseCase,
+} from '../../../common/application';
 
 import { IsUUID, UUID } from '../../../common/domain';
 import { UnidCustomerOrderRequest } from '../../entity/Order';
@@ -14,11 +17,9 @@ export class ConfirmOrderRequest
   readonly orderId: UUID;
 }
 
-export interface StripeCheckoutSessionResult {
-  readonly checkoutId: string;
-}
+export type ConfirmOrderResult = StripeCheckoutSessionResult;
 
 export abstract class IConfirmOrder extends UseCase<
   ConfirmOrderPayload,
-  StripeCheckoutSessionResult
+  ConfirmOrderResult
 > {}

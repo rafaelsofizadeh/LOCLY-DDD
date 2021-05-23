@@ -1,14 +1,8 @@
-import { IsEmail } from 'class-validator';
 import { UseCase } from '../../../common/application';
 import { UUID } from '../../../common/domain';
 import { Customer } from '../../entity/Customer';
 
-export interface GetCustomerUpsertRequest {
-  readonly email: UUID;
-}
-
-export class GetCustomerUpsertRequest implements GetCustomerUpsertRequest {
-  @IsEmail()
+export interface GetCustomerUpsertPayload {
   readonly email: UUID;
 }
 
@@ -18,6 +12,6 @@ export type GetCustomerUpsertResult = {
 };
 
 export abstract class IGetCustomerUpsert extends UseCase<
-  GetCustomerUpsertRequest,
+  GetCustomerUpsertPayload,
   GetCustomerUpsertResult
 > {}

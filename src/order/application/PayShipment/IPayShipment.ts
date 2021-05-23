@@ -1,4 +1,7 @@
-import { UseCase } from '../../../common/application';
+import {
+  StripeCheckoutSessionResult,
+  UseCase,
+} from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
 import { UnidCustomerOrderRequest } from '../../entity/Order';
 
@@ -13,12 +16,9 @@ export class PayShipmentRequest
   readonly orderId: UUID;
 }
 
-// TODO: extract StripeCheckoutSessionResult to common types
-export interface StripeCheckoutSessionResult {
-  readonly checkoutId: string;
-}
+export type PayShipmentResult = StripeCheckoutSessionResult;
 
 export abstract class IPayShipment extends UseCase<
   PayShipmentPayload,
-  StripeCheckoutSessionResult
+  PayShipmentResult
 > {}

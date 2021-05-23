@@ -1,13 +1,13 @@
 import { UseCase } from '../../../../../common/application';
 import { UUID } from '../../../../../common/domain';
 
-export type PayShipmentRequest = {
+export type PayShipmentWebhookPayload = {
   orderId: UUID;
 };
 
-export type PayShipmentResult = void;
+export type PayShipmentWebhookResult = void;
 
 export abstract class IPayShipmentHandler extends UseCase<
-  PayShipmentRequest,
-  PayShipmentResult
+  PayShipmentWebhookPayload,
+  PayShipmentWebhookResult
 > {}

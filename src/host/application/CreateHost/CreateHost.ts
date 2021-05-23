@@ -5,7 +5,7 @@ import { IHostRepository } from '../../../host/persistence/IHostRepository';
 import { withTransaction } from '../../../common/application';
 import { UUID } from '../../../common/domain';
 import { Host } from '../../entity/Host';
-import { CreateHostRequest, ICreateHost } from './ICreateHost';
+import { CreateHostPayload, ICreateHost } from './ICreateHost';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 import Stripe from 'stripe';
 
@@ -18,12 +18,12 @@ export class CreateHost implements ICreateHost {
   ) {}
 
   async execute(
-    createHostRequest: CreateHostRequest,
+    createHostPayload: CreateHostPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<Host> {
     const host: Host = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.createHost(createHostRequest, sessionWithTransaction),
+        this.createHost(createHostPayload, sessionWithTransaction),
       this.mongoClient,
       mongoTransactionSession,
     );
@@ -32,7 +32,7 @@ export class CreateHost implements ICreateHost {
   }
 
   private async createHost(
-    { email }: CreateHostRequest,
+    { email }: CreateHostPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<Host> {
     const hostAccount: Stripe.Account = await this.stripe.accounts.create({

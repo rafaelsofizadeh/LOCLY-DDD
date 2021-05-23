@@ -103,3 +103,7 @@ export type StripeEvent = Omit<Stripe.Event, 'type'> & {
 export type StripeCheckoutSession = Stripe.Checkout.Session & {
   metadata: StripeCheckoutWebhookPayload;
 };
+
+export type StripeCheckoutSessionResult = {
+  readonly checkoutId: string;
+};

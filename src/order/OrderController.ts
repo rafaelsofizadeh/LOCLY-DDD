@@ -14,9 +14,9 @@ import {
 } from './application/DraftOrder/IDraftOrder';
 import {
   ConfirmOrderRequest,
-  StripeCheckoutSessionResult,
   IConfirmOrder,
   ConfirmOrderPayload,
+  ConfirmOrderResult,
 } from './application/ConfirmOrder/IConfirmOrder';
 import {
   ReceiveItemResult,
@@ -53,6 +53,7 @@ import {
   IPayShipment,
   PayShipmentPayload,
   PayShipmentRequest,
+  PayShipmentResult,
 } from './application/PayShipment/IPayShipment';
 import {
   CustomerIdentity,
@@ -129,7 +130,7 @@ export class OrderController {
   async confirmOrderHandler(
     @Body() unidConfirmaOrderRequest: ConfirmOrderRequest,
     @CustomerIdentity() customerId: UUID,
-  ): Promise<StripeCheckoutSessionResult> {
+  ): Promise<ConfirmOrderResult> {
     const confirmOrderPayload: ConfirmOrderPayload = {
       ...unidConfirmaOrderRequest,
       customerId,
@@ -197,7 +198,7 @@ export class OrderController {
   async payShipmentHandler(
     @Body() unidPayShipmentRequest: PayShipmentRequest,
     @CustomerIdentity() customerId: UUID,
-  ): Promise<StripeCheckoutSessionResult> {
+  ): Promise<PayShipmentResult> {
     const payShipmentPayload: PayShipmentPayload = {
       ...unidPayShipmentRequest,
       customerId,

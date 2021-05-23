@@ -1,12 +1,12 @@
 import { StripeEvent, UseCase } from '../../../common/application';
 import {
-  UpdateHostAccountRequest,
+  UpdateHostAccountPayload,
   UpdateHostAccountResult,
 } from './handlers/UpdateHostAccountHandler/IUpdateHostAccountHandler';
 
 export type StripeAccountUpdatedEvent = StripeEvent;
 
-export type StripeAccountUpdatedWebhookPayload = UpdateHostAccountRequest;
+export type StripeAccountUpdatedWebhookPayload = UpdateHostAccountPayload;
 
 export type StripeAccountUpdatedResult = UpdateHostAccountResult;
 

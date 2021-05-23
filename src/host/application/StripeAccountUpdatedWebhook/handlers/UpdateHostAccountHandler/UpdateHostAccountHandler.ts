@@ -6,7 +6,7 @@ import { withTransaction } from '../../../../../common/application';
 import { IHostRepository } from '../../../../persistence/IHostRepository';
 import {
   IUpdateHostAccount,
-  UpdateHostAccountRequest,
+  UpdateHostAccountPayload,
 } from './IUpdateHostAccountHandler';
 
 @Injectable()
@@ -17,13 +17,13 @@ export class UpdateHostAccountHandler implements IUpdateHostAccount {
   ) {}
 
   async execute(
-    updateHostAccountRequest: UpdateHostAccountRequest,
+    updateHostAccountPayload: UpdateHostAccountPayload,
     mongoTransactionSession?: ClientSession,
   ) {
     await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.updateHostAccount(
-          updateHostAccountRequest,
+          updateHostAccountPayload,
           sessionWithTransaction,
         ),
       this.mongoClient,

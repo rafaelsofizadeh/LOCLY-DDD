@@ -3,7 +3,7 @@ import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
 import {
-  GetHostUpsertRequest,
+  GetHostUpsertPayload,
   GetHostUpsertResult,
   IGetHostUpsert,
 } from './IGetHostUpsert';
@@ -19,25 +19,25 @@ export class GetHostUpsert implements IGetHostUpsert {
   ) {}
 
   async execute(
-    getHostUpsertRequest: GetHostUpsertRequest,
+    getHostUpsertPayload: GetHostUpsertPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<GetHostUpsertResult> {
     return withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.getHostUpsert(getHostUpsertRequest, sessionWithTransaction),
+        this.getHostUpsert(getHostUpsertPayload, sessionWithTransaction),
       this.mongoClient,
       mongoTransactionSession,
     );
   }
 
   async getHostUpsert(
-    getHostUpsertRequest: GetHostUpsertRequest,
+    getHostUpsertPayload: GetHostUpsertPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<GetHostUpsertResult> {
     try {
       return {
         host: await this.getHost.execute(
-          getHostUpsertRequest,
+          getHostUpsertPayload,
           mongoTransactionSession,
         ),
         upsert: false,
@@ -45,7 +45,7 @@ export class GetHostUpsert implements IGetHostUpsert {
     } catch (exception) {
       return {
         host: await this.createHost.execute(
-          getHostUpsertRequest,
+          getHostUpsertPayload,
           mongoTransactionSession,
         ),
         upsert: true,

@@ -3,12 +3,12 @@ import { UseCase } from '../../../common/application';
 import { Email, IsUUID, UUID } from '../../../common/domain';
 import { Host } from '../../entity/Host';
 
-export interface GetHostRequest {
+export interface GetHostPayload {
   readonly hostId?: UUID;
   readonly email?: Email;
 }
 
-export class GetHostRequest implements GetHostRequest {
+export class GetHostRequest implements GetHostPayload {
   @IsOptional()
   @IsEmail()
   readonly email?: Email;
@@ -18,4 +18,4 @@ export class GetHostRequest implements GetHostRequest {
   readonly hostId?: UUID;
 }
 
-export abstract class IGetHost extends UseCase<GetHostRequest, Host> {}
+export abstract class IGetHost extends UseCase<GetHostPayload, Host> {}

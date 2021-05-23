@@ -2,13 +2,13 @@ import { Match } from '../../../ConfirmOrder/ConfirmOrder';
 import { Address } from '../../../../entity/Order';
 import { UseCase } from '../../../../../common/application';
 
-export type ConfirmOrderRequest = Match;
+export type ConfirmOrderWebhookPayload = Match;
 
-export type ConfirmOrderResult = {
+export type ConfirmOrderWebhookResult = {
   address: Address;
 };
 
 export abstract class IConfirmOrderHandler extends UseCase<
-  ConfirmOrderRequest,
-  ConfirmOrderResult
+  ConfirmOrderWebhookPayload,
+  ConfirmOrderWebhookResult
 > {}

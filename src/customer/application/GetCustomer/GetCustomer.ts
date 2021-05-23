@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
 import { withTransaction } from '../../../common/application';
-import { GetCustomerRequest, IGetCustomer } from './IGetCustomer';
+import { GetCustomerPayload, IGetCustomer } from './IGetCustomer';
 import { Customer } from '../../entity/Customer';
 
 @Injectable()
@@ -15,13 +15,13 @@ export class GetCustomer implements IGetCustomer {
   ) {}
 
   async execute(
-    getCustomerRequest: GetCustomerRequest,
+    getCustomerPayload: GetCustomerPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<Customer> {
     const customer: Customer = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.customerRepository.findCustomer(
-          getCustomerRequest,
+          getCustomerPayload,
           sessionWithTransaction,
         ),
       this.mongoClient,

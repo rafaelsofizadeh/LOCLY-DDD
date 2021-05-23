@@ -6,11 +6,11 @@ import {
 } from '../../../common/application';
 import { throwCustomException } from '../../../common/error-handling';
 import {
-  ConfirmOrderRequest,
+  ConfirmOrderWebhookPayload,
   IConfirmOrderHandler,
 } from './handlers/ConfirmOrderHandler/IConfirmOrderHandler';
 import {
-  PayShipmentRequest,
+  PayShipmentWebhookPayload,
   IPayShipmentHandler,
 } from './handlers/PayShipmentHandler/IPayShipmentHandler';
 import {
@@ -36,11 +36,11 @@ export class StripeCheckoutWebhook implements IStripeCheckoutWebhook {
     switch (webhookPayload.feeType) {
       case FeeType.Service:
         return this.confirmOrderWebhookGateway.execute(
-          webhookPayload as ConfirmOrderRequest,
+          webhookPayload as ConfirmOrderWebhookPayload,
         );
       case FeeType.Shipment:
         return this.payShipmentWebhookGateway.execute(
-          webhookPayload as PayShipmentRequest,
+          webhookPayload as PayShipmentWebhookPayload,
         );
       default:
         throwCustomException(
