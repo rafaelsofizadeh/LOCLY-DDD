@@ -8,7 +8,7 @@ import {
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
-import { UUID } from '../../common/domain';
+import { Address, UUID } from '../../common/domain';
 import { ICustomerRepository } from './ICustomerRepository';
 import { Customer, CustomerFilter } from '../entity/Customer';
 import {
@@ -22,7 +22,6 @@ import {
   throwCustomException,
 } from '../../common/error-handling';
 import { mongoQuery } from '../../common/persistence';
-import { Address } from '../../order/entity/Order';
 
 enum EntityAction {
   Add = 'add',

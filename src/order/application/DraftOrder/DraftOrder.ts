@@ -13,9 +13,9 @@ import {
   ShipmentCostQuoteFn,
 } from '../../../calculator/getShipmentCostQuote';
 import { DraftedItem } from '../../entity/Item';
-import { UUID } from '../../../common/domain';
+import { Address, UUID } from '../../../common/domain';
 import { Country } from '../../entity/Country';
-import { Address, DraftedOrder, Cost, OrderStatus } from '../../entity/Order';
+import { DraftedOrder, Cost, OrderStatus } from '../../entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
 
 @Injectable()

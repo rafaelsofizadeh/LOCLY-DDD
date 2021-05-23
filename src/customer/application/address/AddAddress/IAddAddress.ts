@@ -5,12 +5,9 @@ import {
   Length,
 } from 'class-validator';
 import { UseCase } from '../../../../common/application';
-import { UUID } from '../../../../common/domain';
+import { Address, UUID } from '../../../../common/domain';
 import { Country } from '../../../../order/entity/Country';
-import {
-  Address,
-  UnidCustomerOrderRequest,
-} from '../../../../order/entity/Order';
+import { UnidCustomerOrderRequest } from '../../../../order/entity/Order';
 
 export interface AddAddressRequest extends Address {
   customerId: UUID;

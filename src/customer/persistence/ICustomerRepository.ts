@@ -1,6 +1,5 @@
 import { ClientSession } from 'mongodb';
-import { UUID } from '../../common/domain';
-import { Address } from '../../order/entity/Order';
+import { Address, UUID } from '../../common/domain';
 import { Customer, CustomerFilter } from '../entity/Customer';
 
 export abstract class ICustomerRepository {

@@ -1,4 +1,4 @@
-import { UUID } from '../../common/domain';
+import { Address, UUID } from '../../common/domain';
 import { EntityFilter } from '../../common/persistence';
 import { Country } from './Country';
 import { Currency } from './Currency';
@@ -17,15 +17,6 @@ export interface Cost
     currency: Currency;
     amount: number;
   }> {}
-
-export type Address = Readonly<{
-  addressLine1: string;
-  addressLine2?: string;
-  locality: string;
-  administrativeArea?: string;
-  country: Country;
-  postalCode?: string;
-}>;
 
 export enum OrderStatus {
   Drafted = 'drafted',

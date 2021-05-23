@@ -4,7 +4,7 @@ import { InjectClient } from 'nest-mongodb';
 import { withTransaction } from '../../../../../common/application';
 import { Host } from '../../../../../host/entity/Host';
 
-import { Address, OrderStatus } from '../../../../entity/Order';
+import { OrderStatus } from '../../../../entity/Order';
 import {
   ConfirmOrderWebhookPayload,
   IConfirmOrderHandler,
@@ -12,6 +12,7 @@ import {
 } from './IConfirmOrderHandler';
 import { IHostRepository } from '../../../../../host/persistence/IHostRepository';
 import { IOrderRepository } from '../../../../persistence/IOrderRepository';
+import { Address } from '../../../../../common/domain';
 
 @Injectable()
 export class ConfirmOrderHandler implements IConfirmOrderHandler {

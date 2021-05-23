@@ -1,7 +1,5 @@
-import { Email, UUID } from '../../common/domain';
+import { Address, Email, UUID } from '../../common/domain';
 import { EntityFilter } from '../../common/persistence';
-
-import { Address } from '../../order/entity/Order';
 
 export type Host = Readonly<{
   id: UUID;

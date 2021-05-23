@@ -1,6 +1,6 @@
 import { Match } from '../../../ConfirmOrder/ConfirmOrder';
-import { Address } from '../../../../entity/Order';
 import { UseCase } from '../../../../../common/application';
+import { Address } from '../../../../../common/domain';
 
 export type ConfirmOrderWebhookPayload = Match;
 

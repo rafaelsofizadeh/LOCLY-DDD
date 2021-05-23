@@ -15,10 +15,14 @@ import {
 import { Country } from '../../entity/Country';
 import { Gram } from '../../entity/Item';
 import { UseCase } from '../../../common/application';
-import { UUID, WithoutId } from '../../../common/domain';
+import {
+  Address,
+  AddressValidationSchema,
+  UUID,
+  WithoutId,
+} from '../../../common/domain';
 import { DraftedItem } from '../../entity/Item';
 import { DraftedOrder, UnidCustomerOrderRequest } from '../../entity/Order';
-import { AddAddressRequest } from '../../../customer/application/address/AddAddress/IAddAddress';
 
 interface DraftItemRequest extends WithoutId<DraftedItem> {}
 
@@ -50,8 +54,8 @@ export class DraftOrderRequest
   @ValidateNested()
   @IsNotEmptyObject()
   @IsDefined()
-  @Type(() => AddAddressRequest)
-  readonly destination: AddAddressRequest;
+  @Type(() => AddressValidationSchema)
+  readonly destination: Address;
 
   @ValidateNested({ each: true })
   @ArrayMinSize(1)

@@ -1,11 +1,11 @@
 import { Binary } from 'mongodb';
 
 import { Customer, CustomerFilter } from '../entity/Customer';
-import { Address } from '../../order/entity/Order';
 import {
   convertToMongoDocument,
   serializeMongoData,
 } from '../../common/persistence';
+import { Address } from '../../common/domain';
 
 export type CustomerMongoDocument = {
   _id: Binary;
