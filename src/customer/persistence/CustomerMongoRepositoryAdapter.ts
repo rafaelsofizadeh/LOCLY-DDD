@@ -203,4 +203,42 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
 
     return mongoDocumentToCustomer(customerDocument);
   }
+
+  // TODO: Vary allowed properties based on OrderStatus
+  async setProperties(
+    filter: CustomerFilter,
+    // TODO: better type naming for OrderFilter here
+    properties: Omit<CustomerFilter, 'orderId'>,
+    mongoTransactionSession?: ClientSession,
+  ) {
+    const filterWithId = normalizeCustomerFilter(filter);
+    const filterQuery: FilterQuery<CustomerMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+
+    const {
+      matchedCount,
+      modifiedCount,
+    }: UpdateWriteOpResult = await this.customerCollection
+      .updateOne(
+        filterQuery,
+        { $set: mongoQuery(properties) },
+        { session: mongoTransactionSession },
+      )
+      .catch(
+        throwCustomException('Error updating customer', {
+          filter,
+          properties,
+        }),
+      );
+
+    expectOnlySingleResult(
+      [matchedCount, modifiedCount],
+      {
+        operation: 'setting properties on',
+        entity: 'customer',
+      },
+      { filter, properties },
+    );
+  }
 }

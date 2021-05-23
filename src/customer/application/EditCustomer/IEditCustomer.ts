@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsOptional, IsString, Length, ValidateNested } from 'class-validator';
+import { UseCase } from '../../../common/application';
 import { Address, AddressValidationSchema, UUID } from '../../../common/domain';
 import { UnidCustomerRequest } from '../../entity/Customer';
 
@@ -27,3 +28,8 @@ export class EditCustomerRequest
   @Type(() => AddressValidationSchema)
   addresses: Address[];
 }
+
+export abstract class IEditCustomer extends UseCase<
+  EditCustomerPayload,
+  void
+> {}
