@@ -43,7 +43,6 @@ export class AuthController {
 
     response.cookie(authnCookieName, authnTokenString, {
       maxAge: authnCookieMaxAge,
-      signed: true,
       httpOnly: true,
     });
   }

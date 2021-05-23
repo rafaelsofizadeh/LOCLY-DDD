@@ -12,7 +12,7 @@ export class VerificationTokenParamToBodyMiddleware {
     const verificationCookieName = this.configService.get<string>(
       'TOKEN_COOKIE_NAME',
     );
-    request.signedCookies[verificationCookieName] = verificationToken;
+    request.cookies[verificationCookieName] = verificationToken;
 
     return next();
   }
