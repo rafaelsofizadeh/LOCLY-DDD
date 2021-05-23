@@ -1,11 +1,11 @@
 import { Binary } from 'mongodb';
 
 import { Host, HostFilter } from '../entity/Host';
-import { Address } from '../../order/entity/Order';
 import {
   serializeMongoData,
   convertToMongoDocument,
 } from '../../common/persistence';
+import { Address } from '../../common/domain';
 
 export type HostMongoDocument = {
   _id: Binary;

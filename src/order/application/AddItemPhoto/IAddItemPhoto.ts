@@ -1,6 +1,6 @@
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
-import { UnidHostOrderRequest } from '../../entity/Order';
+import { UnidHostRequest } from '../../../host/entity/Host';
 import { Photo } from '../../persistence/OrderMongoMapper';
 
 export const maxSimulataneousPhotoCount = 4;
@@ -15,7 +15,7 @@ export interface AddItemPhotoPayload {
 }
 
 export class AddItemPhotoRequest
-  implements Omit<UnidHostOrderRequest<AddItemPhotoPayload>, 'photos'> {
+  implements Omit<UnidHostRequest<AddItemPhotoPayload>, 'photos'> {
   @IsUUID()
   readonly orderId: UUID;
 

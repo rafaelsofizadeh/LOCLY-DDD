@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsOptional, IsString, Length, ValidateNested } from 'class-validator';
 import { Address, AddressValidationSchema, UUID } from '../../../common/domain';
-import { UnidCustomerOrderRequest } from '../../../order/entity/Order';
+import { UnidCustomerRequest } from '../../entity/Customer';
 
 export type EditCustomerPayload = {
   customerId: UUID;
@@ -11,7 +11,7 @@ export type EditCustomerPayload = {
 };
 
 export class EditCustomerRequest
-  implements UnidCustomerOrderRequest<EditCustomerPayload> {
+  implements UnidCustomerRequest<EditCustomerPayload> {
   @IsOptional()
   @IsString()
   @Length(1, 32)

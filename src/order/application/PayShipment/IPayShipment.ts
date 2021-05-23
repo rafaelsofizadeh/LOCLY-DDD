@@ -3,7 +3,7 @@ import {
   UseCase,
 } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
-import { UnidCustomerOrderRequest } from '../../entity/Order';
+import { UnidCustomerRequest } from '../../../customer/entity/Customer';
 
 export interface PayShipmentPayload {
   readonly orderId: UUID;
@@ -11,7 +11,7 @@ export interface PayShipmentPayload {
 }
 
 export class PayShipmentRequest
-  implements UnidCustomerOrderRequest<PayShipmentPayload> {
+  implements UnidCustomerRequest<PayShipmentPayload> {
   @IsUUID()
   readonly orderId: UUID;
 }

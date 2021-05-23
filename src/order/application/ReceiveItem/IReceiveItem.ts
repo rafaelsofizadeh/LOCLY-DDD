@@ -1,6 +1,6 @@
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
-import { UnidHostOrderRequest } from '../../entity/Order';
+import { UnidHostRequest } from '../../../host/entity/Host';
 
 export interface ReceiveItemPayload
   extends Readonly<{
@@ -9,8 +9,7 @@ export interface ReceiveItemPayload
     itemId: UUID;
   }> {}
 
-export class ReceiveItemRequest
-  implements UnidHostOrderRequest<ReceiveItemPayload> {
+export class ReceiveItemRequest implements UnidHostRequest<ReceiveItemPayload> {
   @IsUUID()
   readonly orderId: UUID;
 

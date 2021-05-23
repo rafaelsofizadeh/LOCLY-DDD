@@ -9,3 +9,5 @@ export type Customer = Readonly<{
 }>;
 
 export type CustomerFilter = EntityFilter<Customer, { customerId: UUID }>;
+
+export type UnidCustomerRequest<T> = Omit<T, 'customerId'>;

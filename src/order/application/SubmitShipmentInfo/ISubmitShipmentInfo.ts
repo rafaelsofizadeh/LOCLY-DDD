@@ -12,7 +12,8 @@ import {
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
 import { Gram } from '../../entity/Item';
-import { Cost as ICost, UnidHostOrderRequest } from '../../entity/Order';
+import { Cost as ICost } from '../../entity/Order';
+import { UnidHostRequest } from '../../../host/entity/Host';
 
 export type URL = string;
 
@@ -36,7 +37,7 @@ class Cost implements ICost {
 }
 
 export class SubmitShipmentInfoRequest
-  implements UnidHostOrderRequest<SubmitShipmentInfoPayload> {
+  implements UnidHostRequest<SubmitShipmentInfoPayload> {
   @IsUUID()
   readonly orderId: UUID;
 

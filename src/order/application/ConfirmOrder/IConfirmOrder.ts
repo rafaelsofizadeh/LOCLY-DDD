@@ -4,7 +4,7 @@ import {
 } from '../../../common/application';
 
 import { IsUUID, UUID } from '../../../common/domain';
-import { UnidCustomerOrderRequest } from '../../entity/Order';
+import { UnidCustomerRequest } from '../../../customer/entity/Customer';
 
 export interface ConfirmOrderPayload {
   readonly orderId: UUID;
@@ -12,7 +12,7 @@ export interface ConfirmOrderPayload {
 }
 
 export class ConfirmOrderRequest
-  implements UnidCustomerOrderRequest<ConfirmOrderPayload> {
+  implements UnidCustomerRequest<ConfirmOrderPayload> {
   @IsUUID()
   readonly orderId: UUID;
 }

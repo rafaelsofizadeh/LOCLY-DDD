@@ -29,7 +29,6 @@ export abstract class IOrderRepository {
 
   abstract setProperties(
     filter: OrderFilter,
-    // TODO: type is almost the same as OrderFilter
     properties: Omit<OrderFilter, 'orderId'>,
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;

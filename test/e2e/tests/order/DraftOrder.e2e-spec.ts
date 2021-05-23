@@ -6,14 +6,10 @@ import { isUUID } from 'class-validator';
 import { AppModule } from '../../../../src/AppModule';
 import { Customer } from '../../../../src/customer/entity/Customer';
 import { IOrderRepository } from '../../../../src/order/persistence/IOrderRepository';
-import { UUID } from '../../../../src/common/domain';
+import { Address, UUID } from '../../../../src/common/domain';
 import { ICustomerRepository } from '../../../../src/customer/persistence/ICustomerRepository';
 import { DraftOrderPayload } from '../../../../src/order/application/DraftOrder/IDraftOrder';
-import {
-  OrderStatus,
-  DraftedOrder,
-  Address,
-} from '../../../../src/order/entity/Order';
+import { OrderStatus, DraftedOrder } from '../../../../src/order/entity/Order';
 import { Country } from '../../../../src/order/entity/Country';
 import { CustomExceptionFilter } from '../../../../src/infrastructure/CustomExceptionFilter';
 import {

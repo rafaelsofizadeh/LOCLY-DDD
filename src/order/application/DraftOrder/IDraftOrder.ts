@@ -22,7 +22,8 @@ import {
   WithoutId,
 } from '../../../common/domain';
 import { DraftedItem } from '../../entity/Item';
-import { DraftedOrder, UnidCustomerOrderRequest } from '../../entity/Order';
+import { DraftedOrder } from '../../entity/Order';
+import { UnidCustomerRequest } from '../../../customer/entity/Customer';
 
 interface DraftItemRequest extends WithoutId<DraftedItem> {}
 
@@ -47,7 +48,7 @@ class DraftItemRequestSchema implements DraftItemRequest {
 }
 
 export class DraftOrderRequest
-  implements Omit<UnidCustomerOrderRequest<DraftOrderPayload>, 'orderId'> {
+  implements Omit<UnidCustomerRequest<DraftOrderPayload>, 'orderId'> {
   @IsISO31661Alpha3()
   readonly originCountry: Country;
 

@@ -1,6 +1,6 @@
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
-import { UnidCustomerOrderRequest } from '../../entity/Order';
+import { UnidCustomerRequest } from '../../../customer/entity/Customer';
 
 export interface DeleteOrderPayload {
   orderId: UUID;
@@ -8,7 +8,7 @@ export interface DeleteOrderPayload {
 }
 
 export class DeleteOrderRequest
-  implements UnidCustomerOrderRequest<DeleteOrderPayload> {
+  implements UnidCustomerRequest<DeleteOrderPayload> {
   @IsUUID()
   readonly orderId: UUID;
 }

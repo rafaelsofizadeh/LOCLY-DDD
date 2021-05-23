@@ -12,3 +12,5 @@ export type Host = Readonly<{
 }>;
 
 export type HostFilter = EntityFilter<Host, { hostId: UUID }>;
+
+export type UnidHostRequest<T> = Omit<T, 'hostId'>;
