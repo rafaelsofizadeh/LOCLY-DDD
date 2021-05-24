@@ -36,6 +36,7 @@
     "class-transformer": "^0.3.2",
     "class-validator": "^0.12.2",
     "cookie-parser": "^1.4.5",
+    "i18n-iso-countries": "^6.7.0",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.6.3",
     "ms": "^2.1.3",

@@ -1,10 +1,12 @@
 import { UseCase } from '../../../common/application';
 import { UUID } from '../../../common/domain';
+import { Country } from '../../../order/entity/Country';
 import { Host } from '../../entity/Host';
 
-export interface GetHostUpsertPayload {
-  readonly email: UUID;
-}
+export type GetHostUpsertPayload = Readonly<{
+  email: UUID;
+  country?: Country;
+}>;
 
 export type GetHostUpsertResult = {
   host: Host;

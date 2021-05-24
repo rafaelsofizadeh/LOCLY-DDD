@@ -5,7 +5,7 @@ import { InjectClient } from 'nest-mongodb';
 import { withTransaction } from '../../../common/application';
 import { IEmailService } from '../../../infrastructure/email/IEmailService';
 import {
-  RequestAuthnRequest,
+  RequestAuthnPayload,
   RequestAuthnResult,
   IRequestAuthn,
 } from './IRequestAuthn';
@@ -15,6 +15,7 @@ import { IGetHostUpsert } from '../../../host/application/GetHostUpsert/IGetHost
 import { tokenToString } from '../utils';
 import { Email, UUID } from '../../../common/domain';
 import { throwCustomException } from '../../../common/error-handling';
+import { Country } from '../../../order/entity/Country';
 
 @Injectable()
 export class RequestAuthn implements IRequestAuthn {
@@ -27,24 +28,25 @@ export class RequestAuthn implements IRequestAuthn {
   ) {}
 
   async execute(
-    requestAuthnRequest: RequestAuthnRequest,
+    requestAuthnPayload: RequestAuthnPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<RequestAuthnResult> {
     await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.requestAuthn(requestAuthnRequest, sessionWithTransaction),
+        this.requestAuthn(requestAuthnPayload, sessionWithTransaction),
       this.mongoClient,
       mongoTransactionSession,
     );
   }
 
   private async requestAuthn(
-    { email, type: entityRequestType }: RequestAuthnRequest,
+    { email, type: entityRequestType, country }: RequestAuthnPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<void> {
     const { entityId, entityType } = await this.findOrCreateEntity(
       email,
       entityRequestType,
+      country,
       mongoTransactionSession,
     );
 
@@ -69,7 +71,8 @@ export class RequestAuthn implements IRequestAuthn {
   private async findOrCreateEntity(
     email: Email,
     entityType: EntityType,
-    mongoTransactionSession: ClientSession,
+    country?: Country,
+    mongoTransactionSession?: ClientSession,
   ): Promise<{ entityId: UUID; entityType: EntityType }> {
     if (entityType === EntityType.Customer) {
       const { customer } = await this.getCustomerUpsert.execute(
@@ -85,7 +88,7 @@ export class RequestAuthn implements IRequestAuthn {
 
     if (entityType === EntityType.Host) {
       const { host } = await this.getHostUpsert.execute(
-        { email },
+        { email, country },
         mongoTransactionSession,
       );
 
