@@ -6,6 +6,7 @@ import { withTransaction } from '../../../common/application';
 import { IHostRepository } from '../../persistence/IHostRepository';
 import { EditHostPayload, IEditHost } from './IEditHost';
 
+// TODO: Add country editing (but only once) for those who didn't select country during registration
 @Injectable()
 export class EditHost implements IEditHost {
   constructor(

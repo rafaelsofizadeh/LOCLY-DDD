@@ -17,12 +17,10 @@ export async function withTransaction<T>(
   mongoClient: MongoClient,
   mongoTransactionSession?: ClientSession,
 ): Promise<T> {
-  const wrappedFn = (mongoTransactionSession: ClientSession) =>
-    abortTransactionOnNonMongoException(mongoTransactionSession, fn);
   // Session takes precendence over mongoClient
   return mongoTransactionSession === undefined
     ? await withNewSessionTransaction(mongoClient, fn)
-    : await withExistingSessionTransaction(mongoTransactionSession, wrappedFn);
+    : await withExistingSessionTransaction(mongoTransactionSession, fn);
 }
 
 async function withExistingSessionTransaction<T>(
@@ -59,29 +57,6 @@ async function withNewSessionTransaction<T>(
   );
 
   return result;
-}
-
-async function abortTransactionOnNonMongoException<T>(
-  mongoTransactionSession: ClientSession,
-  fn: (mongoTransactionSession: ClientSession) => Promise<T>,
-): Promise<T> {
-  // Test if mongoTransactionSession has a transaction initialized (to abort that transaction)
-  if (!mongoTransactionSession.inTransaction()) {
-    throw new Error(
-      "Can't abort transaction as mongoTransactionSession isn't in transaction state",
-    );
-  }
-
-  try {
-    return await fn(mongoTransactionSession);
-  } catch (exceptionOrMongoError) {
-    if (exceptionOrMongoError instanceof Exception) {
-      await mongoTransactionSession.abortTransaction();
-      console.log('Transaction aborted');
-    }
-
-    throw exceptionOrMongoError;
-  }
 }
 
 export function stripePrice({ currency, amount }: Cost): StripePrice {
