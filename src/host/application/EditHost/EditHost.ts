@@ -3,7 +3,6 @@ import { isNotEmptyObject } from 'class-validator';
 import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
 import { withTransaction } from '../../../common/application';
-import { Host } from '../../entity/Host';
 import { IHostRepository } from '../../persistence/IHostRepository';
 import { EditHostPayload, IEditHost } from './IEditHost';
 
@@ -27,11 +26,11 @@ export class EditHost implements IEditHost {
   }
 
   private async editHost(
-    { host, ...editProperties }: EditHostPayload,
+    { hostProperties, ...editProperties }: EditHostPayload,
     sessionWithTransaction: ClientSession,
   ) {
-    const { firstName, lastName, address }: Host = {
-      ...host,
+    const { firstName, lastName, address } = {
+      ...hostProperties,
       ...editProperties,
     };
 
@@ -47,7 +46,7 @@ export class EditHost implements IEditHost {
     ].every(propDefined => propDefined);
 
     return this.hostRepository.setProperties(
-      { hostId: host.id },
+      { hostId: hostProperties.id },
       { ...editProperties, profileComplete },
       sessionWithTransaction,
     );

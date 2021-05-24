@@ -5,13 +5,14 @@ import { Address, AddressValidationSchema } from '../../../common/domain';
 import { Host } from '../../entity/Host';
 
 export type EditHostPayload = Readonly<{
-  host: Host;
+  hostProperties: Pick<Host, 'id' | 'firstName' | 'lastName' | 'address'>;
   firstName?: string;
   lastName?: string;
   address?: Address;
 }>;
 
-export class EditHostRequest implements Omit<EditHostPayload, 'host'> {
+export class EditHostRequest
+  implements Omit<EditHostPayload, 'hostProperties'> {
   @IsOptional()
   @IsString()
   @Length(1, 32)
