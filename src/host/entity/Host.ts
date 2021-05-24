@@ -5,10 +5,13 @@ export type Host = Readonly<{
   id: UUID;
   email: Email;
   stripeAccountId: string;
-  verified: boolean;
-  available: boolean;
+  firstName?: string;
+  lastName?: string;
   address?: Address;
   orderIds?: UUID[];
+  verified: boolean;
+  available: boolean;
+  profileComplete: boolean;
 }>;
 
 export type HostFilter = EntityFilter<Host, { hostId: UUID }>;

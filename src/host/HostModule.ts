@@ -1,12 +1,16 @@
 import { Module, Provider } from '@nestjs/common';
 import { CreateHost } from './application/CreateHost/CreateHost';
 import { ICreateHost } from './application/CreateHost/ICreateHost';
+import { EditHost } from './application/EditHost/EditHost';
+import { IEditHost } from './application/EditHost/IEditHost';
 import { GetHost } from './application/GetHost/GetHost';
 import { IGetHost } from './application/GetHost/IGetHost';
 import { GetHostAccountLink } from './application/GetHostAccountLink/GetHostAccountLink';
 import { IGetHostAccountLink } from './application/GetHostAccountLink/IGetHostAccountLink';
 import { GetHostUpsert } from './application/GetHostUpsert/GetHostUpsert';
 import { IGetHostUpsert } from './application/GetHostUpsert/IGetHostUpsert';
+import { ISetHostAvailability } from './application/SetHostAvailability/ISetHostAvailability';
+import { SetHostAvailability } from './application/SetHostAvailability/SetHostAvailability';
 import { IUpdateHostAccount } from './application/StripeAccountUpdatedWebhook/handlers/UpdateHostAccountHandler/IUpdateHostAccountHandler';
 import { UpdateHostAccountHandler } from './application/StripeAccountUpdatedWebhook/handlers/UpdateHostAccountHandler/UpdateHostAccountHandler';
 import { IStripeAccountUpdatedWebhook } from './application/StripeAccountUpdatedWebhook/IStripeAccountUpdatedWebhook';
@@ -18,6 +22,8 @@ const useCaseProviders: Provider[] = [
   { provide: IGetHost, useClass: GetHost },
   { provide: IGetHostUpsert, useClass: GetHostUpsert },
   { provide: IGetHostAccountLink, useClass: GetHostAccountLink },
+  { provide: IEditHost, useClass: EditHost },
+  { provide: ISetHostAvailability, useClass: SetHostAvailability },
   {
     provide: IStripeAccountUpdatedWebhook,
     useClass: StripeAccountUpdatedWebhook,
