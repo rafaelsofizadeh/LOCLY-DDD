@@ -31,18 +31,20 @@ export class RequestAuthn implements IRequestAuthn {
     requestAuthnPayload: RequestAuthnPayload,
     mongoTransactionSession?: ClientSession,
   ): Promise<RequestAuthnResult> {
-    await withTransaction(
+    const authUrl: string = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
         this.requestAuthn(requestAuthnPayload, sessionWithTransaction),
       this.mongoClient,
       mongoTransactionSession,
     );
+
+    return authUrl;
   }
 
   private async requestAuthn(
     { email, type: entityRequestType, country }: RequestAuthnPayload,
     mongoTransactionSession: ClientSession,
-  ): Promise<void> {
+  ): Promise<string> {
     const { entityId, entityType } = await this.findOrCreateEntity(
       email,
       entityRequestType,
@@ -61,11 +63,15 @@ export class RequestAuthn implements IRequestAuthn {
       expiresIn,
     );
 
+    const authUrl = `localhost:3000/auth/${tokenString}`;
+
     await this.emailService.sendEmail({
       to: email,
-      subject: 'Locly authentication link!',
-      html: `<a href="localhost:3000/auth/verify/${tokenString}">Click on this link to log in to Locly!</a>`,
+      subject: 'Locly log in',
+      html: `<a href="${authUrl}>Click on this link to log in to Locly!</a>`,
     });
+
+    return authUrl;
   }
 
   private async findOrCreateEntity(

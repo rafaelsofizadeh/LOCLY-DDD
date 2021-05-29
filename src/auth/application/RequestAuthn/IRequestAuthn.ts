@@ -22,7 +22,7 @@ export class RequestAuthnRequest implements RequestAuthnPayload {
   readonly country?: Country;
 }
 
-export type RequestAuthnResult = void;
+export type RequestAuthnResult = string;
 
 export abstract class IRequestAuthn extends UseCase<
   RequestAuthnPayload,
