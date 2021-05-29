@@ -27,7 +27,7 @@ export class AuthController {
 
   // TokenParamToBodyMiddleware will move the :token URL param to request cookies, for
   // AuthInterceptor to operate on the token cookie.
-  @Get('verify/:token')
+  @Get(':token')
   async verifyAuthnHandler(
     // passthrough: https://docs.nestjs.com/controllers#library-specific-approach
     @Res({ passthrough: true }) response: Response,
