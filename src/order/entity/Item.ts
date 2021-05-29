@@ -13,7 +13,6 @@ export type Item = PhysicalItem &
   Readonly<{
     title: string;
     storeName: string;
-    // TODO: Separate optional fields into separate interface
     photos: Photo[];
     receivedDate: Date;
   }>;

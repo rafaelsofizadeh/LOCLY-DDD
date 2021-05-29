@@ -5,29 +5,29 @@ import supertest from 'supertest';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
-import { AppModule } from '../../../../src/AppModule';
-import { Customer } from '../../../../src/customer/entity/Customer';
-import { Host } from '../../../../src/host/entity/Host';
+import { AppModule } from '../../../src/AppModule';
+import { Customer } from '../../../src/customer/entity/Customer';
+import { Host } from '../../../src/host/entity/Host';
 
-import { ICustomerRepository } from '../../../../src/customer/persistence/ICustomerRepository';
-import { IOrderRepository } from '../../../../src/order/persistence/IOrderRepository';
-import { IDraftOrder } from '../../../../src/order/application/DraftOrder/IDraftOrder';
-import { Country } from '../../../../src/order/entity/Country';
+import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
+import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
+import { IDraftOrder } from '../../../src/order/application/DraftOrder/IDraftOrder';
+import { Country } from '../../../src/order/entity/Country';
 import { isString } from 'class-validator';
-import { IHostRepository } from '../../../../src/host/persistence/IHostRepository';
+import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
 import {
   DraftedOrder,
   ConfirmedOrder,
   OrderStatus,
-} from '../../../../src/order/entity/Order';
-import { Email, UUID } from '../../../../src/common/domain';
-import { CustomExceptionFilter } from '../../../../src/infrastructure/CustomExceptionFilter';
+} from '../../../src/order/entity/Order';
+import { Email, UUID } from '../../../src/common/domain';
+import { CustomExceptionFilter } from '../../../src/infrastructure/CustomExceptionFilter';
 import {
   getDestinationCountriesAvailable,
   originCountriesAvailable,
-} from '../../../../src/calculator/data/PriceGuide';
+} from '../../../src/calculator/data/PriceGuide';
 import { ConfigService } from '@nestjs/config';
-import { ConfirmOrderResult } from '../../../../src/order/application/ConfirmOrder/IConfirmOrder';
+import { ConfirmOrderResult } from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
 
 type HostConfig = {
   email: Email;

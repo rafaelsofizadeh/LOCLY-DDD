@@ -2,7 +2,6 @@ import { ClientSession, MongoClient } from 'mongodb';
 import { Stripe } from 'stripe';
 import { Cost } from '../order/entity/Order';
 import { StripeCheckoutWebhookPayload } from '../order/application/StripeCheckoutWebhook/IStripeCheckoutWebhook';
-import { Exception } from './error-handling';
 
 export abstract class UseCase<TUseCasePort, TUseCaseResult> {
   // TODO: abstract signature doesn't affect type checker anywhere else
