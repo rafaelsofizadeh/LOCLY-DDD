@@ -1,5 +1,5 @@
 import supertest from 'supertest';
-import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { isUUID } from 'class-validator';
 
@@ -11,11 +11,11 @@ import { ICustomerRepository } from '../../../src/customer/persistence/ICustomer
 import { DraftOrderPayload } from '../../../src/order/application/DraftOrder/IDraftOrder';
 import { OrderStatus, DraftedOrder } from '../../../src/order/entity/Order';
 import { Country } from '../../../src/order/entity/Country';
-import { CustomExceptionFilter } from '../../../src/infrastructure/CustomExceptionFilter';
 import {
   getDestinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../src/calculator/data/PriceGuide';
+import { setupNestApp } from '../../../src/main';
 
 // TODO(GLOBAL)(TESTING): Substitute database name in tests
 
@@ -36,18 +36,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
       imports: [AppModule],
     }).compile();
 
-    // TODO: To prevent having to manually register all global pipes, interceptors and etc., create a single method
     app = moduleRef.createNestApplication();
-
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        transform: true,
-        forbidNonWhitelisted: true,
-      }),
-    );
-    app.useGlobalFilters(new CustomExceptionFilter());
-
+    await setupNestApp(app);
     await app.init();
 
     customerRepository = (await moduleRef.resolve(

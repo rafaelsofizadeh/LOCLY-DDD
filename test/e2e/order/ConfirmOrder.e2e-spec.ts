@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import child_process from 'child_process';
 import path from 'path';
 import supertest from 'supertest';
-import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../../../src/AppModule';
@@ -21,13 +21,13 @@ import {
   OrderStatus,
 } from '../../../src/order/entity/Order';
 import { Email, UUID } from '../../../src/common/domain';
-import { CustomExceptionFilter } from '../../../src/infrastructure/CustomExceptionFilter';
 import {
   getDestinationCountriesAvailable,
   originCountriesAvailable,
 } from '../../../src/calculator/data/PriceGuide';
 import { ConfigService } from '@nestjs/config';
 import { ConfirmOrderResult } from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
+import { setupNestApp } from '../../../src/main';
 
 type HostConfig = {
   email: Email;
@@ -63,12 +63,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     }).compile();
 
     app = moduleRef.createNestApplication(undefined, { bodyParser: false });
-
-    app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, transform: true }),
-    );
-    app.useGlobalFilters(new CustomExceptionFilter());
-
+    await setupNestApp(app);
     await app.listen(3000);
 
     const configService = (await moduleRef.resolve(

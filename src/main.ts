@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './AppModule';
 import { CustomExceptionFilter } from './infrastructure/CustomExceptionFilter';
@@ -11,9 +11,7 @@ import { CustomExceptionFilter } from './infrastructure/CustomExceptionFilter';
 
 declare const module: any;
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bodyParser: false });
-
+export async function setupNestApp(app: INestApplication) {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -23,7 +21,11 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new CustomExceptionFilter());
+}
 
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
+  await setupNestApp(app);
   await app.listen(3000);
 
   if (module.hot) {
