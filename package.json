@@ -19,7 +19,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:confirm-order": "jest -i 'ConfirmOrder'",
-    "test:draft-order": "jest -i 'DraftOrder'"
+    "test:draft-order": "jest -i 'DraftOrder'",
+    "test:request-auth": "jest -i 'RequestAuth'"
   },
   "dependencies": {
     "@golevelup/nestjs-stripe": "^0.1.0",
