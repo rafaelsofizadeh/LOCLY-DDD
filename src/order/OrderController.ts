@@ -25,7 +25,6 @@ import {
   ReceiveItemPayload,
 } from './application/ReceiveItem/IReceiveItem';
 import { DraftedOrder } from './entity/Order';
-import { SerializePrivatePropertiesInterceptor } from '../infrastructure/SerializePrivatePropertiesInterceptor';
 import {
   IEditOrder,
   EditOrderRequest,
@@ -76,8 +75,6 @@ export class OrderController {
   ) {}
 
   @Post('draft')
-  // TODO: where else to apply SerializePrivatePropertiesInterceptor?
-  @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async draftOrderHandler(
     @Body() unidDraftOrderRequest: DraftOrderRequest,
     @CustomerIdentity() customerId: UUID,
@@ -96,7 +93,6 @@ export class OrderController {
   }
 
   @Post('edit')
-  @UseInterceptors(SerializePrivatePropertiesInterceptor)
   async editOrderHandler(
     @Body() unidEditOrderRequest: EditOrderRequest,
     @CustomerIdentity() customerId: UUID,
