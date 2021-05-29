@@ -566,7 +566,6 @@ export const priceGuide: ShipmentCostSpecification = {
           'YEM',
           'ZMB',
         ],
-        // TODO(IMPORTANT): Different schema (without "W3" zone)
         priceTable: [
           [10.2, 11.7, 12.75],
           [10.35, 12.65, 14.1],

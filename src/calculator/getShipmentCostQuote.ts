@@ -5,7 +5,6 @@ import { Currency } from '../order/entity/Currency';
 import { Gram, PhysicalItem } from '../order/entity/Item';
 import { priceGuide } from './data/PriceGuide';
 
-// TODO: POST PRICE COVERAGE. Check Royal Mail PDF Bottom, VAT and "add 2.5GBP to prices in the table"
 type PriceTableSpecification = {
   rowsName: string;
   colsName: string;
@@ -15,7 +14,7 @@ type PriceTableSpecification = {
 };
 
 export type ShipmentCostSpecification = {
-  // TODO: should've been type Country: https://github.com/microsoft/TypeScript/issues/37448
+  // Should've been type Country: https://github.com/microsoft/TypeScript/issues/37448
   [countryIsoCode: string]: {
     postalServiceName: string;
     priceTableSpecification: PriceTableSpecification;

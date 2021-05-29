@@ -19,8 +19,7 @@ import { CookieAuthxInterceptor } from './infrastructure/AuthxInterceptor';
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      // TODO(?): only useFactory + inject works for instantiating CookieAuthxInterceptor,
-      // otherwise dependencies are undefined
+      // useFactory + inject works for instantiating CookieAuthxInterceptor, otherwise dependencies are undefined
       useFactory: (
         configService: ConfigService,
         hostRepository: IHostRepository,

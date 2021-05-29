@@ -13,7 +13,6 @@ export type WithoutId<T> = Omit<T, 'id'>;
 
 export type Modify<T, R> = Omit<T, keyof R> & R;
 
-// TODO: Strict UUID type alias
 export type UUID = string;
 
 export const UUID = (id?: UUID) => (id || uuidv4()) as UUID;
