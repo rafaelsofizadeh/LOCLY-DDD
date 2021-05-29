@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Delete,
+  Patch,
   Post,
   UploadedFiles,
   UseInterceptors,
@@ -74,7 +76,7 @@ export class OrderController {
     private readonly payShipment: IPayShipment,
   ) {}
 
-  @Post('draft')
+  @Post()
   async draftOrderHandler(
     @Body() unidDraftOrderRequest: DraftOrderRequest,
     @CustomerIdentity() customerId: UUID,
@@ -92,7 +94,7 @@ export class OrderController {
     return draftOrder;
   }
 
-  @Post('edit')
+  @Patch()
   async editOrderHandler(
     @Body() unidEditOrderRequest: EditOrderRequest,
     @CustomerIdentity() customerId: UUID,
@@ -109,7 +111,7 @@ export class OrderController {
     return editedDraftOrder;
   }
 
-  @Post('delete')
+  @Delete()
   async deleteOrderHandler(
     @Body() unidDeleteOrderRequest: DeleteOrderRequest,
     @CustomerIdentity() customerId: UUID,
