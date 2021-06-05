@@ -5,10 +5,10 @@ import { InjectClient } from 'nest-mongodb';
 import { withTransaction } from '../../../common/application';
 import { IEmailService } from '../../../infrastructure/email/IEmailService';
 import {
-  RequestAuthnPayload,
-  RequestAuthnResult,
-  IRequestAuthn,
-} from './IRequestAuthn';
+  RequestAuthPayload,
+  RequestAuthResult,
+  IRequestAuth,
+} from './IRequestAuth';
 import { IGetCustomerUpsert } from '../../../customer/application/GetCustomerUpsert/IGetCustomerUpsert';
 import { EntityType } from '../../entity/Token';
 import { IGetHostUpsert } from '../../../host/application/GetHostUpsert/IGetHostUpsert';
@@ -18,7 +18,7 @@ import { throwCustomException } from '../../../common/error-handling';
 import { Country } from '../../../order/entity/Country';
 
 @Injectable()
-export class RequestAuthn implements IRequestAuthn {
+export class RequestAuth implements IRequestAuth {
   constructor(
     private readonly getCustomerUpsert: IGetCustomerUpsert,
     private readonly getHostUpsert: IGetHostUpsert,
@@ -28,12 +28,12 @@ export class RequestAuthn implements IRequestAuthn {
   ) {}
 
   async execute(
-    requestAuthnPayload: RequestAuthnPayload,
+    requestAuthPayload: RequestAuthPayload,
     mongoTransactionSession?: ClientSession,
-  ): Promise<RequestAuthnResult> {
+  ): Promise<RequestAuthResult> {
     const authUrl: string = await withTransaction(
       (sessionWithTransaction: ClientSession) =>
-        this.requestAuthn(requestAuthnPayload, sessionWithTransaction),
+        this.requestAuth(requestAuthPayload, sessionWithTransaction),
       this.mongoClient,
       mongoTransactionSession,
     );
@@ -41,11 +41,11 @@ export class RequestAuthn implements IRequestAuthn {
     return authUrl;
   }
 
-  private async requestAuthn(
-    { email, type: entityRequestType, country }: RequestAuthnPayload,
+  private async requestAuth(
+    { email, type: entityRequestType, country }: RequestAuthPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<string> {
-    const { entityId, entityType } = await this.findOrCreateEntity(
+    const { id: entityId, type: entityType } = await this.findOrCreateEntity(
       email,
       entityRequestType,
       country,
@@ -57,14 +57,17 @@ export class RequestAuthn implements IRequestAuthn {
       'VERIFICATION_TOKEN_EXPIRES_IN',
     );
 
+    // Create and sign a verification token to be sent by email.
     const tokenString: string = tokenToString(
-      { entityId, entityType, isVerification: true },
+      { id: entityId, type: entityType, isVerification: true },
       key,
       expiresIn,
     );
 
+    // TODO: Proper URL construction
     const authUrl = `localhost:3000/auth/${tokenString}`;
 
+    // TODO: Email templating
     await this.emailService.sendEmail({
       to: email,
       subject: 'Locly log in',
@@ -74,12 +77,16 @@ export class RequestAuthn implements IRequestAuthn {
     return authUrl;
   }
 
+  // For login, the GetCustomer/HostUpsert use cases are expected to always only GET.
+  // For registration, the use cases are expected to always only UPSERT.
   private async findOrCreateEntity(
     email: Email,
     entityType: EntityType,
+    // country is expected to be defined only during host registration. All other cases (login, customer registration),
+    // country will be undefined.
     country?: Country,
     mongoTransactionSession?: ClientSession,
-  ): Promise<{ entityId: UUID; entityType: EntityType }> {
+  ): Promise<{ id: UUID; type: EntityType }> {
     if (entityType === EntityType.Customer) {
       const { customer } = await this.getCustomerUpsert.execute(
         { email },
@@ -87,20 +94,20 @@ export class RequestAuthn implements IRequestAuthn {
       );
 
       return {
-        entityId: customer.id,
-        entityType: EntityType.Customer,
+        id: customer.id,
+        type: EntityType.Customer,
       };
     }
 
     if (entityType === EntityType.Host) {
       const { host } = await this.getHostUpsert.execute(
-        { email, country },
+        { email, ...(country ? { country } : {}) },
         mongoTransactionSession,
       );
 
       return {
-        entityId: host.id,
-        entityType: EntityType.Host,
+        id: host.id,
+        type: EntityType.Host,
       };
     }
 

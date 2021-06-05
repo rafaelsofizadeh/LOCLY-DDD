@@ -3,46 +3,44 @@ import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import {
-  RequestAuthnRequest,
-  IRequestAuthn,
-} from './application/RequestAuthn/IRequestAuthn';
-import { IVerifyAuthn } from './application/VerifyAuthn/IVerifyAuthn';
+  RequestAuthRequest,
+  IRequestAuth,
+} from './application/RequestAuth/IRequestAuth';
+import { IVerifyAuth } from './application/VerifyAuth/IVerifyAuth';
 import { Token } from './entity/Token';
-import { VerificationTokenIdentity } from './infrastructure/decorators/identity';
+import { VerificationTokenIdentity } from './infrastructure/IdentityDecorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly configService: ConfigService,
-    private readonly requestAuthn: IRequestAuthn,
-    private readonly verifyAuthn: IVerifyAuthn,
+    private readonly requestAuth: IRequestAuth,
+    private readonly verifyAuth: IVerifyAuth,
   ) {}
 
   @Post()
-  async requestAuthnHandler(
-    @Body() requestAuthnRequest: RequestAuthnRequest,
+  async requestAuthHandler(
+    @Body() requestAuthRequest: RequestAuthRequest,
   ): Promise<void> {
-    await this.requestAuthn.execute(requestAuthnRequest);
+    await this.requestAuth.execute(requestAuthRequest);
   }
 
   // TokenParamToBodyMiddleware will move the :token URL param to request cookies, for
   // AuthInterceptor to operate on the token cookie.
   @Get(':token')
-  async verifyAuthnHandler(
+  async verifyAuthHandler(
     // passthrough: https://docs.nestjs.com/controllers#library-specific-approach
     @Res({ passthrough: true }) response: Response,
     @VerificationTokenIdentity() verificationToken: Token,
   ): Promise<void> {
-    const authnTokenString: string = this.verifyAuthn.execute(
-      verificationToken,
-    );
-    const authnCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
-    const authnCookieMaxAge = ms(
-      this.configService.get<string>('AUTHN_TOKEN_EXPIRES_IN'),
+    const authTokenString: string = this.verifyAuth.execute(verificationToken);
+    const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
+    const authCookieMaxAge = ms(
+      this.configService.get<string>('AUTH_TOKEN_EXPIRES_IN'),
     );
 
-    response.cookie(authnCookieName, authnTokenString, {
-      maxAge: authnCookieMaxAge,
+    response.cookie(authCookieName, authTokenString, {
+      maxAge: authCookieMaxAge,
       httpOnly: true,
     });
   }
@@ -51,8 +49,8 @@ export class AuthController {
   async logoutHandler(
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
-    const authnCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
+    const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
 
-    response.clearCookie(authnCookieName);
+    response.clearCookie(authCookieName);
   }
 }

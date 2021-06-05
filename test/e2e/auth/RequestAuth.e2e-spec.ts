@@ -3,7 +3,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../../../src/AppModule';
 import { setupNestApp } from '../../../src/main';
-import { IRequestAuthn } from '../../../src/auth/application/RequestAuthn/IRequestAuthn';
+import { IRequestAuth } from '../../../src/auth/application/RequestAuth/IRequestAuth';
 import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
 import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
 import { EntityType } from '../../../src/auth/entity/Token';
@@ -13,7 +13,7 @@ import { IEmailService } from '../../../src/infrastructure/email/IEmailService';
 
 describe('[POST /auth] IRequestAuth', () => {
   let app: INestApplication;
-  let requestAuthn: IRequestAuthn;
+  let requestAuth: IRequestAuth;
   let customerRepository: ICustomerRepository;
   let hostRepository: IHostRepository;
   let emailService: IEmailService;
@@ -23,7 +23,7 @@ describe('[POST /auth] IRequestAuth', () => {
       imports: [AppModule],
     }).compile();
 
-    requestAuthn = (await moduleRef.resolve(IRequestAuthn)) as IRequestAuthn;
+    requestAuth = (await moduleRef.resolve(IRequestAuth)) as IRequestAuth;
     customerRepository = (await moduleRef.resolve(
       ICustomerRepository,
     )) as ICustomerRepository;
@@ -42,7 +42,7 @@ describe('[POST /auth] IRequestAuth', () => {
   });
 
   describe('Customer', async () => {
-    const customerEmail = 'test@requestauthn.com';
+    const customerEmail = 'testcustomer@requestauth.com';
 
     beforeAll(() => {
       // Email functionality isn't important to us right now
@@ -64,7 +64,7 @@ describe('[POST /auth] IRequestAuth', () => {
         ),
       ).toBeUndefined();
 
-      const authUrl: string = await requestAuthn.execute({
+      const authUrl: string = await requestAuth.execute({
         email: customerEmail,
         type: EntityType.Customer,
       });
@@ -90,7 +90,7 @@ describe('[POST /auth] IRequestAuth', () => {
 
       expect(oldCustomer).toBeDefined();
 
-      const authUrl: string = await requestAuthn.execute({
+      const authUrl: string = await requestAuth.execute({
         email: customerEmail,
         type: EntityType.Customer,
       });

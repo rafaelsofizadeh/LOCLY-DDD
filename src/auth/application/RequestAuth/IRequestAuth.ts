@@ -4,13 +4,15 @@ import { Email } from '../../../common/domain';
 import { Country } from '../../../order/entity/Country';
 import { EntityType } from '../../entity/Token';
 
-export type RequestAuthnPayload = Readonly<{
+export type RequestAuthPayload = Readonly<{
   email: Email;
   type: EntityType;
+  // country is expected to be defined only during host registration. All other cases (login, customer registration),
+  // country will be undefined.
   country?: Country;
 }>;
 
-export class RequestAuthnRequest implements RequestAuthnPayload {
+export class RequestAuthRequest implements RequestAuthPayload {
   @IsEmail()
   readonly email: Email;
 
@@ -22,9 +24,9 @@ export class RequestAuthnRequest implements RequestAuthnPayload {
   readonly country?: Country;
 }
 
-export type RequestAuthnResult = string;
+export type RequestAuthResult = string;
 
-export abstract class IRequestAuthn extends UseCase<
-  RequestAuthnPayload,
-  RequestAuthnResult
+export abstract class IRequestAuth extends UseCase<
+  RequestAuthPayload,
+  RequestAuthResult
 > {}

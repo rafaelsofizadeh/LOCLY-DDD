@@ -13,7 +13,7 @@ import { throwCustomException } from '../../common/error-handling';
 import { Host } from '../../host/entity/Host';
 import { Identity, IdentityType, IdentifiedRequest } from './types';
 
-export class CookieAuthxInterceptor implements NestInterceptor {
+export class CookieAuthInterceptor implements NestInterceptor {
   constructor(
     private readonly configService: ConfigService,
     private readonly hostRepository: IHostRepository,
@@ -37,13 +37,13 @@ export class CookieAuthxInterceptor implements NestInterceptor {
       return { entity: token, type: IdentityType.VerificationToken };
     }
 
-    if (token.entityType === EntityType.Customer) {
-      return { entity: token.entityId, type: IdentityType.Customer };
+    if (token.type === EntityType.Customer) {
+      return { entity: token.id, type: IdentityType.Customer };
     }
 
-    if (token.entityType === EntityType.Host) {
+    if (token.type === EntityType.Host) {
       const host: Host = await this.hostRepository.findHost({
-        hostId: token.entityId,
+        hostId: token.id,
       });
 
       return {
@@ -57,13 +57,13 @@ export class CookieAuthxInterceptor implements NestInterceptor {
     const request: Request = context.switchToHttp().getRequest();
 
     const cookies = this.getCookies(request);
-    const authnCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
-    const tokenString: string = cookies?.[authnCookieName];
+    const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
+    const tokenString: string = cookies?.[authCookieName];
     let token: Token;
 
     if (tokenString) {
       const key = this.configService.get<string>('TOKEN_SIGNING_KEY');
-      // TODO: Pass error message to CookieAuthxInterceptorOptions.throwResponse
+      // TODO: Pass error message to CookieAuthInterceptorOptions.throwResponse
       const { token: newToken, expiredAt, errorMessage } = stringToToken(
         tokenString,
         key,
@@ -72,7 +72,7 @@ export class CookieAuthxInterceptor implements NestInterceptor {
       // TODO: Refresh token?
       if (Boolean(expiredAt) || Boolean(errorMessage)) {
         throwCustomException(
-          'Invalid authn token cookie' +
+          'Invalid auth token cookie' +
             (errorMessage ? `: ${errorMessage}` : ''),
           undefined,
           HttpStatus.FORBIDDEN,

@@ -5,13 +5,13 @@ import { CustomerModule } from '../customer/CustomerModule';
 import { HostModule } from '../host/HostModule';
 import { IHostRepository } from '../host/persistence/IHostRepository';
 import { EmailModule } from '../infrastructure/email/EmailModule';
-import { IRequestAuthn } from './application/RequestAuthn/IRequestAuthn';
-import { RequestAuthn } from './application/RequestAuthn/RequestAuthn';
-import { IVerifyAuthn } from './application/VerifyAuthn/IVerifyAuthn';
-import { VerificationTokenParamToBodyMiddleware } from './application/VerifyAuthn/TokenParamToBodyMiddleware';
-import { VerifyAuthn } from './application/VerifyAuthn/VerifyAuthn';
+import { IRequestAuth } from './application/RequestAuth/IRequestAuth';
+import { RequestAuth } from './application/RequestAuth/RequestAuth';
+import { IVerifyAuth } from './application/VerifyAuth/IVerifyAuth';
+import { VerificationTokenParamToBodyMiddleware } from './application/VerifyAuth/TokenParamToBodyMiddleware';
+import { VerifyAuth } from './application/VerifyAuth/VerifyAuth';
 import { AuthController } from './AuthController';
-import { CookieAuthxInterceptor } from './infrastructure/AuthxInterceptor';
+import { CookieAuthInterceptor } from './infrastructure/AuthInterceptor';
 
 @Module({
   imports: [CustomerModule, HostModule, EmailModule],
@@ -19,15 +19,15 @@ import { CookieAuthxInterceptor } from './infrastructure/AuthxInterceptor';
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      // useFactory + inject works for instantiating CookieAuthxInterceptor, otherwise dependencies are undefined
+      // useFactory + inject works for instantiating CookieAuthInterceptor, otherwise dependencies are undefined
       useFactory: (
         configService: ConfigService,
         hostRepository: IHostRepository,
-      ) => new CookieAuthxInterceptor(configService, hostRepository),
+      ) => new CookieAuthInterceptor(configService, hostRepository),
       inject: [ConfigService, IHostRepository],
     },
-    { provide: IRequestAuthn, useClass: RequestAuthn },
-    { provide: IVerifyAuthn, useClass: VerifyAuthn },
+    { provide: IRequestAuth, useClass: RequestAuth },
+    { provide: IVerifyAuth, useClass: VerifyAuth },
   ],
 })
 export class AuthModule {
