@@ -3,6 +3,7 @@ import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
 import Stripe from 'stripe';
 import { withTransaction } from '../../../../../common/application';
+import { Host } from '../../../../entity/Host';
 import { IHostRepository } from '../../../../persistence/IHostRepository';
 import {
   IUpdateHostAccount,
@@ -35,18 +36,32 @@ export class UpdateHostAccountHandler implements IUpdateHostAccount {
     hostStripeAccount: Stripe.Account,
     mongoTransactionSession: ClientSession,
   ) {
-    const isHostCurrentlyVerified =
-      hostStripeAccount.charges_enabled &&
-      hostStripeAccount.payouts_enabled &&
-      hostStripeAccount.requirements.currently_due.length === 0 &&
-      // TODO(NOW): Should I check capabilities?
-      hostStripeAccount.capabilities.card_payments === 'active' &&
-      hostStripeAccount.capabilities.transfers === 'active';
+    const verified: boolean = this.isHostVerified(hostStripeAccount);
 
     await this.hostRepository.setProperties(
       { stripeAccountId: hostStripeAccount.id },
-      { verified: isHostCurrentlyVerified },
+      {
+        verified,
+        // If host becomes not verified, automatically set availability to false
+        ...(!verified ? { available: false } : {}),
+      },
       mongoTransactionSession,
+    );
+  }
+
+  private isHostVerified({
+    charges_enabled,
+    payouts_enabled,
+    requirements,
+    capabilities,
+  }: Stripe.Account): boolean {
+    return (
+      charges_enabled &&
+      payouts_enabled &&
+      requirements.currently_due.length === 0 &&
+      // TODO(NOW): Should I check capabilities?
+      capabilities.card_payments === 'active' &&
+      capabilities.transfers === 'active'
     );
   }
 }
