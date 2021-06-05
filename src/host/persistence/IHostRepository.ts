@@ -24,6 +24,7 @@ export abstract class IHostRepository {
   abstract findHost(
     filter: HostFilter,
     mongoTransactionSession?: ClientSession,
+    throwIfNotFound?: boolean,
   ): Promise<Host>;
 
   abstract deleteHost(

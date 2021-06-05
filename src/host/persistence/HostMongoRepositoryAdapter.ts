@@ -175,6 +175,7 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
   async findHost(
     filter: HostFilter,
     mongoTransactionSession?: ClientSession,
+    throwIfNotFound: boolean = true,
   ): Promise<Host> {
     const filterWithId = normalizeHostFilter(filter);
     const filterQuery: FilterQuery<HostMongoDocument> = mongoQuery(
@@ -186,7 +187,11 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
       .catch(throwCustomException('Error searching for a host', filter));
 
     if (!hostDocument) {
-      throwCustomException('No host found', filter, HttpStatus.NOT_FOUND)();
+      if (throwIfNotFound) {
+        throwCustomException('No host found', filter, HttpStatus.NOT_FOUND)();
+      }
+
+      return;
     }
 
     return mongoDocumentToHost(hostDocument);
@@ -210,7 +215,6 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
           {
             $match: {
               'address.country': country,
-              verified: true,
               available: true,
             },
           },
