@@ -10,10 +10,10 @@ export class VerifyAuth implements IVerifyAuth {
 
   execute(verificationToken: Token): string {
     // TODO: Check if payload is following VerificationTokenPayload type
-    return this.createAuthTokenFromVerificationToken(verificationToken);
+    return this.verificationTokenToAuthToken(verificationToken);
   }
 
-  private createAuthTokenFromVerificationToken({ id, type }: Token): string {
+  private verificationTokenToAuthToken({ id, type }: Token): string {
     const key = this.configService.get<string>('TOKEN_SIGNING_KEY');
     const expiresIn = this.configService.get<string>('AUTH_TOKEN_EXPIRES_IN');
 
