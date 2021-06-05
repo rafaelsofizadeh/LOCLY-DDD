@@ -3,11 +3,11 @@ import {
   ExecutionContext,
   HttpStatus,
 } from '@nestjs/common';
-import { UUID } from '../../../common/domain';
-import { throwCustomException } from '../../../common/error-handling';
-import { Host } from '../../../host/entity/Host';
-import { Token } from '../../entity/Token';
-import { IdentifiedRequest, Identity, IdentityType } from '../types';
+import { UUID } from '../../common/domain';
+import { throwCustomException } from '../../common/error-handling';
+import { Host } from '../../host/entity/Host';
+import { Token } from '../entity/Token';
+import { IdentifiedRequest, Identity, IdentityType } from './types';
 
 function identityDecoratorFactory<TIdentity>(
   ...allowedIdentityTypes: IdentityType[]

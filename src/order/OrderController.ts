@@ -59,7 +59,7 @@ import {
 import {
   CustomerIdentity,
   VerifiedHostIdentity,
-} from '../auth/infrastructure/decorators/identity';
+} from '../auth/infrastructure/IdentityDecorator';
 import { UUID } from '../common/domain';
 import { Host } from '../host/entity/Host';
 

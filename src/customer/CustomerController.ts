@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Patch } from '@nestjs/common';
-import { CustomerIdentity } from '../auth/infrastructure/decorators/identity';
+import { CustomerIdentity } from '../auth/infrastructure/IdentityDecorator';
 import { UUID } from '../common/domain';
 import {
   EditCustomerRequest,

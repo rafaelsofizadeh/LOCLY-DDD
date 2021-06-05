@@ -6,7 +6,7 @@ import {
 import {
   AnyHostIdentity,
   VerifiedHostIdentity,
-} from '../auth/infrastructure/decorators/identity';
+} from '../auth/infrastructure/IdentityDecorator';
 import { Host } from './entity/Host';
 import { EditHostRequest, IEditHost } from './application/EditHost/IEditHost';
 import {
