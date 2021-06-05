@@ -6,7 +6,7 @@ export enum EntityType {
 }
 
 export type Token = Readonly<{
-  entityId: UUID;
-  entityType: EntityType;
+  id: UUID;
+  type: EntityType;
   isVerification: boolean;
 }>;
