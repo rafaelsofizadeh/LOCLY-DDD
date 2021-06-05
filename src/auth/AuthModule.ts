@@ -34,6 +34,6 @@ export class AuthModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(VerificationTokenParamToBodyMiddleware)
-      .forRoutes({ path: 'auth/verify/:token', method: RequestMethod.GET });
+      .forRoutes({ path: 'auth/:token', method: RequestMethod.GET });
   }
 }

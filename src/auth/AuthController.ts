@@ -18,6 +18,9 @@ export class AuthController {
     private readonly verifyAuth: IVerifyAuth,
   ) {}
 
+  /**
+   * First step in user auth/login. See RequestAuthn.
+   */
   @Post()
   async requestAuthHandler(
     @Body() requestAuthRequest: RequestAuthRequest,
@@ -25,8 +28,13 @@ export class AuthController {
     await this.requestAuth.execute(requestAuthRequest);
   }
 
-  // TokenParamToBodyMiddleware will move the :token URL param to request cookies, for
+  /**
+   * Second and last step in user auth/login. See VerifyAuth.
+   */
+  // VerificationTokenParamToBodyMiddleware will move the :token URL param to request cookies, for
   // AuthInterceptor to operate on the token cookie.
+  // --
+  // VerificationTokenParamToBodyMiddleware is attached in AuthModule for this specific route.
   @Get(':token')
   async verifyAuthHandler(
     // passthrough: https://docs.nestjs.com/controllers#library-specific-approach
@@ -39,6 +47,8 @@ export class AuthController {
       this.configService.get<string>('AUTH_TOKEN_EXPIRES_IN'),
     );
 
+    // Newly created auth token gets signed and reset in request cookies in place of the old (verification) token
+    // cookie. This auth token lets the user subsequently repeatedly authorize requests. User is logged in.
     response.cookie(authCookieName, authTokenString, {
       maxAge: authCookieMaxAge,
       httpOnly: true,

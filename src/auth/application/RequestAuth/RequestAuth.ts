@@ -17,6 +17,10 @@ import { Email, UUID } from '../../../common/domain';
 import { throwCustomException } from '../../../common/error-handling';
 import { Country } from '../../../order/entity/Country';
 
+/**
+ * Functionality for the first step in user auth – accepting user email, generating a verification token and sending it
+ * to the said address.
+ */
 @Injectable()
 export class RequestAuth implements IRequestAuth {
   constructor(
