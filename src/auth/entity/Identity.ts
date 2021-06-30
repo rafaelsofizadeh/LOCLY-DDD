@@ -2,7 +2,7 @@ import { Request } from 'express';
 import { UUID } from '../../common/domain';
 
 import { Host } from '../../host/entity/Host';
-import { Token } from '../entity/Token';
+import { Token } from './Token';
 
 export type IdentifiedRequest<T> = Request & {
   identity: T;
@@ -16,7 +16,7 @@ export enum IdentityType {
   Anonymous = 'anonymous',
 }
 
-// For type annotation purposes
+// Just a type annotation
 type CustomerId = UUID;
 
 export type Identity = {
