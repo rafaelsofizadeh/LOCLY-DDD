@@ -61,6 +61,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
         country: getDestinationCountriesAvailable(originCountry)[0],
       };
 
+      // TODO: Use CreateCustomer usecase
       testCustomer = {
         id: UUID(),
         email: 'random@email.com',
@@ -68,7 +69,6 @@ describe('[POST /order/draft] IDraftOrder', () => {
         orderIds: [],
       };
 
-      // TODO: Use CreateCustomer usecase
       await customerRepository.addCustomer(testCustomer);
     });
 

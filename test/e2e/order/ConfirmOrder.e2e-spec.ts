@@ -62,7 +62,9 @@ describe('Confirm Order – POST /order/confirm', () => {
       imports: [AppModule],
     }).compile();
 
-    app = moduleRef.createNestApplication(undefined, { bodyParser: false });
+    app = moduleRef.createNestApplication(undefined, {
+      bodyParser: false,
+    });
     await setupNestApp(app);
     await app.listen(3000);
 
@@ -84,6 +86,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     draftOrderUseCase = (await moduleRef.resolve(IDraftOrder)) as IDraftOrder;
 
+    // TODO: Use CreateCustomer usecase
     testCustomer = {
       id: UUID(),
       email: 'random@email.com',
