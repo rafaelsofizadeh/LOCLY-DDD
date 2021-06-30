@@ -38,7 +38,10 @@ export class HostController {
     @AnyHostIdentity() host: Host,
     @Body() editHostRequest: EditHostRequest,
   ): Promise<void> {
-    await this.editHost.execute({ hostProperties: host, ...editHostRequest });
+    await this.editHost.execute({
+      currentHostProperties: host,
+      ...editHostRequest,
+    });
   }
 
   @Patch('availability')
