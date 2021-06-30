@@ -51,7 +51,7 @@ export class GetHostUpsert implements IGetHostUpsert {
         throwCustomException(
           "Can't create a host without a country specified",
           {},
-          HttpStatus.FORBIDDEN,
+          HttpStatus.BAD_REQUEST,
         )();
       }
 

@@ -7,7 +7,7 @@ import { UUID } from '../../common/domain';
 import { throwCustomException } from '../../common/error-handling';
 import { Host } from '../../host/entity/Host';
 import { Token } from '../entity/Token';
-import { IdentifiedRequest, Identity, IdentityType } from './types';
+import { IdentifiedRequest, Identity, IdentityType } from '../entity/Identity';
 
 function identityDecoratorFactory<TIdentity>(
   ...allowedIdentityTypes: IdentityType[]
@@ -27,8 +27,11 @@ function identityDecoratorFactory<TIdentity>(
 
     if (!allowedIdentityTypes.includes(identity.type)) {
       throwCustomException(
-        'Invalid entity type',
-        undefined,
+        'Invalid identity',
+        {
+          allowedIdentityTypes,
+          providedIdentityType: identity.type,
+        },
         HttpStatus.UNAUTHORIZED,
       )();
     }
@@ -61,5 +64,13 @@ export const AnyHostIdentity = createParamDecorator<any, any, Host>(
   identityDecoratorFactory<Host>(
     IdentityType.UnverifiedHost,
     IdentityType.Host,
+  ),
+);
+
+export const AnyEntityIdentity = createParamDecorator<any, any, Host | UUID>(
+  identityDecoratorFactory<Host | UUID>(
+    IdentityType.UnverifiedHost,
+    IdentityType.Host,
+    IdentityType.Customer,
   ),
 );

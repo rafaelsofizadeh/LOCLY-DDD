@@ -11,7 +11,7 @@ import { stringToToken } from '../application/utils';
 import { IHostRepository } from '../../host/persistence/IHostRepository';
 import { throwCustomException } from '../../common/error-handling';
 import { Host } from '../../host/entity/Host';
-import { Identity, IdentityType, IdentifiedRequest } from './types';
+import { Identity, IdentityType, IdentifiedRequest } from '../entity/Identity';
 
 export class CookieAuthInterceptor implements NestInterceptor {
   constructor(
@@ -42,9 +42,18 @@ export class CookieAuthInterceptor implements NestInterceptor {
     }
 
     if (token.type === EntityType.Host) {
-      const host: Host = await this.hostRepository.findHost({
-        hostId: token.id,
-      });
+      const host: Host = await this.hostRepository
+        .findHost({
+          hostId: token.id,
+        })
+        .catch(
+          // TODO: Security – should this error message be exposed?
+          throwCustomException(
+            'Host not found',
+            { hostId: token.id },
+            HttpStatus.NOT_FOUND,
+          ),
+        );
 
       return {
         entity: host,
@@ -63,17 +72,23 @@ export class CookieAuthInterceptor implements NestInterceptor {
 
     if (tokenString) {
       const key = this.configService.get<string>('TOKEN_SIGNING_KEY');
-      // TODO: Pass error message to CookieAuthInterceptorOptions.throwResponse
       const { token: newToken, expiredAt, errorMessage } = stringToToken(
         tokenString,
         key,
       );
 
       // TODO: Refresh token?
-      if (Boolean(expiredAt) || Boolean(errorMessage)) {
+      if (Boolean(expiredAt)) {
         throwCustomException(
-          'Invalid auth token cookie' +
-            (errorMessage ? `: ${errorMessage}` : ''),
+          'Token expired' + (errorMessage ? `: ${errorMessage}` : ''),
+          { expiredAt },
+          HttpStatus.REQUEST_TIMEOUT,
+        )();
+      }
+
+      if (Boolean(errorMessage)) {
+        throwCustomException(
+          'Invalid auth token' + (errorMessage ? `: ${errorMessage}` : ''),
           undefined,
           HttpStatus.FORBIDDEN,
         )();
@@ -82,9 +97,15 @@ export class CookieAuthInterceptor implements NestInterceptor {
       token = newToken;
     }
 
-    const identity: Identity = await this.tokenToIdentity(token).catch(
-      throwCustomException('Entity not found', undefined, HttpStatus.FORBIDDEN),
-    );
+    const identity: Identity = await this.tokenToIdentity(token);
+
+    if (!identity) {
+      throwCustomException(
+        'Invalid auth token',
+        undefined,
+        HttpStatus.FORBIDDEN,
+      )();
+    }
 
     (request as IdentifiedRequest<Identity>).identity = identity;
 
