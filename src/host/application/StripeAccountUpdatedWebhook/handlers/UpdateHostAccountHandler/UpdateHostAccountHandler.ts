@@ -3,7 +3,6 @@ import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
 import Stripe from 'stripe';
 import { withTransaction } from '../../../../../common/application';
-import { Host } from '../../../../entity/Host';
 import { IHostRepository } from '../../../../persistence/IHostRepository';
 import {
   IUpdateHostAccount,
@@ -52,15 +51,15 @@ export class UpdateHostAccountHandler implements IUpdateHostAccount {
   private isHostVerified({
     charges_enabled,
     payouts_enabled,
+    details_submitted,
     requirements,
     capabilities,
   }: Stripe.Account): boolean {
     return (
       charges_enabled &&
       payouts_enabled &&
+      details_submitted &&
       requirements.currently_due.length === 0 &&
-      // TODO(NOW): Should I check capabilities?
-      capabilities.card_payments === 'active' &&
       capabilities.transfers === 'active'
     );
   }
