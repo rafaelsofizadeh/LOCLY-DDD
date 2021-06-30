@@ -1,5 +1,5 @@
 import ms from 'ms';
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import {
@@ -8,7 +8,13 @@ import {
 } from './application/RequestAuth/IRequestAuth';
 import { IVerifyAuth } from './application/VerifyAuth/IVerifyAuth';
 import { Token } from './entity/Token';
-import { VerificationTokenIdentity } from './infrastructure/IdentityDecorator';
+import {
+  AnonymousIdentity,
+  AnyEntityIdentity,
+  VerificationTokenIdentity,
+} from './infrastructure/IdentityDecorator';
+import { UUID } from '../common/domain';
+import { Host } from '../host/entity/Host';
 
 @Controller('auth')
 export class AuthController {
@@ -21,9 +27,10 @@ export class AuthController {
   /**
    * First step in user auth/login. See RequestAuthn.
    */
-  @Post()
+  @Get()
   async requestAuthHandler(
     @Body() requestAuthRequest: RequestAuthRequest,
+    @AnonymousIdentity() identity: null,
   ): Promise<void> {
     await this.requestAuth.execute(requestAuthRequest);
   }
@@ -58,6 +65,7 @@ export class AuthController {
   @Get('logout')
   async logoutHandler(
     @Res({ passthrough: true }) response: Response,
+    @AnyEntityIdentity() identity: Host | UUID,
   ): Promise<void> {
     const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
 
