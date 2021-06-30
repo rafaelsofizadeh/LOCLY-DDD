@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { isNotEmptyObject } from 'class-validator';
+import { plainToClass } from 'class-transformer';
+import { validateSync } from 'class-validator';
 import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
 import { withTransaction } from '../../../common/application';
 import { IHostRepository } from '../../persistence/IHostRepository';
-import { EditHostPayload, IEditHost } from './IEditHost';
+import {
+  EditHostPayload,
+  HostProfileValidationSchema,
+  IEditHost,
+} from './IEditHost';
 
 // TODO: Add country editing (but only once) for those who didn't select country during registration
 @Injectable()
@@ -27,27 +32,23 @@ export class EditHost implements IEditHost {
   }
 
   private async editHost(
-    { hostProperties, ...editProperties }: EditHostPayload,
+    { currentHostProperties, ...editProperties }: EditHostPayload,
     sessionWithTransaction: ClientSession,
   ) {
     const { firstName, lastName, address } = {
-      ...hostProperties,
+      ...currentHostProperties,
       ...editProperties,
     };
 
-    const firstNameDefined = typeof firstName === 'string' && firstName.length;
-    const lastNameDefined = typeof lastName === 'string' && lastName.length;
-    const addressDefined =
-      typeof address === 'object' && isNotEmptyObject(address);
+    const profile: HostProfileValidationSchema = plainToClass(
+      HostProfileValidationSchema,
+      { firstName, lastName, address },
+    );
 
-    const profileComplete = [
-      firstNameDefined,
-      lastNameDefined,
-      addressDefined,
-    ].every(propDefined => propDefined);
+    const profileComplete = !validateSync(profile).length;
 
     return this.hostRepository.setProperties(
-      { hostId: hostProperties.id },
+      { hostId: currentHostProperties.id },
       { ...editProperties, profileComplete },
       sessionWithTransaction,
     );

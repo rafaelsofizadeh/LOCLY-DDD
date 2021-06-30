@@ -5,14 +5,17 @@ import { Address, AddressValidationSchema } from '../../../common/domain';
 import { Host } from '../../entity/Host';
 
 export type EditHostPayload = Readonly<{
-  hostProperties: Pick<Host, 'id' | 'firstName' | 'lastName' | 'address'>;
+  currentHostProperties: Pick<
+    Host,
+    'id' | 'firstName' | 'lastName' | 'address'
+  >;
   firstName?: string;
   lastName?: string;
   address?: Address;
 }>;
 
 export class EditHostRequest
-  implements Omit<EditHostPayload, 'hostProperties'> {
+  implements Omit<EditHostPayload, 'currentHostProperties'> {
   @IsOptional()
   @IsString()
   @Length(1, 32)
@@ -27,6 +30,21 @@ export class EditHostRequest
   @ValidateNested()
   @Type(() => AddressValidationSchema)
   address?: Address;
+}
+
+export class HostProfileValidationSchema
+  implements Omit<EditHostPayload, 'currentHostProperties'> {
+  @IsString()
+  @Length(1, 32)
+  firstName: string;
+
+  @IsString()
+  @Length(1, 32)
+  lastName: string;
+
+  @ValidateNested()
+  @Type(() => AddressValidationSchema)
+  address: Address;
 }
 
 export abstract class IEditHost extends UseCase<EditHostPayload, void> {}
