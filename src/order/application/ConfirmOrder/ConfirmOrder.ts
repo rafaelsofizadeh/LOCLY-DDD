@@ -19,6 +19,8 @@ import { IHostRepository } from '../../../host/persistence/IHostRepository';
 import { throwCustomException } from '../../../common/error-handling';
 import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { ConfirmOrderPayload } from './IConfirmOrder';
+import { Customer } from '../../../customer/entity/Customer';
+import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
 
 export type Match = {
   orderId: UUID;
@@ -30,6 +32,7 @@ export class ConfirmOrder implements IConfirmOrder {
   constructor(
     private readonly orderRepository: IOrderRepository,
     private readonly hostRepository: IHostRepository,
+    private readonly customerRepository: ICustomerRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
@@ -65,9 +68,14 @@ export class ConfirmOrder implements IConfirmOrder {
       mongoTransactionSession,
     );
 
+    const {
+      stripeCustomerId,
+    }: Customer = await this.customerRepository.findCustomer({ customerId });
+
     const checkoutSession: StripeCheckoutSession = await this.createStripeCheckoutSession(
       draftOrder,
       hostId,
+      stripeCustomerId,
     );
 
     return checkoutSession;
@@ -95,13 +103,14 @@ export class ConfirmOrder implements IConfirmOrder {
 
   // TODO: Error handling and rejection events
   private async createStripeCheckoutSession(
-    draftOrder: DraftedOrder,
+    { id: orderId }: DraftedOrder,
     hostId: UUID,
+    stripeCustomerId: Stripe.Customer['id'],
   ): Promise<StripeCheckoutSession> {
     const loclyFee: Cost = await this.calculateLoclyFee();
     const price: StripePrice = stripePrice(loclyFee);
     const match: Match = {
-      orderId: draftOrder.id,
+      orderId,
       hostId,
     };
 
@@ -124,6 +133,7 @@ export class ConfirmOrder implements IConfirmOrder {
     const checkoutSession = (await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       customer_email: 'rafa.sofizadeh@gmail.com',
+      customer: stripeCustomerId,
       line_items: [
         {
           price_data: {

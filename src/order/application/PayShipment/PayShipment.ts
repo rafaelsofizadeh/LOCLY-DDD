@@ -18,11 +18,14 @@ import {
 } from '../../../common/application';
 import { OrderStatus } from '../../entity/Order';
 import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
+import { Customer } from '../../../customer/entity/Customer';
+import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
 
 @Injectable()
 export class PayShipmentService implements IPayShipment {
   constructor(
     private readonly orderRepository: IOrderRepository,
+    private readonly customerRepository: ICustomerRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
     @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
@@ -53,11 +56,16 @@ export class PayShipmentService implements IPayShipment {
       mongoTransactionSession,
     );
 
+    const {
+      stripeCustomerId,
+    }: Customer = await this.customerRepository.findCustomer({ customerId });
+
     const price: StripePrice = stripePrice(finalShipmentCost);
 
     const checkoutSession = (await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       customer_email: 'rafa.sofizadeh@gmail.com',
+      customer: stripeCustomerId,
       line_items: [
         {
           price_data: {

@@ -1,9 +1,14 @@
+import Stripe from 'stripe';
 import { Address, Email, UUID } from '../../common/domain';
 import { EntityFilter } from '../../common/persistence';
 
 export type Customer = Readonly<{
   id: UUID;
   email: Email;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  stripeCustomerId: Stripe.Customer['id'];
   addresses: Address[];
   orderIds: UUID[];
 }>;
