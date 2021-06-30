@@ -75,7 +75,7 @@ export class RequestAuth implements IRequestAuth {
     await this.emailService.sendEmail({
       to: email,
       subject: 'Locly log in',
-      html: `<a href="${authUrl}>Click on this link to log in to Locly!</a>`,
+      html: `<a href="${authUrl}">Click on this link to log in to Locly!</a>`,
     });
 
     return authUrl;
