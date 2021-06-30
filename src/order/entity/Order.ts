@@ -29,12 +29,12 @@ export type Order = Readonly<{
   id: UUID;
   status: OrderStatus;
   customerId: UUID;
+  hostId: UUID;
   items: Item[];
+  totalWeight: Gram;
   originCountry: Country;
   destination: Address;
   initialShipmentCost: Cost;
-  hostId: UUID;
-  totalWeight: Gram;
   finalShipmentCost: Cost;
   calculatorResultUrl?: URL;
 }>;

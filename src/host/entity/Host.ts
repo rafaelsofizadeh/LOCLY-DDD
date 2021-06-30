@@ -1,3 +1,4 @@
+import Stripe from 'stripe';
 import { Address, Email, UUID } from '../../common/domain';
 import { EntityFilter } from '../../common/persistence';
 import { Country } from '../../order/entity/Country';
@@ -5,12 +6,12 @@ import { Country } from '../../order/entity/Country';
 export type Host = Readonly<{
   id: UUID;
   email: Email;
-  stripeAccountId: string;
+  stripeAccountId: Stripe.Account['id'];
   country: Country;
   firstName?: string;
   lastName?: string;
   address?: Address;
-  orderIds?: UUID[];
+  orderIds: UUID[];
   verified: boolean;
   available: boolean;
   profileComplete: boolean;
