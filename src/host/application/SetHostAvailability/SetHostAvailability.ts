@@ -43,20 +43,27 @@ export class SetHostAvailability implements ISetHostAvailability {
 
       if (!canHostBeAvailable) {
         const message: string[] = [];
+        const requirements: string[] = [];
 
         if (!verified) {
           message.push(
             'Host is not verified. Verify to be able to set your profile availability.',
           );
+          requirements.push('verified');
         }
 
         if (!profileComplete) {
-          message.push('Host profile is not complete');
+          message.push('Host profile is not complete.');
+          requirements.push('profileComplete');
         }
 
-        const finalMessage = message.join(' ');
+        const finalMessage = message.join(' | ');
 
-        throwCustomException(finalMessage, {}, HttpStatus.FORBIDDEN)();
+        throwCustomException(
+          finalMessage,
+          { requirements },
+          HttpStatus.FORBIDDEN,
+        )();
       }
     }
 
