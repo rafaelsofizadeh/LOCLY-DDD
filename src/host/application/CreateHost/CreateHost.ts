@@ -42,16 +42,16 @@ export class CreateHost implements ICreateHost {
       email,
       country: alpha3ToAlpha2(country),
       capabilities: {
-        card_payments: { requested: true },
+        // TODO(IMPORTANT): Recipient service agreement doesn't allow for 'card_payments'. Manual payouts.
+        // [Removed payout settings].
         transfers: { requested: true },
       },
       business_type: 'individual',
-      settings: {
-        payouts: {
-          schedule: {
-            delay_days: 10,
-          },
-        },
+      // TODO: Do this through Stripe dashboard
+      // https://stripe.com/docs/connect/service-agreement-types#choosing-type-with-express
+      // https://dashboard.stripe.com/settings/connect/express
+      tos_acceptance: {
+        service_agreement: 'recipient',
       },
     });
 
@@ -59,6 +59,7 @@ export class CreateHost implements ICreateHost {
       id: UUID(),
       email,
       country,
+      orderIds: [],
       stripeAccountId: hostAccount.id,
       available: false,
       verified: false,
