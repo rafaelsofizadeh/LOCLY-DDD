@@ -1,5 +1,14 @@
-import { SendMailOptions } from 'nodemailer';
+import { MailDataRequired } from '@sendgrid/mail';
+import { Email } from '../../common/domain';
+
+export type EmailData = {
+  to: Email,
+  from?: Email,
+  subject: string,
+  html: string,
+  
+}
 
 export abstract class IEmailService implements IEmailService {
-  sendEmail: (options: SendMailOptions) => Promise<void>;
+  sendEmail: (data: EmailData) => Promise<void>;
 }
