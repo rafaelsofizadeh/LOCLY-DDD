@@ -35,9 +35,9 @@ async function withExistingSessionTransaction<T>(
   }
 
   let result: T;
-  await mongoTransactionSession.withTransaction(
-    async () => (result = await fn(mongoTransactionSession)),
-  );
+  await mongoTransactionSession.withTransaction(async () => {
+    result = await fn(mongoTransactionSession);
+  });
   return result;
 }
 
@@ -50,8 +50,9 @@ async function withNewSessionTransaction<T>(
   await mongoClient.withSession(
     async (mongoTransactionSession: ClientSession) =>
       await mongoTransactionSession.withTransaction(
-        async (sessionWithTransaction: ClientSession) =>
-          (result = await fn(sessionWithTransaction)),
+        async (sessionWithTransaction: ClientSession) => {
+          result = await fn(sessionWithTransaction);
+        },
       ),
   );
 
