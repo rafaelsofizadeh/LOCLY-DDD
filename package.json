@@ -9,7 +9,8 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start & stripe listen --forward-to localhost:3000/stripe/webhook",
+    "start": "nest start",
+    "start:webhook": "nest start & stripe listen --forward-to localhost:3000/stripe/webhook",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -86,7 +87,7 @@
     "ts-loader": "^6.2.1",
     "ts-node": "9.0.0",
     "tsconfig-paths": "^3.9.0",
-    "typescript": "https://typescript.visualstudio.com/cf7ac146-d525-443c-b23c-0d58337efebc/_apis/build/builds/99188/artifacts?artifactName=tgz&fileId=8A4F5CF4310E72AE3F3599DB677A807009BC386229856DAD4B06C74D77071B7702&fileName=/typescript-4.3.0-insiders.20210325.tgz",
+    "typescript": "^4.3.0-insiders.20210325",
     "webpack-node-externals": "^2.5.2"
   },
   "jest": {
