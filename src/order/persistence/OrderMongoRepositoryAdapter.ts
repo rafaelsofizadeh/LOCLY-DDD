@@ -48,11 +48,10 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     const draftOrderDocument = convertToMongoDocument(draftOrder);
 
     const {
-      matchedCount,
       modifiedCount,
       upsertedCount,
     }: ReplaceWriteOpResult = await this.orderCollection
-      .replaceOne({ _id: draftOrderDocument }, draftOrderDocument, {
+      .replaceOne({ _id: draftOrderDocument._id }, draftOrderDocument, {
         upsert: true,
         session: mongoTransactionSession,
       })
@@ -64,7 +63,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       );
 
     expectOnlySingleResult(
-      [matchedCount, modifiedCount + upsertedCount],
+      [modifiedCount + upsertedCount],
       {
         operation: 'setting properties on',
         entity: 'order',

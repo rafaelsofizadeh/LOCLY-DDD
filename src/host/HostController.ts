@@ -13,14 +13,26 @@ import {
   ISetHostAvailability,
   SetHostAvailabilityRequest,
 } from './application/SetHostAvailability/ISetHostAvailability';
+import { IGetHost } from './application/GetHost/IGetHost';
 
 @Controller('host')
 export class HostController {
   constructor(
+    private readonly getHost: IGetHost,
     private readonly getHostAccountLink: IGetHostAccountLink,
     private readonly editHost: IEditHost,
     private readonly setHostAvailability: ISetHostAvailability,
   ) {}
+
+  // TODO: Add serialization
+  @Get()
+  async getHostController(
+    @AnyHostIdentity() { id: hostId }: Host,
+  ): Promise<Host> {
+    const host: Host = await this.getHost.execute({ hostId });
+
+    return host;
+  }
 
   @Get('dashboard')
   async getHostAccountLinkController(

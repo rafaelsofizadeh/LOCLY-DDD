@@ -64,7 +64,6 @@ export class PayShipmentService implements IPayShipment {
 
     const checkoutSession = (await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      customer_email: 'rafa.sofizadeh@gmail.com',
       customer: stripeCustomerId,
       line_items: [
         {

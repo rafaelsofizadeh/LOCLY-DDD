@@ -15,6 +15,7 @@ export class CustomerController {
     private readonly editCustomer: IEditCustomer,
   ) {}
 
+  // TODO: Add serialization
   @Get()
   async getCustomerController(
     @CustomerIdentity() customerId: UUID,

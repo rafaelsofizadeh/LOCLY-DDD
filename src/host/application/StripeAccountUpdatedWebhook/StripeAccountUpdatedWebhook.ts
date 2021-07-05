@@ -20,6 +20,7 @@ export class StripeAccountUpdatedWebhook
   execute(event: StripeEvent): Promise<StripeAccountUpdatedResult> {
     // TODO: event.data.object extracting decorator
     const webhookPayload = event.data.object as Stripe.Account;
+    console.log('account.updated -- ', webhookPayload);
 
     return this.updateHostAccountWebhookGateway.execute(webhookPayload);
   }

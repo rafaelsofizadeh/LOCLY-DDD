@@ -21,6 +21,7 @@ export async function setupNestApp(app: INestApplication) {
     }),
   );
   app.useGlobalFilters(new CustomExceptionFilter());
+  // app.setGlobalPrefix('api');
 }
 
 async function bootstrap() {

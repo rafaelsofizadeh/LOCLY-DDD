@@ -71,23 +71,23 @@ export function expectOnlyNResults(
   fnMainArgs?: Record<string, any>,
 ) {
   const errorMessageBeginning = `Error ${operation} ${entity} —`;
-  const lessThanOneErrorMessage = `${errorMessageBeginning} less than ${n} ${entity} with given requirements ${
+  const lessThanNErrorMessage = `${errorMessageBeginning} less than ${n} ${entity} with given requirements ${
     lessThanMessage.length ? ':' + lessThanMessage : ''
   }`;
-  const moreThanOneErrorMessage = `${errorMessageBeginning} more than ${n} ${entity}s with given requirements (shouldn't be possible) ${
+  const moreThanNErrorMessage = `${errorMessageBeginning} more than ${n} ${entity}s with given requirements (shouldn't be possible) ${
     moreThanMessage.length ? ':' + moreThanMessage : ''
   }`;
 
   if (controlledVariables.some(variable => variable < n)) {
     throwCustomException(
-      lessThanOneErrorMessage,
+      lessThanNErrorMessage,
       fnMainArgs,
       HttpStatus.NOT_FOUND,
     )();
   }
 
   if (controlledVariables.some(variable => variable > n)) {
-    throwCustomException(moreThanOneErrorMessage, fnMainArgs)();
+    throwCustomException(moreThanNErrorMessage, fnMainArgs)();
   }
 }
 

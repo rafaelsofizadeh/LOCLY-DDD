@@ -26,8 +26,6 @@ export function customerToMongoDocument(
   const customerMongoDocument: CustomerMongoDocument = convertToMongoDocument(
     customer,
   );
-  console.log('customerMongoDocument', customerMongoDocument);
-
   return customerMongoDocument;
 }
 

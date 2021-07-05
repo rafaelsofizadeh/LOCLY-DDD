@@ -1,5 +1,5 @@
 import ms from 'ms';
-import { Body, Controller, Get, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import {
@@ -27,7 +27,7 @@ export class AuthController {
   /**
    * First step in user auth/login. See RequestAuthn.
    */
-  @Get()
+  @Post()
   async requestAuthHandler(
     @Body() requestAuthRequest: RequestAuthRequest,
     @AnonymousIdentity() identity: null,
@@ -62,13 +62,13 @@ export class AuthController {
     });
   }
 
-  @Get('logout')
+  // TODO: GET 'logout' causes routing conflicts with GET ':token'
+  @Post('logout')
   async logoutHandler(
     @Res({ passthrough: true }) response: Response,
     @AnyEntityIdentity() identity: Host | UUID,
   ): Promise<void> {
     const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
-
     response.clearCookie(authCookieName);
   }
 }

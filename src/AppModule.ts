@@ -33,12 +33,16 @@ const infrastructureModules: DynamicModule[] = [
   ConfigModule.forRoot(),
   MongoModule.forFeature(['orders', 'customers', 'hosts']),
   StripeModule.forRootAsync(StripeModule, {
-    useFactory: async (configService: ConfigService) => ({
-      apiKey: configService.get<string>('STRIPE_SECRET_API_TEST_KEY'),
-      webhookConfig: {
-        stripeWebhookSecret: configService.get<string>('STRIPE_WEBHOOK_SECRET'),
-      },
-    }),
+    useFactory: async (configService: ConfigService) => {
+      return {
+        apiKey: configService.get<string>('STRIPE_SECRET_API_TEST_KEY'),
+        webhookConfig: {
+          stripeWebhookSecret: configService.get<string>(
+            'STRIPE_WEBHOOK_SECRET',
+          ),
+        },
+      };
+    },
     inject: [ConfigService],
   }),
 ];
