@@ -87,7 +87,7 @@
     "ts-loader": "^6.2.1",
     "ts-node": "9.0.0",
     "tsconfig-paths": "^3.9.0",
-    "typescript": "^4.3.0-insiders.20210325",
+    "typescript": "^4.4.0-dev.20210705",
     "webpack-node-externals": "^2.5.2"
   },
   "jest": {
