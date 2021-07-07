@@ -71,6 +71,7 @@ import { IGetOrder } from './application/GetOrder/IGetOrder';
 @Controller('order')
 export class OrderController {
   constructor(
+    private readonly getOrder: IGetOrder,
     private readonly draftOrder: IDraftOrder,
     private readonly editOrder: IEditOrder,
     private readonly deleteOrder: IDeleteOrder,
@@ -80,6 +81,18 @@ export class OrderController {
     private readonly submitShipmentInfo: ISubmitShipmentInfo,
     private readonly payShipment: IPayShipment,
   ) {}
+
+  @Get(':orderId')
+  async getOrderHandler(
+    @Param('orderId') orderId: UUID,
+    @AnyEntityIdentity() entity: Host | UUID,
+  ) {
+    const userFilter = isUUID(entity)
+      ? { userId: entity, userType: EntityType.Customer }
+      : { userId: entity.id, userType: EntityType.Host };
+
+    return this.getOrder.execute({ port: { orderId, ...userFilter } });
+  }
 
   @Post()
   async draftOrderHandler(
