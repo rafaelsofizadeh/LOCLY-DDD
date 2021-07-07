@@ -67,8 +67,10 @@ describe('[POST /auth] IRequestAuth', () => {
       ).toBeUndefined();
 
       const authUrl: string = await requestAuth.execute({
-        email: customerEmail,
-        type: EntityType.Customer,
+        port: {
+          email: customerEmail,
+          type: EntityType.Customer,
+        },
       });
 
       expect(authUrl).toMatch(/localhost:3000\/auth\/.+/);
@@ -93,8 +95,10 @@ describe('[POST /auth] IRequestAuth', () => {
       expect(oldCustomer).toBeDefined();
 
       const authUrl: string = await requestAuth.execute({
-        email: customerEmail,
-        type: EntityType.Customer,
+        port: {
+          email: customerEmail,
+          type: EntityType.Customer,
+        },
       });
 
       expect(authUrl).toMatch(/localhost:3000\/auth\/.+/);
@@ -131,9 +135,11 @@ describe('[POST /auth] IRequestAuth', () => {
       const hostCountry: Country = originCountriesAvailable[0];
 
       const authUrl: string = await requestAuth.execute({
-        email: hostEmail,
-        type: EntityType.Host,
-        country: hostCountry,
+        port: {
+          email: hostEmail,
+          type: EntityType.Host,
+          country: hostCountry,
+        },
       });
 
       expect(authUrl).toMatch(/localhost:3000\/auth\/.+/);
@@ -164,8 +170,10 @@ describe('[POST /auth] IRequestAuth', () => {
       expect(oldHost).toBeDefined();
 
       const authUrl: string = await requestAuth.execute({
-        email: hostEmail,
-        type: EntityType.Host,
+        port: {
+          email: hostEmail,
+          type: EntityType.Host,
+        },
       });
 
       expect(authUrl).toMatch(/localhost:3000\/auth\/.+/);

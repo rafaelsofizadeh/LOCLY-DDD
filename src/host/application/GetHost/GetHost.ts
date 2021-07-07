@@ -1,30 +1,23 @@
 import { IHostRepository } from '../../../host/persistence/IHostRepository';
 
 import { Injectable } from '@nestjs/common';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/application';
+import { ClientSession } from 'mongodb';
 import { GetHostPayload, IGetHost } from './IGetHost';
 import { Host } from '../../entity/Host';
+import { Transaction, TransactionUseCasePort } from '../../../common/application';
 
 @Injectable()
 export class GetHost implements IGetHost {
-  constructor(
-    private readonly hostRepository: IHostRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
-  ) {}
+  constructor(private readonly hostRepository: IHostRepository) {}
 
-  async execute(
-    getHostPayload: GetHostPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<Host> {
-    const host: Host = await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.hostRepository.findHost(getHostPayload, sessionWithTransaction),
-      this.mongoClient,
+  @Transaction
+  async execute({
+    port: getHostPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<GetHostPayload>): Promise<Host> {
+    return this.hostRepository.findHost(
+      getHostPayload,
       mongoTransactionSession,
     );
-
-    return host;
   }
 }

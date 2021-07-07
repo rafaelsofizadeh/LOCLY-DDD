@@ -1,7 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { ClientSession, MongoClient } from 'mongodb';
-import { InjectClient } from 'nest-mongodb';
-import { withTransaction } from '../../../common/application';
+import { ClientSession } from 'mongodb';
+import { Transaction, TransactionUseCasePort } from '../../../common/application';
 import { throwCustomException } from '../../../common/error-handling';
 import { IHostRepository } from '../../persistence/IHostRepository';
 import {
@@ -11,22 +10,15 @@ import {
 
 @Injectable()
 export class SetHostAvailability implements ISetHostAvailability {
-  constructor(
-    private readonly hostRepository: IHostRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
-  ) {}
+  constructor(private readonly hostRepository: IHostRepository) {}
 
-  async execute(
-    setHostAvailabilityPayload: SetHostAvailabilityPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<void> {
-    await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.setHostAvailability(
-          setHostAvailabilityPayload,
-          sessionWithTransaction,
-        ),
-      this.mongoClient,
+  @Transaction
+  async execute({
+    port: setHostAvailabilityPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<SetHostAvailabilityPayload>): Promise<void> {
+    await this.setHostAvailability(
+      setHostAvailabilityPayload,
       mongoTransactionSession,
     );
   }

@@ -13,6 +13,8 @@ export type Customer = Readonly<{
   orderIds: UUID[];
 }>;
 
+export type SerializedCustomer = Omit<Customer, 'stripeCustomerId'>;
+
 export type CustomerFilter = EntityFilter<Customer, { customerId: UUID }>;
 
 export type UnidCustomerRequest<T> = Omit<T, 'customerId'>;

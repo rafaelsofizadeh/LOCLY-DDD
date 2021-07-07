@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectClient } from 'nest-mongodb';
 import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/application';
+import { Transaction, TransactionUseCasePort } from '../../../common/application';
 import {
   GetCustomerUpsertPayload,
   GetCustomerUpsertResult,
@@ -15,20 +15,17 @@ export class GetCustomerUpsert implements IGetCustomerUpsert {
   constructor(
     private readonly getCustomer: IGetCustomer,
     private readonly createCustomer: ICreateCustomer,
-    @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute(
-    getCustomerUpsertPayload: GetCustomerUpsertPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<GetCustomerUpsertResult> {
-    return withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.getCustomerUpsert(
-          getCustomerUpsertPayload,
-          sessionWithTransaction,
-        ),
-      this.mongoClient,
+  @Transaction
+  async execute({
+    port: getCustomerUpsertPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<GetCustomerUpsertPayload>): Promise<
+    GetCustomerUpsertResult
+  > {
+    return this.getCustomerUpsert(
+      getCustomerUpsertPayload,
       mongoTransactionSession,
     );
   }
@@ -39,18 +36,18 @@ export class GetCustomerUpsert implements IGetCustomerUpsert {
   ): Promise<GetCustomerUpsertResult> {
     try {
       return {
-        customer: await this.getCustomer.execute(
-          getCustomerUpsertPayload,
+        customer: await this.getCustomer.execute({
+          port: getCustomerUpsertPayload,
           mongoTransactionSession,
-        ),
+        }),
         upsert: false,
       };
     } catch (exception) {
       return {
-        customer: await this.createCustomer.execute(
-          getCustomerUpsertPayload,
+        customer: await this.createCustomer.execute({
+          port: getCustomerUpsertPayload,
           mongoTransactionSession,
-        ),
+        }),
         upsert: true,
       };
     }

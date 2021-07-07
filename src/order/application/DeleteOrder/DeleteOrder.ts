@@ -2,9 +2,8 @@ import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
 
 import { Injectable } from '@nestjs/common';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/application';
+import { ClientSession } from 'mongodb';
+import { Transaction, TransactionUseCasePort } from '../../../common/application';
 import { DeleteOrderPayload, IDeleteOrder } from './IDeleteOrder';
 import { OrderStatus } from '../../entity/Order';
 
@@ -13,19 +12,14 @@ export class DeleteOrder implements IDeleteOrder {
   constructor(
     private readonly customerRepository: ICustomerRepository,
     private readonly orderRepository: IOrderRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute(
-    deleteOrderPayload: DeleteOrderPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<void> {
-    await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.deleteOrder(deleteOrderPayload, sessionWithTransaction),
-      this.mongoClient,
-      mongoTransactionSession,
-    );
+  @Transaction
+  async execute({
+    port: deleteOrderPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<DeleteOrderPayload>): Promise<void> {
+    await this.deleteOrder(deleteOrderPayload, mongoTransactionSession);
   }
 
   private async deleteOrder(

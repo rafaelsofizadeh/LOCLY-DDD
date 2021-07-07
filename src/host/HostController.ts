@@ -7,7 +7,7 @@ import {
   AnyHostIdentity,
   VerifiedHostIdentity,
 } from '../auth/infrastructure/IdentityDecorator';
-import { Host } from './entity/Host';
+import { Host, SerializedHost } from './entity/Host';
 import { EditHostRequest, IEditHost } from './application/EditHost/IEditHost';
 import {
   ISetHostAvailability,
@@ -24,23 +24,25 @@ export class HostController {
     private readonly setHostAvailability: ISetHostAvailability,
   ) {}
 
-  // TODO: Add serialization
   @Get()
   async getHostController(
     @AnyHostIdentity() { id: hostId }: Host,
-  ): Promise<Host> {
-    const host: Host = await this.getHost.execute({ hostId });
+  ): Promise<SerializedHost> {
+    const {
+      stripeAccountId,
+      ...serializedHost
+    }: Host = await this.getHost.execute({ port: { hostId } });
 
-    return host;
+    return serializedHost;
   }
 
   @Get('dashboard')
   async getHostAccountLinkController(
     @AnyHostIdentity() host: Host,
   ): Promise<HostAccountLink> {
-    const accountLink: HostAccountLink = await this.getHostAccountLink.execute(
-      host,
-    );
+    const accountLink: HostAccountLink = await this.getHostAccountLink.execute({
+      port: host,
+    });
 
     return accountLink;
   }
@@ -51,8 +53,10 @@ export class HostController {
     @Body() editHostRequest: EditHostRequest,
   ): Promise<void> {
     await this.editHost.execute({
-      currentHostProperties: host,
-      ...editHostRequest,
+      port: {
+        currentHostProperties: host,
+        ...editHostRequest,
+      },
     });
   }
 
@@ -62,8 +66,10 @@ export class HostController {
     @Body() setHostAvailabilityRequest: SetHostAvailabilityRequest,
   ): Promise<void> {
     await this.setHostAvailability.execute({
-      host,
-      ...setHostAvailabilityRequest,
+      port: {
+        host,
+        ...setHostAvailabilityRequest,
+      },
     });
   }
 }

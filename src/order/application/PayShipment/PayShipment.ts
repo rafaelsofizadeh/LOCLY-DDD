@@ -8,13 +8,13 @@ import {
   PayShipmentResult,
 } from './IPayShipment';
 import { IOrderRepository } from '../../persistence/IOrderRepository';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
+import { ClientSession } from 'mongodb';
 import {
   StripeCheckoutSession,
   StripePrice,
   stripePrice,
-  withTransaction,
+  Transaction,
+  TransactionUseCasePort,
 } from '../../../common/application';
 import { OrderStatus } from '../../entity/Order';
 import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
@@ -27,17 +27,15 @@ export class PayShipmentService implements IPayShipment {
     private readonly orderRepository: IOrderRepository,
     private readonly customerRepository: ICustomerRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
-    @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute(
-    payShipmentPayload: PayShipmentPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<PayShipmentResult> {
-    const checkoutSession: Stripe.Checkout.Session = await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.createPaymentSession(payShipmentPayload, sessionWithTransaction),
-      this.mongoClient,
+  @Transaction
+  async execute({
+    port: payShipmentPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<PayShipmentPayload>): Promise<PayShipmentResult> {
+    const checkoutSession: Stripe.Checkout.Session = await this.createPaymentSession(
+      payShipmentPayload,
       mongoTransactionSession,
     );
 

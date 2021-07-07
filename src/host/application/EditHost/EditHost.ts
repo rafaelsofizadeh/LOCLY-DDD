@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validateSync } from 'class-validator';
-import { ClientSession, MongoClient } from 'mongodb';
-import { InjectClient } from 'nest-mongodb';
-import { withTransaction } from '../../../common/application';
+import { ClientSession } from 'mongodb';
+import { Transaction, TransactionUseCasePort } from '../../../common/application';
 import { IHostRepository } from '../../persistence/IHostRepository';
 import {
   EditHostPayload,
@@ -14,21 +13,14 @@ import {
 // TODO: Add country editing (but only once) for those who didn't select country during registration
 @Injectable()
 export class EditHost implements IEditHost {
-  constructor(
-    private readonly hostRepository: IHostRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
-  ) {}
+  constructor(private readonly hostRepository: IHostRepository) {}
 
-  async execute(
-    editHostPayload: EditHostPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<void> {
-    await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.editHost(editHostPayload, sessionWithTransaction),
-      this.mongoClient,
-      mongoTransactionSession,
-    );
+  @Transaction
+  async execute({
+    port: editHostPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<EditHostPayload>): Promise<void> {
+    await this.editHost(editHostPayload, mongoTransactionSession);
   }
 
   private async editHost(

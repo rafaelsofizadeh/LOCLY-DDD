@@ -32,7 +32,7 @@ export class AuthController {
     @Body() requestAuthRequest: RequestAuthRequest,
     @AnonymousIdentity() identity: null,
   ): Promise<void> {
-    await this.requestAuth.execute(requestAuthRequest);
+    await this.requestAuth.execute({ port: requestAuthRequest });
   }
 
   /**

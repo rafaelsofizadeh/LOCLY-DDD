@@ -2,13 +2,54 @@ import { ClientSession, MongoClient } from 'mongodb';
 import { Stripe } from 'stripe';
 import { Cost } from '../order/entity/Order';
 import { StripeCheckoutWebhookPayload } from '../order/application/StripeCheckoutWebhook/IStripeCheckoutWebhook';
+import { InjectClient } from 'nest-mongodb';
+
+export type TransactionUseCasePort<P> = {
+  port: P;
+  mongoTransactionSession?: ClientSession;
+};
 
 export abstract class UseCase<TUseCasePort, TUseCaseResult> {
   // TODO: abstract signature doesn't affect type checker anywhere else
+  // Why the arg is an object? Because of difficulties of getting the optional mongoTransactionSession
+  // (inside @Transaction decorator)
   abstract execute(
-    port: TUseCasePort,
-    mongoTransactionSession?: ClientSession,
+    arg: TransactionUseCasePort<TUseCasePort>,
   ): Promise<TUseCaseResult>;
+}
+
+export function Transaction<TUseCasePort, TUseCaseResult>(
+  target: UseCase<TUseCasePort, TUseCaseResult>,
+  key: string | symbol,
+  descriptor: TypedPropertyDescriptor<
+    (arg: { mongoTransactionSession?: ClientSession }) => Promise<any>
+  >,
+) {
+  const injectMongoClient = InjectClient();
+  injectMongoClient(target, 'mongoClient');
+
+  const fn = descriptor.value;
+
+  descriptor.value = function({
+    mongoTransactionSession,
+    ...nonTransactionArgs
+  }: {
+    mongoTransactionSession: ClientSession;
+  }) {
+    const boundFn = fn.bind(this);
+
+    return withTransaction(
+      (newSession: ClientSession) =>
+        boundFn({
+          ...nonTransactionArgs,
+          mongoTransactionSession: newSession,
+        }),
+      this.mongoClient,
+      mongoTransactionSession,
+    );
+  };
+
+  return descriptor;
 }
 
 export async function withTransaction<T>(

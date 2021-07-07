@@ -1,33 +1,23 @@
 import { ICustomerRepository } from '../../persistence/ICustomerRepository';
 
 import { Injectable } from '@nestjs/common';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/application';
+import { ClientSession } from 'mongodb';
+import { Transaction, TransactionUseCasePort } from '../../../common/application';
 import { GetCustomerPayload, IGetCustomer } from './IGetCustomer';
 import { Customer } from '../../entity/Customer';
 
 @Injectable()
 export class GetCustomer implements IGetCustomer {
-  constructor(
-    private readonly customerRepository: ICustomerRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
-  ) {}
+  constructor(private readonly customerRepository: ICustomerRepository) {}
 
-  async execute(
-    getCustomerPayload: GetCustomerPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<Customer> {
-    const customer: Customer = await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.customerRepository.findCustomer(
-          getCustomerPayload,
-          sessionWithTransaction,
-        ),
-      this.mongoClient,
+  @Transaction
+  async execute({
+    port: getCustomerPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<GetCustomerPayload>): Promise<Customer> {
+    return this.customerRepository.findCustomer(
+      getCustomerPayload,
       mongoTransactionSession,
     );
-
-    return customer;
   }
 }

@@ -1,10 +1,9 @@
 import Stripe from 'stripe';
 import { Injectable } from '@nestjs/common';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
+import { ClientSession } from 'mongodb';
 import { alpha3ToAlpha2 } from 'i18n-iso-countries';
 import { IHostRepository } from '../../../host/persistence/IHostRepository';
-import { withTransaction } from '../../../common/application';
+import { Transaction, TransactionUseCasePort } from '../../../common/application';
 import { UUID } from '../../../common/domain';
 import { Host } from '../../entity/Host';
 import { CreateHostPayload, ICreateHost } from './ICreateHost';
@@ -14,22 +13,15 @@ import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 export class CreateHost implements ICreateHost {
   constructor(
     private readonly hostRepository: IHostRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
     @InjectStripeClient() private readonly stripe: Stripe,
   ) {}
 
-  async execute(
-    createHostPayload: CreateHostPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<Host> {
-    const host: Host = await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.createHost(createHostPayload, sessionWithTransaction),
-      this.mongoClient,
-      mongoTransactionSession,
-    );
-
-    return host;
+  @Transaction
+  async execute({
+    port: createHostPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<CreateHostPayload>): Promise<Host> {
+    return this.createHost(createHostPayload, mongoTransactionSession);
   }
 
   private async createHost(

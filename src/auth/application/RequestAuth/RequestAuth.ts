@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
-import { withTransaction } from '../../../common/application';
+import { Transaction, TransactionUseCasePort, withTransaction } from '../../../common/application';
 import { IEmailService } from '../../../infrastructure/email/IEmailService';
 import {
   RequestAuthPayload,
@@ -28,21 +28,14 @@ export class RequestAuth implements IRequestAuth {
     private readonly getHostUpsert: IGetHostUpsert,
     private readonly configService: ConfigService,
     private readonly emailService: IEmailService,
-    @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute(
-    requestAuthPayload: RequestAuthPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<RequestAuthResult> {
-    const authUrl: string = await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.requestAuth(requestAuthPayload, sessionWithTransaction),
-      this.mongoClient,
-      mongoTransactionSession,
-    );
-
-    return authUrl;
+  @Transaction
+  async execute({
+    port: requestAuthPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<RequestAuthPayload>): Promise<RequestAuthResult> {
+    return this.requestAuth(requestAuthPayload, mongoTransactionSession);
   }
 
   private async requestAuth(
@@ -92,10 +85,10 @@ export class RequestAuth implements IRequestAuth {
     mongoTransactionSession?: ClientSession,
   ): Promise<{ id: UUID; type: EntityType }> {
     if (entityType === EntityType.Customer) {
-      const { customer } = await this.getCustomerUpsert.execute(
-        { email },
+      const { customer } = await this.getCustomerUpsert.execute({
+        port: { email },
         mongoTransactionSession,
-      );
+      });
 
       return {
         id: customer.id,
@@ -104,10 +97,10 @@ export class RequestAuth implements IRequestAuth {
     }
 
     if (entityType === EntityType.Host) {
-      const { host } = await this.getHostUpsert.execute(
-        { email, ...(country ? { country } : {}) },
+      const { host } = await this.getHostUpsert.execute({
+        port: { email, ...(country ? { country } : {}) },
         mongoTransactionSession,
-      );
+      });
 
       return {
         id: host.id,

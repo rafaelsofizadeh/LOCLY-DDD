@@ -17,11 +17,16 @@ export class StripeAccountUpdatedWebhook
   ) {}
 
   @StripeWebhookHandler('account.updated')
-  execute(event: StripeEvent): Promise<StripeAccountUpdatedResult> {
+  execute({
+    port: event,
+  }: {
+    port: StripeEvent;
+  }): Promise<StripeAccountUpdatedResult> {
     // TODO: event.data.object extracting decorator
     const webhookPayload = event.data.object as Stripe.Account;
-    console.log('account.updated -- ', webhookPayload);
 
-    return this.updateHostAccountWebhookGateway.execute(webhookPayload);
+    return this.updateHostAccountWebhookGateway.execute({
+      port: webhookPayload,
+    });
   }
 }

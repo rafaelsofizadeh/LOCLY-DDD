@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ClientSession, MongoClient } from 'mongodb';
-import { InjectClient } from 'nest-mongodb';
-import { withTransaction } from '../../../../../common/application';
+import { ClientSession } from 'mongodb';
+import { Transaction, TransactionUseCasePort } from '../../../../../common/application';
 import { Host } from '../../../../../host/entity/Host';
 
 import { OrderStatus } from '../../../../entity/Order';
@@ -19,17 +18,17 @@ export class ConfirmOrderHandler implements IConfirmOrderHandler {
   constructor(
     private readonly orderRepository: IOrderRepository,
     private readonly hostRepository: IHostRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute(
-    confirmOrderRequest: ConfirmOrderWebhookPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<ConfirmOrderWebhookResult> {
-    const matchedHostAddress: Address = await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.confirmOrder(confirmOrderRequest, sessionWithTransaction),
-      this.mongoClient,
+  @Transaction
+  async execute({
+    port: confirmOrderRequest,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<ConfirmOrderWebhookPayload>): Promise<
+    ConfirmOrderWebhookResult
+  > {
+    const matchedHostAddress: Address = await this.confirmOrder(
+      confirmOrderRequest,
       mongoTransactionSession,
     );
 

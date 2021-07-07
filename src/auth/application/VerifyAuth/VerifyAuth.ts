@@ -13,7 +13,6 @@ export class VerifyAuth implements IVerifyAuth {
   constructor(private readonly configService: ConfigService) {}
 
   execute(verificationToken: Token): string {
-    // TODO: Check if payload is following VerificationTokenPayload type
     return this.verificationTokenToAuthToken(verificationToken);
   }
 

@@ -17,6 +17,8 @@ export type Host = Readonly<{
   profileComplete: boolean;
 }>;
 
+export type SerializedHost = Omit<Host, 'stripeAccountId'>;
+
 export type HostFilter = EntityFilter<Host, { hostId: UUID }>;
 
 export type UnidHostRequest<T> = Omit<T, 'hostId'>;

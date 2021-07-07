@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ClientSession, MongoClient } from 'mongodb';
-import { InjectClient } from 'nest-mongodb';
-import { withTransaction } from '../../../../../common/application';
+import { ClientSession } from 'mongodb';
+import { Transaction, TransactionUseCasePort } from '../../../../../common/application';
 
 import { OrderStatus } from '../../../../entity/Order';
 import {
@@ -13,21 +12,16 @@ import { IOrderRepository } from '../../../../persistence/IOrderRepository';
 
 @Injectable()
 export class PayShipmentHandler implements IPayShipmentHandler {
-  constructor(
-    private readonly orderRepository: IOrderRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
-  ) {}
+  constructor(private readonly orderRepository: IOrderRepository) {}
 
-  async execute(
-    payShipmentRequest: PayShipmentWebhookPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<PayShipmentWebhookResult> {
-    await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.markOrderPaid(payShipmentRequest, sessionWithTransaction),
-      this.mongoClient,
-      mongoTransactionSession,
-    );
+  @Transaction
+  async execute({
+    port: payShipmentRequest,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<PayShipmentWebhookPayload>): Promise<
+    PayShipmentWebhookResult
+  > {
+    await this.markOrderPaid(payShipmentRequest, mongoTransactionSession);
   }
 
   private async markOrderPaid(

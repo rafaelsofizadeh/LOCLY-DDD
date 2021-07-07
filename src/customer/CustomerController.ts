@@ -6,21 +6,25 @@ import {
   IEditCustomer,
 } from './application/EditCustomer/IEditCustomer';
 import { IGetCustomer } from './application/GetCustomer/IGetCustomer';
-import { Customer } from './entity/Customer';
+import { Customer, SerializedCustomer } from './entity/Customer';
 
-@Controller('user')
+@Controller('customer')
 export class CustomerController {
   constructor(
     private readonly getCustomer: IGetCustomer,
     private readonly editCustomer: IEditCustomer,
   ) {}
 
-  // TODO: Add serialization
   @Get()
   async getCustomerController(
     @CustomerIdentity() customerId: UUID,
-  ): Promise<Customer> {
-    const customer: Customer = await this.getCustomer.execute({ customerId });
+  ): Promise<SerializedCustomer> {
+    const {
+      stripeCustomerId,
+      ...customer
+    }: Customer = await this.getCustomer.execute({
+      port: { customerId },
+    });
 
     return customer;
   }
@@ -30,6 +34,8 @@ export class CustomerController {
     @CustomerIdentity() customerId: UUID,
     @Body() editOrderRequest: EditCustomerRequest,
   ): Promise<void> {
-    await this.editCustomer.execute({ customerId, ...editOrderRequest });
+    await this.editCustomer.execute({
+      port: { customerId, ...editOrderRequest },
+    });
   }
 }

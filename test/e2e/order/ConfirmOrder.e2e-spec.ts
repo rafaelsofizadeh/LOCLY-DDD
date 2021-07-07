@@ -28,6 +28,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { ConfirmOrderResult } from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import { setupNestApp } from '../../../src/main';
+import { ICreateCustomer } from '../../../src/customer/application/CreateCustomer/ICreateCustomer';
+import { IEditCustomer } from '../../../src/customer/application/EditCustomer/IEditCustomer';
 
 type HostConfig = {
   email: Email;
@@ -45,6 +47,8 @@ describe('Confirm Order – POST /order/confirm', () => {
   let hostRepository: IHostRepository;
 
   let draftOrderUseCase: IDraftOrder;
+  let createCustomerUseCase: ICreateCustomer;
+  let editCustomerUseCase: IEditCustomer;
 
   let testCustomer: Customer;
   let testOrder: DraftedOrder;
@@ -85,22 +89,32 @@ describe('Confirm Order – POST /order/confirm', () => {
     )) as IHostRepository;
 
     draftOrderUseCase = (await moduleRef.resolve(IDraftOrder)) as IDraftOrder;
+    createCustomerUseCase = (await moduleRef.resolve(
+      ICreateCustomer,
+    )) as ICreateCustomer;
+    editCustomerUseCase = (await moduleRef.resolve(
+      IEditCustomer,
+    )) as IEditCustomer;
 
     // TODO: Use CreateCustomer usecase
-    testCustomer = {
-      id: UUID(),
-      email: 'random@email.com',
-      addresses: [
-        {
-          addressLine1: '10 Bandz',
-          locality: 'Juicy',
-          country: destinationCountry,
-        },
-      ],
-      orderIds: [],
-    };
+    testCustomer = await createCustomerUseCase.execute({
+      port: {
+        email: 'random@email.com',
+      },
+    });
 
-    await customerRepository.addCustomer(testCustomer);
+    await editCustomerUseCase.execute({
+      port: {
+        customerId: testCustomer.id,
+        addresses: [
+          {
+            addressLine1: '10 Bandz',
+            locality: 'Juicy',
+            country: destinationCountry,
+          },
+        ],
+      },
+    });
 
     stripeListener = child_process.spawn('stripe', [
       'listen',
@@ -122,16 +136,18 @@ describe('Confirm Order – POST /order/confirm', () => {
 
   beforeEach(async () => {
     testOrder = await draftOrderUseCase.execute({
-      customerId: testCustomer.id,
-      originCountry,
-      destination: testCustomer.addresses[0],
-      items: [
-        {
-          title: 'Laptop',
-          storeName: 'Amazon',
-          weight: 10,
-        },
-      ],
+      port: {
+        customerId: testCustomer.id,
+        originCountry,
+        destination: testCustomer.addresses[0],
+        items: [
+          {
+            title: 'Laptop',
+            storeName: 'Amazon',
+            weight: 10,
+          },
+        ],
+      },
     });
   });
 

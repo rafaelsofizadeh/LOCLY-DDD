@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
+  Param,
   Patch,
   Post,
   UploadedFiles,
@@ -26,7 +28,7 @@ import {
   ReceiveItemRequest,
   ReceiveItemPayload,
 } from './application/ReceiveItem/IReceiveItem';
-import { DraftedOrder } from './entity/Order';
+import { DraftedOrder, Order } from './entity/Order';
 import {
   IEditOrder,
   EditOrderRequest,
@@ -57,11 +59,14 @@ import {
   PayShipmentResult,
 } from './application/PayShipment/IPayShipment';
 import {
+  AnyEntityIdentity,
   CustomerIdentity,
   VerifiedHostIdentity,
 } from '../auth/infrastructure/IdentityDecorator';
-import { UUID } from '../common/domain';
+import { isUUID, UUID } from '../common/domain';
 import { Host } from '../host/entity/Host';
+import { EntityType } from '../auth/entity/Token';
+import { IGetOrder } from './application/GetOrder/IGetOrder';
 
 @Controller('order')
 export class OrderController {
@@ -87,9 +92,9 @@ export class OrderController {
       customerId,
     };
 
-    const draftOrder: DraftedOrder = await this.draftOrder.execute(
-      draftOrderPayload,
-    );
+    const draftOrder: DraftedOrder = await this.draftOrder.execute({
+      port: draftOrderPayload,
+    });
 
     return draftOrder;
   }
@@ -104,9 +109,9 @@ export class OrderController {
       customerId,
     };
 
-    const editedDraftOrder: DraftedOrder = await this.editOrder.execute(
-      editOrderPayload,
-    );
+    const editedDraftOrder: DraftedOrder = await this.editOrder.execute({
+      port: editOrderPayload,
+    });
 
     return editedDraftOrder;
   }
@@ -121,7 +126,7 @@ export class OrderController {
       customerId,
     };
 
-    await this.deleteOrder.execute(deleteOrderPayload);
+    await this.deleteOrder.execute({ port: deleteOrderPayload });
   }
 
   @Post('confirm')
@@ -134,9 +139,9 @@ export class OrderController {
       customerId,
     };
 
-    const stripeCheckoutSession = await this.confirmOrder.execute(
-      confirmOrderPayload,
-    );
+    const stripeCheckoutSession = await this.confirmOrder.execute({
+      port: confirmOrderPayload,
+    });
 
     return stripeCheckoutSession;
   }
@@ -151,9 +156,9 @@ export class OrderController {
       hostId,
     };
 
-    const receivedDateResult = await this.receiveItem.execute(
-      receiveItemPayload,
-    );
+    const receivedDateResult = await this.receiveItem.execute({
+      port: receiveItemPayload,
+    });
 
     return receivedDateResult;
   }
@@ -173,7 +178,9 @@ export class OrderController {
     };
 
     const receivedDateResult = await this.addItemPhoto.execute({
-      ...addItemPhotoPayload,
+      port: {
+        ...addItemPhotoPayload,
+      },
     });
 
     return receivedDateResult;
@@ -189,7 +196,7 @@ export class OrderController {
       hostId,
     };
 
-    await this.submitShipmentInfo.execute(submitShipmentInfoPayload);
+    await this.submitShipmentInfo.execute({ port: submitShipmentInfoPayload });
   }
 
   @Post('payShipment')
@@ -202,9 +209,9 @@ export class OrderController {
       customerId,
     };
 
-    const stripeCheckoutSession = await this.payShipment.execute(
-      payShipmentPayload,
-    );
+    const stripeCheckoutSession = await this.payShipment.execute({
+      port: payShipmentPayload,
+    });
 
     return stripeCheckoutSession;
   }

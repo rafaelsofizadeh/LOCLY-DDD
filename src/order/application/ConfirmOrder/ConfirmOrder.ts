@@ -6,13 +6,13 @@ import { ConfirmOrderResult, IConfirmOrder } from './IConfirmOrder';
 import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { Host } from '../../../host/entity/Host';
 import { UUID } from '../../../common/domain';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
+import { ClientSession } from 'mongodb';
 import {
   StripeCheckoutSession,
   StripePrice,
   stripePrice,
-  withTransaction,
+  Transaction,
+  TransactionUseCasePort,
 } from '../../../common/application';
 import { OrderStatus, DraftedOrder, Cost } from '../../entity/Order';
 import { IHostRepository } from '../../../host/persistence/IHostRepository';
@@ -34,18 +34,15 @@ export class ConfirmOrder implements IConfirmOrder {
     private readonly hostRepository: IHostRepository,
     private readonly customerRepository: ICustomerRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
-    @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute(
-    confirmOrderPayload: ConfirmOrderPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<ConfirmOrderResult> {
-    // TODO(GLOBAL): Transaction decorator
-    const checkoutSession: Stripe.Checkout.Session = await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.matchOrderAndCheckout(confirmOrderPayload, sessionWithTransaction),
-      this.mongoClient,
+  @Transaction
+  async execute({
+    port: confirmOrderPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<ConfirmOrderPayload>): Promise<ConfirmOrderResult> {
+    const checkoutSession: Stripe.Checkout.Session = await this.matchOrderAndCheckout(
+      confirmOrderPayload,
       mongoTransactionSession,
     );
 

@@ -4,9 +4,8 @@ import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepo
 import { DraftOrderPayload, IDraftOrder } from './IDraftOrder';
 
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/application';
+import { ClientSession } from 'mongodb';
+import { Transaction, TransactionUseCasePort } from '../../../common/application';
 import {
   getShipmentCostQuote,
   ShipmentCostQuote,
@@ -23,21 +22,14 @@ export class DraftOrder implements IDraftOrder {
   constructor(
     private readonly customerRepository: ICustomerRepository,
     private readonly orderRepository: IOrderRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute(
-    draftOrderPayload: DraftOrderPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<DraftedOrder> {
-    const draftOrder: DraftedOrder = await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.draftOrder(draftOrderPayload, sessionWithTransaction),
-      this.mongoClient,
-      mongoTransactionSession,
-    );
-
-    return draftOrder;
+  @Transaction
+  async execute({
+    port: draftOrderPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<DraftOrderPayload>): Promise<DraftedOrder> {
+    return this.draftOrder(draftOrderPayload, mongoTransactionSession);
   }
 
   private async draftOrder(

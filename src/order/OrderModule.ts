@@ -36,8 +36,11 @@ import { IPayShipmentHandler } from './application/StripeCheckoutWebhook/handler
 import { PayShipmentHandler } from './application/StripeCheckoutWebhook/handlers/PayShipmentHandler/PayShipmentHandler';
 import { IStripeCheckoutWebhook } from './application/StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { StripeCheckoutWebhook } from './application/StripeCheckoutWebhook/StripeCheckoutWebhook';
+import { IGetOrder } from './application/GetOrder/IGetOrder';
+import { GetOrder } from './application/GetOrder/GetOrder';
 
 const useCaseProviders: Provider[] = [
+  { provide: IGetOrder, useClass: GetOrder },
   { provide: IDraftOrder, useClass: DraftOrder },
   { provide: IEditOrder, useClass: EditOrder },
   { provide: IDeleteOrder, useClass: DeleteOrder },

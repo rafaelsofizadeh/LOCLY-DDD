@@ -1,27 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { ClientSession, MongoClient } from 'mongodb';
-import { InjectClient } from 'nest-mongodb';
-import { withTransaction } from '../../../common/application';
+import { ClientSession } from 'mongodb';
+import { Transaction, TransactionUseCasePort } from '../../../common/application';
 import { ICustomerRepository } from '../../persistence/ICustomerRepository';
 import { EditCustomerPayload, IEditCustomer } from './IEditCustomer';
 
 @Injectable()
 export class EditCustomer implements IEditCustomer {
-  constructor(
-    private readonly customerRepository: ICustomerRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
-  ) {}
+  constructor(private readonly customerRepository: ICustomerRepository) {}
 
-  async execute(
-    editCustomerPayload: EditCustomerPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<void> {
-    await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.editCustomer(editCustomerPayload, sessionWithTransaction),
-      this.mongoClient,
-      mongoTransactionSession,
-    );
+  @Transaction
+  async execute({
+    port: editCustomerPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<EditCustomerPayload>): Promise<void> {
+    return this.editCustomer(editCustomerPayload, mongoTransactionSession);
   }
 
   private async editCustomer(

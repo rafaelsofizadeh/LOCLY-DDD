@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ClientSession, MongoClient } from 'mongodb';
-import { InjectClient } from 'nest-mongodb';
+import { ClientSession } from 'mongodb';
 import Stripe from 'stripe';
-import { withTransaction } from '../../../../../common/application';
+import {
+  Transaction,
+  TransactionUseCasePort,
+} from '../../../../../common/application';
 import { IHostRepository } from '../../../../persistence/IHostRepository';
 import {
   IUpdateHostAccount,
@@ -11,22 +13,15 @@ import {
 
 @Injectable()
 export class UpdateHostAccountHandler implements IUpdateHostAccount {
-  constructor(
-    private readonly hostRepository: IHostRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
-  ) {}
+  constructor(private readonly hostRepository: IHostRepository) {}
 
-  async execute(
-    updateHostAccountPayload: UpdateHostAccountPayload,
-    mongoTransactionSession?: ClientSession,
-  ) {
-    await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.updateHostAccount(
-          updateHostAccountPayload,
-          sessionWithTransaction,
-        ),
-      this.mongoClient,
+  @Transaction
+  async execute({
+    port: updateHostAccountPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<UpdateHostAccountPayload>) {
+    await this.updateHostAccount(
+      updateHostAccountPayload,
       mongoTransactionSession,
     );
   }

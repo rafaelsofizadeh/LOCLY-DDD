@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { UUID } from '../../../common/domain';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/application';
+import { ClientSession } from 'mongodb';
+import { Transaction, TransactionUseCasePort } from '../../../common/application';
 import {
   ReceiveItemPayload,
   ReceiveItemResult,
@@ -13,24 +12,17 @@ import { OrderStatus } from '../../entity/Order';
 
 @Injectable()
 export class ReceiveItem implements IReceiveItem {
-  constructor(
-    private readonly orderRepository: IOrderRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
-  ) {}
+  constructor(private readonly orderRepository: IOrderRepository) {}
 
-  async execute(
-    { orderId, itemId, hostId }: ReceiveItemPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<ReceiveItemResult> {
-    const receivedDate: Date = await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.handleOrderItemReceipt(
-          orderId,
-          hostId,
-          itemId,
-          sessionWithTransaction,
-        ),
-      this.mongoClient,
+  @Transaction
+  async execute({
+    port: { orderId, itemId, hostId },
+    mongoTransactionSession,
+  }: TransactionUseCasePort<ReceiveItemPayload>): Promise<ReceiveItemResult> {
+    const receivedDate: Date = await this.handleOrderItemReceipt(
+      orderId,
+      hostId,
+      itemId,
       mongoTransactionSession,
     );
 

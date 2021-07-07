@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IOrderRepository } from '../../persistence/IOrderRepository';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/application';
+import { ClientSession } from 'mongodb';
+import { Transaction, TransactionUseCasePort } from '../../../common/application';
 import {
   AddItemPhotoPayload,
   IAddItemPhoto,
@@ -12,19 +11,17 @@ import { OrderStatus } from '../../entity/Order';
 
 @Injectable()
 export class AddItemPhoto implements IAddItemPhoto {
-  constructor(
-    private readonly orderRepository: IOrderRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
-  ) {}
+  constructor(private readonly orderRepository: IOrderRepository) {}
 
-  async execute(
-    addItemPhotoPayload: AddItemPhotoPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<ItemPhotosUploadResult> {
-    const itemPhotoUploadResults = await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.uploadItemPhoto(addItemPhotoPayload, sessionWithTransaction),
-      this.mongoClient,
+  @Transaction
+  async execute({
+    port: addItemPhotoPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<AddItemPhotoPayload>): Promise<
+    ItemPhotosUploadResult
+  > {
+    const itemPhotoUploadResults = await this.uploadItemPhoto(
+      addItemPhotoPayload,
       mongoTransactionSession,
     );
 

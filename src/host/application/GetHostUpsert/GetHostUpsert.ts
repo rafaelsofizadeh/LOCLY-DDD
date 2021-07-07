@@ -1,7 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/application';
+import { ClientSession } from 'mongodb';
 import {
   GetHostUpsertPayload,
   GetHostUpsertResult,
@@ -11,25 +9,26 @@ import { IGetHost } from '../GetHost/IGetHost';
 import { ICreateHost } from '../CreateHost/ICreateHost';
 import { Host } from '../../entity/Host';
 import { throwCustomException } from '../../../common/error-handling';
+import {
+  Transaction,
+  TransactionUseCasePort,
+} from '../../../common/application';
 
 @Injectable()
 export class GetHostUpsert implements IGetHostUpsert {
   constructor(
     private readonly getHost: IGetHost,
     private readonly createHost: ICreateHost,
-    @InjectClient() private readonly mongoClient: MongoClient,
   ) {}
 
-  async execute(
-    getHostUpsertPayload: GetHostUpsertPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<GetHostUpsertResult> {
-    return withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.getHostUpsert(getHostUpsertPayload, sessionWithTransaction),
-      this.mongoClient,
-      mongoTransactionSession,
-    );
+  @Transaction
+  async execute({
+    port: getHostUpsertPayload,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<GetHostUpsertPayload>): Promise<
+    GetHostUpsertResult
+  > {
+    return this.getHostUpsert(getHostUpsertPayload, mongoTransactionSession);
   }
 
   async getHostUpsert(
@@ -37,10 +36,10 @@ export class GetHostUpsert implements IGetHostUpsert {
     mongoTransactionSession: ClientSession,
   ): Promise<GetHostUpsertResult> {
     try {
-      const host: Host = await this.getHost.execute(
-        getHostPayload,
+      const host: Host = await this.getHost.execute({
+        port: getHostPayload,
         mongoTransactionSession,
-      );
+      });
 
       return {
         host,
@@ -55,10 +54,10 @@ export class GetHostUpsert implements IGetHostUpsert {
         )();
       }
 
-      const host: Host = await this.createHost.execute(
-        { country, ...getHostPayload },
+      const host: Host = await this.createHost.execute({
+        port: { country, ...getHostPayload },
         mongoTransactionSession,
-      );
+      });
 
       return {
         host,

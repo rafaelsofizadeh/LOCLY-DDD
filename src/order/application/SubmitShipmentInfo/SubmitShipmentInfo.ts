@@ -1,8 +1,10 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { IOrderRepository } from '../../persistence/IOrderRepository';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
-import { withTransaction } from '../../../common/application';
+import { ClientSession } from 'mongodb';
+import {
+  Transaction,
+  TransactionUseCasePort,
+} from '../../../common/application';
 import {
   SubmitShipmentInfoPayload,
   ISubmitShipmentInfo,
@@ -14,21 +16,14 @@ import { UUID } from '../../../common/domain';
 
 @Injectable()
 export class SubmitShipmentInfo implements ISubmitShipmentInfo {
-  constructor(
-    private readonly orderRepository: IOrderRepository,
-    @InjectClient() private readonly mongoClient: MongoClient,
-  ) {}
+  constructor(private readonly orderRepository: IOrderRepository) {}
 
-  async execute(
-    finalizeOrderRequest: SubmitShipmentInfoPayload,
-    mongoTransactionSession?: ClientSession,
-  ): Promise<void> {
-    await withTransaction(
-      (sessionWithTransaction: ClientSession) =>
-        this.finalizeOrder(finalizeOrderRequest, sessionWithTransaction),
-      this.mongoClient,
-      mongoTransactionSession,
-    );
+  @Transaction
+  async execute({
+    port: finalizeOrderRequest,
+    mongoTransactionSession,
+  }: TransactionUseCasePort<SubmitShipmentInfoPayload>): Promise<void> {
+    await this.finalizeOrder(finalizeOrderRequest, mongoTransactionSession);
   }
 
   private async finalizeOrder(

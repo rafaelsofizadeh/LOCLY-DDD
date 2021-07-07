@@ -12,8 +12,12 @@ import { throwCustomException } from '../../../common/error-handling';
 export class GetHostAccountLink implements IGetHostAccountLink {
   constructor(@InjectStripeClient() private readonly stripe: Stripe) {}
 
-  async execute(payload: GetHostAccountLinkPayload): Promise<HostAccountLink> {
-    return this.generateHostStripeAccountLink(payload);
+  async execute({
+    port,
+  }: {
+    port: GetHostAccountLinkPayload;
+  }): Promise<HostAccountLink> {
+    return this.generateHostStripeAccountLink(port);
   }
 
   private async generateHostStripeAccountLink({

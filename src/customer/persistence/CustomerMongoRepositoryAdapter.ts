@@ -24,7 +24,7 @@ import {
 import { convertToMongoDocument, mongoQuery } from '../../common/persistence';
 import { isNotEmptyObject } from 'class-validator';
 
-enum EntityAction {
+enum ArrayAction {
   Add = 'add',
   Remove = 'remove',
 }
@@ -80,7 +80,7 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     await this.addOrRemoveEntityToArrayProp(
-      EntityAction.Add,
+      ArrayAction.Add,
       filter,
       'orderIds',
       orderId,
@@ -94,7 +94,7 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
     mongoTransactionSession?: ClientSession,
   ): Promise<void> {
     await this.addOrRemoveEntityToArrayProp(
-      EntityAction.Remove,
+      ArrayAction.Remove,
       filter,
       'orderIds',
       orderId,
@@ -107,7 +107,7 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
     P extends keyof Customer,
     R extends Pick<Customer, P>[P] extends Array<infer E> ? E : never
   >(
-    action: EntityAction,
+    action: ArrayAction,
     filter: CustomerFilter,
     prop: Pick<Customer, P>[P] extends any[] ? P : never,
     entity: R,
