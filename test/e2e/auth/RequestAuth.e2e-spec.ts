@@ -1,5 +1,4 @@
-import supertest from 'supertest';
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../../../src/AppModule';
 import { setupNestApp } from '../../../src/main';
@@ -10,8 +9,6 @@ import { EntityType } from '../../../src/auth/entity/Token';
 import { IEmailService } from '../../../src/infrastructure/email/IEmailService';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { Country } from '../../../src/order/entity/Country';
-
-// TODO(GLOBAL)(TESTING): Substitute database name in tests
 
 describe('[POST /auth] IRequestAuth', () => {
   let app: INestApplication;
@@ -25,13 +22,9 @@ describe('[POST /auth] IRequestAuth', () => {
       imports: [AppModule],
     }).compile();
 
-    requestAuth = (await moduleRef.resolve(IRequestAuth)) as IRequestAuth;
-    customerRepository = (await moduleRef.resolve(
-      ICustomerRepository,
-    )) as ICustomerRepository;
-    hostRepository = (await moduleRef.resolve(
-      IHostRepository,
-    )) as IHostRepository;
+    requestAuth = await moduleRef.resolve(IRequestAuth);
+    customerRepository = await moduleRef.resolve(ICustomerRepository);
+    hostRepository = await moduleRef.resolve(IHostRepository);
     emailService = (await moduleRef.resolve(IEmailService)) as IEmailService;
 
     app = moduleRef.createNestApplication();
@@ -159,7 +152,7 @@ describe('[POST /auth] IRequestAuth', () => {
       });
     });
 
-    // IMPORTANT: Needs to run sequentially after 'New'
+    // Needs to run sequentially after 'New'!
     it('Existing', async () => {
       const oldHost = await hostRepository.findHost(
         { email: hostEmail },
@@ -178,8 +171,8 @@ describe('[POST /auth] IRequestAuth', () => {
 
       expect(authUrl).toMatch(/localhost:3000\/auth\/.+/);
 
-      // Nothing should change in the host object if it has already been registered — should be identical with
-      // oldHost
+      // Nothing should change in the host object if it has already been registered
+      // — should be identical with oldHost
       expect(
         await hostRepository.findHost({ email: hostEmail }, undefined, false),
       ).toMatchObject(oldHost);

@@ -72,31 +72,15 @@ describe('Confirm Order – POST /order/confirm', () => {
     await setupNestApp(app);
     await app.listen(3000);
 
-    const configService = (await moduleRef.resolve(
-      ConfigService,
-    )) as ConfigService;
+    const configService = await moduleRef.resolve(ConfigService);
 
-    customerRepository = (await moduleRef.resolve(
-      ICustomerRepository,
-    )) as ICustomerRepository;
+    customerRepository = await moduleRef.resolve(ICustomerRepository);
+    orderRepository = await moduleRef.resolve(IOrderRepository);
+    hostRepository = await moduleRef.resolve(IHostRepository);
+    draftOrderUseCase = await moduleRef.resolve(IDraftOrder);
+    createCustomerUseCase = await moduleRef.resolve(ICreateCustomer);
+    editCustomerUseCase = await moduleRef.resolve(IEditCustomer);
 
-    orderRepository = (await moduleRef.resolve(
-      IOrderRepository,
-    )) as IOrderRepository;
-
-    hostRepository = (await moduleRef.resolve(
-      IHostRepository,
-    )) as IHostRepository;
-
-    draftOrderUseCase = (await moduleRef.resolve(IDraftOrder)) as IDraftOrder;
-    createCustomerUseCase = (await moduleRef.resolve(
-      ICreateCustomer,
-    )) as ICreateCustomer;
-    editCustomerUseCase = (await moduleRef.resolve(
-      IEditCustomer,
-    )) as IEditCustomer;
-
-    // TODO: Use CreateCustomer usecase
     testCustomer = await createCustomerUseCase.execute({
       port: {
         email: 'random@email.com',
@@ -160,6 +144,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
   afterAll(async () => {
     await Promise.allSettled([
+      // TODO: DeleteCustomer use case
       customerRepository.deleteCustomer({ customerId: testCustomer.id }),
     ]);
 

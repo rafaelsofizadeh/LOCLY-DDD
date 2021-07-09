@@ -16,8 +16,8 @@ import {
   originCountriesAvailable,
 } from '../../../src/calculator/data/PriceGuide';
 import { setupNestApp } from '../../../src/main';
-
-// TODO(GLOBAL)(TESTING): Substitute database name in tests
+import { ICreateCustomer } from '../../../src/customer/application/CreateCustomer/ICreateCustomer';
+import { IEditCustomer } from '../../../src/customer/application/EditCustomer/IEditCustomer';
 
 describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
@@ -25,61 +25,64 @@ describe('[POST /order/draft] IDraftOrder', () => {
   let customerRepository: ICustomerRepository;
   let orderRepository: IOrderRepository;
 
+  let createCustomerUseCase: ICreateCustomer;
+  let editCustomerUseCase: IEditCustomer;
+
   let testOrderId: UUID;
   let testCustomer: Customer;
   let testCustomerAddress: Address;
 
-  const originCountry = originCountriesAvailable[0];
+  const originCountry: Country = originCountriesAvailable[0];
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
+    createCustomerUseCase = await moduleRef.resolve(ICreateCustomer);
+    editCustomerUseCase = await moduleRef.resolve(IEditCustomer);
+    customerRepository = await moduleRef.resolve(ICustomerRepository);
+    orderRepository = await moduleRef.resolve(IOrderRepository);
+
     app = moduleRef.createNestApplication();
     await setupNestApp(app);
     await app.init();
 
-    customerRepository = (await moduleRef.resolve(
-      ICustomerRepository,
-    )) as ICustomerRepository;
+    testCustomerAddress = {
+      addressLine1: '10 Bandz',
+      locality: 'Juicy',
+      country: getDestinationCountriesAvailable(originCountry)[0],
+    };
 
-    orderRepository = (await moduleRef.resolve(
-      IOrderRepository,
-    )) as IOrderRepository;
+    testCustomer = await createCustomerUseCase.execute({
+      port: {
+        email: 'random@email.com',
+      },
+    });
+
+    await editCustomerUseCase.execute({
+      port: {
+        customerId: testCustomer.id,
+        addresses: [testCustomerAddress],
+      },
+    });
+
+    testCustomer.addresses.push(testCustomerAddress);
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  describe('interact with DB and require invididual teardown', () => {
-    beforeEach(async () => {
-      testCustomerAddress = {
-        addressLine1: '10 Bandz',
-        locality: 'Juicy',
-        country: getDestinationCountriesAvailable(originCountry)[0],
-      };
-
-      // TODO: Use CreateCustomer usecase
-      testCustomer = {
-        id: UUID(),
-        email: 'random@email.com',
-        addresses: [testCustomerAddress],
-        orderIds: [],
-      };
-
-      await customerRepository.addCustomer(testCustomer);
-    });
-
-    afterEach(() =>
+  describe.only('interact with DB and require invididual teardown', () => {
+    afterAll(() =>
       Promise.all([
         customerRepository.deleteCustomer({ customerId: testCustomer.id }),
         orderRepository.deleteOrder({ orderId: testOrderId }),
       ]),
     );
 
-    it('successfully creates a Order', async () => {
+    it.only('successfully creates a Order', async () => {
       const testOrderRequest: DraftOrderPayload = {
         customerId: testCustomer.id,
         originCountry: originCountriesAvailable[0],
@@ -94,8 +97,10 @@ describe('[POST /order/draft] IDraftOrder', () => {
       };
 
       const response: supertest.Response = await supertest(app.getHttpServer())
-        .post('/order/draft')
+        .post('/order')
         .send(testOrderRequest);
+
+      console.log(response.body);
 
       expect(response.status).toBe(HttpStatus.CREATED);
 
@@ -139,7 +144,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       const invalidTestOrderRequest = {};
 
       const response: supertest.Response = await supertest(app.getHttpServer())
-        .post('/order/draft')
+        .post('/order')
         .send(invalidTestOrderRequest);
 
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
@@ -165,7 +170,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       };
 
       const response: supertest.Response = await supertest(app.getHttpServer())
-        .post('/order/draft')
+        .post('/order')
         .send(invalidTestOrderRequest);
 
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
@@ -198,7 +203,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       };
 
       const response: supertest.Response = await supertest(app.getHttpServer())
-        .post('/order/draft')
+        .post('/order')
         .send(testOrderRequest);
 
       // HTTP 503 'SERVICE UNAVAILABLE'
@@ -231,7 +236,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       };
 
       const response: supertest.Response = await supertest(app.getHttpServer())
-        .post('/order/draft')
+        .post('/order')
         .send(invalidTestOrderRequest);
 
       expect(response.status).toBe(HttpStatus.NOT_FOUND);
