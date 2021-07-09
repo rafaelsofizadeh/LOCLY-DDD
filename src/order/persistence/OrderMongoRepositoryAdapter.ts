@@ -205,7 +205,6 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     );
   }
 
-  // TODO: Merge orderFilter and itemFilter
   async setItemProperties(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
@@ -284,7 +283,6 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       'items.receivedDate': { $ne: null },
     };
 
-    // TODO: Beautify
     const statusQuery = status
       ? {
           status: Array.isArray(status) ? { $in: status } : status,

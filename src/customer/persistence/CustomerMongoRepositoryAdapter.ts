@@ -105,7 +105,6 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
     );
   }
 
-  // TODO: Apply to Host and Order repositories
   async addOrRemoveEntityToArrayProp<
     P extends keyof Customer,
     R extends Pick<Customer, P>[P] extends Array<infer E> ? E : never

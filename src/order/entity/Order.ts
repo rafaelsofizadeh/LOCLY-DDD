@@ -53,7 +53,6 @@ export type FinalizedOrder = Omit<ConfirmedOrder, 'status' | 'items'> &
     items: Array<ReceivedItem | FinalizedItem>;
   };
 
-// TODO: Vary OrderFilter allowed properties based on OrderStatus
 export type OrderFilter = EntityFilter<Order, { orderId: UUID }>;
 
 export type OrderItemFilter = OrderFilter & { item: ItemFilter };

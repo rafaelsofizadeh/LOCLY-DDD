@@ -47,7 +47,15 @@ export class CookieAuthInterceptor implements NestInterceptor {
           hostId: token.id,
         })
         .catch(
-          // TODO: Security – should this error message be exposed?
+          /**
+           * Exposing the host id in the error message shouldn't have any security risk. To hit this point in code,
+           * the attacker would anyway have to be able to spoof the JWT token.
+           *
+           * However, this exception should IMMEDIATELY launch an investigation, because either:
+           * a) The attacker indeed has obtained the JWT token encryption key and is sending fake JWT token in the
+           * cookies to try and access a host account.
+           * b) There is a bug in the code producing invalid host credentials.
+           */
           throwCustomException(
             'Host not found',
             { hostId: token.id },
