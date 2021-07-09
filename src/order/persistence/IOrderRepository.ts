@@ -5,6 +5,19 @@ import { Order, DraftedOrder, OrderFilter, OrderStatus } from '../entity/Order';
 import { ItemPhotosUploadResult } from '../application/AddItemPhoto/IAddItemPhoto';
 import { Photo } from './OrderMongoMapper';
 
+type T<K extends keyof Order = any> = Omit<
+  OrderFilter,
+  Exclude<keyof OrderFilter, K> | 'orderId' | 'status'
+>;
+
+type t = T<
+  | 'status'
+  | 'hostId'
+  | 'items'
+  | 'originCountry'
+  | 'destination'
+  | 'initialShipmentCost'
+>;
 /**
  * Pick a non-extendable set of order properties.
  * Regulate which value 'status' can be set to.
@@ -16,11 +29,11 @@ type AllowedOrderProperties<
   K extends keyof Order = any,
   S extends OrderStatus | false = false
 > = Omit<OrderFilter, Exclude<keyof OrderFilter, K> | 'orderId' | 'status'> &
-  S extends false
-  ? {}
-  : {
-      status?: S;
-    };
+  (S extends false
+    ? {}
+    : {
+        status?: S;
+      });
 
 type OrderFilterWithStatus<S extends OrderStatus> = Omit<
   OrderFilter,
