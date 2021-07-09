@@ -57,5 +57,3 @@ export type FinalizedOrder = Omit<ConfirmedOrder, 'status' | 'items'> &
 export type OrderFilter = EntityFilter<Order, { orderId: UUID }>;
 
 export type OrderItemFilter = OrderFilter & { item: ItemFilter };
-
-

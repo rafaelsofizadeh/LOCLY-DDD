@@ -52,7 +52,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
     }
 
     await this.orderRepository.setProperties(
-      // status and hostId are already checked in findOrder()
+      // status and hostId are already checked in getUnfinalizedItems()
       { orderId },
       {
         totalWeight,
@@ -68,7 +68,6 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
     orderId: UUID,
     hostId: UUID,
   ): Promise<Item[]> {
-    // TODO(?): Replace this check with a mongo query http://www.askasya.com/post/matchallarrayelements/
     const order: Order = await this.orderRepository.findOrder({
       orderId,
       status: OrderStatus.Confirmed,

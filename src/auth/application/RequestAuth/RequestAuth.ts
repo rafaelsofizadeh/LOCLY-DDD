@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientSession, MongoClient } from 'mongodb';
 import { InjectClient } from 'nest-mongodb';
-import { Transaction, TransactionUseCasePort, withTransaction } from '../../../common/application';
+import {
+  Transaction,
+  TransactionUseCasePort,
+  withTransaction,
+} from '../../../common/application';
 import { IEmailService } from '../../../infrastructure/email/IEmailService';
 import {
   RequestAuthPayload,
