@@ -9,7 +9,10 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
 import { UUID } from '../../common/domain';
-import { ICustomerRepository } from './ICustomerRepository';
+import {
+  AllowedCustomerProperties,
+  ICustomerRepository,
+} from './ICustomerRepository';
 import { Customer, CustomerFilter } from '../entity/Customer';
 import {
   mongoDocumentToCustomer,
@@ -177,11 +180,9 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
     return mongoDocumentToCustomer(customerDocument);
   }
 
-  // TODO: Vary allowed properties based on OrderStatus
   async setProperties(
     filter: CustomerFilter,
-    // TODO: better type naming for OrderFilter here
-    properties: Omit<CustomerFilter, 'orderId'>,
+    properties: AllowedCustomerProperties,
     mongoTransactionSession?: ClientSession,
   ) {
     if (!isNotEmptyObject(filter) || !isNotEmptyObject(properties)) {

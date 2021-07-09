@@ -10,7 +10,6 @@ export type TransactionUseCasePort<P> = {
 };
 
 export abstract class UseCase<TUseCasePort, TUseCaseResult> {
-  // TODO: abstract signature doesn't affect type checker anywhere else
   // Why the arg is an object?
   // Because of difficulties of getting the optional mongoTransactionSession (inside @Transaction decorator)
   abstract execute(

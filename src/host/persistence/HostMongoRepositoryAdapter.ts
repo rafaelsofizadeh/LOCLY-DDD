@@ -9,7 +9,7 @@ import {
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectCollection } from 'nest-mongodb';
 
-import { IHostRepository } from './IHostRepository';
+import { AllowedHostProperties, IHostRepository } from './IHostRepository';
 import { Host, HostFilter } from '../entity/Host';
 import {
   mongoDocumentToHost,
@@ -107,8 +107,7 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
 
   async setProperties(
     filter: HostFilter,
-    // TODO: better type naming for OrderFilter here
-    properties: Omit<HostFilter, 'hostId'>,
+    properties: AllowedHostProperties,
     mongoTransactionSession?: ClientSession,
   ) {
     if (!isNotEmptyObject(filter) || !isNotEmptyObject(properties)) {

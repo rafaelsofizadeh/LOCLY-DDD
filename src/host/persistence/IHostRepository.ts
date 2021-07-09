@@ -3,6 +3,8 @@ import { UUID } from '../../common/domain';
 import { Country } from '../../order/entity/Country';
 import { Host, HostFilter } from '../entity/Host';
 
+export type AllowedHostProperties = Omit<HostFilter, 'hostId'>;
+
 export abstract class IHostRepository {
   abstract addHost(
     host: Host,
@@ -39,8 +41,7 @@ export abstract class IHostRepository {
 
   abstract setProperties(
     filter: HostFilter,
-    // TODO: type is almost the same as OrderFilter
-    properties: Omit<HostFilter, 'hostId'>,
+    properties: AllowedHostProperties,
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 

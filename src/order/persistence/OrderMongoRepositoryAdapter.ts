@@ -72,13 +72,14 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     );
   }
 
-  // TODO: Vary allowed properties based on OrderStatus
+  // Overloads are set in IOrderRepository, and OrderRepository is injected through that
+  // interface / abstract class, so function signature here doesn't really matter — purposefully
+  // as general as possible. SEE IOrderRepository.
   async setProperties(
     filter: OrderFilter,
-    // TODO: better type naming for OrderFilter here
-    properties: Omit<OrderFilter, 'orderId'>,
+    properties: OrderFilter,
     mongoTransactionSession?: ClientSession,
-  ) {
+  ): Promise<void> {
     if (!isNotEmptyObject(filter) || !isNotEmptyObject(properties)) {
       return;
     }

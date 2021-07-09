@@ -2,6 +2,8 @@ import { ClientSession } from 'mongodb';
 import { UUID } from '../../common/domain';
 import { Customer, CustomerFilter } from '../entity/Customer';
 
+export type AllowedCustomerProperties = Omit<CustomerFilter, 'customerId'>;
+
 export abstract class ICustomerRepository {
   abstract addCustomer(
     customer: Customer,
@@ -27,7 +29,7 @@ export abstract class ICustomerRepository {
 
   abstract setProperties(
     filter: CustomerFilter,
-    properties: Omit<CustomerFilter, 'customerId'>,
+    properties: AllowedCustomerProperties,
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
