@@ -111,6 +111,7 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
   >(
     action: ArrayAction,
     filter: CustomerFilter,
+    // TODO: combine prop & entity into a single argument { [prop]: entity }
     prop: Pick<Customer, P>[P] extends any[] ? P : never,
     entity: R,
     mongoTransactionSession?: ClientSession,
@@ -122,8 +123,8 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
 
     const updateQuery =
       action === 'add'
-        ? { $push: { prop: entity } }
-        : { $pull: { $elemMatch: { prop: entity } } };
+        ? { $push: { [prop]: entity } }
+        : { $pull: { $elemMatch: { [prop]: entity } } };
 
     const errorAction = `${action === 'add' ? 'adding to' : 'removing from'}`;
 
