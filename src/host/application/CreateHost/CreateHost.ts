@@ -3,7 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { ClientSession } from 'mongodb';
 import { alpha3ToAlpha2 } from 'i18n-iso-countries';
 import { IHostRepository } from '../../../host/persistence/IHostRepository';
-import { Transaction, TransactionUseCasePort } from '../../../common/application';
+import {
+  Transaction,
+  TransactionUseCasePort,
+} from '../../../common/application';
 import { UUID } from '../../../common/domain';
 import { Host } from '../../entity/Host';
 import { CreateHostPayload, ICreateHost } from './ICreateHost';
@@ -34,8 +37,7 @@ export class CreateHost implements ICreateHost {
       email,
       country: alpha3ToAlpha2(country),
       capabilities: {
-        // TODO(IMPORTANT): Recipient service agreement doesn't allow for 'card_payments'. Manual payouts.
-        // [Removed payout settings].
+        // TODO(IMPORTANT): Recipient service agreement doesn't allow for 'card_payments'
         transfers: { requested: true },
       },
       business_type: 'individual',
@@ -44,6 +46,14 @@ export class CreateHost implements ICreateHost {
       // https://dashboard.stripe.com/settings/connect/express
       tos_acceptance: {
         service_agreement: 'recipient',
+      },
+      settings: {
+        payouts: {
+          schedule: {
+            delay_days: 10,
+            interval: 'weekly',
+          },
+        },
       },
     });
 
