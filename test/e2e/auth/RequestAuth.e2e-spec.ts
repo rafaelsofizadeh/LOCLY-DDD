@@ -25,7 +25,7 @@ describe('[POST /auth] IRequestAuth', () => {
     requestAuth = await moduleRef.resolve(IRequestAuth);
     customerRepository = await moduleRef.resolve(ICustomerRepository);
     hostRepository = await moduleRef.resolve(IHostRepository);
-    emailService = (await moduleRef.resolve(IEmailService)) as IEmailService;
+    emailService = await moduleRef.resolve(IEmailService);
 
     app = moduleRef.createNestApplication();
     await setupNestApp(app);

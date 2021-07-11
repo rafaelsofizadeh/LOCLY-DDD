@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ClientSession, MongoClient } from 'mongodb';
-import { InjectClient } from 'nest-mongodb';
+import { ClientSession } from 'mongodb';
 import {
   Transaction,
   TransactionUseCasePort,
-  withTransaction,
 } from '../../../common/application';
-import { IEmailService } from '../../../infrastructure/email/IEmailService';
 import {
   RequestAuthPayload,
   RequestAuthResult,
@@ -20,6 +17,7 @@ import { tokenToString } from '../utils';
 import { Email, UUID } from '../../../common/domain';
 import { throwCustomException } from '../../../common/error-handling';
 import { Country } from '../../../order/entity/Country';
+import { IAuthDeliveryStrategy } from '../../infrastructure/AuthDeliveryStrategy/IAuthDeliveryStrategy';
 
 /**
  * Functionality for the first step in user auth – accepting user email, generating a verification token and sending it
@@ -31,7 +29,7 @@ export class RequestAuth implements IRequestAuth {
     private readonly getCustomerUpsert: IGetCustomerUpsert,
     private readonly getHostUpsert: IGetHostUpsert,
     private readonly configService: ConfigService,
-    private readonly emailService: IEmailService,
+    private readonly authDeliveryStrategy: IAuthDeliveryStrategy,
   ) {}
 
   @Transaction
@@ -65,17 +63,7 @@ export class RequestAuth implements IRequestAuth {
       expiresIn,
     );
 
-    // TODO: Proper URL construction
-    const authUrl = `localhost:3000/auth/${tokenString}`;
-
-    // TODO: Email templating
-    await this.emailService.sendEmail({
-      to: email,
-      subject: 'Locly log in',
-      html: `<a href="${authUrl}">Click on this link to log in to Locly!</a>`,
-    });
-
-    return authUrl;
+    return this.authDeliveryStrategy.deliverAuth(tokenString, email);
   }
 
   // For login, the GetCustomer/HostUpsert use cases are expected to always only GET.
