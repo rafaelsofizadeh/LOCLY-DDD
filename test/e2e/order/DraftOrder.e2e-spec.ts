@@ -8,7 +8,10 @@ import { Customer } from '../../../src/customer/entity/Customer';
 import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
 import { Address, UUID } from '../../../src/common/domain';
 import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
-import { DraftOrderPayload } from '../../../src/order/application/DraftOrder/IDraftOrder';
+import {
+  DraftOrderPayload,
+  DraftOrderRequest,
+} from '../../../src/order/application/DraftOrder/IDraftOrder';
 import { OrderStatus, DraftedOrder } from '../../../src/order/entity/Order';
 import { Country } from '../../../src/order/entity/Country';
 import {
@@ -18,15 +21,22 @@ import {
 import { setupNestApp } from '../../../src/main';
 import { ICreateCustomer } from '../../../src/customer/application/CreateCustomer/ICreateCustomer';
 import { IEditCustomer } from '../../../src/customer/application/EditCustomer/IEditCustomer';
+import { IVerifyAuth } from '../../../src/auth/application/VerifyAuth/IVerifyAuth';
+import { IRequestAuth } from '../../../src/auth/application/RequestAuth/IRequestAuth';
+import { EntityType } from '../../../src/auth/entity/Token';
 
 describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
+  let request: ReturnType<typeof supertest.agent>;
 
-  let customerRepository: ICustomerRepository;
-  let orderRepository: IOrderRepository;
+  let requestAuthUseCase: IRequestAuth;
+  let verifyAuthUseCase: IVerifyAuth;
 
   let createCustomerUseCase: ICreateCustomer;
   let editCustomerUseCase: IEditCustomer;
+
+  let customerRepository: ICustomerRepository;
+  let orderRepository: IOrderRepository;
 
   let testOrderId: UUID;
   let testCustomer: Customer;
@@ -39,14 +49,20 @@ describe('[POST /order/draft] IDraftOrder', () => {
       imports: [AppModule],
     }).compile();
 
+    requestAuthUseCase = await moduleRef.resolve(IRequestAuth);
+    verifyAuthUseCase = await moduleRef.resolve(IVerifyAuth);
+
     createCustomerUseCase = await moduleRef.resolve(ICreateCustomer);
     editCustomerUseCase = await moduleRef.resolve(IEditCustomer);
+
     customerRepository = await moduleRef.resolve(ICustomerRepository);
     orderRepository = await moduleRef.resolve(IOrderRepository);
 
     app = moduleRef.createNestApplication();
     await setupNestApp(app);
     await app.init();
+
+    request = supertest.agent(app.getHttpServer());
 
     testCustomerAddress = {
       addressLine1: '10 Bandz',
@@ -68,6 +84,11 @@ describe('[POST /order/draft] IDraftOrder', () => {
     });
 
     testCustomer.addresses.push(testCustomerAddress);
+
+    const authTokenString = await requestAuthUseCase.execute({
+      port: { email: testCustomer.email, type: EntityType.Customer },
+    });
+    await request.get(`/auth/${authTokenString}`);
   });
 
   afterAll(async () => {
@@ -83,8 +104,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     );
 
     it.only('successfully creates a Order', async () => {
-      const testOrderRequest: DraftOrderPayload = {
-        customerId: testCustomer.id,
+      const testOrderRequest: DraftOrderRequest = {
         originCountry: originCountriesAvailable[0],
         destination: testCustomerAddress,
         items: [
@@ -96,7 +116,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await supertest(app.getHttpServer())
+      const response: supertest.Response = await request
         .post('/order')
         .send(testOrderRequest);
 
@@ -123,6 +143,14 @@ describe('[POST /order/draft] IDraftOrder', () => {
         false,
       )) as DraftedOrder;
 
+      console.log(
+        {
+          orderId: testOrderId,
+          status: OrderStatus.Drafted,
+          customerId: testCustomer.id,
+        },
+        addedOrder,
+      );
       expect(addedOrder.status).toBe(OrderStatus.Drafted);
 
       // Load the test customer from the database
@@ -143,7 +171,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     it('fails on invalid request format #1', async () => {
       const invalidTestOrderRequest = {};
 
-      const response: supertest.Response = await supertest(app.getHttpServer())
+      const response: supertest.Response = await request
         .post('/order')
         .send(invalidTestOrderRequest);
 
@@ -169,7 +197,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await supertest(app.getHttpServer())
+      const response: supertest.Response = await request
         .post('/order')
         .send(invalidTestOrderRequest);
 
@@ -202,7 +230,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await supertest(app.getHttpServer())
+      const response: supertest.Response = await request
         .post('/order')
         .send(testOrderRequest);
 
@@ -235,7 +263,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await supertest(app.getHttpServer())
+      const response: supertest.Response = await request
         .post('/order')
         .send(invalidTestOrderRequest);
 
