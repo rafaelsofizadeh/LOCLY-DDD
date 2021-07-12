@@ -1,6 +1,8 @@
 import { Module, Provider } from '@nestjs/common';
 import { CreateCustomer } from './application/CreateCustomer/CreateCustomer';
 import { ICreateCustomer } from './application/CreateCustomer/ICreateCustomer';
+import { DeleteCustomer } from './application/DeleteCustomer/DeleteCustomer';
+import { IDeleteCustomer } from './application/DeleteCustomer/IDeleteCustomer';
 import { EditCustomer } from './application/EditCustomer/EditCustomer';
 import { IEditCustomer } from './application/EditCustomer/IEditCustomer';
 import { GetCustomer } from './application/GetCustomer/GetCustomer';
@@ -14,6 +16,7 @@ const useCaseProviders: Provider[] = [
   { provide: IGetCustomer, useClass: GetCustomer },
   { provide: IGetCustomerUpsert, useClass: GetCustomerUpsert },
   { provide: IEditCustomer, useClass: EditCustomer },
+  { provide: IDeleteCustomer, useClass: DeleteCustomer },
 ];
 
 @Module({

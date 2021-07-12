@@ -23,6 +23,7 @@ export enum OrderStatus {
   Confirmed = 'confirmed',
   Finalized = 'finalized',
   Paid = 'paid',
+  Completed = 'completed',
 }
 
 export type Order = Readonly<{
