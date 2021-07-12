@@ -7,7 +7,11 @@ import countries from '../../../src/calculator/data/CountryIsoCodes';
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
 import { Address, UUID } from '../../../src/common/domain';
-import { DraftOrderRequest } from '../../../src/order/application/DraftOrder/IDraftOrder';
+import {
+  DraftOrderPayload,
+  DraftOrderRequest,
+  IDraftOrder,
+} from '../../../src/order/application/DraftOrder/IDraftOrder';
 import {
   OrderStatus,
   DraftedOrder,
@@ -24,6 +28,7 @@ import { IGetCustomer } from '../../../src/customer/application/GetCustomer/IGet
 import { authorize, createTestCustomer } from '../utilities';
 import { IGetOrder } from '../../../src/order/application/GetOrder/IGetOrder';
 import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
+import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
 
 describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
@@ -33,6 +38,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
   let deleteCustomer: IDeleteCustomer;
 
   let getOrder: IGetOrder;
+  let draftOrder: IDraftOrder;
+  let deleteOrder: IDeleteOrder;
 
   const originCountry: Country = originCountriesAvailable[0];
   const destinationCountry: Country = getDestinationCountriesAvailable(
@@ -65,6 +72,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
     agent = await authorize(app, moduleRef, customer.email);
 
     getOrder = await moduleRef.resolve(IGetOrder);
+    draftOrder = await moduleRef.resolve(IDraftOrder);
+    deleteOrder = await moduleRef.resolve(IDeleteOrder);
   });
 
   afterAll(async () => {
@@ -74,8 +83,10 @@ describe('[POST /order/draft] IDraftOrder', () => {
   describe('interact with DB and require invididual teardown', () => {
     afterAll(() =>
       Promise.all([
-        // See IDeleteCustomer implementation. Customer's drafted orders get deleted too.
-        // orderRepository.deleteOrder({ orderId: testOrderId }),
+        // DeleteOrder actually isn't necessary here, as the order.status = Drafted,
+        // and DeleteCustomer deletes Drafted orders together with the Customer.
+        // However, DeleteOrder will stay here for preventing accidental bugs.
+        deleteOrder.execute({ port: { customerId: customer.id, orderId } }),
         deleteCustomer.execute({ port: { customerId: customer.id } }),
       ]),
     );
@@ -209,10 +220,11 @@ describe('[POST /order/draft] IDraftOrder', () => {
       );
     });
 
-    it('fails on nonexistent customer', async () => {
+    it.only('fails on nonexistent customer', async () => {
       const nonexistentCustomerId: UUID = UUID();
 
-      const invalidTestOrderRequest: DraftOrderRequest = {
+      const invalidTestOrderRequest: DraftOrderPayload = {
+        customerId: nonexistentCustomerId,
         originCountry: originCountriesAvailable[0],
         destination: address,
         items: [
@@ -224,20 +236,14 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await agent
-        .post('/order')
-        .send(invalidTestOrderRequest);
-
-      expect(response.status).toBe(HttpStatus.NOT_FOUND);
-
-      expect(response.body.message).toMatch(
-        // TODO: Remove necessity for the entire string (toMatch apparently doesn't work with non-exact matches)
-        new RegExp(
-          `${
-            HttpStatus[HttpStatus.NOT_FOUND]
-          } | Order couldn't be added to customer \(orderId: [a-zA-Z0-9-]+, customerId: ${nonexistentCustomerId}\): customer with given id doesn't exist`,
-        ),
-      );
+      try {
+        await draftOrder.execute({ port: invalidTestOrderRequest });
+      } catch (error) {
+        console.log(error);
+        expect(error.error.message).toMatch(
+          'less than 1 customer with given requirements',
+        );
+      }
     });
 
     /**
