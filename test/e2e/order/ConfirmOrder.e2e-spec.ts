@@ -30,6 +30,8 @@ import { ConfirmOrderResult } from '../../../src/order/application/ConfirmOrder/
 import { setupNestApp } from '../../../src/main';
 import { ICreateCustomer } from '../../../src/customer/application/CreateCustomer/ICreateCustomer';
 import { IEditCustomer } from '../../../src/customer/application/EditCustomer/IEditCustomer';
+import { createTestCustomer } from '../utilities';
+import { IGetCustomer } from '../../../src/customer/application/GetCustomer/IGetCustomer';
 
 type HostConfig = {
   email: Email;
@@ -49,8 +51,10 @@ describe('Confirm Order – POST /order/confirm', () => {
   let draftOrderUseCase: IDraftOrder;
   let createCustomerUseCase: ICreateCustomer;
   let editCustomerUseCase: IEditCustomer;
+  let getCustomerUseCase: IGetCustomer;
 
   let testCustomer: Customer;
+
   let testOrder: DraftedOrder;
   let testHosts: Host[];
 
@@ -80,25 +84,14 @@ describe('Confirm Order – POST /order/confirm', () => {
     draftOrderUseCase = await moduleRef.resolve(IDraftOrder);
     createCustomerUseCase = await moduleRef.resolve(ICreateCustomer);
     editCustomerUseCase = await moduleRef.resolve(IEditCustomer);
+    getCustomerUseCase = await moduleRef.resolve(IGetCustomer);
 
-    testCustomer = await createCustomerUseCase.execute({
-      port: {
-        email: 'random@email.com',
-      },
-    });
-
-    await editCustomerUseCase.execute({
-      port: {
-        customerId: testCustomer.id,
-        addresses: [
-          {
-            addressLine1: '10 Bandz',
-            locality: 'Juicy',
-            country: destinationCountry,
-          },
-        ],
-      },
-    });
+    testCustomer = await createTestCustomer(
+      destinationCountry,
+      createCustomerUseCase,
+      editCustomerUseCase,
+      getCustomerUseCase,
+    );
 
     stripeListener = child_process.spawn('stripe', [
       'listen',

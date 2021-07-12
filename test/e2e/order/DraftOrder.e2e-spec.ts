@@ -3,16 +3,16 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { isUUID } from 'class-validator';
 
+import countries from '../../../src/calculator/data/CountryIsoCodes';
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
-import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
 import { Address, UUID } from '../../../src/common/domain';
-import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
+import { DraftOrderRequest } from '../../../src/order/application/DraftOrder/IDraftOrder';
 import {
-  DraftOrderPayload,
-  DraftOrderRequest,
-} from '../../../src/order/application/DraftOrder/IDraftOrder';
-import { OrderStatus, DraftedOrder } from '../../../src/order/entity/Order';
+  OrderStatus,
+  DraftedOrder,
+  Order,
+} from '../../../src/order/entity/Order';
 import { Country } from '../../../src/order/entity/Country';
 import {
   getDestinationCountriesAvailable,
@@ -24,6 +24,10 @@ import { IEditCustomer } from '../../../src/customer/application/EditCustomer/IE
 import { IVerifyAuth } from '../../../src/auth/application/VerifyAuth/IVerifyAuth';
 import { IRequestAuth } from '../../../src/auth/application/RequestAuth/IRequestAuth';
 import { EntityType } from '../../../src/auth/entity/Token';
+import { IGetCustomer } from '../../../src/customer/application/GetCustomer/IGetCustomer';
+import { authorize, createTestCustomer } from '../utilities';
+import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
+import { IGetOrder } from '../../../src/order/application/GetOrder/IGetOrder';
 
 describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
@@ -34,15 +38,19 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
   let createCustomerUseCase: ICreateCustomer;
   let editCustomerUseCase: IEditCustomer;
+  let getCustomerUseCase: IGetCustomer;
+  let deleteCustomerUseCase: IDeleteCustomer;
 
-  let customerRepository: ICustomerRepository;
-  let orderRepository: IOrderRepository;
-
-  let testOrderId: UUID;
-  let testCustomer: Customer;
-  let testCustomerAddress: Address;
+  let getOrderUseCase: IGetOrder;
 
   const originCountry: Country = originCountriesAvailable[0];
+  const destinationCountry: Country = getDestinationCountriesAvailable(
+    originCountry,
+  )[0];
+
+  let orderId: UUID;
+  let customer: Customer;
+  let address: Address;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -54,9 +62,10 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
     createCustomerUseCase = await moduleRef.resolve(ICreateCustomer);
     editCustomerUseCase = await moduleRef.resolve(IEditCustomer);
+    getCustomerUseCase = await moduleRef.resolve(IGetCustomer);
+    deleteCustomerUseCase = await moduleRef.resolve(IDeleteCustomer);
 
-    customerRepository = await moduleRef.resolve(ICustomerRepository);
-    orderRepository = await moduleRef.resolve(IOrderRepository);
+    getOrderUseCase = await moduleRef.resolve(IGetOrder);
 
     app = moduleRef.createNestApplication();
     await setupNestApp(app);
@@ -64,49 +73,34 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
     request = supertest.agent(app.getHttpServer());
 
-    testCustomerAddress = {
-      addressLine1: '10 Bandz',
-      locality: 'Juicy',
-      country: getDestinationCountriesAvailable(originCountry)[0],
-    };
+    customer = await createTestCustomer(
+      destinationCountry,
+      createCustomerUseCase,
+      editCustomerUseCase,
+      getCustomerUseCase,
+    );
+    address = customer.addresses[0];
 
-    testCustomer = await createCustomerUseCase.execute({
-      port: {
-        email: 'random@email.com',
-      },
-    });
-
-    await editCustomerUseCase.execute({
-      port: {
-        customerId: testCustomer.id,
-        addresses: [testCustomerAddress],
-      },
-    });
-
-    testCustomer.addresses.push(testCustomerAddress);
-
-    const authTokenString = await requestAuthUseCase.execute({
-      port: { email: testCustomer.email, type: EntityType.Customer },
-    });
-    await request.get(`/auth/${authTokenString}`);
+    await authorize(customer.email, request, requestAuthUseCase);
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  describe.only('interact with DB and require invididual teardown', () => {
+  describe('interact with DB and require invididual teardown', () => {
     afterAll(() =>
       Promise.all([
-        customerRepository.deleteCustomer({ customerId: testCustomer.id }),
-        orderRepository.deleteOrder({ orderId: testOrderId }),
+        // See IDeleteCustomer implementation. Customer's drafted orders get deleted too.
+        // orderRepository.deleteOrder({ orderId: testOrderId }),
+        deleteCustomerUseCase.execute({ port: { customerId: customer.id } }),
       ]),
     );
 
-    it.only('successfully creates a Order', async () => {
+    it('successfully creates a Order', async () => {
       const testOrderRequest: DraftOrderRequest = {
         originCountry: originCountriesAvailable[0],
-        destination: testCustomerAddress,
+        destination: address,
         items: [
           {
             title: 'Laptop',
@@ -120,50 +114,37 @@ describe('[POST /order/draft] IDraftOrder', () => {
         .post('/order')
         .send(testOrderRequest);
 
-      console.log(response.body);
-
       expect(response.status).toBe(HttpStatus.CREATED);
 
       const { id, customerId, destination } = response.body as DraftedOrder;
 
-      // 1. order id should be a UUID
+      // Order id should be a UUID
       expect(isUUID(id)).toBe(true);
 
-      testOrderId = UUID(id);
+      orderId = UUID(id);
 
-      // 2. order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
+      // Order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
       // should be a DraftedOrder
-      const addedOrder: DraftedOrder = (await orderRepository.findOrder(
-        {
-          orderId: testOrderId,
-          status: OrderStatus.Drafted,
-          customerId: testCustomer.id,
-        },
-        undefined,
-        false,
-      )) as DraftedOrder;
+      const addedOrder: Order = await getOrderUseCase.execute({
+        port: { orderId, userId: customer.id, userType: EntityType.Customer },
+      });
 
-      console.log(
-        {
-          orderId: testOrderId,
-          status: OrderStatus.Drafted,
-          customerId: testCustomer.id,
-        },
-        addedOrder,
-      );
+      // Order should have a 'Drafted' status
       expect(addedOrder.status).toBe(OrderStatus.Drafted);
+      // Order should be assigned its customer's id.
+      expect(addedOrder.customerId).toBe(customer.id);
 
-      // Load the test customer from the database
-      const updatedTestCustomer: Customer = await customerRepository.findCustomer(
-        { customerId: testCustomer.id },
-      );
+      // Load the updated customer from the database
+      const updatedCustomer: Customer = await getCustomerUseCase.execute({
+        port: { customerId: customer.id },
+      });
 
-      // 3. order customerId should be the same as customer id
-      expect(customerId).toEqual(updatedTestCustomer.id);
-      // 4. order id should be added to customer orderIds (i.e. order is assigned to customer)
-      expect(updatedTestCustomer.orderIds).toContain(testOrderId);
-      // 5. customer's address should be set on the order
-      expect(destination).toEqual(testCustomerAddress);
+      // Order customerId should be the same as customer id
+      expect(customerId).toEqual(updatedCustomer.id);
+      // Order id should be added to customer orderIds (i.e. order is assigned to customer)
+      expect(updatedCustomer.orderIds).toContain(orderId);
+      // Customer's address should be set on the order
+      expect(destination).toEqual(address);
     });
   });
 
@@ -178,7 +159,6 @@ describe('[POST /order/draft] IDraftOrder', () => {
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
 
       expect(response.body.message).toEqual([
-        'customerId must be an UUID',
         'originCountry must be a valid ISO31661 Alpha3 code',
         'destination should not be null or undefined',
         'destination must be a non-empty object',
@@ -204,7 +184,6 @@ describe('[POST /order/draft] IDraftOrder', () => {
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
 
       expect(response.body.message).toEqual([
-        'customerId must be an UUID',
         'originCountry must be a valid ISO31661 Alpha3 code',
         'destination should not be null or undefined',
         'destination must be a non-empty object',
@@ -214,13 +193,13 @@ describe('[POST /order/draft] IDraftOrder', () => {
     });
 
     it('fails due to unavailable service in country', async () => {
-      // TODO: [allCountries - originCountry].chooseRandom()
-      const unavailableOriginCountry: Country = 'ITA';
+      const unavailableOriginCountry: Country = countries.find(
+        (country: Country) => !originCountriesAvailable.includes(country),
+      ) as Country;
 
-      const testOrderRequest: DraftOrderPayload = {
-        customerId: testCustomer.id,
+      const testOrderRequest: DraftOrderRequest = {
         originCountry: unavailableOriginCountry,
-        destination: testCustomerAddress,
+        destination: address,
         items: [
           {
             title: 'Laptop',
@@ -250,10 +229,9 @@ describe('[POST /order/draft] IDraftOrder', () => {
     it('fails on nonexistent customer', async () => {
       const nonexistentCustomerId: UUID = UUID();
 
-      const invalidTestOrderRequest: DraftOrderPayload = {
-        customerId: nonexistentCustomerId,
+      const invalidTestOrderRequest: DraftOrderRequest = {
         originCountry: originCountriesAvailable[0],
-        destination: testCustomerAddress,
+        destination: address,
         items: [
           {
             title: 'Laptop',
