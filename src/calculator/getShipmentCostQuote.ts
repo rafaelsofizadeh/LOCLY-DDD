@@ -100,6 +100,14 @@ export function getShipmentCostQuote(
   try {
     validateOriginCountry(originCountry);
 
+    if (originCountry === destinationCountry) {
+      throwCustomException(
+        "Origin country can't be equal to destination country",
+        { originCountry, destinationCountry },
+        HttpStatus.SERVICE_UNAVAILABLE,
+      )();
+    }
+
     const {
       postalServiceName,
       priceTableSpecification: { weightIntervals, deliveryZoneNames, currency },
