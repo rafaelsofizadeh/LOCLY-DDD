@@ -53,11 +53,14 @@ describe('[POST /order/draft] IDraftOrder', () => {
     await setupNestApp(app);
     await app.init();
 
-    ({ customer, getCustomer, deleteCustomer } = await createTestCustomer(
-      destinationCountry,
-      moduleRef,
-    ));
-    address = customer.addresses[0];
+    ({
+      customer,
+      customer: {
+        addresses: [address],
+      },
+      getCustomer,
+      deleteCustomer,
+    } = await createTestCustomer(destinationCountry, moduleRef));
 
     agent = await authorize(app, moduleRef, customer.email);
 
