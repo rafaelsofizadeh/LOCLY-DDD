@@ -19,69 +19,49 @@ import {
   originCountriesAvailable,
 } from '../../../src/calculator/data/PriceGuide';
 import { setupNestApp } from '../../../src/main';
-import { ICreateCustomer } from '../../../src/customer/application/CreateCustomer/ICreateCustomer';
-import { IEditCustomer } from '../../../src/customer/application/EditCustomer/IEditCustomer';
-import { IVerifyAuth } from '../../../src/auth/application/VerifyAuth/IVerifyAuth';
-import { IRequestAuth } from '../../../src/auth/application/RequestAuth/IRequestAuth';
 import { EntityType } from '../../../src/auth/entity/Token';
 import { IGetCustomer } from '../../../src/customer/application/GetCustomer/IGetCustomer';
 import { authorize, createTestCustomer } from '../utilities';
-import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
 import { IGetOrder } from '../../../src/order/application/GetOrder/IGetOrder';
+import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
 
 describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
-  let request: ReturnType<typeof supertest.agent>;
+  let agent: ReturnType<typeof supertest.agent>;
 
-  let requestAuthUseCase: IRequestAuth;
-  let verifyAuthUseCase: IVerifyAuth;
+  let getCustomer: IGetCustomer;
+  let deleteCustomer: IDeleteCustomer;
 
-  let createCustomerUseCase: ICreateCustomer;
-  let editCustomerUseCase: IEditCustomer;
-  let getCustomerUseCase: IGetCustomer;
-  let deleteCustomerUseCase: IDeleteCustomer;
-
-  let getOrderUseCase: IGetOrder;
+  let getOrder: IGetOrder;
 
   const originCountry: Country = originCountriesAvailable[0];
   const destinationCountry: Country = getDestinationCountriesAvailable(
     originCountry,
   )[0];
 
-  let orderId: UUID;
   let customer: Customer;
   let address: Address;
+
+  let orderId: UUID;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    requestAuthUseCase = await moduleRef.resolve(IRequestAuth);
-    verifyAuthUseCase = await moduleRef.resolve(IVerifyAuth);
-
-    createCustomerUseCase = await moduleRef.resolve(ICreateCustomer);
-    editCustomerUseCase = await moduleRef.resolve(IEditCustomer);
-    getCustomerUseCase = await moduleRef.resolve(IGetCustomer);
-    deleteCustomerUseCase = await moduleRef.resolve(IDeleteCustomer);
-
-    getOrderUseCase = await moduleRef.resolve(IGetOrder);
-
     app = moduleRef.createNestApplication();
     await setupNestApp(app);
     await app.init();
 
-    request = supertest.agent(app.getHttpServer());
-
-    customer = await createTestCustomer(
+    ({ customer, getCustomer, deleteCustomer } = await createTestCustomer(
       destinationCountry,
-      createCustomerUseCase,
-      editCustomerUseCase,
-      getCustomerUseCase,
-    );
+      moduleRef,
+    ));
     address = customer.addresses[0];
 
-    await authorize(customer.email, request, requestAuthUseCase);
+    agent = await authorize(app, moduleRef, customer.email);
+
+    getOrder = await moduleRef.resolve(IGetOrder);
   });
 
   afterAll(async () => {
@@ -93,7 +73,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       Promise.all([
         // See IDeleteCustomer implementation. Customer's drafted orders get deleted too.
         // orderRepository.deleteOrder({ orderId: testOrderId }),
-        deleteCustomerUseCase.execute({ port: { customerId: customer.id } }),
+        deleteCustomer.execute({ port: { customerId: customer.id } }),
       ]),
     );
 
@@ -110,7 +90,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await request
+      const response: supertest.Response = await agent
         .post('/order')
         .send(testOrderRequest);
 
@@ -125,7 +105,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
       // Order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
       // should be a DraftedOrder
-      const addedOrder: Order = await getOrderUseCase.execute({
+      const addedOrder: Order = await getOrder.execute({
         port: { orderId, userId: customer.id, userType: EntityType.Customer },
       });
 
@@ -135,7 +115,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       expect(addedOrder.customerId).toBe(customer.id);
 
       // Load the updated customer from the database
-      const updatedCustomer: Customer = await getCustomerUseCase.execute({
+      const updatedCustomer: Customer = await getCustomer.execute({
         port: { customerId: customer.id },
       });
 
@@ -152,7 +132,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     it('fails on invalid request format #1', async () => {
       const invalidTestOrderRequest = {};
 
-      const response: supertest.Response = await request
+      const response: supertest.Response = await agent
         .post('/order')
         .send(invalidTestOrderRequest);
 
@@ -177,7 +157,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await request
+      const response: supertest.Response = await agent
         .post('/order')
         .send(invalidTestOrderRequest);
 
@@ -209,7 +189,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await request
+      const response: supertest.Response = await agent
         .post('/order')
         .send(testOrderRequest);
 
@@ -241,7 +221,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await request
+      const response: supertest.Response = await agent
         .post('/order')
         .send(invalidTestOrderRequest);
 
