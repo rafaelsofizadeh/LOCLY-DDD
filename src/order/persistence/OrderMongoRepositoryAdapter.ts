@@ -13,6 +13,7 @@ import { isNotEmptyObject } from 'class-validator';
 
 import { UUID } from '../../common/domain';
 import {
+  expectOnlyNResults,
   expectOnlySingleResult,
   throwCustomException,
 } from '../../common/error-handling';
@@ -203,6 +204,29 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       },
       filter,
     );
+  }
+
+  async deleteOrders(
+    orderIds: UUID[],
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void> {
+    const orderMongoBinaryIds: Binary[] = orderIds.map(orderId =>
+      uuidToMuuid(orderId),
+    );
+
+    const {
+      deletedCount,
+    }: DeleteWriteOpResultObject = await this.orderCollection
+      .deleteMany(
+        { _id: { $in: orderMongoBinaryIds } },
+        { session: mongoTransactionSession },
+      )
+      .catch(throwCustomException('Error deleting many orders', { orderIds }));
+
+    expectOnlyNResults(orderIds.length, [deletedCount], {
+      operation: 'deleting',
+      entity: 'order',
+    });
   }
 
   async setItemProperties(

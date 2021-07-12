@@ -64,6 +64,11 @@ export abstract class IOrderRepository {
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
+  abstract deleteOrders(
+    orderIds: UUID[],
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void>;
+
   abstract setProperties(
     filter: OrderFilterWithStatus<OrderStatus.Drafted>,
     properties: AllowedOrderProperties<
