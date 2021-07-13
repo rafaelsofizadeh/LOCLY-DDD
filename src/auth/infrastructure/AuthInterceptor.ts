@@ -2,6 +2,7 @@ import {
   CallHandler,
   ExecutionContext,
   HttpStatus,
+  Injectable,
   NestInterceptor,
 } from '@nestjs/common';
 import { Request } from 'express';
@@ -13,6 +14,7 @@ import { throwCustomException } from '../../common/error-handling';
 import { Host } from '../../host/entity/Host';
 import { Identity, IdentityType, IdentifiedRequest } from '../entity/Identity';
 
+@Injectable()
 export class CookieAuthInterceptor implements NestInterceptor {
   constructor(
     private readonly configService: ConfigService,

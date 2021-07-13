@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CustomerModule } from '../customer/CustomerModule';
 import { HostModule } from '../host/HostModule';
-import { IHostRepository } from '../host/persistence/IHostRepository';
 import { EmailModule } from '../infrastructure/email/EmailModule';
 import { IEmailService } from '../infrastructure/email/IEmailService';
 import { IRequestAuth } from './application/RequestAuth/IRequestAuth';
@@ -23,12 +22,7 @@ import { OutputAuthDeliveryStrategy } from './infrastructure/AuthDeliveryStrateg
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      // useFactory + inject works for instantiating CookieAuthInterceptor, otherwise dependencies are undefined
-      useFactory: (
-        configService: ConfigService,
-        hostRepository: IHostRepository,
-      ) => new CookieAuthInterceptor(configService, hostRepository),
-      inject: [ConfigService, IHostRepository],
+      useClass: CookieAuthInterceptor,
     },
     {
       provide: IAuthDeliveryStrategy,
