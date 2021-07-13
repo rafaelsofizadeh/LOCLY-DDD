@@ -75,6 +75,11 @@ export class CookieAuthInterceptor implements NestInterceptor {
   async intercept(context: ExecutionContext, next: CallHandler) {
     const request: Request = context.switchToHttp().getRequest();
 
+    const path = request.path;
+    if (path === this.configService.get<string>('STRIPE_WEBHOOK_PATH')) {
+      return next.handle();
+    }
+
     const cookies = this.getCookies(request);
     const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
     const tokenString: string = cookies?.[authCookieName];
