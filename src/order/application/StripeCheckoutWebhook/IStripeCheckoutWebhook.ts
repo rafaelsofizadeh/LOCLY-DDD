@@ -24,7 +24,6 @@ export type StripeCheckoutResult =
   | ConfirmOrderWebhookResult
   | PayShipmentWebhookResult;
 
-export abstract class IStripeCheckoutWebhook extends UseCase<
-  StripeCheckoutEvent,
-  StripeCheckoutResult
-> {}
+export abstract class IStripeCheckoutWebhook {
+  abstract execute(event: StripeCheckoutEvent): Promise<StripeCheckoutResult>;
+}

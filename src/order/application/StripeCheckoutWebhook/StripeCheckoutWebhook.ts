@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import {
   StripeCheckoutSession,
   StripeEvent,
-  Transaction,
 } from '../../../common/application';
 import { throwCustomException } from '../../../common/error-handling';
 import {
@@ -28,13 +27,8 @@ export class StripeCheckoutWebhook implements IStripeCheckoutWebhook {
     private readonly payShipmentWebhookGateway: IPayShipmentHandler,
   ) {}
 
-  // TODO: Don't run AuthInterceptor on webhooks !!!!!!!!! NOW NOW
   @StripeWebhookHandler('checkout.session.completed')
-  execute({
-    port: event,
-  }: {
-    port: StripeEvent;
-  }): Promise<StripeCheckoutResult> {
+  execute(event: StripeEvent): Promise<StripeCheckoutResult> {
     const webhookPayload = (event.data.object as StripeCheckoutSession)
       .metadata as StripeCheckoutWebhookPayload;
 
