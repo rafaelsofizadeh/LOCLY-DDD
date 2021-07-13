@@ -1,11 +1,13 @@
 import supertest from 'supertest';
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getCollectionToken } from 'nest-mongodb';
 import { isUUID } from 'class-validator';
 
 import countries from '../../../src/calculator/data/CountryIsoCodes';
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
+import { serializeMongoData } from '../../../src/common/persistence';
 import { Address, UUID } from '../../../src/common/domain';
 import {
   DraftOrderPayload,
@@ -24,18 +26,22 @@ import {
 } from '../../../src/calculator/data/PriceGuide';
 import { setupNestApp } from '../../../src/main';
 import { EntityType } from '../../../src/auth/entity/Token';
-import { IGetCustomer } from '../../../src/customer/application/GetCustomer/IGetCustomer';
 import { authorize, createTestCustomer } from '../utilities';
 import { IGetOrder } from '../../../src/order/application/GetOrder/IGetOrder';
-import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
+import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
+import { throwCustomException } from '../../../src/common/error-handling';
+import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
+import { Collection } from 'mongodb';
+import { OrderMongoDocument } from '../../../src/order/persistence/OrderMongoMapper';
 
 describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
+  let moduleRef: TestingModule;
   let agent: ReturnType<typeof supertest.agent>;
 
-  let getCustomer: IGetCustomer;
-  let deleteCustomer: IDeleteCustomer;
+  let customerRepository: ICustomerRepository;
+  let orderRepository: IOrderRepository;
 
   let getOrder: IGetOrder;
   let draftOrder: IDraftOrder;
@@ -52,7 +58,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
   let orderId: UUID;
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
+    moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
@@ -60,13 +66,14 @@ describe('[POST /order/draft] IDraftOrder', () => {
     await setupNestApp(app);
     await app.init();
 
+    customerRepository = await moduleRef.resolve(ICustomerRepository);
+    orderRepository = await moduleRef.resolve(IOrderRepository);
+
     ({
       customer,
       customer: {
         addresses: [address],
       },
-      getCustomer,
-      deleteCustomer,
     } = await createTestCustomer(destinationCountry, moduleRef));
 
     agent = await authorize(app, moduleRef, customer.email);
@@ -80,14 +87,11 @@ describe('[POST /order/draft] IDraftOrder', () => {
     await app.close();
   });
 
-  describe('interact with DB and require invididual teardown', () => {
+  describe('interact with DB, require invididual teardown', () => {
     afterAll(() =>
       Promise.all([
-        // DeleteOrder actually isn't necessary here, as the order.status = Drafted,
-        // and DeleteCustomer deletes Drafted orders together with the Customer.
-        // However, DeleteOrder will stay here for preventing accidental bugs.
-        deleteOrder.execute({ port: { customerId: customer.id, orderId } }),
-        deleteCustomer.execute({ port: { customerId: customer.id } }),
+        orderRepository.deleteOrder({ orderId }),
+        customerRepository.deleteCustomer({ customerId: customer.id }),
       ]),
     );
 
@@ -129,8 +133,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
       expect(addedOrder.customerId).toBe(customer.id);
 
       // Load the updated customer from the database
-      const updatedCustomer: Customer = await getCustomer.execute({
-        port: { customerId: customer.id },
+      const updatedCustomer: Customer = await customerRepository.findCustomer({
+        customerId: customer.id,
       });
 
       // Order customerId should be the same as customer id
@@ -139,6 +143,64 @@ describe('[POST /order/draft] IDraftOrder', () => {
       expect(updatedCustomer.orderIds).toContain(orderId);
       // Customer's address should be set on the order
       expect(destination).toEqual(address);
+    });
+
+    it('transaction rollback on uncaught exceptions', async () => {
+      const orderCollection: Collection<OrderMongoDocument> = await moduleRef.resolve(
+        getCollectionToken('orders'),
+      );
+
+      const addOrder = customerRepository.addOrder.bind(customerRepository);
+      const testException = 'TEST EXCEPTION';
+      jest
+        .spyOn(customerRepository, 'addOrder')
+        .mockImplementationOnce(async (...args: any[]) => {
+          addOrder(...args);
+          throwCustomException(testException)();
+        });
+
+      const getAllOrders = (): Promise<Order[]> =>
+        orderCollection
+          .find()
+          .toArray()
+          .then(orderDocuments =>
+            orderDocuments.map(orderDocument =>
+              serializeMongoData(orderDocument),
+            ),
+          );
+
+      const beforeOrderDatabaseSnapshot: Order[] = await getAllOrders();
+      const beforeCustomer: Customer = await customerRepository.findCustomer({
+        customerId: customer.id,
+      });
+
+      const testOrderRequest: DraftOrderRequest = {
+        originCountry: originCountriesAvailable[0],
+        destination: address,
+        items: [
+          {
+            title: 'Laptop',
+            storeName: 'Amazon',
+            weight: 1500,
+          },
+        ],
+      };
+
+      const response: supertest.Response = await agent
+        .post('/order')
+        .send(testOrderRequest);
+
+      expect(response.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      const { message } = response.body;
+      expect(message).toMatch(testException);
+
+      const afterOrderDatabaseSnapshot: Order[] = await getAllOrders();
+      const afterCustomer: Customer = await customerRepository.findCustomer({
+        customerId: customer.id,
+      });
+
+      expect(afterOrderDatabaseSnapshot).toEqual(beforeOrderDatabaseSnapshot);
+      expect(afterCustomer).toEqual(beforeCustomer);
     });
   });
 
@@ -210,17 +272,15 @@ describe('[POST /order/draft] IDraftOrder', () => {
       // HTTP 503 'SERVICE UNAVAILABLE'
       expect(response.status).toBe(HttpStatus.SERVICE_UNAVAILABLE);
 
-      // TODO: Error typing
       const { message, data } = response.body;
 
-      // TODO: Better way to check error message
-      // 1. Check the error format
+      // Check the error format
       expect(message.split(':')[0]).toBe(
         `SERVICE_UNAVAILABLE | Origin country ${unavailableOriginCountry} is not supported by the calculator. `,
       );
     });
 
-    it.only('fails on nonexistent customer', async () => {
+    it('fails on nonexistent customer', async () => {
       const nonexistentCustomerId: UUID = UUID();
 
       const invalidTestOrderRequest: DraftOrderPayload = {
@@ -246,17 +306,6 @@ describe('[POST /order/draft] IDraftOrder', () => {
       }
     });
 
-    /**
-     * TODO: Test for transaction rollback success.
-     *
-     * 1. Count the number of documents in collection
-     * 2. IDraftOrder -> failure
-     * 3. Count the number of documents in collection again. 3 === 1, else failure
-     *
-     * You can either knowingly make the UseCase fail (like in 'fails on nonexistent customer'),
-     * or mock a function to __always__ fail. But how to mock the function, for example, addOrder?
-     *
-     * TODO: Test for all granular calculator errors
-     */
+    // TODO: Test for all granular calculator errors
   });
 });
