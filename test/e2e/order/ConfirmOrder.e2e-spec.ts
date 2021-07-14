@@ -147,14 +147,15 @@ describe('Confirm Order – POST /order/confirm', () => {
     // TODO: Vary 'verified' true-false
     const testHostConfigs: HostConfig[] = [
       /*
-      Test host #1 (will be selected):
+      Test host #1:
+      ✗ NOT verified
       ✔ available
       ✔ same country as the order
       ✔ lowest number of orders (1)
       */
       {
         email: 'johndoe@example.com',
-        verified: true,
+        verified: false,
         country: originCountry,
         available: true,
         orderCount: 1,
@@ -162,6 +163,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       /*
       Test host #2:
       ✗ NOT available
+      ✔ verified
       ✔ same country as the order
       ✔ lowest number of orders (1)
       */
@@ -175,6 +177,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       /*
       Test host #3:
       ✗ NOT the same country as the order
+      ✔ verified
       ✔ available
       ✔ lowest number of orders (1)
       */
@@ -188,6 +191,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       /*
       Test host #4:
       ✗ NOT the lowest number of orders (2)
+      ✔ verified
       ✔ same country as the order
       ✔ available
       */
@@ -203,19 +207,35 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✗ NOT the lowest number of orders (2)
       ✗ NOT the same country as the order
       ✗ NOT available
+      ✗ verified
       */
       {
         email: 'johndoe@example.com',
-        verified: true,
+        verified: false,
         country: originCountriesAvailable[2] || ('ZZZ' as Country),
         available: false,
         orderCount: 3,
       },
+      /*
+      Test host #6 (WILL BE SELECTED):
+      ✔ available
+      ✔ verified
+      ✔ same country as the order
+      ✔ lowest number of orders (1)
+      */
+      {
+        email: 'johndoe@example.com',
+        verified: true,
+        country: originCountry,
+        available: true,
+        orderCount: 1,
+      },
     ];
     hosts = configsToHosts(testHostConfigs);
+    console.log(hosts);
     await hostRepository.addManyHosts(hosts);
 
-    const testMatchedHost = hosts[0];
+    const testMatchedHost = hosts[hosts.length - 1];
 
     const response: supertest.Response = await agent
       .post('/order/confirm')

@@ -214,6 +214,7 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
           {
             $match: {
               'address.country': country,
+              verified: true,
               available: true,
             },
           },
