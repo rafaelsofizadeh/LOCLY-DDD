@@ -32,7 +32,7 @@ import { IOrderRepository } from '../../../src/order/persistence/IOrderRepositor
 import { Collection } from 'mongodb';
 import { OrderMongoDocument } from '../../../src/order/persistence/OrderMongoMapper';
 
-describe('[POST /order/draft] IDraftOrder', () => {
+describe('Draft Order – POST /order', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
   let agent: ReturnType<typeof supertest.agent>;
@@ -91,7 +91,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       ]),
     );
 
-    it('successfully creates a Order', async () => {
+    it('creates a Order', async () => {
       const testOrderRequest: DraftOrderRequest = {
         originCountry,
         destination: address,

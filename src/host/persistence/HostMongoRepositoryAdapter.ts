@@ -111,7 +111,9 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
     mongoTransactionSession?: ClientSession,
   ) {
     if (!isNotEmptyObject(filter) || !isNotEmptyObject(properties)) {
-      return;
+      throw new Error(
+        "setProperties – filter and/or properties can't be empty",
+      );
     }
 
     const filterWithId = normalizeHostFilter(filter);
