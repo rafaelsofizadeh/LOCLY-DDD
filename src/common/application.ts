@@ -68,10 +68,6 @@ async function withExistingSessionTransaction<T>(
 ): Promise<T> {
   // Session already in transaction, program will assume it's already wrapped in mongoTransactionSession.withTransaction
   if (mongoTransactionSession.inTransaction()) {
-    console.warn(
-      "Session already in transaction, program will assume it's already wrapped in mongoTransactionSession.withTransaction",
-    );
-
     const result: T = await fn(mongoTransactionSession);
     return result;
   }
