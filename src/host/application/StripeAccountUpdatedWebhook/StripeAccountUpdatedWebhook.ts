@@ -16,6 +16,7 @@ export class StripeAccountUpdatedWebhook
     private readonly updateHostAccountWebhookGateway: IUpdateHostAccount,
   ) {}
 
+  // TODO: Auth for Stripe webhooks
   @StripeWebhookHandler('account.updated')
   execute(event: StripeEvent): Promise<StripeAccountUpdatedResult> {
     // TODO: event.data.object extracting decorator

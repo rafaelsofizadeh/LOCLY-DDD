@@ -299,7 +299,6 @@ describe('[POST /order/draft] IDraftOrder', () => {
       try {
         await draftOrder.execute({ port: invalidTestOrderRequest });
       } catch (error) {
-        console.log(error);
         expect(error.error.message).toMatch(
           'less than 1 customer with given requirements',
         );
