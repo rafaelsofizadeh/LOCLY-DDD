@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { EntityType } from '../../../auth/entity/Token';
+import { UserType } from '../../../auth/entity/Token';
 import {
   Transaction,
   TransactionUseCasePort,
@@ -19,7 +19,7 @@ export class GetOrder implements IGetOrder {
     mongoTransactionSession,
   }: TransactionUseCasePort<GetOrderPayload>): Promise<Order> {
     const userFilter =
-      userType === EntityType.Customer
+      userType === UserType.Customer
         ? { customerId: userId }
         : { hostId: userId };
 

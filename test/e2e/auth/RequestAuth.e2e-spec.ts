@@ -5,7 +5,7 @@ import { setupNestApp } from '../../../src/main';
 import { IRequestAuth } from '../../../src/auth/application/RequestAuth/IRequestAuth';
 import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
 import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
-import { EntityType } from '../../../src/auth/entity/Token';
+import { UserType } from '../../../src/auth/entity/Token';
 import { IEmailService } from '../../../src/infrastructure/email/IEmailService';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { Country } from '../../../src/order/entity/Country';
@@ -64,7 +64,7 @@ describe('[POST /auth] IRequestAuth', () => {
       const authUrl: string = await requestAuth.execute({
         port: {
           email: customerEmail,
-          type: EntityType.Customer,
+          type: UserType.Customer,
         },
       });
 
@@ -92,7 +92,7 @@ describe('[POST /auth] IRequestAuth', () => {
       const authUrl: string = await requestAuth.execute({
         port: {
           email: customerEmail,
-          type: EntityType.Customer,
+          type: UserType.Customer,
         },
       });
 
@@ -133,7 +133,7 @@ describe('[POST /auth] IRequestAuth', () => {
       const authUrl: string = await requestAuth.execute({
         port: {
           email: hostEmail,
-          type: EntityType.Host,
+          type: UserType.Host,
           country: hostCountry,
         },
       });
@@ -168,7 +168,7 @@ describe('[POST /auth] IRequestAuth', () => {
       const authUrl: string = await requestAuth.execute({
         port: {
           email: hostEmail,
-          type: EntityType.Host,
+          type: UserType.Host,
         },
       });
 

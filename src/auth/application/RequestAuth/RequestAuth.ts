@@ -11,7 +11,7 @@ import {
   IRequestAuth,
 } from './IRequestAuth';
 import { IGetCustomerUpsert } from '../../../customer/application/GetCustomerUpsert/IGetCustomerUpsert';
-import { EntityType } from '../../entity/Token';
+import { UserType } from '../../entity/Token';
 import { IGetHostUpsert } from '../../../host/application/GetHostUpsert/IGetHostUpsert';
 import { tokenToString } from '../utils';
 import { Email, UUID } from '../../../common/domain';
@@ -44,7 +44,7 @@ export class RequestAuth implements IRequestAuth {
     { email, type: entityRequestType, country }: RequestAuthPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<string> {
-    const { id: entityId, type: entityType } = await this.findOrCreateEntity(
+    const { id: entityId, type: userType } = await this.findOrCreateEntity(
       email,
       entityRequestType,
       country,
@@ -58,7 +58,7 @@ export class RequestAuth implements IRequestAuth {
 
     // Create and sign a verification token to be sent by email.
     const tokenString: string = tokenToString(
-      { id: entityId, type: entityType, isVerification: true },
+      { id: entityId, type: userType, isVerification: true },
       key,
       expiresIn,
     );
@@ -70,13 +70,13 @@ export class RequestAuth implements IRequestAuth {
   // For registration, the use cases are expected to always only UPSERT.
   private async findOrCreateEntity(
     email: Email,
-    entityType: EntityType,
+    userType: UserType,
     // country is expected to be defined only during host registration. All other cases (login, customer registration),
     // country will be undefined.
     country?: Country,
     mongoTransactionSession?: ClientSession,
-  ): Promise<{ id: UUID; type: EntityType }> {
-    if (entityType === EntityType.Customer) {
+  ): Promise<{ id: UUID; type: UserType }> {
+    if (userType === UserType.Customer) {
       const { customer } = await this.getCustomerUpsert.execute({
         port: { email },
         mongoTransactionSession,
@@ -84,11 +84,11 @@ export class RequestAuth implements IRequestAuth {
 
       return {
         id: customer.id,
-        type: EntityType.Customer,
+        type: UserType.Customer,
       };
     }
 
-    if (entityType === EntityType.Host) {
+    if (userType === UserType.Host) {
       const { host } = await this.getHostUpsert.execute({
         port: { email, ...(country ? { country } : {}) },
         mongoTransactionSession,
@@ -96,10 +96,10 @@ export class RequestAuth implements IRequestAuth {
 
       return {
         id: host.id,
-        type: EntityType.Host,
+        type: UserType.Host,
       };
     }
 
-    throwCustomException('Incorrect entity type', { entityType })();
+    throwCustomException('Incorrect entity type', { userType })();
   }
 }

@@ -22,7 +22,7 @@ import {
 import { Country } from '../../../src/order/entity/Country';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { setupNestApp } from '../../../src/main';
-import { EntityType } from '../../../src/auth/entity/Token';
+import { UserType } from '../../../src/auth/entity/Token';
 import { authorize, createTestCustomer } from '../utilities';
 import { IGetOrder } from '../../../src/order/application/GetOrder/IGetOrder';
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
@@ -115,7 +115,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       // Order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
       // should be a DraftedOrder
       const addedOrder: Order = await getOrder.execute({
-        port: { orderId, userId: customer.id, userType: EntityType.Customer },
+        port: { orderId, userId: customer.id, userType: UserType.Customer },
       });
 
       // Order should have a 'Drafted' status

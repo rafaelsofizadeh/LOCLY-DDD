@@ -65,7 +65,7 @@ import {
 } from '../auth/infrastructure/IdentityDecorator';
 import { isUUID, UUID } from '../common/domain';
 import { Host } from '../host/entity/Host';
-import { EntityType } from '../auth/entity/Token';
+import { UserType } from '../auth/entity/Token';
 import { IGetOrder } from './application/GetOrder/IGetOrder';
 
 @Controller('order')
@@ -87,9 +87,10 @@ export class OrderController {
     @Param('orderId') orderId: UUID,
     @AnyEntityIdentity() entity: Host | UUID,
   ) {
+    // TODO: Better way to determine entity type
     const userFilter = isUUID(entity)
-      ? { userId: entity, userType: EntityType.Customer }
-      : { userId: entity.id, userType: EntityType.Host };
+      ? { userId: entity, userType: UserType.Customer }
+      : { userId: entity.id, userType: UserType.Host };
 
     return this.getOrder.execute({ port: { orderId, ...userFilter } });
   }

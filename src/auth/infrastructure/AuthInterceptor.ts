@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { EntityType, Token } from '../entity/Token';
+import { UserType, Token } from '../entity/Token';
 import { stringToToken } from '../application/utils';
 import { IHostRepository } from '../../host/persistence/IHostRepository';
 import { throwCustomException } from '../../common/error-handling';
@@ -39,11 +39,11 @@ export class CookieAuthInterceptor implements NestInterceptor {
       return { entity: token, type: IdentityType.VerificationToken };
     }
 
-    if (token.type === EntityType.Customer) {
+    if (token.type === UserType.Customer) {
       return { entity: token.id, type: IdentityType.Customer };
     }
 
-    if (token.type === EntityType.Host) {
+    if (token.type === UserType.Host) {
       const host: Host = await this.hostRepository
         .findHost({
           hostId: token.id,
