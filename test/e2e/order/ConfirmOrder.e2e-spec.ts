@@ -20,16 +20,13 @@ import {
   OrderStatus,
 } from '../../../src/order/entity/Order';
 import { Email, UUID } from '../../../src/common/domain';
-import {
-  getDestinationCountriesAvailable,
-  originCountriesAvailable,
-} from '../../../src/calculator/data/PriceGuide';
 import { ConfigService } from '@nestjs/config';
 import { ConfirmOrderResult } from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import { setupNestApp } from '../../../src/main';
 import { authorize, createTestCustomer } from '../utilities';
 import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
+import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 
 type HostConfig = {
   email: Email;
@@ -57,9 +54,6 @@ describe('Confirm Order – POST /order/confirm', () => {
   let stripeListener: child_process.ChildProcess;
 
   const originCountry: Country = originCountriesAvailable[0];
-  const destinationCountry: Country = getDestinationCountriesAvailable(
-    originCountry,
-  )[0];
 
   beforeAll(async () => {
     // Setting timeout in before*(): https://stackoverflow.com/a/67392078/6539857
@@ -83,10 +77,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     draftOrder = await moduleRef.resolve(IDraftOrder);
     deleteOrder = await moduleRef.resolve(IDeleteOrder);
 
-    ({ customer, deleteCustomer } = await createTestCustomer(
-      destinationCountry,
-      moduleRef,
-    ));
+    ({ customer, deleteCustomer } = await createTestCustomer(moduleRef));
 
     agent = await authorize(app, moduleRef, customer.email);
 
@@ -184,7 +175,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       {
         email: 'johndoe@example.com',
         verified: true,
-        country: originCountriesAvailable[1] || ('XXX' as Country),
+        country: 'XXX' as Country,
         available: true,
         orderCount: 1,
       },
@@ -212,7 +203,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       {
         email: 'johndoe@example.com',
         verified: false,
-        country: originCountriesAvailable[2] || ('ZZZ' as Country),
+        country: 'ZZZ' as Country,
         available: false,
         orderCount: 3,
       },

@@ -20,10 +20,7 @@ import {
   Order,
 } from '../../../src/order/entity/Order';
 import { Country } from '../../../src/order/entity/Country';
-import {
-  getDestinationCountriesAvailable,
-  originCountriesAvailable,
-} from '../../../src/calculator/data/PriceGuide';
+import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { setupNestApp } from '../../../src/main';
 import { EntityType } from '../../../src/auth/entity/Token';
 import { authorize, createTestCustomer } from '../utilities';
@@ -47,15 +44,11 @@ describe('[POST /order/draft] IDraftOrder', () => {
   let draftOrder: IDraftOrder;
   let deleteOrder: IDeleteOrder;
 
-  const originCountry: Country = originCountriesAvailable[0];
-  const destinationCountry: Country = getDestinationCountriesAvailable(
-    originCountry,
-  )[0];
-
   let customer: Customer;
   let address: Address;
 
   let orderId: UUID;
+  const originCountry: Country = originCountriesAvailable[0];
 
   beforeAll(async () => {
     jest.setTimeout(20000);
@@ -71,12 +64,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
     customerRepository = await moduleRef.resolve(ICustomerRepository);
     orderRepository = await moduleRef.resolve(IOrderRepository);
 
-    ({
-      customer,
-      customer: {
-        addresses: [address],
-      },
-    } = await createTestCustomer(destinationCountry, moduleRef));
+    ({ customer } = await createTestCustomer(moduleRef, originCountry));
+    address = customer.addresses[0];
 
     agent = await authorize(app, moduleRef, customer.email);
 
@@ -99,7 +88,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
     it('successfully creates a Order', async () => {
       const testOrderRequest: DraftOrderRequest = {
-        originCountry: originCountriesAvailable[0],
+        originCountry,
         destination: address,
         items: [
           {
@@ -177,7 +166,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       });
 
       const testOrderRequest: DraftOrderRequest = {
-        originCountry: originCountriesAvailable[0],
+        originCountry,
         destination: address,
         items: [
           {
@@ -287,7 +276,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
       const invalidTestOrderRequest: DraftOrderPayload = {
         customerId: nonexistentCustomerId,
-        originCountry: originCountriesAvailable[0],
+        originCountry,
         destination: address,
         items: [
           {
