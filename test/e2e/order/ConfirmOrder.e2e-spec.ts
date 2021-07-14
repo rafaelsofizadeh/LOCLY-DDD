@@ -9,7 +9,6 @@ import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
 import { Host } from '../../../src/host/entity/Host';
 
-import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
 import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
 import { IDraftOrder } from '../../../src/order/application/DraftOrder/IDraftOrder';
 import { Country } from '../../../src/order/entity/Country';
@@ -28,10 +27,9 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { ConfirmOrderResult } from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import { setupNestApp } from '../../../src/main';
-import { ICreateCustomer } from '../../../src/customer/application/CreateCustomer/ICreateCustomer';
-import { IEditCustomer } from '../../../src/customer/application/EditCustomer/IEditCustomer';
-import { createTestCustomer } from '../utilities';
-import { IGetCustomer } from '../../../src/customer/application/GetCustomer/IGetCustomer';
+import { authorize, createTestCustomer } from '../utilities';
+import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
+import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
 
 type HostConfig = {
   email: Email;
@@ -43,20 +41,18 @@ type HostConfig = {
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;
+  let agent: ReturnType<typeof supertest.agent>;
 
-  let customerRepository: ICustomerRepository;
+  let order: DraftedOrder;
+  let draftOrder: IDraftOrder;
+  let deleteOrder: IDeleteOrder;
   let orderRepository: IOrderRepository;
+
+  let customer: Customer;
+  let deleteCustomer: IDeleteCustomer;
+
+  let hosts: Host[];
   let hostRepository: IHostRepository;
-
-  let draftOrderUseCase: IDraftOrder;
-  let createCustomerUseCase: ICreateCustomer;
-  let editCustomerUseCase: IEditCustomer;
-  let getCustomerUseCase: IGetCustomer;
-
-  let testCustomer: Customer;
-
-  let testOrder: DraftedOrder;
-  let testHosts: Host[];
 
   let stripeListener: child_process.ChildProcess;
 
@@ -66,6 +62,10 @@ describe('Confirm Order – POST /order/confirm', () => {
   )[0];
 
   beforeAll(async () => {
+    // Setting timeout in before*(): https://stackoverflow.com/a/67392078/6539857
+    // https://stackoverflow.com/a/49864436/6539857
+    jest.setTimeout(50000);
+
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -74,24 +74,21 @@ describe('Confirm Order – POST /order/confirm', () => {
       bodyParser: false,
     });
     await setupNestApp(app);
-    await app.listen(3000);
+    await app.init();
 
     const configService = await moduleRef.resolve(ConfigService);
 
-    customerRepository = await moduleRef.resolve(ICustomerRepository);
     orderRepository = await moduleRef.resolve(IOrderRepository);
     hostRepository = await moduleRef.resolve(IHostRepository);
-    draftOrderUseCase = await moduleRef.resolve(IDraftOrder);
-    createCustomerUseCase = await moduleRef.resolve(ICreateCustomer);
-    editCustomerUseCase = await moduleRef.resolve(IEditCustomer);
-    getCustomerUseCase = await moduleRef.resolve(IGetCustomer);
+    draftOrder = await moduleRef.resolve(IDraftOrder);
+    deleteOrder = await moduleRef.resolve(IDeleteOrder);
 
-    testCustomer = await createTestCustomer(
+    ({ customer, deleteCustomer } = await createTestCustomer(
       destinationCountry,
-      createCustomerUseCase,
-      editCustomerUseCase,
-      getCustomerUseCase,
-    );
+      moduleRef,
+    ));
+
+    agent = await authorize(app, moduleRef, customer.email);
 
     stripeListener = child_process.spawn('stripe', [
       'listen',
@@ -112,11 +109,11 @@ describe('Confirm Order – POST /order/confirm', () => {
   });
 
   beforeEach(async () => {
-    testOrder = await draftOrderUseCase.execute({
+    order = await draftOrder.execute({
       port: {
-        customerId: testCustomer.id,
+        customerId: customer.id,
         originCountry,
-        destination: testCustomer.addresses[0],
+        destination: customer.addresses[0],
         items: [
           {
             title: 'Laptop',
@@ -130,31 +127,29 @@ describe('Confirm Order – POST /order/confirm', () => {
 
   afterEach(async () => {
     await Promise.allSettled([
-      hostRepository.deleteManyHosts(testHosts.map(({ id }) => id)),
-      orderRepository.deleteOrder({ orderId: testOrder.id }),
+      hostRepository.deleteManyHosts(hosts.map(({ id }) => id)),
+      deleteOrder.execute({
+        port: { customerId: customer.id, orderId: order.id },
+      }),
     ]);
   });
 
   afterAll(async () => {
     await Promise.allSettled([
-      // TODO: DeleteCustomer use case
-      customerRepository.deleteCustomer({ customerId: testCustomer.id }),
+      deleteCustomer.execute({ port: { customerId: customer.id } }),
     ]);
 
     stripeListener.kill();
     await app.close();
   });
 
-  it(`Matches Order with a Host, updates Order's "hostId" property, and Host's "orderIds" property`, async (done) /* done() is needed for "awaiting" setTimeout */ => {
-    // https://stackoverflow.com/a/49864436/6539857
-    jest.setTimeout(55000);
-
+  it(`Matches Order with a Host, updates Order's "hostId" property, and Host's "orderIds" property`, async () => {
     // TODO: Vary 'verified' true-false
     const testHostConfigs: HostConfig[] = [
       /*
       Test host #1 (will be selected):
       ✔ available
-      ✔ same country as the testOrder
+      ✔ same country as the order
       ✔ lowest number of orders (1)
       */
       {
@@ -167,7 +162,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       /*
       Test host #2:
       ✗ NOT available
-      ✔ same country as the testOrder
+      ✔ same country as the order
       ✔ lowest number of orders (1)
       */
       {
@@ -179,7 +174,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       },
       /*
       Test host #3:
-      ✗ NOT the same country as the testOrder
+      ✗ NOT the same country as the order
       ✔ available
       ✔ lowest number of orders (1)
       */
@@ -193,7 +188,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       /*
       Test host #4:
       ✗ NOT the lowest number of orders (2)
-      ✔ same country as the testOrder
+      ✔ same country as the order
       ✔ available
       */
       {
@@ -206,7 +201,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       /*
       Test host #5:
       ✗ NOT the lowest number of orders (2)
-      ✗ NOT the same country as the testOrder
+      ✗ NOT the same country as the order
       ✗ NOT available
       */
       {
@@ -217,17 +212,15 @@ describe('Confirm Order – POST /order/confirm', () => {
         orderCount: 3,
       },
     ];
-    testHosts = configsToHosts(testHostConfigs);
-    // TODO: use CreateHost usecase instead
-    await hostRepository.addManyHosts(testHosts);
+    hosts = configsToHosts(testHostConfigs);
+    await hostRepository.addManyHosts(hosts);
 
-    const testMatchedHost = testHosts[0];
+    const testMatchedHost = hosts[0];
 
-    const response: supertest.Response = await supertest(app.getHttpServer())
+    const response: supertest.Response = await agent
       .post('/order/confirm')
       .send({
-        orderId: testOrder.id,
-        customerId: testCustomer.id,
+        orderId: order.id,
       });
 
     expect(response.status).toBe(HttpStatus.CREATED);
@@ -242,40 +235,37 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     await fillStripeCheckoutForm();
 
-    setTimeout(async () => {
-      await page.screenshot({
-        path: './test/e2e/tests/order/stripe_form_result.png',
-        fullPage: true,
-      });
+    await new Promise(res => setTimeout(res, 15000));
 
-      let updatedTestOrder: ConfirmedOrder;
+    await page.screenshot({
+      path: './test/e2e/order/stripe_form_result.png',
+      fullPage: true,
+    });
 
-      updatedTestOrder = (await orderRepository.findOrder(
-        {
-          orderId: testOrder.id,
-          status: OrderStatus.Confirmed,
-        },
-        undefined,
-        false,
-      )) as ConfirmedOrder;
+    let updatedTestOrder: ConfirmedOrder;
 
-      expect(updatedTestOrder).toBeDefined();
+    updatedTestOrder = (await orderRepository.findOrder(
+      {
+        orderId: order.id,
+        status: OrderStatus.Confirmed,
+      },
+      undefined,
+      false,
+    )) as ConfirmedOrder;
 
-      expect(updatedTestOrder.hostId).toBeDefined();
-      expect(updatedTestOrder.hostId).toBe(testMatchedHost.id);
+    expect(updatedTestOrder).toBeDefined();
 
-      const updatedTestHost: Host = await hostRepository.findHost({
-        hostId: testMatchedHost.id,
-      });
+    expect(updatedTestOrder.hostId).toBeDefined();
+    expect(updatedTestOrder.hostId).toBe(testMatchedHost.id);
 
-      expect(updatedTestHost.orderIds).toContain(testOrder.id);
-      expect(updatedTestHost.orderIds.length).toBe(
-        testMatchedHost.orderIds.length + 1,
-      );
+    const updatedTestHost: Host = await hostRepository.findHost({
+      hostId: testMatchedHost.id,
+    });
 
-      // Called at the end of setTimeout to allow setTimeout to block the test case.
-      done();
-    }, 15000);
+    expect(updatedTestHost.orderIds).toContain(order.id);
+    expect(updatedTestHost.orderIds.length).toBe(
+      testMatchedHost.orderIds.length + 1,
+    );
   });
 
   it(`Doesn't match Order with a Host as no Host is available in given country`, async () => {
@@ -296,15 +286,16 @@ describe('Confirm Order – POST /order/confirm', () => {
         email: 'johndoe@example.com',
       }),
     );
-    testHosts = configsToHosts(testHostConfigs);
-    await hostRepository.addManyHosts(testHosts);
+    hosts = configsToHosts(testHostConfigs);
+    await hostRepository.addManyHosts(hosts);
 
-    const response: supertest.Response = await supertest(app.getHttpServer())
+    const response: supertest.Response = await agent
       .post('/order/confirm')
       .send({
-        orderId: testOrder.id,
-        customerId: testCustomer.id,
+        orderId: order.id,
       });
+
+    console.log(response.body);
 
     expect(response.status).toBe(HttpStatus.SERVICE_UNAVAILABLE);
     expect(response.body.message).toMatch(
@@ -344,7 +335,7 @@ async function fillStripeCheckoutForm(): Promise<void> {
   const testNameOnCard = 'TEST TESTOV';
 
   await page.goto(
-    'file:///Users/rafaelsofizadeh/Documents/Developer/LOCLY-DDD/test/e2e/tests/order/CheckoutPage.html',
+    'file:///Users/rafaelsofizadeh/Documents/Developer/LOCLY-DDD/test/e2e/order/CheckoutPage.html',
   );
   await page.click('#checkout-button');
 
