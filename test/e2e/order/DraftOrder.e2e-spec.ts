@@ -67,7 +67,12 @@ describe('[POST /order/draft] IDraftOrder', () => {
     ({ customer } = await createTestCustomer(moduleRef, originCountry));
     address = customer.addresses[0];
 
-    agent = await authorize(app, moduleRef, customer.email);
+    ({ agent } = await authorize(
+      app,
+      moduleRef,
+      customer.email,
+      UserType.Customer,
+    ));
 
     getOrder = await moduleRef.resolve(IGetOrder);
     draftOrder = await moduleRef.resolve(IDraftOrder);

@@ -72,16 +72,41 @@ export async function createTestCustomer(
 export async function authorize(
   app: any,
   moduleRef: TestingModule,
+): Promise<{
+  agent: SuperAgentTest;
+}>;
+export async function authorize(
+  app: any,
+  moduleRef: TestingModule,
   email: Email,
-): Promise<SuperAgentTest> {
+  userType: UserType,
+): Promise<{
+  agent: SuperAgentTest;
+  logout: () => Promise<Response>;
+}>;
+export async function authorize(
+  app: any,
+  moduleRef: TestingModule,
+  email?: Email,
+  userType?: UserType,
+): Promise<{
+  agent: SuperAgentTest;
+  logout?: () => Promise<Response>;
+}> {
   const requestAgent = agent(app.getHttpServer());
 
   const requestAuth: IRequestAuth = await moduleRef.resolve(IRequestAuth);
-  const authTokenString = await requestAuth.execute({
-    port: { email, type: EntityType.Customer },
-  });
 
-  await requestAgent.get(`/auth/${authTokenString}`);
+  if (email && userType) {
+    const authTokenString = await requestAuth.execute({
+      port: { email, type: userType },
+    });
 
-  return requestAgent;
+    await requestAgent.get(`/auth/${authTokenString}`);
+  }
+
+  return {
+    agent: requestAgent,
+    logout: () => requestAgent.post('/auth/logout').send(),
+  };
 }

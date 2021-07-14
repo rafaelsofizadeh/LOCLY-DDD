@@ -27,6 +27,7 @@ import { authorize, createTestCustomer } from '../utilities';
 import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
+import { UserType } from '../../../src/auth/entity/Token';
 
 type HostConfig = {
   email: Email;
@@ -79,7 +80,12 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     ({ customer, deleteCustomer } = await createTestCustomer(moduleRef));
 
-    agent = await authorize(app, moduleRef, customer.email);
+    ({ agent } = await authorize(
+      app,
+      moduleRef,
+      customer.email,
+      UserType.Customer,
+    ));
 
     stripeListener = child_process.spawn('stripe', [
       'listen',
