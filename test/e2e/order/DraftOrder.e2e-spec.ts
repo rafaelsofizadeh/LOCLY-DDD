@@ -58,6 +58,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
   let orderId: UUID;
 
   beforeAll(async () => {
+    jest.setTimeout(20000);
+
     moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
