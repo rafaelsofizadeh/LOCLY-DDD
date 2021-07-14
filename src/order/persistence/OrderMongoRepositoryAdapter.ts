@@ -250,7 +250,12 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       ...orderFilterWithId,
       items: itemFilterWithId,
     };
-    const filterQuery = mongoQuery(filter);
+
+    const filterQuery = {
+      ...mongoQuery(orderFilterWithId),
+      // https://docs.mongodb.com/manual/reference/operator/update/positional/#update-embedded-documents-using-multiple-field-matches
+      items: { $elemMatch: { ...mongoQuery(itemFilterWithId) } },
+    } as any;
 
     const itemSetQuery = mongoQuery({ 'items.$': properties });
 
