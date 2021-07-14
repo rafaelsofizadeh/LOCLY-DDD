@@ -1,10 +1,9 @@
 import { agent as requestAgent, Response } from 'supertest';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
-import { Address } from '../../../src/common/domain';
 import { IDraftOrder } from '../../../src/order/application/DraftOrder/IDraftOrder';
 import { Order } from '../../../src/order/entity/Order';
 import { Country } from '../../../src/order/entity/Country';
@@ -24,13 +23,13 @@ import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
 import { Item } from '../../../src/order/entity/Item';
 
 /**
- * 1. + Create test Customer
- * 2. + Create test Host
- * 3. + Authorize as Customer
- * 4. + Execute DraftOrder
- * 5. + Confirm order:
- *    1. + Execute ConfirmOrder
- *    2. + Trigger ConfirmOrderHandler (webhook)
+ * 1. Create test Customer
+ * 2. Create test Host
+ * 3. Authorize as Customer
+ * 4. Execute DraftOrder
+ * 5. Confirm order:
+ *    1. Execute ConfirmOrder
+ *    2. Trigger ConfirmOrderHandler (webhook)
  * 6. Logout
  * 7. Authorize as Host
  * 8. Execute ReceiveItem
@@ -48,6 +47,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
   let order: Order;
   let getOrder: IGetOrder;
   let deleteOrder: IDeleteOrder;
+
+  let receivedItem: Item;
 
   let customer: Customer;
 
@@ -111,10 +112,20 @@ describe('[POST /order/draft] IDraftOrder', () => {
     order = await orderRepository.findOrder({ orderId });
   });
 
+  afterAll(async () => {
+    await Promise.all([
+      hostRepository.deleteHost({ hostId: host.id }),
+      customerRepository.deleteCustomer({ customerId: customer.id }),
+      //orderRepository.deleteOrder({ orderId: order.id }),
+    ]);
+
+    await app.close();
+  });
+
   it('Marks Item as received', async () => {
     ({ agent } = await authorize(app, moduleRef, host.email, UserType.Host));
 
-    const receivedItem = order.items[0];
+    receivedItem = order.items[0];
     const receiveItemRequest: ReceiveItemRequest = {
       orderId: order.id,
       itemId: receivedItem.id,
@@ -134,19 +145,42 @@ describe('[POST /order/draft] IDraftOrder', () => {
       ({ id }) => id === receivedItem.id,
     );
 
+    expect(newReceivedItem.receivedDate).toBeDefined();
+    expect(newReceivedItem.receivedDate).toBeInstanceOf(Date);
     expect(new Date(newReceivedItem.receivedDate)).toStrictEqual(
       new Date(response.body.receivedDate),
     );
-  });
+
+    receivedItem = newReceivedItem;
   });
 
-  afterAll(async () => {
-    await Promise.all([
-      hostRepository.deleteHost({ hostId: host.id }),
-      customerRepository.deleteCustomer({ customerId: customer.id }),
-      orderRepository.deleteOrder({ orderId: order.id }),
-    ]);
+  it('Fails at repeated Item receipt', async () => {
+    const receiveItemRequest: ReceiveItemRequest = {
+      orderId: order.id,
+      itemId: receivedItem.id,
+    };
 
-    await app.close();
+    const response: Response = await agent
+      .post('/order/receiveItem')
+      .send(receiveItemRequest);
+
+    const {
+      status,
+      body: { message },
+    } = response;
+
+    expect(status).toBe(HttpStatus.NOT_ACCEPTABLE);
+    expect(message).toMatch(/Item already marked as "received"./);
+
+    const newOrder: Order = await orderRepository.findOrder({
+      orderId: order.id,
+    });
+    const newReceivedItem: Item = newOrder.items.find(
+      ({ id }) => id === receivedItem.id,
+    );
+
+    expect(newReceivedItem.receivedDate).toStrictEqual(
+      receivedItem.receivedDate,
+    );
   });
 });
