@@ -45,7 +45,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
 
     if (notFinalizedItems.length) {
       throwCustomException(
-        "Can't finalize order until all items have weights and photos",
+        "Can't finalize order until all items have uploaded photos and have been marked as 'received'",
         { orderId, notFinalizedItemIds },
         HttpStatus.FORBIDDEN,
       )();

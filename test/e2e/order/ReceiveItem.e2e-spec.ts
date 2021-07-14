@@ -21,6 +21,7 @@ import { IConfirmOrderHandler } from '../../../src/order/application/StripeCheck
 import { IConfirmOrder } from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import { ReceiveItemRequest } from '../../../src/order/application/ReceiveItem/IReceiveItem';
 import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
+import { Item } from '../../../src/order/entity/Item';
 
 /**
  * 1. + Create test Customer
@@ -107,9 +108,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       port: { orderId, hostId: host.id },
     });
 
-    order = await getOrder.execute({
-      port: { orderId, userId: customer.id, userType: UserType.Customer },
-    });
+    order = await orderRepository.findOrder({ orderId });
   });
 
   it('Marks Item as received', async () => {
@@ -125,9 +124,20 @@ describe('[POST /order/draft] IDraftOrder', () => {
       .post('/order/receiveItem')
       .send(receiveItemRequest);
 
-    // COMPLETE TESTS
     type Await<T> = T extends PromiseLike<infer U> ? U : T;
     let logout: Await<ReturnType<typeof authorize>>['logout'];
+
+    const newOrder: Order = await orderRepository.findOrder({
+      orderId: order.id,
+    });
+    const newReceivedItem: Item = newOrder.items.find(
+      ({ id }) => id === receivedItem.id,
+    );
+
+    expect(new Date(newReceivedItem.receivedDate)).toStrictEqual(
+      new Date(response.body.receivedDate),
+    );
+  });
   });
 
   afterAll(async () => {
