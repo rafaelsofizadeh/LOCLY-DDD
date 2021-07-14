@@ -17,6 +17,8 @@ describe('[POST /auth] IRequestAuth', () => {
   let hostRepository: IHostRepository;
   let emailService: IEmailService;
 
+  const jwtMatcher = /\w+\.\w+\.\w+/;
+
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -36,7 +38,7 @@ describe('[POST /auth] IRequestAuth', () => {
     await app.close();
   });
 
-  describe('Customer', async () => {
+  describe('Customer', () => {
     const customerEmail = 'testcustomer@requestauth.com';
 
     beforeAll(() => {
@@ -66,7 +68,7 @@ describe('[POST /auth] IRequestAuth', () => {
         },
       });
 
-      expect(authUrl).toMatch(/localhost:3000\/auth\/.+/);
+      expect(authUrl).toMatch(jwtMatcher);
 
       const newCustomer = await customerRepository.findCustomer(
         { email: customerEmail },
@@ -94,7 +96,8 @@ describe('[POST /auth] IRequestAuth', () => {
         },
       });
 
-      expect(authUrl).toMatch(/localhost:3000\/auth\/.+/);
+      // JWT sections are separated by 2 dots
+      expect(authUrl).toMatch(jwtMatcher);
 
       // Nothing should change in the customer object if it has already been registered — should be identical with
       // oldCustomer
@@ -108,7 +111,7 @@ describe('[POST /auth] IRequestAuth', () => {
     });
   });
 
-  describe('Host', async () => {
+  describe('Host', () => {
     const hostEmail = 'testhost@requestauth.com';
 
     beforeAll(() => {
@@ -135,7 +138,7 @@ describe('[POST /auth] IRequestAuth', () => {
         },
       });
 
-      expect(authUrl).toMatch(/localhost:3000\/auth\/.+/);
+      expect(authUrl).toMatch(jwtMatcher);
 
       const newHost = await hostRepository.findHost(
         { email: hostEmail },
@@ -169,7 +172,8 @@ describe('[POST /auth] IRequestAuth', () => {
         },
       });
 
-      expect(authUrl).toMatch(/localhost:3000\/auth\/.+/);
+      // JWT sections are separated by 2 dots
+      expect(authUrl).toMatch(jwtMatcher);
 
       // Nothing should change in the host object if it has already been registered
       // — should be identical with oldHost
