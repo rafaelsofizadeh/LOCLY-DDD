@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch } from '@nestjs/common';
 import {
   HostAccountLink,
   IGetHostAccountLink,
@@ -14,6 +14,7 @@ import {
   SetHostAvailabilityRequest,
 } from './application/SetHostAvailability/ISetHostAvailability';
 import { IGetHost } from './application/GetHost/IGetHost';
+import { IDeleteHost } from './application/DeleteHost/IDeleteHost';
 
 @Controller('host')
 export class HostController {
@@ -21,6 +22,7 @@ export class HostController {
     private readonly getHost: IGetHost,
     private readonly getHostAccountLink: IGetHostAccountLink,
     private readonly editHost: IEditHost,
+    private readonly deleteHost: IDeleteHost,
     private readonly setHostAvailability: ISetHostAvailability,
   ) {}
 
@@ -71,5 +73,10 @@ export class HostController {
         ...setHostAvailabilityRequest,
       },
     });
+  }
+
+  @Delete()
+  async deleteHostController(@AnyHostIdentity() host: Host): Promise<void> {
+    await this.deleteHost.execute({ port: { hostId: host.id } });
   }
 }
