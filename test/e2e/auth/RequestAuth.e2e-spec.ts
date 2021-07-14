@@ -17,7 +17,7 @@ describe('[POST /auth] IRequestAuth', () => {
   let hostRepository: IHostRepository;
   let emailService: IEmailService;
 
-  const jwtMatcher = /\w+\.\w+\.\w+/;
+  const jwtMatcher = /.+\..+\..+/;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({

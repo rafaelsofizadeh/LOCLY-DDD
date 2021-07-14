@@ -232,7 +232,6 @@ describe('Confirm Order – POST /order/confirm', () => {
       },
     ];
     hosts = configsToHosts(testHostConfigs);
-    console.log(hosts);
     await hostRepository.addManyHosts(hosts);
 
     const testMatchedHost = hosts[hosts.length - 1];
@@ -314,8 +313,6 @@ describe('Confirm Order – POST /order/confirm', () => {
       .send({
         orderId: order.id,
       });
-
-    console.log(response.body);
 
     expect(response.status).toBe(HttpStatus.SERVICE_UNAVAILABLE);
     expect(response.body.message).toMatch(
