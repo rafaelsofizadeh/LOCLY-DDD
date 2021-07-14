@@ -51,7 +51,7 @@ export class CreateHost implements ICreateHost {
         payouts: {
           schedule: {
             delay_days: 10,
-            interval: 'weekly',
+            interval: 'daily',
           },
         },
       },
