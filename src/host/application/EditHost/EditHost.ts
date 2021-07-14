@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validateSync } from 'class-validator';
 import { ClientSession } from 'mongodb';
-import { Transaction, TransactionUseCasePort } from '../../../common/application';
+import {
+  Transaction,
+  TransactionUseCasePort,
+} from '../../../common/application';
 import { IHostRepository } from '../../persistence/IHostRepository';
 import {
   EditHostPayload,
@@ -28,7 +31,7 @@ export class EditHost implements IEditHost {
     sessionWithTransaction: ClientSession,
   ) {
     const { firstName, lastName, address } = {
-      ...currentHostProperties,
+      ...(currentHostProperties || {}),
       ...editProperties,
     };
 
