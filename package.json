@@ -19,8 +19,9 @@
     "test:watch": "NODE_ENV=dev jest --watch",
     "test:cov": "NODE_ENV=dev jest --coverage",
     "test:debug": "NODE_ENV=dev node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:confirm-order": "NODE_ENV=dev jest -i 'ConfirmOrder'",
     "test:draft-order": "NODE_ENV=dev jest -i 'DraftOrder'",
+    "test:confirm-order": "NODE_ENV=dev jest -i 'ConfirmOrder'",
+    "test:receive-item": "NODE_ENV=dev jest -i 'ReceiveItem'",
     "test:request-auth": "NODE_ENV=dev jest -i 'RequestAuth'"
   },
   "dependencies": {
