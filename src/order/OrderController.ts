@@ -66,7 +66,7 @@ import {
 import { isUUID, UUID } from '../common/domain';
 import { Host } from '../host/entity/Host';
 import { UserType } from '../auth/entity/Token';
-import { IGetOrder } from './application/GetOrder/IGetOrder';
+import { GetOrderResult, IGetOrder } from './application/GetOrder/IGetOrder';
 
 @Controller('order')
 export class OrderController {
@@ -86,8 +86,8 @@ export class OrderController {
   async getOrderHandler(
     @Param('orderId') orderId: UUID,
     @AnyEntityIdentity() entity: Host | UUID,
-  ) {
-    // TODO: Better way to determine entity type
+  ): Promise<GetOrderResult> {
+    // TODO: Better way to determine user type
     const userFilter = isUUID(entity)
       ? { userId: entity, userType: UserType.Customer }
       : { userId: entity.id, userType: UserType.Host };
