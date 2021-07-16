@@ -177,7 +177,7 @@ export class OrderController {
     return receivedDateResult;
   }
 
-  @Post('addItemPhotos')
+  @Post('itemPhotos')
   // file control/validation is done by MulterModule registration
   @UseInterceptors(FilesInterceptor('photos'))
   async addItemPhotoHandler(
@@ -200,7 +200,7 @@ export class OrderController {
     return receivedDateResult;
   }
 
-  @Post('submitShipmentInfo')
+  @Post('shipmentInfo')
   async submitShipmentInfoHandler(
     @Body() unidSubmitShipmentInfoRequest: SubmitShipmentInfoRequest,
     @VerifiedHostIdentity() { id: hostId }: Host,
