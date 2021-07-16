@@ -61,14 +61,14 @@ describe('[POST /auth] IRequestAuth', () => {
         ),
       ).toBeUndefined();
 
-      const authUrl: string = await requestAuth.execute({
+      const authTokenString: string = await requestAuth.execute({
         port: {
           email: customerEmail,
           type: UserType.Customer,
         },
       });
 
-      expect(authUrl).toMatch(jwtMatcher);
+      expect(authTokenString).toMatch(jwtMatcher);
 
       const newCustomer = await customerRepository.findCustomer(
         { email: customerEmail },
@@ -89,7 +89,7 @@ describe('[POST /auth] IRequestAuth', () => {
 
       expect(oldCustomer).toBeDefined();
 
-      const authUrl: string = await requestAuth.execute({
+      const authTokenString: string = await requestAuth.execute({
         port: {
           email: customerEmail,
           type: UserType.Customer,
@@ -97,7 +97,7 @@ describe('[POST /auth] IRequestAuth', () => {
       });
 
       // JWT sections are separated by 2 dots
-      expect(authUrl).toMatch(jwtMatcher);
+      expect(authTokenString).toMatch(jwtMatcher);
 
       // Nothing should change in the customer object if it has already been registered — should be identical with
       // oldCustomer
@@ -130,7 +130,7 @@ describe('[POST /auth] IRequestAuth', () => {
 
       const hostCountry: Country = originCountriesAvailable[0];
 
-      const authUrl: string = await requestAuth.execute({
+      const authTokenString: string = await requestAuth.execute({
         port: {
           email: hostEmail,
           type: UserType.Host,
@@ -138,7 +138,7 @@ describe('[POST /auth] IRequestAuth', () => {
         },
       });
 
-      expect(authUrl).toMatch(jwtMatcher);
+      expect(authTokenString).toMatch(jwtMatcher);
 
       const newHost = await hostRepository.findHost(
         { email: hostEmail },
@@ -165,7 +165,7 @@ describe('[POST /auth] IRequestAuth', () => {
 
       expect(oldHost).toBeDefined();
 
-      const authUrl: string = await requestAuth.execute({
+      const authTokenString: string = await requestAuth.execute({
         port: {
           email: hostEmail,
           type: UserType.Host,
@@ -173,7 +173,7 @@ describe('[POST /auth] IRequestAuth', () => {
       });
 
       // JWT sections are separated by 2 dots
-      expect(authUrl).toMatch(jwtMatcher);
+      expect(authTokenString).toMatch(jwtMatcher);
 
       // Nothing should change in the host object if it has already been registered
       // — should be identical with oldHost

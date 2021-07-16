@@ -119,9 +119,7 @@ describe('Draft Order – POST /order', () => {
 
       // Order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
       // should be a DraftedOrder
-      const addedOrder: Order = await getOrder.execute({
-        port: { orderId, userId: customer.id, userType: UserType.Customer },
-      });
+      const addedOrder: Order = await orderRepository.findOrder({ orderId });
 
       // Order should have a 'Drafted' status
       expect(addedOrder.status).toBe(OrderStatus.Drafted);
@@ -272,7 +270,7 @@ describe('Draft Order – POST /order', () => {
 
       // Check the error format
       expect(message.split(':')[0]).toBe(
-        `SERVICE_UNAVAILABLE | Origin country ${unavailableOriginCountry} is not supported by the calculator. `,
+        `SERVICE_UNAVAILABLE | Origin country ${unavailableOriginCountry} is not supported by Locly. `,
       );
     });
 

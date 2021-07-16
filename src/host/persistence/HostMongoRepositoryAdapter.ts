@@ -245,9 +245,9 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
 
     if (!hostDocument) {
       throwCustomException(
-        'No host found',
+        `No host available in ${country}.`,
         { country },
-        HttpStatus.NOT_FOUND,
+        HttpStatus.SERVICE_UNAVAILABLE,
       )();
     }
 

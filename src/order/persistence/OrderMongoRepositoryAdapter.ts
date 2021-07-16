@@ -324,7 +324,6 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       ...receivedCheck,
     };
 
-    // TODO: typing
     // TODO: Error handling on photos
     const photoMuuids = photos.map(({ id }) => id);
     const photoUploadResults: ItemPhotosUploadResult = photos.map(
@@ -370,7 +369,6 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       },
       {
         orderFilter,
-        // TODO:
         itemFilter: {
           ...itemFilter,
           receivedDate: 'NOT_NULL',

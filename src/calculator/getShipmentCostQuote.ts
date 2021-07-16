@@ -66,7 +66,7 @@ function determineDeliveryZone(
 function validateOriginCountry(originCountry: Country): void {
   if (!priceGuide.hasOwnProperty(originCountry)) {
     throw new Error(
-      `Origin country ${originCountry} is not supported by the calculator.`,
+      `Origin country ${originCountry} is not supported by Locly.`,
     );
   }
 }
@@ -101,11 +101,7 @@ export function getShipmentCostQuote(
     validateOriginCountry(originCountry);
 
     if (originCountry === destinationCountry) {
-      throwCustomException(
-        "Origin country can't be equal to destination country",
-        { originCountry, destinationCountry },
-        HttpStatus.SERVICE_UNAVAILABLE,
-      )();
+      throw new Error("Origin country can't be equal to destination country");
     }
 
     const {
@@ -141,7 +137,7 @@ export function getShipmentCostQuote(
 
     if (!availableDeliveryServices.length) {
       throw new Error(
-        `Destination country ${destinationCountry} is not supported by ${postalServiceName}.`,
+        `Destination country ${destinationCountry} is not supported by ${postalServiceName} of ${originCountry}.`,
       );
     }
 
@@ -175,7 +171,7 @@ export function getShipmentCostQuote(
       error.message,
       { originCountry, destinationCountry, packages },
       HttpStatus.SERVICE_UNAVAILABLE,
-    )(error);
+    )();
   }
 }
 
