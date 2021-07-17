@@ -8,7 +8,7 @@ then
     git add .
     git commit -m "Edit .gitignore to publish"
     # https://stackoverflow.com/a/65733058/6539857
-    git push heroku `git subtree split --prefix dist master`:master --force
+    git push heroku `git subtree split --prefix dist deployment`:master --force
     git reset HEAD~
     git checkout .gitignore
 else
