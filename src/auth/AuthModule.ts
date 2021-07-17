@@ -36,7 +36,7 @@ import { OutputAuthDeliveryStrategy } from './infrastructure/AuthDeliveryStrateg
           case 'dev':
             return new OutputAuthDeliveryStrategy();
           case 'prod':
-            return new EmailAuthDeliveryStrategy(emailService);
+            return new EmailAuthDeliveryStrategy(emailService, configService);
           default:
             throw new Error(`Invalid NODE_ENV: ${nodeEnv}`);
         }
