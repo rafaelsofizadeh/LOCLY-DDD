@@ -299,18 +299,6 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     const { status, ...restOrderFilterWithId } = normalizeOrderFilter(
       orderFilter,
     );
-    const itemFilterWithId = normalizeItemFilter(itemFilter);
-
-    const filter = {
-      ...restOrderFilterWithId,
-      items: itemFilterWithId,
-    };
-
-    const filterQueryWithoutReceivedCheck = mongoQuery(filter);
-    // TODO:
-    const receivedCheck = {
-      'items.receivedDate': { $ne: null },
-    };
 
     const statusQuery = status
       ? {
@@ -318,10 +306,24 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
         }
       : {};
 
+    const itemFilterWithId = normalizeItemFilter(itemFilter);
+
+    // const filter = {
+    //   ...restOrderFilterWithId,
+    //   ...statusQuery,
+    //   items: { ...itemFilterWithId, receivedDate: { $ne: null } },
+    // };
+
     const filterQuery = {
-      ...filterQueryWithoutReceivedCheck,
-      ...statusQuery,
-      ...receivedCheck,
+      ...mongoQuery({ ...restOrderFilterWithId, ...statusQuery }),
+      items: {
+        // For more than one item property, $elemMatch must be used:
+        // https://docs.mongodb.com/manual/reference/operator/update/positional/#update-embedded-documents-using-multiple-field-matches
+        $elemMatch: {
+          ...mongoQuery({ items: itemFilterWithId }),
+          'items.receivedDate': { $ne: null },
+        },
+      },
     };
 
     // TODO: Error handling on photos
