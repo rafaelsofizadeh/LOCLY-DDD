@@ -5,7 +5,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { UserType, Token } from '../entity/Token';
 import { stringToToken } from '../application/utils';
@@ -74,6 +74,7 @@ export class CookieAuthInterceptor implements NestInterceptor {
 
   async intercept(context: ExecutionContext, next: CallHandler) {
     const request: Request = context.switchToHttp().getRequest();
+    const response: Response = context.switchToHttp().getResponse();
 
     const path = request.path;
     if (path === this.configService.get<string>('STRIPE_WEBHOOK_PATH')) {
@@ -81,6 +82,19 @@ export class CookieAuthInterceptor implements NestInterceptor {
     }
 
     const cookies = this.getCookies(request);
+
+    const authIndicatorCookieName = this.configService.get<string>(
+      'AUTH_INDICATOR_COOKIE_NAME',
+    );
+    const authIndicator: string = cookies?.[authIndicatorCookieName];
+
+    if (!authIndicator) {
+      response.cookie(authIndicatorCookieName, false, {
+        httpOnly: false,
+        maxAge: 365 * 24 * 60 * 60 * 10,
+      });
+    }
+
     const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
     const tokenString: string = cookies?.[authCookieName];
     let token: Token;
