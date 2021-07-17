@@ -1,3 +1,4 @@
+# https://stackoverflow.com/a/40178818/6539857
 STATUS="$(git status)"
 
 if [[ $STATUS == *"nothing to commit, working tree clean"* ]]
@@ -6,7 +7,8 @@ then
     sed -i "" '/dist/d' ./.gitignore
     git add .
     git commit -m "Edit .gitignore to publish"
-    git subtree push --force --prefix dist heroku master
+    # https://stackoverflow.com/a/65733058/6539857
+    git push heroku `git subtree split --prefix dist master`:master --force
     git reset HEAD~
     git checkout .gitignore
 else
