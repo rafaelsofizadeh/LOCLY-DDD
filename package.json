@@ -7,13 +7,13 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build",
+    "build": "nest build && cp Procfile dist/Procfile && cp package.deployment.json dist/package.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "NODE_ENV=prod nest start",
     "start:webhook": "NODE_ENV=dev nest start & stripe listen --forward-to localhost:3000/stripe/webhook",
     "start:dev": "NODE_ENV=dev nest start --watch",
     "start:debug": "NODE_ENV=dev nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "NODE_ENV=prod node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "NODE_ENV=dev jest --runInBand",
     "test:watch": "NODE_ENV=dev jest --watch",
@@ -104,5 +104,8 @@
     },
     "coverageDirectory": "../coverage",
     "preset": "jest-puppeteer"
+  },
+  "engines": {
+    "node": "14.x"
   }
 }
