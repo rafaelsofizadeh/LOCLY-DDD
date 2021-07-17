@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest build && cp Procfile dist/Procfile && cp package.deployment.json dist/package.json",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "NODE_ENV=prod nest start",
     "start:webhook": "NODE_ENV=dev nest start & stripe listen --forward-to localhost:3000/stripe/webhook",
