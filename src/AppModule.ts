@@ -67,7 +67,7 @@ const persistenceProviders: Provider[] = [
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('MONGO_CONNECTION_STRING'),
         dbName:
-          configService.get<string>('NODE_ENV') === 'production'
+          configService.get<string>('NODE_ENV') === 'prod'
             ? configService.get<string>('MONGO_PROD_DB_NAME')
             : configService.get<string>('MONGO_DEV_DB_NAME'),
       }),
