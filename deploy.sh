@@ -2,6 +2,7 @@ STATUS="$(git status)"
 
 if [[ $STATUS == *"nothing to commit, working directory clean"* ]]
 then
+    npm run build
     sed -i "" '/dist/d' ./.gitignore
     git add .
     git commit -m "Edit .gitignore to publish"
