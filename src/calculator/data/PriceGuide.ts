@@ -6,8 +6,6 @@ export const priceGuide: ShipmentCostSpecification = {
     postalServiceName: 'Royal Mail',
     priceTableSpecification: {
       currency: 'GBP',
-      rowsName: 'weightIntervals',
-      colsName: 'deliveryZones',
       deliveryZoneNames: ['Europe', 'World 1', 'World 2', 'World 3'],
       weightIntervals: [100, 250, 500, 750, 1000, 1250, 1500, 2000],
     },
@@ -599,8 +597,6 @@ export const priceGuide: ShipmentCostSpecification = {
     postalServiceName: 'Australia Post',
     priceTableSpecification: {
       currency: 'AUD',
-      rowsName: 'weightIntervals',
-      colsName: 'deliveryZones',
       deliveryZoneNames: [
         'New Zealand',
         'Asia Pacific',
@@ -860,8 +856,6 @@ export const priceGuide: ShipmentCostSpecification = {
     postalServiceName: 'Canada Post',
     priceTableSpecification: {
       currency: 'CAD',
-      rowsName: 'weightIntervals',
-      colsName: 'deliveryZones',
       deliveryZoneNames: [
         '101',
         '102',

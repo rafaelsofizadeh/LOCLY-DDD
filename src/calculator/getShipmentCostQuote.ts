@@ -6,8 +6,6 @@ import { Gram, PhysicalItem } from '../order/entity/Item';
 import { priceGuide } from './data/PriceGuide';
 
 type PriceTableSpecification = {
-  rowsName: string;
-  colsName: string;
   deliveryZoneNames: string[];
   weightIntervals: Gram[];
   currency: Currency;
