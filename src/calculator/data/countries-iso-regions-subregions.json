@@ -1,0 +1,3033 @@
+{
+  "SOURCE": "https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes/blob/master/all/all.json",
+  "Asia": {
+    "all": [
+      {
+        "name": "Afghanistan",
+        "iso3": "AFG",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Armenia",
+        "iso3": "ARM",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Azerbaijan",
+        "iso3": "AZE",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Bahrain",
+        "iso3": "BHR",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Bangladesh",
+        "iso3": "BGD",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Bhutan",
+        "iso3": "BTN",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Brunei Darussalam",
+        "iso3": "BRN",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Cambodia",
+        "iso3": "KHM",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "China",
+        "iso3": "CHN",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Cyprus",
+        "iso3": "CYP",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Georgia",
+        "iso3": "GEO",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Hong Kong",
+        "iso3": "HKG",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "India",
+        "iso3": "IND",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Indonesia",
+        "iso3": "IDN",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Iran (Islamic Republic of)",
+        "iso3": "IRN",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Iraq",
+        "iso3": "IRQ",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Israel",
+        "iso3": "ISR",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Japan",
+        "iso3": "JPN",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Jordan",
+        "iso3": "JOR",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Kazakhstan",
+        "iso3": "KAZ",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      },
+      {
+        "name": "Korea (Democratic People's Republic of)",
+        "iso3": "PRK",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Korea, Republic of",
+        "iso3": "KOR",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Kuwait",
+        "iso3": "KWT",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Kyrgyzstan",
+        "iso3": "KGZ",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      },
+      {
+        "name": "Lao People's Democratic Republic",
+        "iso3": "LAO",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Lebanon",
+        "iso3": "LBN",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Macao",
+        "iso3": "MAC",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Malaysia",
+        "iso3": "MYS",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Maldives",
+        "iso3": "MDV",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Mongolia",
+        "iso3": "MNG",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Myanmar",
+        "iso3": "MMR",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Nepal",
+        "iso3": "NPL",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Oman",
+        "iso3": "OMN",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Pakistan",
+        "iso3": "PAK",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Palestine, State of",
+        "iso3": "PSE",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Philippines",
+        "iso3": "PHL",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Qatar",
+        "iso3": "QAT",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Saudi Arabia",
+        "iso3": "SAU",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Singapore",
+        "iso3": "SGP",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Sri Lanka",
+        "iso3": "LKA",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Syrian Arab Republic",
+        "iso3": "SYR",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Taiwan, Province of China",
+        "iso3": "TWN",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Tajikistan",
+        "iso3": "TJK",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      },
+      {
+        "name": "Thailand",
+        "iso3": "THA",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Timor-Leste",
+        "iso3": "TLS",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Turkey",
+        "iso3": "TUR",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Turkmenistan",
+        "iso3": "TKM",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      },
+      {
+        "name": "United Arab Emirates",
+        "iso3": "ARE",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Uzbekistan",
+        "iso3": "UZB",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      },
+      {
+        "name": "Viet Nam",
+        "iso3": "VNM",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Yemen",
+        "iso3": "YEM",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    ],
+    "Southern Asia": [
+      {
+        "name": "Afghanistan",
+        "iso3": "AFG",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Bangladesh",
+        "iso3": "BGD",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Bhutan",
+        "iso3": "BTN",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "India",
+        "iso3": "IND",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Iran (Islamic Republic of)",
+        "iso3": "IRN",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Maldives",
+        "iso3": "MDV",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Nepal",
+        "iso3": "NPL",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Pakistan",
+        "iso3": "PAK",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      },
+      {
+        "name": "Sri Lanka",
+        "iso3": "LKA",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      }
+    ],
+    "Western Asia": [
+      {
+        "name": "Armenia",
+        "iso3": "ARM",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Azerbaijan",
+        "iso3": "AZE",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Bahrain",
+        "iso3": "BHR",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Cyprus",
+        "iso3": "CYP",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Georgia",
+        "iso3": "GEO",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Iraq",
+        "iso3": "IRQ",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Israel",
+        "iso3": "ISR",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Jordan",
+        "iso3": "JOR",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Kuwait",
+        "iso3": "KWT",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Lebanon",
+        "iso3": "LBN",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Oman",
+        "iso3": "OMN",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Palestine, State of",
+        "iso3": "PSE",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Qatar",
+        "iso3": "QAT",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Saudi Arabia",
+        "iso3": "SAU",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Syrian Arab Republic",
+        "iso3": "SYR",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Turkey",
+        "iso3": "TUR",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "United Arab Emirates",
+        "iso3": "ARE",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      },
+      {
+        "name": "Yemen",
+        "iso3": "YEM",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    ],
+    "South-eastern Asia": [
+      {
+        "name": "Brunei Darussalam",
+        "iso3": "BRN",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Cambodia",
+        "iso3": "KHM",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Indonesia",
+        "iso3": "IDN",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Lao People's Democratic Republic",
+        "iso3": "LAO",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Malaysia",
+        "iso3": "MYS",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Myanmar",
+        "iso3": "MMR",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Philippines",
+        "iso3": "PHL",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Singapore",
+        "iso3": "SGP",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Thailand",
+        "iso3": "THA",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Timor-Leste",
+        "iso3": "TLS",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      },
+      {
+        "name": "Viet Nam",
+        "iso3": "VNM",
+        "region": "Asia",
+        "subregion": "South-eastern Asia"
+      }
+    ],
+    "Eastern Asia": [
+      {
+        "name": "China",
+        "iso3": "CHN",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Hong Kong",
+        "iso3": "HKG",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Japan",
+        "iso3": "JPN",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Korea (Democratic People's Republic of)",
+        "iso3": "PRK",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Korea, Republic of",
+        "iso3": "KOR",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Macao",
+        "iso3": "MAC",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Mongolia",
+        "iso3": "MNG",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      },
+      {
+        "name": "Taiwan",
+        "iso3": "TWN",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      }
+    ],
+    "Central Asia": [
+      {
+        "name": "Kazakhstan",
+        "iso3": "KAZ",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      },
+      {
+        "name": "Kyrgyzstan",
+        "iso3": "KGZ",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      },
+      {
+        "name": "Tajikistan",
+        "iso3": "TJK",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      },
+      {
+        "name": "Turkmenistan",
+        "iso3": "TKM",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      },
+      {
+        "name": "Uzbekistan",
+        "iso3": "UZB",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      }
+    ]
+  },
+  "Europe": {
+    "all": [
+      {
+        "name": "Åland Islands",
+        "iso3": "ALA",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Albania",
+        "iso3": "ALB",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Andorra",
+        "iso3": "AND",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Austria",
+        "iso3": "AUT",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Belarus",
+        "iso3": "BLR",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Belgium",
+        "iso3": "BEL",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Bosnia and Herzegovina",
+        "iso3": "BIH",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Bulgaria",
+        "iso3": "BGR",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Croatia",
+        "iso3": "HRV",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Czechia",
+        "iso3": "CZE",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Denmark",
+        "iso3": "DNK",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Estonia",
+        "iso3": "EST",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Faroe Islands",
+        "iso3": "FRO",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Finland",
+        "iso3": "FIN",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "France",
+        "iso3": "FRA",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Germany",
+        "iso3": "DEU",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Gibraltar",
+        "iso3": "GIB",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Greece",
+        "iso3": "GRC",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Guernsey",
+        "iso3": "GGY",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Holy See",
+        "iso3": "VAT",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Hungary",
+        "iso3": "HUN",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Iceland",
+        "iso3": "ISL",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Ireland",
+        "iso3": "IRL",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Isle of Man",
+        "iso3": "IMN",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Italy",
+        "iso3": "ITA",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Jersey",
+        "iso3": "JEY",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Latvia",
+        "iso3": "LVA",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Liechtenstein",
+        "iso3": "LIE",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Lithuania",
+        "iso3": "LTU",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Luxembourg",
+        "iso3": "LUX",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Malta",
+        "iso3": "MLT",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Moldova, Republic of",
+        "iso3": "MDA",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Monaco",
+        "iso3": "MCO",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Montenegro",
+        "iso3": "MNE",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Netherlands",
+        "iso3": "NLD",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "North Macedonia",
+        "iso3": "MKD",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Norway",
+        "iso3": "NOR",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Poland",
+        "iso3": "POL",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Portugal",
+        "iso3": "PRT",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Romania",
+        "iso3": "ROU",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Russian Federation",
+        "iso3": "RUS",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "San Marino",
+        "iso3": "SMR",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Serbia",
+        "iso3": "SRB",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Slovakia",
+        "iso3": "SVK",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Slovenia",
+        "iso3": "SVN",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Spain",
+        "iso3": "ESP",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Svalbard and Jan Mayen",
+        "iso3": "SJM",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Sweden",
+        "iso3": "SWE",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Switzerland",
+        "iso3": "CHE",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Ukraine",
+        "iso3": "UKR",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "United Kingdom of Great Britain and Northern Ireland",
+        "iso3": "GBR",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    ],
+    "Northern Europe": [
+      {
+        "name": "Åland Islands",
+        "iso3": "ALA",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Denmark",
+        "iso3": "DNK",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Estonia",
+        "iso3": "EST",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Faroe Islands",
+        "iso3": "FRO",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Finland",
+        "iso3": "FIN",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Guernsey",
+        "iso3": "GGY",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Iceland",
+        "iso3": "ISL",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Ireland",
+        "iso3": "IRL",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Isle of Man",
+        "iso3": "IMN",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Jersey",
+        "iso3": "JEY",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Latvia",
+        "iso3": "LVA",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Lithuania",
+        "iso3": "LTU",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Norway",
+        "iso3": "NOR",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Svalbard and Jan Mayen",
+        "iso3": "SJM",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "Sweden",
+        "iso3": "SWE",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      },
+      {
+        "name": "United Kingdom of Great Britain and Northern Ireland",
+        "iso3": "GBR",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    ],
+    "Southern Europe": [
+      {
+        "name": "Albania",
+        "iso3": "ALB",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Andorra",
+        "iso3": "AND",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Bosnia and Herzegovina",
+        "iso3": "BIH",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Croatia",
+        "iso3": "HRV",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Gibraltar",
+        "iso3": "GIB",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Greece",
+        "iso3": "GRC",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Holy See",
+        "iso3": "VAT",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Italy",
+        "iso3": "ITA",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Malta",
+        "iso3": "MLT",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Montenegro",
+        "iso3": "MNE",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "North Macedonia",
+        "iso3": "MKD",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Portugal",
+        "iso3": "PRT",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "San Marino",
+        "iso3": "SMR",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Serbia",
+        "iso3": "SRB",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Slovenia",
+        "iso3": "SVN",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      },
+      {
+        "name": "Spain",
+        "iso3": "ESP",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    ],
+    "Western Europe": [
+      {
+        "name": "Austria",
+        "iso3": "AUT",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Belgium",
+        "iso3": "BEL",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "France",
+        "iso3": "FRA",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Germany",
+        "iso3": "DEU",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Liechtenstein",
+        "iso3": "LIE",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Luxembourg",
+        "iso3": "LUX",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Monaco",
+        "iso3": "MCO",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Netherlands",
+        "iso3": "NLD",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      },
+      {
+        "name": "Switzerland",
+        "iso3": "CHE",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      }
+    ],
+    "Eastern Europe": [
+      {
+        "name": "Belarus",
+        "iso3": "BLR",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Bulgaria",
+        "iso3": "BGR",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Czechia",
+        "iso3": "CZE",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Hungary",
+        "iso3": "HUN",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Moldova, Republic of",
+        "iso3": "MDA",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Poland",
+        "iso3": "POL",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Romania",
+        "iso3": "ROU",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Russian Federation",
+        "iso3": "RUS",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Slovakia",
+        "iso3": "SVK",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      },
+      {
+        "name": "Ukraine",
+        "iso3": "UKR",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      }
+    ]
+  },
+  "Africa": {
+    "all": [
+      {
+        "name": "Algeria",
+        "iso3": "DZA",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Angola",
+        "iso3": "AGO",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Benin",
+        "iso3": "BEN",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Botswana",
+        "iso3": "BWA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "British Indian Ocean Territory",
+        "iso3": "IOT",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Burkina Faso",
+        "iso3": "BFA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Burundi",
+        "iso3": "BDI",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Cabo Verde",
+        "iso3": "CPV",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Cameroon",
+        "iso3": "CMR",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Central African Republic",
+        "iso3": "CAF",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Chad",
+        "iso3": "TCD",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Comoros",
+        "iso3": "COM",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Congo",
+        "iso3": "COG",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Congo, Democratic Republic of the",
+        "iso3": "COD",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Côte d'Ivoire",
+        "iso3": "CIV",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Djibouti",
+        "iso3": "DJI",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Egypt",
+        "iso3": "EGY",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Equatorial Guinea",
+        "iso3": "GNQ",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Eritrea",
+        "iso3": "ERI",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Eswatini",
+        "iso3": "SWZ",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Ethiopia",
+        "iso3": "ETH",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "French Southern Territories",
+        "iso3": "ATF",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Gabon",
+        "iso3": "GAB",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Gambia",
+        "iso3": "GMB",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Ghana",
+        "iso3": "GHA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Guinea",
+        "iso3": "GIN",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Guinea-Bissau",
+        "iso3": "GNB",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Kenya",
+        "iso3": "KEN",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Lesotho",
+        "iso3": "LSO",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Liberia",
+        "iso3": "LBR",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Libya",
+        "iso3": "LBY",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Madagascar",
+        "iso3": "MDG",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Malawi",
+        "iso3": "MWI",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Mali",
+        "iso3": "MLI",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Mauritania",
+        "iso3": "MRT",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Mauritius",
+        "iso3": "MUS",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Mayotte",
+        "iso3": "MYT",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Morocco",
+        "iso3": "MAR",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Mozambique",
+        "iso3": "MOZ",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Namibia",
+        "iso3": "NAM",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Niger",
+        "iso3": "NER",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Nigeria",
+        "iso3": "NGA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Réunion",
+        "iso3": "REU",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Rwanda",
+        "iso3": "RWA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Saint Helena, Ascension and Tristan da Cunha",
+        "iso3": "SHN",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Sao Tome and Principe",
+        "iso3": "STP",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Senegal",
+        "iso3": "SEN",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Seychelles",
+        "iso3": "SYC",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Sierra Leone",
+        "iso3": "SLE",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Somalia",
+        "iso3": "SOM",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "South Africa",
+        "iso3": "ZAF",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "South Sudan",
+        "iso3": "SSD",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Sudan",
+        "iso3": "SDN",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Tanzania, United Republic of",
+        "iso3": "TZA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Togo",
+        "iso3": "TGO",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Tunisia",
+        "iso3": "TUN",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Uganda",
+        "iso3": "UGA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Western Sahara",
+        "iso3": "ESH",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Zambia",
+        "iso3": "ZMB",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Zimbabwe",
+        "iso3": "ZWE",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      }
+    ],
+    "Northern Africa": [
+      {
+        "name": "Algeria",
+        "iso3": "DZA",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Egypt",
+        "iso3": "EGY",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Libya",
+        "iso3": "LBY",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Morocco",
+        "iso3": "MAR",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Sudan",
+        "iso3": "SDN",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Tunisia",
+        "iso3": "TUN",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      },
+      {
+        "name": "Western Sahara",
+        "iso3": "ESH",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      }
+    ],
+    "Sub-Saharan Africa": [
+      {
+        "name": "Angola",
+        "iso3": "AGO",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Benin",
+        "iso3": "BEN",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Botswana",
+        "iso3": "BWA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "British Indian Ocean Territory",
+        "iso3": "IOT",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Burkina Faso",
+        "iso3": "BFA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Burundi",
+        "iso3": "BDI",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Cabo Verde",
+        "iso3": "CPV",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Cameroon",
+        "iso3": "CMR",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Central African Republic",
+        "iso3": "CAF",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Chad",
+        "iso3": "TCD",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Comoros",
+        "iso3": "COM",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Congo",
+        "iso3": "COG",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Congo, Democratic Republic of the",
+        "iso3": "COD",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Côte d'Ivoire",
+        "iso3": "CIV",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Djibouti",
+        "iso3": "DJI",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Equatorial Guinea",
+        "iso3": "GNQ",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Eritrea",
+        "iso3": "ERI",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Eswatini",
+        "iso3": "SWZ",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Ethiopia",
+        "iso3": "ETH",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "French Southern Territories",
+        "iso3": "ATF",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Gabon",
+        "iso3": "GAB",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Gambia",
+        "iso3": "GMB",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Ghana",
+        "iso3": "GHA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Guinea",
+        "iso3": "GIN",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Guinea-Bissau",
+        "iso3": "GNB",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Kenya",
+        "iso3": "KEN",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Lesotho",
+        "iso3": "LSO",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Liberia",
+        "iso3": "LBR",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Madagascar",
+        "iso3": "MDG",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Malawi",
+        "iso3": "MWI",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Mali",
+        "iso3": "MLI",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Mauritania",
+        "iso3": "MRT",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Mauritius",
+        "iso3": "MUS",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Mayotte",
+        "iso3": "MYT",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Mozambique",
+        "iso3": "MOZ",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Namibia",
+        "iso3": "NAM",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Niger",
+        "iso3": "NER",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Nigeria",
+        "iso3": "NGA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Réunion",
+        "iso3": "REU",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Rwanda",
+        "iso3": "RWA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Saint Helena, Ascension and Tristan da Cunha",
+        "iso3": "SHN",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Sao Tome and Principe",
+        "iso3": "STP",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Senegal",
+        "iso3": "SEN",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Seychelles",
+        "iso3": "SYC",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Sierra Leone",
+        "iso3": "SLE",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Somalia",
+        "iso3": "SOM",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "South Africa",
+        "iso3": "ZAF",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "South Sudan",
+        "iso3": "SSD",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Tanzania, United Republic of",
+        "iso3": "TZA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Togo",
+        "iso3": "TGO",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Uganda",
+        "iso3": "UGA",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Zambia",
+        "iso3": "ZMB",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      },
+      {
+        "name": "Zimbabwe",
+        "iso3": "ZWE",
+        "region": "Africa",
+        "subregion": "Sub-Saharan Africa"
+      }
+    ]
+  },
+  "Oceania": {
+    "all": [
+      {
+        "name": "American Samoa",
+        "iso3": "ASM",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Australia",
+        "iso3": "AUS",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      },
+      {
+        "name": "Christmas Island",
+        "iso3": "CXR",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      },
+      {
+        "name": "Cocos (Keeling) Islands",
+        "iso3": "CCK",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      },
+      {
+        "name": "Cook Islands",
+        "iso3": "COK",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Fiji",
+        "iso3": "FJI",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      },
+      {
+        "name": "French Polynesia",
+        "iso3": "PYF",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Guam",
+        "iso3": "GUM",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Heard Island and McDonald Islands",
+        "iso3": "HMD",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      },
+      {
+        "name": "Kiribati",
+        "iso3": "KIR",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Marshall Islands",
+        "iso3": "MHL",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Micronesia (Federated States of)",
+        "iso3": "FSM",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Nauru",
+        "iso3": "NRU",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "New Caledonia",
+        "iso3": "NCL",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      },
+      {
+        "name": "New Zealand",
+        "iso3": "NZL",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      },
+      {
+        "name": "Niue",
+        "iso3": "NIU",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Norfolk Island",
+        "iso3": "NFK",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      },
+      {
+        "name": "Northern Mariana Islands",
+        "iso3": "MNP",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Palau",
+        "iso3": "PLW",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Papua New Guinea",
+        "iso3": "PNG",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      },
+      {
+        "name": "Pitcairn",
+        "iso3": "PCN",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Samoa",
+        "iso3": "WSM",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Solomon Islands",
+        "iso3": "SLB",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      },
+      {
+        "name": "Tokelau",
+        "iso3": "TKL",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Tonga",
+        "iso3": "TON",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Tuvalu",
+        "iso3": "TUV",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "United States Minor Outlying Islands",
+        "iso3": "UMI",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Vanuatu",
+        "iso3": "VUT",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      },
+      {
+        "name": "Wallis and Futuna",
+        "iso3": "WLF",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      }
+    ],
+    "Polynesia": [
+      {
+        "name": "American Samoa",
+        "iso3": "ASM",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Cook Islands",
+        "iso3": "COK",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "French Polynesia",
+        "iso3": "PYF",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Niue",
+        "iso3": "NIU",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Pitcairn",
+        "iso3": "PCN",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Samoa",
+        "iso3": "WSM",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Tokelau",
+        "iso3": "TKL",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Tonga",
+        "iso3": "TON",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Tuvalu",
+        "iso3": "TUV",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      },
+      {
+        "name": "Wallis and Futuna",
+        "iso3": "WLF",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      }
+    ],
+    "Australia and New Zealand": [
+      {
+        "name": "Australia",
+        "iso3": "AUS",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      },
+      {
+        "name": "Christmas Island",
+        "iso3": "CXR",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      },
+      {
+        "name": "Cocos (Keeling) Islands",
+        "iso3": "CCK",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      },
+      {
+        "name": "Heard Island and McDonald Islands",
+        "iso3": "HMD",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      },
+      {
+        "name": "New Zealand",
+        "iso3": "NZL",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      },
+      {
+        "name": "Norfolk Island",
+        "iso3": "NFK",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      }
+    ],
+    "Melanesia": [
+      {
+        "name": "Fiji",
+        "iso3": "FJI",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      },
+      {
+        "name": "New Caledonia",
+        "iso3": "NCL",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      },
+      {
+        "name": "Papua New Guinea",
+        "iso3": "PNG",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      },
+      {
+        "name": "Solomon Islands",
+        "iso3": "SLB",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      },
+      {
+        "name": "Vanuatu",
+        "iso3": "VUT",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      }
+    ],
+    "Micronesia": [
+      {
+        "name": "Guam",
+        "iso3": "GUM",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Kiribati",
+        "iso3": "KIR",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Marshall Islands",
+        "iso3": "MHL",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Micronesia (Federated States of)",
+        "iso3": "FSM",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Nauru",
+        "iso3": "NRU",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Northern Mariana Islands",
+        "iso3": "MNP",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "Palau",
+        "iso3": "PLW",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      },
+      {
+        "name": "United States Minor Outlying Islands",
+        "iso3": "UMI",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      }
+    ]
+  },
+  "Americas": {
+    "all": [
+      {
+        "name": "Anguilla",
+        "iso3": "AIA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Antigua and Barbuda",
+        "iso3": "ATG",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Argentina",
+        "iso3": "ARG",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Aruba",
+        "iso3": "ABW",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Bahamas",
+        "iso3": "BHS",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Barbados",
+        "iso3": "BRB",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Belize",
+        "iso3": "BLZ",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Bermuda",
+        "iso3": "BMU",
+        "region": "Americas",
+        "subregion": "Northern America"
+      },
+      {
+        "name": "Bolivia (Plurinational State of)",
+        "iso3": "BOL",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Bonaire, Sint Eustatius and Saba",
+        "iso3": "BES",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Bouvet Island",
+        "iso3": "BVT",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Brazil",
+        "iso3": "BRA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Canada",
+        "iso3": "CAN",
+        "region": "Americas",
+        "subregion": "Northern America"
+      },
+      {
+        "name": "Cayman Islands",
+        "iso3": "CYM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Chile",
+        "iso3": "CHL",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Colombia",
+        "iso3": "COL",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Costa Rica",
+        "iso3": "CRI",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Cuba",
+        "iso3": "CUB",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Curaçao",
+        "iso3": "CUW",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Dominica",
+        "iso3": "DMA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Dominican Republic",
+        "iso3": "DOM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Ecuador",
+        "iso3": "ECU",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "El Salvador",
+        "iso3": "SLV",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Falkland Islands (Malvinas)",
+        "iso3": "FLK",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "French Guiana",
+        "iso3": "GUF",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Greenland",
+        "iso3": "GRL",
+        "region": "Americas",
+        "subregion": "Northern America"
+      },
+      {
+        "name": "Grenada",
+        "iso3": "GRD",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Guadeloupe",
+        "iso3": "GLP",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Guatemala",
+        "iso3": "GTM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Guyana",
+        "iso3": "GUY",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Haiti",
+        "iso3": "HTI",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Honduras",
+        "iso3": "HND",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Jamaica",
+        "iso3": "JAM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Martinique",
+        "iso3": "MTQ",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Mexico",
+        "iso3": "MEX",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Montserrat",
+        "iso3": "MSR",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Nicaragua",
+        "iso3": "NIC",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Panama",
+        "iso3": "PAN",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Paraguay",
+        "iso3": "PRY",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Peru",
+        "iso3": "PER",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Puerto Rico",
+        "iso3": "PRI",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Saint Barthélemy",
+        "iso3": "BLM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Saint Kitts and Nevis",
+        "iso3": "KNA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Saint Lucia",
+        "iso3": "LCA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Saint Martin (French part)",
+        "iso3": "MAF",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Saint Pierre and Miquelon",
+        "iso3": "SPM",
+        "region": "Americas",
+        "subregion": "Northern America"
+      },
+      {
+        "name": "Saint Vincent and the Grenadines",
+        "iso3": "VCT",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Sint Maarten (Dutch part)",
+        "iso3": "SXM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "South Georgia and the South Sandwich Islands",
+        "iso3": "SGS",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Suriname",
+        "iso3": "SUR",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Trinidad and Tobago",
+        "iso3": "TTO",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Turks and Caicos Islands",
+        "iso3": "TCA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "United States of America",
+        "iso3": "USA",
+        "region": "Americas",
+        "subregion": "Northern America"
+      },
+      {
+        "name": "Uruguay",
+        "iso3": "URY",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Venezuela (Bolivarian Republic of)",
+        "iso3": "VEN",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Virgin Islands (British)",
+        "iso3": "VGB",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Virgin Islands (U.S.)",
+        "iso3": "VIR",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      }
+    ],
+    "Latin America and the Caribbean": [
+      {
+        "name": "Anguilla",
+        "iso3": "AIA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Antigua and Barbuda",
+        "iso3": "ATG",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Argentina",
+        "iso3": "ARG",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Aruba",
+        "iso3": "ABW",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Bahamas",
+        "iso3": "BHS",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Barbados",
+        "iso3": "BRB",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Belize",
+        "iso3": "BLZ",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Bolivia (Plurinational State of)",
+        "iso3": "BOL",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Bonaire, Sint Eustatius and Saba",
+        "iso3": "BES",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Bouvet Island",
+        "iso3": "BVT",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Brazil",
+        "iso3": "BRA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Cayman Islands",
+        "iso3": "CYM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Chile",
+        "iso3": "CHL",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Colombia",
+        "iso3": "COL",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Costa Rica",
+        "iso3": "CRI",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Cuba",
+        "iso3": "CUB",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Curaçao",
+        "iso3": "CUW",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Dominica",
+        "iso3": "DMA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Dominican Republic",
+        "iso3": "DOM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Ecuador",
+        "iso3": "ECU",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "El Salvador",
+        "iso3": "SLV",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Falkland Islands (Malvinas)",
+        "iso3": "FLK",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "French Guiana",
+        "iso3": "GUF",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Grenada",
+        "iso3": "GRD",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Guadeloupe",
+        "iso3": "GLP",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Guatemala",
+        "iso3": "GTM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Guyana",
+        "iso3": "GUY",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Haiti",
+        "iso3": "HTI",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Honduras",
+        "iso3": "HND",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Jamaica",
+        "iso3": "JAM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Martinique",
+        "iso3": "MTQ",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Mexico",
+        "iso3": "MEX",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Montserrat",
+        "iso3": "MSR",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Nicaragua",
+        "iso3": "NIC",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Panama",
+        "iso3": "PAN",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Paraguay",
+        "iso3": "PRY",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Peru",
+        "iso3": "PER",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Puerto Rico",
+        "iso3": "PRI",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Saint Barthélemy",
+        "iso3": "BLM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Saint Kitts and Nevis",
+        "iso3": "KNA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Saint Lucia",
+        "iso3": "LCA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Saint Martin (French part)",
+        "iso3": "MAF",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Saint Vincent and the Grenadines",
+        "iso3": "VCT",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Sint Maarten (Dutch part)",
+        "iso3": "SXM",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "South Georgia and the South Sandwich Islands",
+        "iso3": "SGS",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Suriname",
+        "iso3": "SUR",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Trinidad and Tobago",
+        "iso3": "TTO",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Turks and Caicos Islands",
+        "iso3": "TCA",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Uruguay",
+        "iso3": "URY",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Venezuela (Bolivarian Republic of)",
+        "iso3": "VEN",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Virgin Islands (British)",
+        "iso3": "VGB",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      },
+      {
+        "name": "Virgin Islands (U.S.)",
+        "iso3": "VIR",
+        "region": "Americas",
+        "subregion": "Latin America and the Caribbean"
+      }
+    ],
+    "Northern America": [
+      {
+        "name": "Bermuda",
+        "iso3": "BMU",
+        "region": "Americas",
+        "subregion": "Northern America"
+      },
+      {
+        "name": "Canada",
+        "iso3": "CAN",
+        "region": "Americas",
+        "subregion": "Northern America"
+      },
+      {
+        "name": "Greenland",
+        "iso3": "GRL",
+        "region": "Americas",
+        "subregion": "Northern America"
+      },
+      {
+        "name": "Saint Pierre and Miquelon",
+        "iso3": "SPM",
+        "region": "Americas",
+        "subregion": "Northern America"
+      },
+      {
+        "name": "United States of America",
+        "iso3": "USA",
+        "region": "Americas",
+        "subregion": "Northern America"
+      }
+    ]
+  }
+}
