@@ -4,7 +4,6 @@ function zip(multiarray) {
     .map((_, i) => multiarray.map(r => r[i]));
 }
 
-
 function chunk(arr, size) {
   const chunks = [];
 
