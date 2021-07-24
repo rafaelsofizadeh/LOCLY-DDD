@@ -40,9 +40,7 @@ describe('Draft Order – POST /order', () => {
   let customerRepository: ICustomerRepository;
   let orderRepository: IOrderRepository;
 
-  let getOrder: IGetOrder;
   let draftOrder: IDraftOrder;
-  let deleteOrder: IDeleteOrder;
 
   let customer: Customer;
   let address: Address;
@@ -74,9 +72,7 @@ describe('Draft Order – POST /order', () => {
       UserType.Customer,
     ));
 
-    getOrder = await moduleRef.resolve(IGetOrder);
     draftOrder = await moduleRef.resolve(IDraftOrder);
-    deleteOrder = await moduleRef.resolve(IDeleteOrder);
   });
 
   afterAll(async () => {
