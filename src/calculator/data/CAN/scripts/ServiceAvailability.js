@@ -102,3 +102,9 @@ writeFileSync(
   JSON.stringify(iso3Zones, null, 2),
   'utf8',
 );
+
+[[]].map(([iso2, zone]) => [alpha2ToAlpha3(iso2), Number(zone)]).reduce((zones, [iso3, zone]) => {
+  zones[zone] = zones[zone] || [];
+  zones[zone].push(iso3);
+  return zones;
+}, {})
