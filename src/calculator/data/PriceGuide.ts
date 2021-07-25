@@ -3637,6 +3637,49 @@ export const priceGuide: ShipmentCostSpecification = {
       },
     ],
   },
+  CHE: {
+    postalServiceName: 'Swiss Post',
+    priceTableSpecification: {
+      currency: 'CHF',
+      deliveryZoneNames: ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5'],
+      weightIntervals: [2000, 5000, 10000, 15000, 20000],
+    },
+    deliveryZones: {
+      'Zone 1': ['AUT', 'BEL', 'DNK', 'FRA', 'DEU', 'ITA', 'NLD', 'PRT', 'GBR'],
+      'Zone 2': ['POL', 'ESP', 'SWE'],
+      'Zone 3': ['ROU', 'RUS', 'TUR', 'UKR'],
+      'Zone 4': ['CAN', 'USA'],
+      'Zone 5': ['AUS', 'BRA', 'CHN', 'IND', 'JPN', 'NZL', 'THA'],
+    },
+    deliveryServices: [
+      {
+        id: 'economy',
+        tracked: true,
+        name: 'PostPac International Economy',
+        serviceAvailability: ['all'],
+        priceTable: [
+          [34, 37, 41, 44, 48],
+          [42, 47, 53, 57, 62],
+          [46, 55, 65, 76, 89],
+          [51, 63, 75, 97, 120],
+          [56, 72, 87, 119, 151],
+        ],
+      },
+      {
+        id: 'priority',
+        tracked: true,
+        name: 'PostPac International Priority',
+        serviceAvailability: ['all'],
+        priceTable: [
+          [38, 43, 48, 53, 58],
+          [48, 54, 64, 76, 88],
+          [56, 65, 77, 104, 130],
+          [67, 81, 94, 138, 182],
+          [72, 89, 106, 169, 231],
+        ],
+      },
+    ],
+  },
 };
 
 export const originCountriesAvailable = Object.keys(priceGuide) as Country[];
