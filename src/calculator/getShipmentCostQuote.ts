@@ -11,12 +11,15 @@ type PriceTableSpecification = {
   currency: Currency;
 };
 
+type CountryWeight = { iso3: Country; maxWeight: Gram };
+type DeliveryZone = Country[] | CountryWeight[];
+
 export type ShipmentCostSpecification = {
   // Should've been type Country: https://github.com/microsoft/TypeScript/issues/37448
   [countryIsoCode: string]: {
     postalServiceName: string;
     priceTableSpecification: PriceTableSpecification;
-    deliveryZones: { [key: string]: Country[] };
+    deliveryZones: { [key: string]: DeliveryZone };
     deliveryServices: Array<{
       id: string;
       name: string;
@@ -52,13 +55,35 @@ function getNumericInterval(numericIntervals: number[], point: number): Index {
   );
 }
 
+// TODO: Overload by DeliveryZone subtype
 function determineDeliveryZone(
-  deliveryZones: { [key: string]: Country[] },
+  deliveryZones: {
+    [key: string]: DeliveryZone;
+  },
   country: Country,
-) {
-  return Object.keys(deliveryZones).find(zone =>
-    deliveryZones[zone].includes(country),
-  );
+): [[string, DeliveryZone], Country | CountryWeight] {
+  let countryEntry: Country | CountryWeight;
+
+  const determinedZone = Object.entries(deliveryZones).find(([name, zone]) => {
+    if (Array.isArray(zone)) {
+      if (typeof zone[0] === 'string') {
+        return (zone as Country[]).includes(country);
+      }
+
+      if (typeof zone[0] === 'object') {
+        countryEntry = (zone as Array<{
+          iso3: Country;
+          maxWeight: Gram;
+        }>).find(({ iso3 }) => iso3 === country);
+
+        return Boolean(countryEntry);
+      }
+    }
+
+    return false;
+  });
+
+  return [determinedZone, countryEntry];
 }
 
 function validateOriginCountry(originCountry: Country): void {
@@ -69,14 +94,7 @@ function validateOriginCountry(originCountry: Country): void {
   }
 }
 
-function validatePackageDimensions(
-  weightIntervals: Gram[],
-  packages: PhysicalItem[],
-): Index {
-  const totalWeight = packages
-    .map(pkg => pkg.weight)
-    .reduce((totalWeight, weight) => totalWeight + weight, 0);
-
+function validateWeight(weightIntervals: Gram[], totalWeight: Gram): Index {
   const maxWeight = weightIntervals.slice(-1)[0];
 
   if (totalWeight > maxWeight) {
@@ -110,23 +128,36 @@ export function getShipmentCostQuote(
       deliveryServices,
     } = priceGuide[originCountry];
 
-    const weightIntervalIndex: Index = validatePackageDimensions(
+    const totalWeight: Gram = packages
+      .map(pkg => pkg.weight)
+      .reduce((totalWeight, weight) => totalWeight + weight, 0);
+
+    const weightIntervalIndex: Index = validateWeight(
       weightIntervals,
-      packages,
+      totalWeight,
     );
 
-    const deliveryZone = determineDeliveryZone(
-      deliveryZones,
-      destinationCountry,
-    );
+    const [
+      [deliveryZoneName, deliveryZone],
+      countryEntry,
+    ] = determineDeliveryZone(deliveryZones, destinationCountry);
 
     if (!deliveryZone) {
       throw new Error(
-        `Destination country ${destinationCountry} is not supported by ${postalServiceName} of ${originCountry}.`,
+        `Destination country ${destinationCountry} is not supported by ${postalServiceName} postal service of ${originCountry}.`,
       );
     }
 
-    const deliveryZoneTableIndex = deliveryZoneNames.indexOf(deliveryZone);
+    if (
+      typeof countryEntry === 'object' &&
+      totalWeight > countryEntry.maxWeight
+    ) {
+      throw new Error(
+        `Weight ${totalWeight} exceeds max specified weight ${countryEntry.maxWeight}.`,
+      );
+    }
+
+    const deliveryZoneTableIndex = deliveryZoneNames.indexOf(deliveryZoneName);
 
     const availableDeliveryServices = deliveryServices.filter(
       ({ serviceAvailability }) =>
