@@ -88,9 +88,7 @@ function determineDeliveryZone(
 
 function validateOriginCountry(originCountry: Country): void {
   if (!priceGuide.hasOwnProperty(originCountry)) {
-    throw new Error(
-      `Origin country ${originCountry} is not supported by Locly.`,
-    );
+    throw `Origin country ${originCountry} is not supported by Locly.`;
   }
 }
 
@@ -98,9 +96,7 @@ function validateWeight(weightIntervals: Gram[], totalWeight: Gram): Index {
   const maxWeight = weightIntervals.slice(-1)[0];
 
   if (totalWeight > maxWeight) {
-    throw new Error(
-      `Weight ${totalWeight} exceeds max specified weight ${maxWeight}.`,
-    );
+    throw `Weight ${totalWeight} exceeds max specified weight ${maxWeight}.`;
   }
 
   const weightIntervalIndex = getNumericInterval(weightIntervals, totalWeight);
@@ -118,7 +114,7 @@ export function getShipmentCostQuote(
     validateOriginCountry(originCountry);
 
     if (originCountry === destinationCountry) {
-      throw new Error("Origin country can't be equal to destination country");
+      throw "Origin country can't be equal to destination country";
     }
 
     const {
@@ -143,18 +139,14 @@ export function getShipmentCostQuote(
     ] = determineDeliveryZone(deliveryZones, destinationCountry);
 
     if (!deliveryZone) {
-      throw new Error(
-        `Destination country ${destinationCountry} is not supported by ${postalServiceName} postal service of ${originCountry}.`,
-      );
+      throw `Destination country ${destinationCountry} is not supported by ${postalServiceName} postal service of ${originCountry}.`;
     }
 
     if (
       typeof countryEntry === 'object' &&
       totalWeight > countryEntry.maxWeight
     ) {
-      throw new Error(
-        `Weight ${totalWeight} exceeds max specified weight ${countryEntry.maxWeight}.`,
-      );
+      throw `Weight ${totalWeight} exceeds max specified weight ${countryEntry.maxWeight}.`;
     }
 
     const deliveryZoneTableIndex = deliveryZoneNames.indexOf(deliveryZoneName);
@@ -166,9 +158,7 @@ export function getShipmentCostQuote(
     );
 
     if (!availableDeliveryServices.length) {
-      throw new Error(
-        `Destination country ${destinationCountry} is not supported by ${postalServiceName} of ${originCountry}.`,
-      );
+      throw `Destination country ${destinationCountry} is not supported by ${postalServiceName} of ${originCountry}.`;
     }
 
     const services = availableDeliveryServices.map(service => {
@@ -181,7 +171,7 @@ export function getShipmentCostQuote(
       );
 
       if (isNaN(price)) {
-        throw new Error('Unexpected error occurred');
+        throw 'Unexpected error occurred';
       }
 
       return {
@@ -196,9 +186,9 @@ export function getShipmentCostQuote(
       currency,
       services,
     };
-  } catch (error) {
+  } catch (message) {
     throwCustomException(
-      error.message,
+      message,
       { originCountry, destinationCountry, packages },
       HttpStatus.SERVICE_UNAVAILABLE,
     )();
