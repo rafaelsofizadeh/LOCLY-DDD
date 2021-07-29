@@ -95,7 +95,7 @@ export class DraftOrder implements IDraftOrder {
     const { currency, services }: ShipmentCostQuote = getShipmentCostQuote(
       originCountry,
       destinationCountry,
-      items.map(({ weight }) => ({ weight })),
+      items.reduce((totalWeight, { weight }) => totalWeight + weight, 0),
     );
 
     // TODO: Service choice logic

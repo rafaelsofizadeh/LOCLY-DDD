@@ -108,7 +108,7 @@ function validateWeight(weightIntervals: Gram[], totalWeight: Gram): Index {
 export function getShipmentCostQuote(
   originCountry: Country,
   destinationCountry: Country,
-  packages: PhysicalItem[],
+  totalWeight: Gram,
 ): ShipmentCostQuote {
   try {
     validateOriginCountry(originCountry);
@@ -123,10 +123,6 @@ export function getShipmentCostQuote(
       deliveryZones,
       deliveryServices,
     } = priceGuide[originCountry];
-
-    const totalWeight: Gram = packages
-      .map(pkg => pkg.weight)
-      .reduce((totalWeight, weight) => totalWeight + weight, 0);
 
     const weightIntervalIndex: Index = validateWeight(
       weightIntervals,
@@ -189,7 +185,7 @@ export function getShipmentCostQuote(
   } catch (message) {
     throwCustomException(
       message,
-      { originCountry, destinationCountry, packages },
+      { originCountry, destinationCountry, totalWeight },
       HttpStatus.SERVICE_UNAVAILABLE,
     )();
   }
@@ -198,5 +194,5 @@ export function getShipmentCostQuote(
 export type ShipmentCostQuoteFn = (
   originCountry: Country,
   destinationCountry: Country,
-  packages: Array<{ weight: Gram }>,
+  totalWeight: Gram,
 ) => ShipmentCostQuote;
