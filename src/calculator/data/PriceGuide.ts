@@ -3642,117 +3642,117 @@ export const priceGuide: ShipmentCostSpecification = {
     priceTableSpecification: {
       currency: 'CHF',
       deliveryZoneNames: ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5'],
-      weightIntervals: [2000, 5000, 10000, 15000, 20000],
+      weightIntervals: [2000, 5000, 10000, 15000, 20000, 25000, 30000],
     },
     deliveryZones: {
       'Zone 1': [
         {
           iso3: 'AUT',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'BEL',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'DNK',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'FRA',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'DEU',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'ITA',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'NLD',
-          maxWeight: 20,
+          maxWeight: 20000,
         },
         {
           iso3: 'GBR',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
       ],
       'Zone 2': [
         {
           iso3: 'POL',
-          maxWeight: 20,
+          maxWeight: 20000,
         },
         {
           iso3: 'PRT',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'ESP',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'SWE',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
       ],
       'Zone 3': [
         {
           iso3: 'ROU',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'RUS',
-          maxWeight: 20,
+          maxWeight: 20000,
         },
         {
           iso3: 'TUR',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'UKR',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
       ],
       'Zone 4': [
         {
           iso3: 'CAN',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'USA',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
       ],
       'Zone 5': [
         {
           iso3: 'AUS',
-          maxWeight: 20,
+          maxWeight: 20000,
         },
         {
           iso3: 'BRA',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'CHN',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'IND',
-          maxWeight: 20,
+          maxWeight: 20000,
         },
         {
           iso3: 'JPN',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'NZL',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
         {
           iso3: 'THA',
-          maxWeight: 30,
+          maxWeight: 30000,
         },
       ],
     },
@@ -4789,7 +4789,7 @@ export const priceGuide: ShipmentCostSpecification = {
     ],
   },
   USA: {
-    postalServiceName: 'Posten',
+    postalServiceName: 'USPS',
     priceTableSpecification: {
       currency: 'USD',
       deliveryZoneNames: [
@@ -4815,7 +4815,6 @@ export const priceGuide: ShipmentCostSpecification = {
         'Zone 20',
       ],
       weightIntervals: [
-        0,
         454,
         907,
         1361,
@@ -4892,889 +4891,889 @@ export const priceGuide: ShipmentCostSpecification = {
       'Zone 1': [
         {
           iso3: 'CAN',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 2': [
         {
           iso3: 'MEX',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
       ],
       'Zone 3': [
         {
           iso3: 'ALB',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'ARM',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'AZE',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'BLR',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'BIH',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'BGR',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'HRV',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'DOM',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'EST',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'DOM',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'HUN',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'COM',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'LVA',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'LTU',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'MDA',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'MNE',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'MKD',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'POL',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'ROU',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'SRB',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'SVK',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'SVN',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'UKR',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 4': [
         {
           iso3: 'AND',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'AUT',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'BEL',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'DNK',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'FIN',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'GIB',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'GRC',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'IRL',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'ISR',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'ITA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'LIE',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'LUX',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'NLD',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'PRT',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'SPM',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'ESP',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'TUR',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 5': [
         {
           iso3: 'FRO',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'GRL',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'ISL',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'MLT',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'NOR',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'SMR',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'SWE',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'CHE',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 6': [
         {
           iso3: 'BHR',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'BGD',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'BRN',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'BRB',
-          maxWeight: 9.98,
+          maxWeight: 9980,
         },
         {
           iso3: 'KHM',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'FJI',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'IND',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'IDN',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'IRQ',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'KIR',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'KWT',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'LAO',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'LBN',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'MAC',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'MDV',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'NRU',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'NPL',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'OMN',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'PAK',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'PHL',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'PCN',
-          maxWeight: 9.98,
+          maxWeight: 9980,
         },
         {
           iso3: 'SAU',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'SGP',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'SLB',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'LKA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'SYR',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'THA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'TON',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'TKM',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'TUV',
-          maxWeight: 24.95,
+          maxWeight: 24950,
         },
         {
           iso3: 'VNM',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'WLF',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 7': [
         {
           iso3: 'AFG',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'BTN',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'CYP',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'PYF',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'IRN',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'JOR',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'KAZ',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'KGZ',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'MYS',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'MNG',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'NCL',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'PNG',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'QAT',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'WSM',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'TWN',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'TJK',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'TLS',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'ARE',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'UZB',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'VUT',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'YEM',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 8': [
         {
           iso3: 'AGO',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'BDI',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'CPV',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'TCD',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'COM',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'COD',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'CIV',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'EGY',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'GNQ',
-          maxWeight: 9.98,
+          maxWeight: 9980,
         },
         {
           iso3: 'SWZ',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'GAB',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'GMB',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'GIN',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'MLI',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'MRT',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'MUS',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'NAM',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'REU',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'STP',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'SEN',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'SYC',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'SSD',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'ZMB',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'ZWE',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
       ],
       'Zone 9': [
         {
           iso3: 'DZA',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'BEN',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'BWA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'BFA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'CMR',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'CAF',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'COD',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'DJI',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'ERI',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'ETH',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'GHA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'GNB',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'KEN',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'LSO',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'LBR',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'LBY',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'MDG',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'MWI',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'MAR',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'MOZ',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'NER',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'NGA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'RWA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'SHN',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'SLE',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'ZAF',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'SDN',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'TZA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'TGO',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'SHN',
-          maxWeight: 9.98,
+          maxWeight: 9980,
         },
         {
           iso3: 'TUN',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'UGA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 10': [
         {
           iso3: 'AIA',
-          maxWeight: 9.98,
+          maxWeight: 9980,
         },
         {
           iso3: 'ATG',
-          maxWeight: 9.98,
+          maxWeight: 9980,
         },
         {
           iso3: 'ARG',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'BHS',
-          maxWeight: 9.98,
+          maxWeight: 9980,
         },
         {
           iso3: 'BRB',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'BLZ',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'BMU',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'IOT',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'COL',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'ECU',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'GRD',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'GTM',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'HTI',
-          maxWeight: 24.95,
+          maxWeight: 24950,
         },
         {
           iso3: 'MSR',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'NIC',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'PRY',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'KNA',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'VCT',
-          maxWeight: 9.98,
+          maxWeight: 9980,
         },
         {
           iso3: 'TTO',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'FLK',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
       ],
       'Zone 11': [
         {
           iso3: 'ABW',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'CYM',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'CHL',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'CRI',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'CUB',
-          maxWeight: 9.98,
+          maxWeight: 9980,
         },
         {
           iso3: 'CUW',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'DMA',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'DOM',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'SLV',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'GUF',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'GLP',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'GUY',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'HND',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'JAM',
-          maxWeight: 9.98,
+          maxWeight: 9980,
         },
         {
           iso3: 'MTQ',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'PAN',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'PER',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
         {
           iso3: 'LCA',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'SXM',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'SUR',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
         {
           iso3: 'URY',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'VEN',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 12': [
         {
           iso3: 'AUS',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'NZL',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 13': [
         {
           iso3: 'BRA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 14': [
         {
           iso3: 'CHN',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 15': [
         {
           iso3: 'FRA',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 16': [
         {
           iso3: 'DEU',
-          maxWeight: 31.75,
+          maxWeight: 31750,
         },
       ],
       'Zone 17': [
         {
           iso3: 'JPN',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
       'Zone 18': [
         {
           iso3: 'HKG',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
         {
           iso3: 'KOR',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
       ],
       'Zone 19': [
         {
           iso3: 'RUS',
-          maxWeight: 19.96,
+          maxWeight: 19960,
         },
       ],
       'Zone 20': [
         {
           iso3: 'GBR',
-          maxWeight: 29.94,
+          maxWeight: 29940,
         },
       ],
     },
