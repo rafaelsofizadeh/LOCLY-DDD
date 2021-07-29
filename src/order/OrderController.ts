@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -67,6 +68,11 @@ import { isUUID, UUID } from '../common/domain';
 import { Host } from '../host/entity/Host';
 import { UserType } from '../auth/entity/Token';
 import { GetOrderResult, IGetOrder } from './application/GetOrder/IGetOrder';
+import { EstimateShipmentCostRequest } from './application/EstimateShipmentCost/IEstimateShipmentCost';
+import {
+  getShipmentCostQuote,
+  ShipmentCostQuote,
+} from '../calculator/getShipmentCostQuote';
 
 @Controller('order')
 export class OrderController {
@@ -93,6 +99,19 @@ export class OrderController {
       : { userId: entity.id, userType: UserType.Host };
 
     return this.getOrder.execute({ port: { orderId, ...userFilter } });
+  }
+
+  // TODO: Any identity? Doesn't accept anonymous identity right now
+  @Get('/shipmentCost')
+  estimateShipmentCostHandler(
+    @Query()
+    {
+      originCountry,
+      destinationCountry,
+      totalWeight,
+    }: EstimateShipmentCostRequest,
+  ): ShipmentCostQuote {
+    return getShipmentCostQuote(originCountry, destinationCountry, totalWeight);
   }
 
   @Post()
