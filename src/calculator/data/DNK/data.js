@@ -516,7 +516,7 @@ for (const [i, c] of countryCodes.entries()) {
 setTimeout(
   () =>
     writeFile(
-      join(__dirname, './prices.json'),
+      join(__dirname, './data.json'),
       JSON.stringify(prices, null, 2),
       err => {
         if (err) throw err;
