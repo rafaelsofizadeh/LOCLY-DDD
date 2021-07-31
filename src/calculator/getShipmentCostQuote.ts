@@ -129,12 +129,14 @@ export function getShipmentCostQuote(
       totalWeight,
     );
 
-    const [
-      [deliveryZoneName, deliveryZone],
-      countryEntry,
-    ] = determineDeliveryZone(deliveryZones, destinationCountry);
+    let deliveryZoneName, deliveryZone, countryEntry;
 
-    if (!deliveryZone) {
+    try {
+      [[deliveryZoneName, deliveryZone], countryEntry] = determineDeliveryZone(
+        deliveryZones,
+        destinationCountry,
+      );
+    } catch (err) {
       throw `Destination country ${destinationCountry} is not supported by ${postalServiceName} postal service of ${originCountry}.`;
     }
 
