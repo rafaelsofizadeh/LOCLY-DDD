@@ -31,7 +31,14 @@ import { OrderMongoRepositoryAdapter } from './order/persistence/OrderMongoRepos
 
 const infrastructureModules: DynamicModule[] = [
   ConfigModule.forRoot(),
-  MongoModule.forFeature(['orders', 'customers', 'hosts']),
+  MongoModule.forFeature([
+    'orders',
+    'customers',
+    'hosts',
+    // TODO: Configure bucket name (host_item_photo)
+    'host_item_photos.files',
+    'host_item_photos.chunks',
+  ]),
   StripeModule.forRootAsync(StripeModule, {
     useFactory: async (configService: ConfigService) => {
       return {

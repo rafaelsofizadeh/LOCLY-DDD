@@ -74,11 +74,16 @@ import {
   getShipmentCostQuote,
   ShipmentCostQuote,
 } from '../calculator/getShipmentCostQuote';
+import {
+  GetItemPhotoResult,
+  IGetItemPhoto,
+} from './application/GetItemPhoto/IGetItemPhoto';
 
 @Controller('order')
 export class OrderController {
   constructor(
     private readonly getOrder: IGetOrder,
+    private readonly getItemPhoto: IGetItemPhoto,
     private readonly draftOrder: IDraftOrder,
     private readonly editOrder: IEditOrder,
     private readonly deleteOrder: IDeleteOrder,
@@ -218,6 +223,23 @@ export class OrderController {
     });
 
     return receivedDateResult;
+  }
+
+  @Get(':orderId/item/:itemId/photo/:photoId')
+  async getItemPhotoHandler(
+    @Param('orderId') orderId: UUID,
+    @Param('itemId') itemId: UUID,
+    @Param('photoId') photoId: UUID,
+    @AnyEntityIdentity() entity: Host | UUID,
+  ): Promise<GetItemPhotoResult> {
+    // TODO: Better way to determine user type
+    const userFilter = isUUID(entity)
+      ? { userId: entity, userType: UserType.Customer }
+      : { userId: entity.id, userType: UserType.Host };
+
+    return this.getItemPhoto.execute({
+      port: { orderId, itemId, photoId, ...userFilter },
+    });
   }
 
   @Post('shipmentInfo')

@@ -38,6 +38,8 @@ import { IStripeCheckoutWebhook } from './application/StripeCheckoutWebhook/IStr
 import { StripeCheckoutWebhook } from './application/StripeCheckoutWebhook/StripeCheckoutWebhook';
 import { IGetOrder } from './application/GetOrder/IGetOrder';
 import { GetOrder } from './application/GetOrder/GetOrder';
+import { GetItemPhoto } from './application/GetItemPhoto/GetItemPhoto';
+import { IGetItemPhoto } from './application/GetItemPhoto/IGetItemPhoto';
 
 const useCaseProviders: Provider[] = [
   { provide: IGetOrder, useClass: GetOrder },
@@ -64,6 +66,7 @@ const useCaseProviders: Provider[] = [
     provide: IStripeCheckoutWebhook,
     useClass: StripeCheckoutWebhook,
   },
+  { provide: IGetItemPhoto, useClass: GetItemPhoto },
 ];
 
 const testProviders: Provider[] = [];
