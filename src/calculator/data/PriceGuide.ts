@@ -270,7 +270,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'tracked',
         name: 'International Tracked',
         tracked: true,
         serviceAvailability: [
@@ -335,7 +334,6 @@ export const priceGuide: ShipmentCostSpecification = {
         ],
       },
       {
-        id: 'tracked-signed',
         name: 'International Tracked & Signed',
         tracked: true,
         serviceAvailability: [
@@ -412,7 +410,6 @@ export const priceGuide: ShipmentCostSpecification = {
         ],
       },
       {
-        id: 'signed',
         name: 'International Signed',
         tracked: false,
         serviceAvailability: [
@@ -576,7 +573,6 @@ export const priceGuide: ShipmentCostSpecification = {
         ],
       },
       {
-        id: 'standard',
         name: 'International Standard',
         tracked: false,
         serviceAvailability: ['all'],
@@ -832,7 +828,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'tracked',
         name: 'Standard',
         serviceAvailability: ['all'],
         tracked: true,
@@ -998,7 +993,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'xpresspost-intl',
         tracked: true,
         name: 'Xpresspost International',
         serviceAvailability: ['all'],
@@ -1945,7 +1939,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'intl',
         tracked: true,
         priceTable: [
           [1700, 2100, 2500, 3200],
@@ -2279,7 +2272,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'general',
         name: 'Standard',
         tracked: true,
         serviceAvailability: ['all'],
@@ -2563,7 +2555,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'standard',
         tracked: true,
         name: 'Standard Parcel',
         serviceAvailability: ['all'],
@@ -2575,7 +2566,6 @@ export const priceGuide: ShipmentCostSpecification = {
         ],
       },
       {
-        id: 'registered-100',
         tracked: true,
         name: 'Registered parcel (insured up to €100)',
         serviceAvailability: ['all'],
@@ -2587,7 +2577,6 @@ export const priceGuide: ShipmentCostSpecification = {
         ],
       },
       {
-        id: 'registered-500',
         tracked: true,
         name: 'Registered parcel (insured up to €500)',
         serviceAvailability: ['all'],
@@ -2599,7 +2588,6 @@ export const priceGuide: ShipmentCostSpecification = {
         ],
       },
       {
-        id: 'registered-5500',
         tracked: true,
         name: 'Registered parcel (insured up to €5500)',
         serviceAvailability: ['all'],
@@ -2879,7 +2867,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'economy',
         tracked: true,
         name: 'Speedpost Economy',
         serviceAvailability: ['all'],
@@ -3010,7 +2997,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'ems',
         tracked: true,
         name: 'EMS Courier — Parcels',
         serviceAvailability: ['all'],
@@ -3617,7 +3603,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'standard',
         tracked: true,
         name: 'International Parcels',
         serviceAvailability: ['all'],
@@ -3753,7 +3738,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'economy',
         tracked: true,
         name: 'PostPac International Economy',
         serviceAvailability: ['all'],
@@ -3996,7 +3980,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'standard',
         tracked: true,
         name: 'International Express',
         serviceAvailability: ['all'],
@@ -4433,7 +4416,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'standard',
         tracked: true,
         name: 'Via posten.no',
         serviceAvailability: ['all'],
@@ -4551,7 +4533,6 @@ export const priceGuide: ShipmentCostSpecification = {
         'CHE',
         'UKR',
         'GBR',
-        'TUR',
       ],
       'Zone B2': [
         'BLR',
@@ -4767,7 +4748,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'standard',
         tracked: true,
         name: 'Paq Standard Internacional',
         serviceAvailability: ['all'],
@@ -5774,7 +5754,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'standard',
         tracked: true,
         name: 'Priority Mail International',
         serviceAvailability: ['all'],
@@ -7559,7 +7538,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'economy',
         tracked: true,
         name: 'Economy',
         serviceAvailability: ['all'],
@@ -7627,7 +7605,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'priority-a',
         tracked: true,
         name: 'A Priority',
         serviceAvailability: ['all'],
@@ -7660,7 +7637,6 @@ export const priceGuide: ShipmentCostSpecification = {
         ],
       },
       {
-        id: 'priority-b',
         tracked: true,
         name: 'B Priority',
         serviceAvailability: ['all'],
@@ -7962,7 +7938,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'standard',
         tracked: true,
         name: 'Standard',
         serviceAvailability: ['all'],
@@ -8320,7 +8295,6 @@ export const priceGuide: ShipmentCostSpecification = {
     },
     deliveryServices: [
       {
-        id: 'standard',
         tracked: true,
         name: 'Standard',
         serviceAvailability: ['all'],

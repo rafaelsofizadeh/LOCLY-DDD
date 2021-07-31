@@ -2,7 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 import { throwCustomException } from '../common/error-handling';
 import { Country } from '../order/entity/Country';
 import { Currency } from '../order/entity/Currency';
-import { Gram, PhysicalItem } from '../order/entity/Item';
+import { Gram } from '../order/entity/Item';
 import { priceGuide } from './data/PriceGuide';
 
 type PriceTableSpecification = {
@@ -21,7 +21,6 @@ export type ShipmentCostSpecification = {
     priceTableSpecification: PriceTableSpecification;
     deliveryZones: { [key: string]: DeliveryZone };
     deliveryServices: Array<{
-      id: string;
       name: string;
       tracked: boolean;
       serviceAvailability: Array<Country | 'all'>;
@@ -34,7 +33,7 @@ export type ShipmentCostQuote = {
   postalServiceName: string;
   currency: Currency;
   deliveryZone: string;
-  services: { name: string; tracked: boolean; price: number }[];
+  services: Array<{ name: string; tracked: boolean; price: number }>;
 };
 
 type Index = number;
