@@ -11,8 +11,6 @@ import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuid
 import { setupNestApp } from '../../../src/main';
 import { UserType } from '../../../src/auth/entity/Token';
 import { authorize, createTestCustomer, createTestHost } from '../utilities';
-import { IGetOrder } from '../../../src/order/application/GetOrder/IGetOrder';
-import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
 import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
 import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
 import { Host } from '../../../src/host/entity/Host';
@@ -45,16 +43,12 @@ describe('[POST /order/draft] IDraftOrder', () => {
   let orderRepository: IOrderRepository;
 
   let order: Order;
-  let getOrder: IGetOrder;
-  let deleteOrder: IDeleteOrder;
-
   let receivedItem: Item;
+  const originCountry: Country = originCountriesAvailable[0];
 
   let customer: Customer;
 
   let host: Host;
-
-  const originCountry: Country = originCountriesAvailable[0];
 
   beforeAll(async () => {
     jest.setTimeout(30000);
@@ -74,7 +68,6 @@ describe('[POST /order/draft] IDraftOrder', () => {
     ({ customer } = await createTestCustomer(moduleRef, originCountry));
     ({ host } = await createTestHost(moduleRef, originCountry));
 
-    getOrder = await moduleRef.resolve(IGetOrder);
     const draftOrder: IDraftOrder = await moduleRef.resolve(IDraftOrder);
     const confirmOrder: IConfirmOrder = await moduleRef.resolve(IConfirmOrder);
     const confirmOrderWebhookHandler: IConfirmOrderHandler = await moduleRef.resolve(
@@ -170,7 +163,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     } = response;
 
     expect(status).toBe(HttpStatus.NOT_ACCEPTABLE);
-    expect(message).toMatch(/Item already marked as "received"\./);
+    expect(message).toMatch(/Item already marked as 'received'\./);
 
     const newOrder: Order = await orderRepository.findOrder({
       orderId: order.id,

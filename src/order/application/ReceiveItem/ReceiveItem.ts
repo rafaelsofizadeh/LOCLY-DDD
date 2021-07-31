@@ -51,7 +51,7 @@ export class ReceiveItem implements IReceiveItem {
     // Can't receive an already-received item
     if (order.items.find(({ id }) => id === itemId).receivedDate) {
       throwCustomException(
-        'Item already marked as "received".',
+        "Item already marked as 'received'.",
         { orderId, itemId },
         HttpStatus.NOT_ACCEPTABLE,
       )();

@@ -35,6 +35,7 @@ export class AddItemPhoto implements IAddItemPhoto {
     { orderId, hostId, itemId, photos }: AddItemPhotoPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
+    // addItemPhotos() requires the item to be marked as received (i.e. have a receivedDate)
     return this.orderRepository.addItemPhotos(
       {
         orderId,
