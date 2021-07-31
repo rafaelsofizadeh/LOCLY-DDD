@@ -315,13 +315,14 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     // };
 
     const filterQuery = {
-      ...mongoQuery({ ...restOrderFilterWithId, ...statusQuery }),
+      ...mongoQuery(restOrderFilterWithId),
+      ...statusQuery,
       items: {
         // For more than one item property, $elemMatch must be used:
         // https://docs.mongodb.com/manual/reference/operator/update/positional/#update-embedded-documents-using-multiple-field-matches
         $elemMatch: {
-          ...mongoQuery({ items: itemFilterWithId }),
-          'items.receivedDate': { $ne: null },
+          ...mongoQuery(itemFilterWithId),
+          receivedDate: { $ne: null },
         },
       },
     };
