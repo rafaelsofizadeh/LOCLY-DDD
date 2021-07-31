@@ -13,7 +13,7 @@ export type Item = PhysicalItem &
   Readonly<{
     title: string;
     storeName: string;
-    photos: Photo[];
+    photos: UUID[];
     receivedDate: Date;
   }>;
 

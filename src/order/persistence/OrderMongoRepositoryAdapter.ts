@@ -331,7 +331,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     const photoMuuids = photos.map(({ id }) => id);
     const photoUploadResults: ItemPhotosUploadResult = photos.map(
       ({ id, filename }) => ({
-        id: muuidToUuid(id),
+        id,
         photoName: filename,
       }),
     );
