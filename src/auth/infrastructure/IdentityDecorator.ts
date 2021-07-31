@@ -74,3 +74,12 @@ export const AnyEntityIdentity = createParamDecorator<any, any, Host | UUID>(
     IdentityType.Customer,
   ),
 );
+
+export const AnyIdentity = createParamDecorator<any, any, Host | UUID>(
+  identityDecoratorFactory<Host | UUID>(
+    IdentityType.Anonymous,
+    IdentityType.UnverifiedHost,
+    IdentityType.Host,
+    IdentityType.Customer,
+  ),
+);

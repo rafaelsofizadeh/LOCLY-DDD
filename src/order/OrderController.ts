@@ -61,6 +61,7 @@ import {
 } from './application/PayShipment/IPayShipment';
 import {
   AnyEntityIdentity,
+  AnyIdentity,
   CustomerIdentity,
   VerifiedHostIdentity,
 } from '../auth/infrastructure/IdentityDecorator';
@@ -88,6 +89,19 @@ export class OrderController {
     private readonly payShipment: IPayShipment,
   ) {}
 
+  @Get('shipmentCost')
+  estimateShipmentCostHandler(
+    @Query()
+    {
+      originCountry,
+      destinationCountry,
+      totalWeight,
+    }: EstimateShipmentCostRequest,
+    @AnyIdentity() identity: any,
+  ): ShipmentCostQuote {
+    return getShipmentCostQuote(originCountry, destinationCountry, totalWeight);
+  }
+
   @Get(':orderId')
   async getOrderHandler(
     @Param('orderId') orderId: UUID,
@@ -99,19 +113,6 @@ export class OrderController {
       : { userId: entity.id, userType: UserType.Host };
 
     return this.getOrder.execute({ port: { orderId, ...userFilter } });
-  }
-
-  // TODO: Any identity? Doesn't accept anonymous identity right now
-  @Get('/shipmentCost')
-  estimateShipmentCostHandler(
-    @Query()
-    {
-      originCountry,
-      destinationCountry,
-      totalWeight,
-    }: EstimateShipmentCostRequest,
-  ): ShipmentCostQuote {
-    return getShipmentCostQuote(originCountry, destinationCountry, totalWeight);
   }
 
   @Post()
