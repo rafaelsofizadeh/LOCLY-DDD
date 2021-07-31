@@ -33,6 +33,7 @@ export type ShipmentCostSpecification = {
 export type ShipmentCostQuote = {
   postalServiceName: string;
   currency: Currency;
+  deliveryZone: string;
   services: { name: string; tracked: boolean; price: number }[];
 };
 
@@ -180,6 +181,7 @@ export function getShipmentCostQuote(
     return {
       postalServiceName,
       currency,
+      deliveryZone: deliveryZoneName,
       services,
     };
   } catch (message) {
