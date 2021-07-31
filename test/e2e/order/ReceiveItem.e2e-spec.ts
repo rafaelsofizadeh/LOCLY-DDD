@@ -170,7 +170,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     } = response;
 
     expect(status).toBe(HttpStatus.NOT_ACCEPTABLE);
-    expect(message).toMatch(/Item already marked as "received"./);
+    expect(message).toMatch(/Item already marked as "received"\./);
 
     const newOrder: Order = await orderRepository.findOrder({
       orderId: order.id,

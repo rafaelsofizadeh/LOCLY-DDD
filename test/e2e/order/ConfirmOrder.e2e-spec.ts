@@ -342,7 +342,7 @@ function updatedStripeCheckoutSessionInTestPage(checkoutId: string) {
 
 // TODO: Retry on Stripe form error (will eliminate majority of test failures)
 async function fillStripeCheckoutForm(): Promise<void> {
-  const typingOptions = { delay: 100 };
+  const typingOptions = { delay: 300 };
   const testCardNumber = '4242424242424242';
   const testCardExpirty = '0424';
   const testCardCvc = '100';
