@@ -88,7 +88,9 @@ export class CookieAuthInterceptor implements NestInterceptor {
     );
     const authIndicator: string = cookies?.[authIndicatorCookieName];
 
-    if (!authIndicator) {
+    // Response is undefined if the response is injected in the controller (using @Res())
+    // https://stackoverflow.com/questions/55205145/why-does-nestjs-interceptor-return-undefined
+    if (response && !authIndicator) {
       response.cookie(authIndicatorCookieName, false, {
         httpOnly: false,
         maxAge: 365 * 24 * 60 * 60 * 10,
