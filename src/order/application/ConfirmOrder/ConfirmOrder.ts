@@ -111,22 +111,7 @@ export class ConfirmOrder implements IConfirmOrder {
       hostId,
     };
 
-    /**
-     * Scenarios:
-     *
-     * I. Match Order with Host, store hostId on Order BEFORE Payment:
-     *
-     * 1. Host matched to Order -> Customer didn't finalize Payment -> Customer requests Order info,
-     *    sees Order.Host(Id), requests Host info -> gets Host address without Paying.
-     * 2. CURRENT:  Host matched to Order -> while Customer finalizes Payment, Host decides to set their status to
-     *    "unavailable" -> Customer payed, but Order couldn't be matched to/executed by Host
-     *    TODO: Potential solution: prohibit Host from setting status as "unavailable" while the Host has unfinalized
-     *    Orders. I.e. "book" the host while the payment is being processed.
-     *
-     * II. Payment BEFORE matching Host:
-     *
-     * 1. Customer pays Order -> Order tries to match with a Host -> no Host available
-     */
+    // Edge case: the matched host sets availability to "not available" inbetween the customer confirming the order and paying.
     const checkoutSession = (await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       customer: stripeCustomerId,

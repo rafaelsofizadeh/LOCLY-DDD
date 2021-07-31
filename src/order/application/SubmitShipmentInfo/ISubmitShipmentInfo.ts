@@ -31,7 +31,6 @@ class Cost implements ICost {
   @IsPositive()
   amount: number;
 
-  // @IsIn(Currency)
   @Equals('USD')
   currency: 'USD';
 }
