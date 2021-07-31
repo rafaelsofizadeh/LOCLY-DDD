@@ -90,6 +90,8 @@ export class ConfirmOrder implements IConfirmOrder {
 
       return matchedHost.id;
     } catch (error) {
+      console.error(error);
+
       throwCustomException(
         'No available host',
         { originCountry },

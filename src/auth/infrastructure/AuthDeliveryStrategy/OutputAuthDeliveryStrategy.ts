@@ -9,7 +9,6 @@ export class OutputAuthDeliveryStrategy implements IAuthDeliveryStrategy {
   async deliverAuth(
     authTokenString: string,
   ): Promise<OutputAuthDeliveryResult> {
-    console.log(authTokenString);
     return authTokenString;
   }
 }
