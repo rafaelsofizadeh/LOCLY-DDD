@@ -6,17 +6,8 @@ import {
   TransactionUseCasePort,
 } from '../../../common/application';
 import { throwCustomException } from '../../../common/error-handling';
-import {
-  muuidToUuid,
-  uuidToMuuid,
-  mongoQuery,
-  serializeMongoData,
-} from '../../../common/persistence';
-import {
-  Photo,
-  PhotoChunk,
-  PhotoFile,
-} from '../../persistence/OrderMongoMapper';
+import { uuidToMuuid } from '../../../common/persistence';
+import { PhotoChunk, PhotoFile } from '../../persistence/OrderMongoMapper';
 import { IGetOrder } from '../GetOrder/IGetOrder';
 import {
   GetItemPhotoPayload,
