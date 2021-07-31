@@ -78,14 +78,12 @@ const testProviders: Provider[] = [];
           // IMPORTANT: ALWAYS PUT REQUEST BODY FIELDS BEFORE FILE FIELD, or else req.body might be unpopulated
           // https://stackoverflow.com/a/43197040
           file: (request: Request) => {
-            const { hostId, itemId } = request.body as AddItemPhotoPayload;
-
             const photoId = UUID();
 
             return {
               id: uuidToMuuid(photoId),
               bucketName: 'host_item_photos',
-              filename: `${photoId}_hostId:${hostId}_itemId:${itemId}`,
+              filename: photoId,
             };
           },
         }),
@@ -94,10 +92,17 @@ const testProviders: Provider[] = [];
           files: maxSimulataneousPhotoCount,
         },
         fileFilter: (req, { mimetype }, cb) => {
-          if (!/image\/jpeg|jpg|png|gif|heic/.test(mimetype)) {
+          if (!/image\/jpeg|jpg|png|gif|heic|mp4/.test(mimetype)) {
             try {
               throwCustomException('Unsupported file mimetype', {
-                allowedFileMimetypes: ['jpeg', 'jpg', 'png', 'gif', 'heic'],
+                allowedFileMimetypes: [
+                  'jpeg',
+                  'jpg',
+                  'png',
+                  'gif',
+                  'heic',
+                  'mp4',
+                ],
                 actualFileMimetype: mimetype,
               })();
             } catch (exception) {
