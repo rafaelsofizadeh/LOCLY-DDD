@@ -18,7 +18,11 @@ import { IEditHost } from '../../src/host/application/EditHost/IEditHost';
 import { IGetHost } from '../../src/host/application/GetHost/IGetHost';
 import { Host } from '../../src/host/entity/Host';
 import { IHostRepository } from '../../src/host/persistence/IHostRepository';
+import { IConfirmOrder } from '../../src/order/application/ConfirmOrder/IConfirmOrder';
+import { IDraftOrder } from '../../src/order/application/DraftOrder/IDraftOrder';
+import { IConfirmOrderHandler } from '../../src/order/application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/IConfirmOrderHandler';
 import { Country } from '../../src/order/entity/Country';
+import { IOrderRepository } from '../../src/order/persistence/IOrderRepository';
 
 export async function createTestCustomer(
   moduleRef: TestingModule,
@@ -174,4 +178,50 @@ export async function authorize(
     agent: requestAgent,
     logout: () => requestAgent.post('/auth/logout').send(),
   };
+}
+
+export async function createConfirmedOrder(
+  moduleRef: TestingModule,
+  orderRepository: IOrderRepository,
+  {
+    customer,
+    originCountry,
+    host,
+  }: { customer: Customer; originCountry: Country; host: Host },
+) {
+  const draftOrder: IDraftOrder = await moduleRef.resolve(IDraftOrder);
+  const confirmOrder: IConfirmOrder = await moduleRef.resolve(IConfirmOrder);
+  const confirmOrderWebhookHandler: IConfirmOrderHandler = await moduleRef.resolve(
+    IConfirmOrderHandler,
+  );
+
+  const { id: orderId } = await draftOrder.execute({
+    port: {
+      customerId: customer.id,
+      originCountry,
+      destination: customer.addresses[0],
+      items: [
+        {
+          title: 'Item #1',
+          storeName: 'Random Store',
+          weight: 700,
+        },
+        {
+          title: 'Item #2',
+          storeName: 'Randomer Store',
+          weight: 300,
+        },
+      ],
+    },
+  });
+
+  await confirmOrder.execute({
+    port: { orderId, customerId: customer.id },
+  });
+
+  await confirmOrderWebhookHandler.execute({
+    port: { orderId, hostId: host.id },
+  });
+
+  return await orderRepository.findOrder({ orderId });
 }

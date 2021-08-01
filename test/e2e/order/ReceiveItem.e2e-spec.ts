@@ -4,18 +4,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
-import { IDraftOrder } from '../../../src/order/application/DraftOrder/IDraftOrder';
 import { Order } from '../../../src/order/entity/Order';
 import { Country } from '../../../src/order/entity/Country';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { setupNestApp } from '../../../src/main';
 import { UserType } from '../../../src/auth/entity/Token';
-import { authorize, createTestCustomer, createTestHost } from '../utilities';
+import {
+  authorize,
+  createConfirmedOrder,
+  createTestCustomer,
+  createTestHost,
+} from '../utilities';
 import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
 import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
 import { Host } from '../../../src/host/entity/Host';
-import { IConfirmOrderHandler } from '../../../src/order/application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/IConfirmOrderHandler';
-import { IConfirmOrder } from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import { ReceiveItemRequest } from '../../../src/order/application/ReceiveItem/IReceiveItem';
 import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
 import { Item } from '../../../src/order/entity/Item';
@@ -68,48 +70,18 @@ describe('[POST /order/draft] IDraftOrder', () => {
     ({ customer } = await createTestCustomer(moduleRef, originCountry));
     ({ host } = await createTestHost(moduleRef, originCountry));
 
-    const draftOrder: IDraftOrder = await moduleRef.resolve(IDraftOrder);
-    const confirmOrder: IConfirmOrder = await moduleRef.resolve(IConfirmOrder);
-    const confirmOrderWebhookHandler: IConfirmOrderHandler = await moduleRef.resolve(
-      IConfirmOrderHandler,
-    );
-
-    const { id: orderId } = await draftOrder.execute({
-      port: {
-        customerId: customer.id,
-        originCountry,
-        destination: customer.addresses[0],
-        items: [
-          {
-            title: 'Item #1',
-            storeName: 'Random Store',
-            weight: 700,
-          },
-          {
-            title: 'Item #2',
-            storeName: 'Randomer Store',
-            weight: 300,
-          },
-        ],
-      },
+    order = await createConfirmedOrder(moduleRef, orderRepository, {
+      customer,
+      host,
+      originCountry,
     });
-
-    await confirmOrder.execute({
-      port: { orderId, customerId: customer.id },
-    });
-
-    await confirmOrderWebhookHandler.execute({
-      port: { orderId, hostId: host.id },
-    });
-
-    order = await orderRepository.findOrder({ orderId });
   });
 
   afterAll(async () => {
     await Promise.all([
       hostRepository.deleteHost({ hostId: host.id }),
       customerRepository.deleteCustomer({ customerId: customer.id }),
-      //orderRepository.deleteOrder({ orderId: order.id }),
+      orderRepository.deleteOrder({ orderId: order.id }),
     ]);
 
     await app.close();
