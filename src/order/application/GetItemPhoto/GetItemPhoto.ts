@@ -7,7 +7,7 @@ import {
 } from '../../../common/application';
 import { throwCustomException } from '../../../common/error-handling';
 import { uuidToMuuid } from '../../../common/persistence';
-import { PhotoChunk, PhotoFile } from '../../persistence/OrderMongoMapper';
+import { PhotoChunk, PhotoDocument } from '../../persistence/OrderMongoMapper';
 import { IGetOrder } from '../GetOrder/IGetOrder';
 import {
   GetItemPhotoPayload,
@@ -20,7 +20,7 @@ export class GetItemPhoto implements IGetItemPhoto {
   constructor(
     private readonly getOrder: IGetOrder,
     @InjectCollection('host_item_photos.files')
-    private readonly photoFileCollection: Collection<PhotoFile>,
+    private readonly photoFileCollection: Collection<PhotoDocument>,
     @InjectCollection('host_item_photos.chunks')
     private readonly photoChunkCollection: Collection<PhotoChunk>,
   ) {}
@@ -34,7 +34,9 @@ export class GetItemPhoto implements IGetItemPhoto {
     const item = order.items.find(
       ({ id }) => id === getItemPhotoPayload.itemId,
     );
-    const photoId = item.photos.find(id => id === getItemPhotoPayload.photoId);
+    const photoId = item.photoIds.find(
+      id => id === getItemPhotoPayload.photoId,
+    );
 
     if (!photoId) {
       throwCustomException(
@@ -51,7 +53,7 @@ export class GetItemPhoto implements IGetItemPhoto {
       filename: fileName,
       contentType,
       _id: fileMuuid,
-    }: PhotoFile = await this.photoFileCollection
+    }: PhotoDocument = await this.photoFileCollection
       .findOne({ _id: photoMuuid })
       .catch(
         throwCustomException(

@@ -19,7 +19,8 @@ export type DraftedOrderMongoDocument = MongoDocument<DraftedOrder>;
 export type ConfirmedOrderMongoDocument = MongoDocument<ConfirmedOrder>;
 
 export type Photo = Omit<Express.Multer.File, 'id'> & { id: UUID };
-export type PhotoFile = Omit<Photo, 'id'> & { _id: MUUID };
+export type PhotoFile = Omit<Photo, 'id'> & { id: MUUID };
+export type PhotoDocument = Omit<Photo, 'id'> & { _id: MUUID };
 export type PhotoChunk = {
   _id: MUUID;
   files_id: MUUID;

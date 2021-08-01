@@ -21,9 +21,10 @@ import { IOrderRepository } from './IOrderRepository';
 import { Order, DraftedOrder, OrderFilter } from '../entity/Order';
 import {
   OrderMongoDocument,
-  Photo,
   normalizeOrderFilter,
   normalizeItemFilter,
+  PhotoDocument,
+  PhotoFile,
 } from './OrderMongoMapper';
 import {
   mongoQuery,
@@ -293,7 +294,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
   async addItemPhotos(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
-    photos: Photo[],
+    photos: PhotoFile[],
     mongoTransactionSession?: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
     const { status, ...restOrderFilterWithId } = normalizeOrderFilter(
@@ -331,7 +332,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     const photoMuuids = photos.map(({ id }) => id);
     const photoUploadResults: ItemPhotosUploadResult = photos.map(
       ({ id, filename }) => ({
-        id,
+        id: muuidToUuid(id),
         name: filename,
       }),
     );
@@ -347,7 +348,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
         // TODO:
         {
           $push: {
-            'items.$.photos': {
+            'items.$.photoIds': {
               $each: photoMuuids,
             },
           },

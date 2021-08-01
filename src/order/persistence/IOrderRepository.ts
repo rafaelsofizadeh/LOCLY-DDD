@@ -2,8 +2,8 @@ import { ClientSession } from 'mongodb';
 import { UUID } from '../../common/domain';
 import { ItemFilter } from '../entity/Item';
 import { Order, DraftedOrder, OrderFilter, OrderStatus } from '../entity/Order';
-import { Photo } from './OrderMongoMapper';
 import { ItemPhotosUploadResult } from '../application/AddItemPhotos/IAddItemPhotos';
+import { PhotoFile } from './OrderMongoMapper';
 
 type T<K extends keyof Order = any> = Omit<
   OrderFilter,
@@ -120,7 +120,7 @@ export abstract class IOrderRepository {
   abstract addItemPhotos(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
-    photos: Photo[],
+    photos: PhotoFile[],
     mongoTransactionSession?: ClientSession,
   ): Promise<ItemPhotosUploadResult>;
 }

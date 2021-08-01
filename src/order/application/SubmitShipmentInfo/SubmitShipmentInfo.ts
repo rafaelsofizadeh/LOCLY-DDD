@@ -75,7 +75,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
     });
 
     const notFinalizedItems: Item[] = order.items.filter(
-      ({ receivedDate, photos }) => !(receivedDate && photos.length),
+      ({ receivedDate, photoIds }) => !(receivedDate && photoIds.length),
     );
 
     return notFinalizedItems;

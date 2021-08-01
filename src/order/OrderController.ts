@@ -207,7 +207,7 @@ export class OrderController {
   @UseInterceptors(FilesInterceptor('photos'))
   async addItemPhotoHandler(
     @Body() unidAddItemPhotoRequest: AddItemPhotoRequest,
-    @UploadedFiles() photos: Photo[],
+    @UploadedFiles() photos: PhotoFile[],
     @VerifiedHostIdentity() { id: hostId }: Host,
   ) {
     const addItemPhotoPayload: AddItemPhotoPayload = {
