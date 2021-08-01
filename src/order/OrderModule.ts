@@ -1,4 +1,4 @@
-import { Module, Provider } from '@nestjs/common';
+import { HttpStatus, Module, Provider } from '@nestjs/common';
 import { getDbToken } from 'nest-mongodb';
 import GridFsStorage from 'multer-gridfs-storage';
 
@@ -95,19 +95,23 @@ const testProviders: Provider[] = [];
           files: maxSimulataneousPhotoCount,
         },
         fileFilter: (req, { mimetype }, cb) => {
-          if (!/image\/jpeg|jpg|png|gif|heic|mp4/.test(mimetype)) {
+          if (
+            !/(?:image\/(?:jpeg|jpg|png|gif|heic))|(?:video\/(?:mp4|mpeg|avi|ogg|webm))/.test(
+              mimetype,
+            )
+          ) {
             try {
-              throwCustomException('Unsupported file mimetype', {
-                allowedFileMimetypes: [
-                  'jpeg',
-                  'jpg',
-                  'png',
-                  'gif',
-                  'heic',
-                  'mp4',
-                ],
-                actualFileMimetype: mimetype,
-              })();
+              throwCustomException(
+                'Unsupported file mimetype',
+                {
+                  allowedFileMimetypes: {
+                    'image/': ['jpeg', 'jpg', 'png', 'gif', 'heic', 'mp4'],
+                    'video/': ['mp4', 'mpeg', 'avi', 'ogg', 'webm'],
+                  },
+                  actualFileMimetype: mimetype,
+                },
+                HttpStatus.BAD_REQUEST,
+              )();
             } catch (exception) {
               cb(exception, false);
             }

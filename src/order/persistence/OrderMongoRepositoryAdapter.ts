@@ -332,7 +332,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     const photoUploadResults: ItemPhotosUploadResult = photos.map(
       ({ id, filename }) => ({
         id,
-        photoName: filename,
+        name: filename,
       }),
     );
 

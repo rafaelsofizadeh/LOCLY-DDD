@@ -28,4 +28,4 @@ export abstract class IAddItemPhoto extends UseCase<
   ItemPhotosUploadResult
 > {}
 
-export type ItemPhotosUploadResult = Array<{ photoName: string; id: UUID }>;
+export type ItemPhotosUploadResult = Array<{ name: string; id: UUID }>;
