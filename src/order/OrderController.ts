@@ -44,9 +44,9 @@ import {
 import {
   AddItemPhotoPayload,
   AddItemPhotoRequest,
-  IAddItemPhoto,
-} from './application/AddItemPhoto/IAddItemPhoto';
-import { Photo } from './persistence/OrderMongoMapper';
+  IAddItemPhotos,
+} from './application/AddItemPhotos/IAddItemPhotos';
+import { PhotoFile } from './persistence/OrderMongoMapper';
 import {
   SubmitShipmentInfoRequest,
   SubmitShipmentInfoResult,
@@ -89,7 +89,7 @@ export class OrderController {
     private readonly deleteOrder: IDeleteOrder,
     private readonly confirmOrder: IConfirmOrder,
     private readonly receiveItem: IReceiveItem,
-    private readonly addItemPhoto: IAddItemPhoto,
+    private readonly addItemPhotos: IAddItemPhotos,
     private readonly submitShipmentInfo: ISubmitShipmentInfo,
     private readonly payShipment: IPayShipment,
   ) {}
@@ -216,7 +216,7 @@ export class OrderController {
       photos,
     };
 
-    const receivedDateResult = await this.addItemPhoto.execute({
+    const receivedDateResult = await this.addItemPhotos.execute({
       port: {
         ...addItemPhotoPayload,
       },

@@ -1,7 +1,7 @@
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
 import { UnidHostRequest } from '../../../host/entity/Host';
-import { Photo } from '../../persistence/OrderMongoMapper';
+import { PhotoFile } from '../../persistence/OrderMongoMapper';
 
 export const maxSimulataneousPhotoCount = 4;
 
@@ -11,7 +11,7 @@ export interface AddItemPhotoPayload {
   orderId: UUID;
   hostId: UUID;
   itemId: UUID;
-  photos: Photo[];
+  photos: PhotoFile[];
 }
 
 export class AddItemPhotoRequest
@@ -23,7 +23,7 @@ export class AddItemPhotoRequest
   readonly itemId: UUID;
 }
 
-export abstract class IAddItemPhoto extends UseCase<
+export abstract class IAddItemPhotos extends UseCase<
   AddItemPhotoPayload,
   ItemPhotosUploadResult
 > {}

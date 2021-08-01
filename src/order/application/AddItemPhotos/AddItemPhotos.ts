@@ -7,13 +7,13 @@ import {
 } from '../../../common/application';
 import {
   AddItemPhotoPayload,
-  IAddItemPhoto,
+  IAddItemPhotos,
   ItemPhotosUploadResult,
-} from './IAddItemPhoto';
+} from './IAddItemPhotos';
 import { OrderStatus } from '../../entity/Order';
 
 @Injectable()
-export class AddItemPhoto implements IAddItemPhoto {
+export class AddItemPhotos implements IAddItemPhotos {
   constructor(private readonly orderRepository: IOrderRepository) {}
 
   @Transaction

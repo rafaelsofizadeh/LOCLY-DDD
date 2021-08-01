@@ -17,12 +17,11 @@ import { IDeleteOrder } from './application/DeleteOrder/IDeleteOrder';
 import { DeleteOrder } from './application/DeleteOrder/DeleteOrder';
 import { Db } from 'mongodb';
 import {
-  AddItemPhotoPayload,
-  IAddItemPhoto,
+  IAddItemPhotos,
   maxPhotoSizeBytes,
   maxSimulataneousPhotoCount,
-} from './application/AddItemPhoto/IAddItemPhoto';
-import { AddItemPhoto } from './application/AddItemPhoto/AddItemPhoto';
+} from './application/AddItemPhotos/IAddItemPhotos';
+import { AddItemPhotos } from './application/AddItemPhotos/AddItemPhotos';
 import { MulterModule } from '@nestjs/platform-express';
 import { throwCustomException } from '../common/error-handling';
 import { UUID } from '../common/domain';
@@ -49,7 +48,7 @@ const useCaseProviders: Provider[] = [
   { provide: IConfirmOrder, useClass: ConfirmOrder },
   { provide: IConfirmOrderHandler, useClass: ConfirmOrderHandler },
   { provide: IReceiveItem, useClass: ReceiveItem },
-  { provide: IAddItemPhoto, useClass: AddItemPhoto },
+  { provide: IAddItemPhotos, useClass: AddItemPhotos },
   {
     provide: ISubmitShipmentInfo,
     useClass: SubmitShipmentInfo,

@@ -2,8 +2,8 @@ import { ClientSession } from 'mongodb';
 import { UUID } from '../../common/domain';
 import { ItemFilter } from '../entity/Item';
 import { Order, DraftedOrder, OrderFilter, OrderStatus } from '../entity/Order';
-import { ItemPhotosUploadResult } from '../application/AddItemPhoto/IAddItemPhoto';
 import { Photo } from './OrderMongoMapper';
+import { ItemPhotosUploadResult } from '../application/AddItemPhotos/IAddItemPhotos';
 
 type T<K extends keyof Order = any> = Omit<
   OrderFilter,
