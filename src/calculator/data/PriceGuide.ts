@@ -4417,7 +4417,7 @@ export const priceGuide: ShipmentCostSpecification = {
     deliveryServices: [
       {
         tracked: true,
-        name: 'Via posten.no',
+        name: 'Standard, via posten.no (website)',
         serviceAvailability: ['all'],
         priceTable: [
           [312, 348],
