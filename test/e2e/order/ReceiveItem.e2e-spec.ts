@@ -22,19 +22,6 @@ import { ReceiveItemRequest } from '../../../src/order/application/ReceiveItem/I
 import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
 import { Item } from '../../../src/order/entity/Item';
 
-/**
- * 1. Create test Customer
- * 2. Create test Host
- * 3. Authorize as Customer
- * 4. Execute DraftOrder
- * 5. Confirm order:
- *    1. Execute ConfirmOrder
- *    2. Trigger ConfirmOrderHandler (webhook)
- * 6. Logout
- * 7. Authorize as Host
- * 8. Execute ReceiveItem
- */
-
 describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;

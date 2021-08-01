@@ -22,6 +22,7 @@
     "test:draft-order": "NODE_ENV=dev jest -i 'DraftOrder'",
     "test:confirm-order": "NODE_ENV=dev jest -i 'ConfirmOrder'",
     "test:receive-item": "NODE_ENV=dev jest -i 'ReceiveItem'",
+    "test:add-item-photos": "NODE_ENV=dev jest -i 'AddItemPhotos'",
     "test:request-auth": "NODE_ENV=dev jest -i 'RequestAuth'"
   },
   "dependencies": {
