@@ -84,6 +84,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
     ({ customer } = await createTestCustomer(moduleRef, originCountry));
     ({ host } = await createTestHost(moduleRef, originCountry));
 
+    ({ agent } = await authorize(app, moduleRef, host.email, UserType.Host));
+
     order = await createConfirmedOrder(moduleRef, orderRepository, {
       customer,
       host,
@@ -102,8 +104,6 @@ describe('[POST /order/draft] IDraftOrder', () => {
   });
 
   it('Adds 1 item photo', async () => {
-    ({ agent } = await authorize(app, moduleRef, host.email, UserType.Host));
-
     // Item needs to be received before uploading an image
     receivedItem = order.items[0];
 
