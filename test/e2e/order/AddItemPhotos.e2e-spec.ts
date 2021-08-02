@@ -158,7 +158,6 @@ describe('[POST /order/draft] IDraftOrder', () => {
   });
 
   it(`Adds ${maxSimulataneousPhotoCount} more item photos`, async () => {
-    expect(receivedItem.receivedDate).toBeDefined();
     expect(receivedItem.photoIds.length).toBe(1);
 
     const request = agent
@@ -207,5 +206,43 @@ describe('[POST /order/draft] IDraftOrder', () => {
       .find({ _id: { $in: updatedItem.photoIds.map(uuidToMuuid) } })
       .toArray();
     expect(photoUploadRepoResult.length).toBe(newPhotosLength);
+
+    order = updatedOrder;
+    receivedItem = updatedItem;
   });
+
+  it(`Doesn't add more than ${maxSimulataneousPhotoCount} item photos`, async () => {
+    expect(receivedItem.receivedDate).toBeDefined();
+    expect(receivedItem.photoIds.length).toBe(1 + maxSimulataneousPhotoCount);
+
+    const request = agent
+      .post('/order/itemPhotos')
+      .field('orderId', order.id)
+      .field('itemId', receivedItem.id);
+
+    const repeats = 5;
+    for (let i = 0; i < repeats; i++) {
+      request.attach(
+        'photos',
+        join(__dirname, './addItemPhotos-test-image.png'),
+      );
+    }
+
+    const response: supertest.Response = await request;
+
+    expect(response.status).toBe(HttpStatus.BAD_REQUEST);
+
+    const updatedOrder: Order = await orderRepository.findOrder({
+      orderId: order.id,
+    });
+    const updatedItem: Item = updatedOrder.items.find(
+      ({ id }) => id === receivedItem.id,
+    );
+
+    const newPhotosLength = 1 + maxSimulataneousPhotoCount;
+
+    expect(updatedItem.photoIds.length).toBe(newPhotosLength);
+  });
+
+  // TODO: File extension, size
 });
