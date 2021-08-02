@@ -187,7 +187,13 @@ export async function createConfirmedOrder(
     customer,
     originCountry,
     host,
-  }: { customer: Customer; originCountry: Country; host: Host },
+    itemCount = 1,
+  }: {
+    customer: Customer;
+    originCountry: Country;
+    host: Host;
+    itemCount?: number;
+  },
 ) {
   const draftOrder: IDraftOrder = await moduleRef.resolve(IDraftOrder);
   const confirmOrder: IConfirmOrder = await moduleRef.resolve(IConfirmOrder);
@@ -200,18 +206,13 @@ export async function createConfirmedOrder(
       customerId: customer.id,
       originCountry,
       destination: customer.addresses[0],
-      items: [
-        {
-          title: 'Item #1',
+      items: Array(itemCount)
+        .fill({})
+        .map((_, index) => ({
+          title: 'Item #' + (index + 1),
           storeName: 'Random Store',
-          weight: 700,
-        },
-        {
-          title: 'Item #2',
-          storeName: 'Randomer Store',
-          weight: 300,
-        },
-      ],
+          weight: 2000 / itemCount,
+        })),
     },
   });
 
