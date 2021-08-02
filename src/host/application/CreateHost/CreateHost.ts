@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ClientSession } from 'mongodb';
 import { alpha3ToAlpha2 } from 'i18n-iso-countries';
 import { IHostRepository } from '../../../host/persistence/IHostRepository';
@@ -11,9 +11,69 @@ import { UUID } from '../../../common/domain';
 import { Host } from '../../entity/Host';
 import { CreateHostPayload, ICreateHost } from './ICreateHost';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
+import { Country } from '../../../order/entity/Country';
+import { throwCustomException } from '../../../common/error-handling';
 
 @Injectable()
 export class CreateHost implements ICreateHost {
+  // Important for the host to be available for cross-border payouts.
+  // https://stripe.com/docs/connect/cross-border-payouts
+  private readonly stripeSupportedCountries: Country[] = [
+    'ARG',
+    'AUS',
+    'AUT',
+    'BEL',
+    'BOL',
+    'BGR',
+    'CAN',
+    'CHL',
+    'COL',
+    'CRI',
+    'HRV',
+    'CYP',
+    'CZE',
+    'DNK',
+    'DOM',
+    'EGY',
+    'EST',
+    'FIN',
+    'FRA',
+    'DEU',
+    'GRC',
+    'HKG',
+    'HUN',
+    'ISL',
+    'IND',
+    'IDN',
+    'IRL',
+    'ISR',
+    'ITA',
+    'LVA',
+    'LIE',
+    'LTU',
+    'LUX',
+    'MLT',
+    'MEX',
+    'NLD',
+    'NZL',
+    'NOR',
+    'PRY',
+    'PER',
+    'POL',
+    'PRT',
+    'ROU',
+    'SGP',
+    'SVK',
+    'SVN',
+    'ESP',
+    'SWE',
+    'CHE',
+    'THA',
+    'TTO',
+    'GBR',
+    'URY',
+  ];
+
   constructor(
     private readonly hostRepository: IHostRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
@@ -31,13 +91,18 @@ export class CreateHost implements ICreateHost {
     { email, country }: CreateHostPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<Host> {
-    // TODO(VERY IMPORTANT): Check if country is supported by Stripe
+    if (!this.stripeSupportedCountries.includes(country)) {
+      throwCustomException(
+        `Host can't be based in ${country}. Stripe doesn't support cross-border payouts in ${country}. https://stripe.com/docs/connect/cross-border-payouts`,
+        { country },
+      )();
+    }
+
     const hostAccount: Stripe.Account = await this.stripe.accounts.create({
       type: 'express',
       email,
       country: alpha3ToAlpha2(country),
       capabilities: {
-        // TODO(IMPORTANT): Recipient service agreement doesn't allow for 'card_payments'
         transfers: { requested: true },
       },
       business_type: 'individual',
