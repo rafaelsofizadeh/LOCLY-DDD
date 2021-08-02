@@ -60,7 +60,7 @@ export class ConfirmOrder implements IConfirmOrder {
       mongoTransactionSession,
     )) as DraftedOrder;
 
-    const hostId: UUID = await this.findMatchingHost(
+    const host: Host = await this.findMatchingHost(
       draftOrder,
       mongoTransactionSession,
     );
@@ -71,7 +71,7 @@ export class ConfirmOrder implements IConfirmOrder {
 
     const checkoutSession: StripeCheckoutSession = await this.createStripeCheckoutSession(
       draftOrder,
-      hostId,
+      host,
       stripeCustomerId,
     );
 
@@ -81,14 +81,12 @@ export class ConfirmOrder implements IConfirmOrder {
   private async findMatchingHost(
     { originCountry }: DraftedOrder,
     mongoTransactionSession: ClientSession,
-  ): Promise<UUID> {
+  ): Promise<Host> {
     try {
-      const matchedHost: Host = await this.hostRepository.findHostAvailableInCountryWithMinimumNumberOfOrders(
+      return this.hostRepository.findHostAvailableInCountryWithMinimumNumberOfOrders(
         originCountry,
         mongoTransactionSession,
       );
-
-      return matchedHost.id;
     } catch (error) {
       console.error(error);
 
@@ -103,14 +101,18 @@ export class ConfirmOrder implements IConfirmOrder {
   // TODO: Error handling and rejection events
   private async createStripeCheckoutSession(
     { id: orderId }: DraftedOrder,
-    hostId: UUID,
+    host: Host,
     stripeCustomerId: Stripe.Customer['id'],
   ): Promise<StripeCheckoutSession> {
-    const loclyFee: Cost = await this.calculateLoclyFee();
-    const price: StripePrice = stripePrice(loclyFee);
+    const totalFee: Cost = this.calculateTotalFee();
+    const localFee: Cost = this.calculateLoclyFee(totalFee);
+
+    const totalPrice: StripePrice = stripePrice(totalFee);
+    const loclyPrice: StripePrice = stripePrice(localFee);
+
     const match: Match = {
       orderId,
-      hostId,
+      hostId: host.id,
     };
 
     // Edge case: the matched host sets availability to "not available" inbetween the customer confirming the order and paying.
@@ -120,7 +122,7 @@ export class ConfirmOrder implements IConfirmOrder {
       line_items: [
         {
           price_data: {
-            ...price,
+            ...totalPrice,
             product_data: {
               name: 'Locly and Host Service Fee',
             },
@@ -128,6 +130,10 @@ export class ConfirmOrder implements IConfirmOrder {
           quantity: 1,
         },
       ],
+      payment_intent_data: {
+        application_fee_amount: loclyPrice.unit_amount,
+        transfer_data: { destination: host.stripeAccountId },
+      },
       metadata: {
         feeType: FeeType.Service,
         ...match,
@@ -140,10 +146,17 @@ export class ConfirmOrder implements IConfirmOrder {
     return checkoutSession;
   }
 
-  private async calculateLoclyFee(): Promise<Cost> {
+  private calculateTotalFee(): Cost {
     return {
       currency: 'USD',
       amount: 100,
+    };
+  }
+
+  private calculateLoclyFee({ currency, amount: totalAmount }: Cost): Cost {
+    return {
+      currency,
+      amount: totalAmount * 0.2,
     };
   }
 }

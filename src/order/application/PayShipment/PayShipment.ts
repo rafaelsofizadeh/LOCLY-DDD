@@ -20,12 +20,15 @@ import { OrderStatus } from '../../entity/Order';
 import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { Customer } from '../../../customer/entity/Customer';
 import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
+import { IHostRepository } from '../../../host/persistence/IHostRepository';
+import { Host } from '../../../host/entity/Host';
 
 @Injectable()
 export class PayShipmentService implements IPayShipment {
   constructor(
     private readonly orderRepository: IOrderRepository,
     private readonly customerRepository: ICustomerRepository,
+    private readonly hostRepository: IHostRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
   ) {}
 
@@ -49,7 +52,7 @@ export class PayShipmentService implements IPayShipment {
     { orderId, customerId }: PayShipmentPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<StripeCheckoutSession> {
-    const { finalShipmentCost } = await this.orderRepository.findOrder(
+    const { finalShipmentCost, hostId } = await this.orderRepository.findOrder(
       { orderId, status: OrderStatus.Finalized, customerId },
       mongoTransactionSession,
     );
@@ -57,6 +60,12 @@ export class PayShipmentService implements IPayShipment {
     const {
       stripeCustomerId,
     }: Customer = await this.customerRepository.findCustomer({ customerId });
+
+    const {
+      stripeAccountId: hostStripeAccountId,
+    }: Host = await this.hostRepository.findHost({
+      hostId,
+    });
 
     const price: StripePrice = stripePrice(finalShipmentCost);
 
@@ -74,6 +83,9 @@ export class PayShipmentService implements IPayShipment {
           quantity: 1,
         },
       ],
+      payment_intent_data: {
+        transfer_data: { destination: hostStripeAccountId },
+      },
       metadata: {
         feeType: FeeType.Shipment,
         orderId,
