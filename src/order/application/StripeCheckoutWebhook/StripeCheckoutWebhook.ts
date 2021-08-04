@@ -27,12 +27,12 @@ export class StripeCheckoutWebhook implements IStripeCheckoutWebhook {
     private readonly payShipmentWebhookGateway: IPayShipmentHandler,
   ) {}
 
-  // TODO: Auth for Stripe webhooks
   @StripeWebhookHandler('checkout.session.completed')
   execute(event: StripeEvent): Promise<StripeCheckoutResult> {
-    const webhookPayload = (event.data.object as StripeCheckoutSession)
-      .metadata as StripeCheckoutWebhookPayload;
+    const session = event.data.object as StripeCheckoutSession;
+    const webhookPayload = session.metadata as StripeCheckoutWebhookPayload;
 
+    //https://stripe.com/docs/payments/checkout/fulfill-orders
     switch (webhookPayload.feeType) {
       case FeeType.Service:
         return this.confirmOrderWebhookGateway.execute({

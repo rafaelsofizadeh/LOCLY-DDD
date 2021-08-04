@@ -99,7 +99,7 @@ async function withNewSessionTransaction<T>(
 
 export function stripePrice({ currency, amount }: Cost): StripePrice {
   return {
-    currency: currency,
+    currency: currency.toLocaleLowerCase(),
     unit_amount: Math.floor(amount * 100),
   };
 }
