@@ -1691,7 +1691,7 @@ export const priceGuide: ShipmentCostSpecification = {
   JPN: {
     postalServiceName: 'Japan Post',
     priceTableSpecification: {
-      currency: 'AUD',
+      currency: 'JPY',
       deliveryZoneNames: [
         'First Zone',
         'Second Zone',
@@ -7302,7 +7302,7 @@ export const priceGuide: ShipmentCostSpecification = {
       },
     ],
   },
-  PLN: {
+  POL: {
     postalServiceName: 'Poczta Polska',
     priceTableSpecification: {
       currency: 'PLN',
