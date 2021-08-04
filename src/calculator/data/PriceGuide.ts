@@ -1764,6 +1764,7 @@ export const priceGuide: ShipmentCostSpecification = {
         'LAO',
       ],
       'Third Zone': [
+        'USA',
         'ABW',
         'AIA',
         'ATG',

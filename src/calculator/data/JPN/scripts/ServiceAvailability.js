@@ -31,6 +31,7 @@ const zones = {
     'Laos',
   ],
   'Third Zone': [
+    'United States of America',
     'Aruba',
     'Anguilla',
     'Antigua and Barbuda',
@@ -231,4 +232,3 @@ writeFileSync(
   JSON.stringify(isoEntries, null, 2),
   'utf8',
 );
-
