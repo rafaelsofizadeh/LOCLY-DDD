@@ -76,15 +76,30 @@ const testProviders: Provider[] = [];
       useFactory: async (db: Db) => ({
         storage: new GridFsStorage({
           db,
-          // TODO: Better 'file' function typing
-          // IMPORTANT: ALWAYS PUT REQUEST BODY FIELDS BEFORE FILE FIELD, or else req.body might be unpopulated
+          // IMPORTANT: ALWAYS PUT REQUEST BODY FIELDS BEFORE FILE FIELD, or else req.body will be empty
           // https://stackoverflow.com/a/43197040
           file: (request: Request) => {
+            let bucketName: string;
             const photoId = UUID();
+            const pathDestination = request.originalUrl
+              .split('/')
+              ?.slice(-1)[0];
+
+            if (pathDestination === 'itemPhotos') {
+              bucketName = 'host_item_photos';
+            } else if (pathDestination === 'shipmentInfo') {
+              bucketName = 'host_item_receipts';
+            } else {
+              throwCustomException(
+                'Path not allowed for file upload',
+                { path: request.originalUrl },
+                HttpStatus.FORBIDDEN,
+              )();
+            }
 
             return {
               id: uuidToMuuid(photoId),
-              bucketName: 'host_item_photos',
+              bucketName,
               filename: photoId,
             };
           },
@@ -93,20 +108,65 @@ const testProviders: Provider[] = [];
           fileSize: maxPhotoSizeBytes,
           files: maxSimulataneousPhotoCount,
         },
-        fileFilter: (req, { mimetype }, cb) => {
+        fileFilter: (request, { mimetype }, cb) => {
+          const createRegexFilter = (
+            type: keyof typeof allowedExtensions,
+          ): RegExp => {
+            return new RegExp(
+              `^${type}\\/(${allowedExtensions[type]
+                .map(ext => escapeRegex(ext))
+                .join('|')})`,
+            );
+          };
+
+          const allowedExtensions = {
+            image: ['jpeg', 'jpg', 'png', 'gif', 'heic', 'mp4'],
+            video: ['mp4', 'mpeg', 'avi', 'ogg', 'webm'],
+            application: [
+              'msword',
+              'pdf',
+              'vnd.openxmlformats-officedocument.wordprocessingml.document',
+            ],
+          };
+
+          const filterGroups: {
+            [path: string]: Array<keyof typeof allowedExtensions>;
+          } = {
+            itemPhotos: ['image', 'video'],
+            shipmentInfo: ['image', 'application'],
+          };
+
+          const pathDestination = request.originalUrl.split('/')?.slice(-1)[0];
+
+          if (!filterGroups.hasOwnProperty(pathDestination)) {
+            try {
+              throwCustomException(
+                'Path not allowed for file upload',
+                { path: request.originalUrl },
+                HttpStatus.FORBIDDEN,
+              )();
+            } catch (exception) {
+              cb(exception, false);
+            }
+          }
+
           if (
-            !/(?:image\/(?:jpeg|jpg|png|gif|heic))|(?:video\/(?:mp4|mpeg|avi|ogg|webm))/.test(
-              mimetype,
+            !filterGroups[pathDestination].every(filter =>
+              createRegexFilter(filter).test(mimetype),
             )
           ) {
             try {
               throwCustomException(
-                'Unsupported file mimetype',
+                'Unsupported file mimetype for path',
                 {
-                  allowedFileMimetypes: {
-                    'image/': ['jpeg', 'jpg', 'png', 'gif', 'heic', 'mp4'],
-                    'video/': ['mp4', 'mpeg', 'avi', 'ogg', 'webm'],
-                  },
+                  path: request.originalUrl,
+                  allowedFileMimetypes: filterGroups[pathDestination].reduce(
+                    (allowed, type) => {
+                      allowed[type] = allowedExtensions[type];
+                      return allowed;
+                    },
+                    {},
+                  ),
                   actualFileMimetype: mimetype,
                 },
                 HttpStatus.BAD_REQUEST,
@@ -127,3 +187,7 @@ const testProviders: Provider[] = [];
   exports: [...useCaseProviders],
 })
 export class OrderModule {}
+
+function escapeRegex(string: string) {
+  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
