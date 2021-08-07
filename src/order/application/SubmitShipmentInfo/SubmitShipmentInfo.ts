@@ -11,8 +11,14 @@ import {
 } from './ISubmitShipmentInfo';
 import { Order, OrderStatus } from '../../entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
-import { Item } from '../../entity/Item';
 import { UUID } from '../../../common/domain';
+
+enum UnfinalizedItemReason {
+  NO_PHOTOS = 'no photos',
+  NOT_RECEIVED = 'not received',
+}
+
+export type UnfinalizedItem = { id: UUID; reasons: UnfinalizedItemReason[] };
 
 @Injectable()
 export class SubmitShipmentInfo implements ISubmitShipmentInfo {
@@ -36,17 +42,15 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
     }: SubmitShipmentInfoPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<void> {
-    const notFinalizedItems: Item[] = await this.getUnfinalizedItems(
+    const unfinalizedItems: UnfinalizedItem[] = await this.getUnfinalizedItems(
       orderId,
       hostId,
     );
 
-    const notFinalizedItemIds: UUID[] = notFinalizedItems.map(({ id }) => id);
-
-    if (notFinalizedItems.length) {
+    if (unfinalizedItems.length) {
       throwCustomException(
         "Can't finalize order until all items have uploaded photos and have been marked as 'received'",
-        { orderId, notFinalizedItemIds },
+        { orderId, unfinalizedItems },
         HttpStatus.FORBIDDEN,
       )();
     }
@@ -67,17 +71,29 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
   private async getUnfinalizedItems(
     orderId: UUID,
     hostId: UUID,
-  ): Promise<Item[]> {
+  ): Promise<UnfinalizedItem[]> {
     const order: Order = await this.orderRepository.findOrder({
       orderId,
       status: OrderStatus.Confirmed,
       hostId,
     });
 
-    const notFinalizedItems: Item[] = order.items.filter(
-      ({ receivedDate, photoIds }) => !(receivedDate && photoIds.length),
-    );
+    const unfinalizedItems: UnfinalizedItem[] = order.items
+      .map(({ id, receivedDate, photoIds }) => {
+        const reasons: UnfinalizedItemReason[] = [];
 
-    return notFinalizedItems;
+        if (!receivedDate) {
+          reasons.push(UnfinalizedItemReason.NOT_RECEIVED);
+        }
+
+        if (!photoIds?.length) {
+          reasons.push(UnfinalizedItemReason.NO_PHOTOS);
+        }
+
+        return reasons.length ? { id, reasons } : undefined;
+      })
+      .filter(unfinalizedItem => Boolean(unfinalizedItem));
+
+    return unfinalizedItems;
   }
 }
