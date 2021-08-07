@@ -24,8 +24,8 @@ import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
 import { Item } from '../../../src/order/entity/Item';
 import { Collection } from 'mongodb';
 import {
-  PhotoChunk,
-  PhotoDocument,
+  FileUploadChunkMongoDocument,
+  FileUploadMongoDocument,
 } from '../../../src/order/persistence/OrderMongoMapper';
 import { getCollectionToken } from 'nest-mongodb';
 import {
@@ -44,8 +44,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
   let hostRepository: IHostRepository;
   let orderRepository: IOrderRepository;
 
-  let photoFileCollection: Collection<PhotoDocument>;
-  let photoChunkCollection: Collection<PhotoChunk>;
+  let photoFileCollection: Collection<FileUploadMongoDocument>;
+  let photoChunkCollection: Collection<FileUploadChunkMongoDocument>;
 
   let receiveItem: IReceiveItem;
 
@@ -146,12 +146,12 @@ describe('[POST /order/draft] IDraftOrder', () => {
     expect(updatedItem.photoIds.length).toBe(1);
     expect(updatedItem.photoIds[0]).toBe(photoId);
 
-    const photoUploadRepoResult: PhotoDocument[] = await photoFileCollection
+    const photoUploadRepoResult: FileUploadMongoDocument[] = await photoFileCollection
       .find({ _id: uuidToMuuid(photoId) })
       .toArray();
     expect(photoUploadRepoResult.length).toBe(1);
 
-    const photoDocument: PhotoDocument = photoUploadRepoResult[0];
+    const photoDocument: FileUploadMongoDocument = photoUploadRepoResult[0];
 
     order = updatedOrder;
     receivedItem = updatedItem;
@@ -202,7 +202,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       resultPhotoIds.every(photoId => updatedItem.photoIds.includes(photoId)),
     ).toBe(true);
 
-    const photoUploadRepoResult: PhotoDocument[] = await photoFileCollection
+    const photoUploadRepoResult: FileUploadMongoDocument[] = await photoFileCollection
       .find({ _id: { $in: updatedItem.photoIds.map(uuidToMuuid) } })
       .toArray();
     expect(photoUploadRepoResult.length).toBe(newPhotosLength);

@@ -24,8 +24,8 @@ import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
 import { Item } from '../../../src/order/entity/Item';
 import { Collection } from 'mongodb';
 import {
-  PhotoChunk,
-  PhotoDocument,
+  FileUploadChunkMongoDocument,
+  FileUploadMongoDocument,
 } from '../../../src/order/persistence/OrderMongoMapper';
 import { getCollectionToken } from 'nest-mongodb';
 

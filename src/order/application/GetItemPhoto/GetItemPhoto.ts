@@ -7,7 +7,10 @@ import {
 } from '../../../common/application';
 import { throwCustomException } from '../../../common/error-handling';
 import { uuidToMuuid } from '../../../common/persistence';
-import { PhotoChunk, PhotoDocument } from '../../persistence/OrderMongoMapper';
+import {
+  FileUploadChunkMongoDocument,
+  FileUploadMongoDocument,
+} from '../../persistence/OrderMongoMapper';
 import { IGetOrder } from '../GetOrder/IGetOrder';
 import {
   GetItemPhotoPayload,
@@ -20,9 +23,11 @@ export class GetItemPhoto implements IGetItemPhoto {
   constructor(
     private readonly getOrder: IGetOrder,
     @InjectCollection('host_item_photos.files')
-    private readonly photoFileCollection: Collection<PhotoDocument>,
+    private readonly photoFileCollection: Collection<FileUploadMongoDocument>,
     @InjectCollection('host_item_photos.chunks')
-    private readonly photoChunkCollection: Collection<PhotoChunk>,
+    private readonly photoChunkCollection: Collection<
+      FileUploadChunkMongoDocument
+    >,
   ) {}
 
   @Transaction
@@ -53,7 +58,7 @@ export class GetItemPhoto implements IGetItemPhoto {
       filename: fileName,
       contentType,
       _id: fileMuuid,
-    }: PhotoDocument = await this.photoFileCollection
+    }: FileUploadMongoDocument = await this.photoFileCollection
       .findOne({ _id: photoMuuid })
       .catch(
         throwCustomException(
@@ -63,7 +68,7 @@ export class GetItemPhoto implements IGetItemPhoto {
         ),
       );
 
-    const photoChunks: PhotoChunk[] = await this.photoChunkCollection
+    const photoChunks: FileUploadChunkMongoDocument[] = await this.photoChunkCollection
       .find({ files_id: fileMuuid })
       .toArray()
       .catch(throwCustomException('Error getting photo', getItemPhotoPayload));

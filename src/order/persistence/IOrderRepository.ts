@@ -3,7 +3,7 @@ import { UUID } from '../../common/domain';
 import { ItemFilter } from '../entity/Item';
 import { Order, DraftedOrder, OrderFilter, OrderStatus } from '../entity/Order';
 import { ItemPhotosUploadResult } from '../application/AddItemPhotos/IAddItemPhotos';
-import { PhotoFile } from './OrderMongoMapper';
+import { FileUpload } from './OrderMongoMapper';
 
 type T<K extends keyof Order = any> = Omit<
   OrderFilter,
@@ -120,7 +120,7 @@ export abstract class IOrderRepository {
   abstract addItemPhotos(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
-    photos: PhotoFile[],
+    photos: FileUpload[],
     mongoTransactionSession?: ClientSession,
   ): Promise<ItemPhotosUploadResult>;
 }

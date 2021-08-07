@@ -10,7 +10,7 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 import {
   IDraftOrder,
@@ -46,7 +46,7 @@ import {
   AddItemPhotoRequest,
   IAddItemPhotos,
 } from './application/AddItemPhotos/IAddItemPhotos';
-import { PhotoFile } from './persistence/OrderMongoMapper';
+import { FileUpload } from './persistence/OrderMongoMapper';
 import {
   SubmitShipmentInfoRequest,
   SubmitShipmentInfoResult,
@@ -207,7 +207,7 @@ export class OrderController {
   @UseInterceptors(FilesInterceptor('photos'))
   async addItemPhotoHandler(
     @Body() unidAddItemPhotoRequest: AddItemPhotoRequest,
-    @UploadedFiles() photos: PhotoFile[],
+    @UploadedFiles() photos: FileUpload[],
     @VerifiedHostIdentity() { id: hostId }: Host,
   ) {
     const addItemPhotoPayload: AddItemPhotoPayload = {
@@ -243,8 +243,11 @@ export class OrderController {
   }
 
   @Post('shipmentInfo')
+  // file control/validation is done by MulterModule registration
+  @UseInterceptors(FileInterceptor('confirmationFile'))
   async submitShipmentInfoHandler(
     @Body() unidSubmitShipmentInfoRequest: SubmitShipmentInfoRequest,
+    @UploadedFiles() photos: FileUpload[],
     @VerifiedHostIdentity() { id: hostId }: Host,
   ): Promise<SubmitShipmentInfoResult> {
     const submitShipmentInfoPayload: SubmitShipmentInfoPayload = {

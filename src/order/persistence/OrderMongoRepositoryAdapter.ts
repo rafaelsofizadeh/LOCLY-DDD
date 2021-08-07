@@ -23,8 +23,8 @@ import {
   OrderMongoDocument,
   normalizeOrderFilter,
   normalizeItemFilter,
-  PhotoDocument,
-  PhotoFile,
+  FileUploadMongoDocument,
+  FileUpload,
 } from './OrderMongoMapper';
 import {
   mongoQuery,
@@ -294,7 +294,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
   async addItemPhotos(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
-    photos: PhotoFile[],
+    photos: FileUpload[],
     mongoTransactionSession?: ClientSession,
   ): Promise<ItemPhotosUploadResult> {
     const { status, ...restOrderFilterWithId } = normalizeOrderFilter(
