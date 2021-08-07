@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ClientSession } from 'mongodb';
 import { alpha3ToAlpha2 } from 'i18n-iso-countries';
 import { IHostRepository } from '../../../host/persistence/IHostRepository';
@@ -7,7 +7,7 @@ import {
   Transaction,
   TransactionUseCasePort,
 } from '../../../common/application';
-import { UUID } from '../../../common/domain';
+import { Address, UUID } from '../../../common/domain';
 import { Host } from '../../entity/Host';
 import { CreateHostPayload, ICreateHost } from './ICreateHost';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
@@ -100,7 +100,38 @@ export class CreateHost implements ICreateHost {
       )();
     }
 
-    const hostAccount: Stripe.Account = await this.stripe.accounts.create({
+    const hostAccount: Stripe.Account = await this.createHostStripeAccount({
+      email,
+      country,
+    });
+
+    const host: Host = {
+      id: UUID(),
+      email,
+      country,
+      firstName: undefined,
+      lastName: undefined,
+      address: {} as Address,
+      orderIds: [],
+      stripeAccountId: hostAccount.id,
+      available: false,
+      verified: false,
+      profileComplete: false,
+    };
+
+    await this.hostRepository.addHost(host, mongoTransactionSession);
+
+    return host;
+  }
+
+  async createHostStripeAccount({
+    email,
+    country,
+  }: {
+    email: string;
+    country: Country;
+  }): Promise<Stripe.Account> {
+    return this.stripe.accounts.create({
       type: 'express',
       email,
       country: alpha3ToAlpha2(country),
@@ -108,7 +139,7 @@ export class CreateHost implements ICreateHost {
         transfers: { requested: true },
       },
       business_type: 'individual',
-      // TODO: Do this through Stripe dashboard
+      // Possible to do through Stripe dashboard
       // https://stripe.com/docs/connect/service-agreement-types#choosing-type-with-express
       // https://dashboard.stripe.com/settings/connect/express
       tos_acceptance: {
@@ -127,20 +158,5 @@ export class CreateHost implements ICreateHost {
         },
       },
     });
-
-    const host: Host = {
-      id: UUID(),
-      email,
-      country,
-      orderIds: [],
-      stripeAccountId: hostAccount.id,
-      available: false,
-      verified: false,
-      profileComplete: false,
-    };
-
-    await this.hostRepository.addHost(host, mongoTransactionSession);
-
-    return host;
   }
 }

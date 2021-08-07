@@ -1,3 +1,4 @@
+import Stripe from 'stripe';
 import { UseCase } from '../../../common/application';
 import { Email } from '../../../common/domain';
 import { Country } from '../../../order/entity/Country';
@@ -8,4 +9,8 @@ export type CreateHostPayload = Readonly<{
   country: Country;
 }>;
 
-export abstract class ICreateHost extends UseCase<CreateHostPayload, Host> {}
+export abstract class ICreateHost extends UseCase<CreateHostPayload, Host> {
+  abstract createHostStripeAccount(
+    properties: Partial<Stripe.Account>,
+  ): Promise<Stripe.Account>;
+}
