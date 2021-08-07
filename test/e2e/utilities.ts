@@ -84,7 +84,7 @@ export async function createTestHost(
   verified: boolean = true,
   available: boolean = true,
   profileComplete: boolean = true,
-  stripeAccountTransfersActive: boolean = true,
+  orderCount: number = 0,
 ): Promise<{
   host: Host;
   createHost: ICreateHost;
@@ -102,7 +102,7 @@ export async function createTestHost(
 
   const email = `${UUID()}@email.com`;
 
-  if (stripeAccountTransfersActive) {
+  if (verified) {
     createHost.createHostStripeAccount = async function createHostStripeAccount() {
       const hostStripeAccount: Stripe.Account = await this.stripe.accounts.create(
         {
@@ -171,6 +171,9 @@ export async function createTestHost(
       profileComplete,
       firstName: 'Host',
       lastName: 'Testov',
+      orderIds: Array(orderCount)
+        .fill('')
+        .map(() => UUID()),
       address: {
         addressLine1: '42 Random St.',
         locality: 'Random City',
