@@ -14,7 +14,6 @@ import {
   authorize,
   createConfirmedOrder,
   createTestCustomer,
-  createTestHost,
   createTestHostWithStripeTransfersCapability,
 } from '../utilities';
 import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
@@ -22,13 +21,6 @@ import { IOrderRepository } from '../../../src/order/persistence/IOrderRepositor
 import { Host } from '../../../src/host/entity/Host';
 import { IReceiveItem } from '../../../src/order/application/ReceiveItem/IReceiveItem';
 import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
-import { Item } from '../../../src/order/entity/Item';
-import { Collection } from 'mongodb';
-import {
-  FileUploadChunkMongoDocument,
-  FileUploadMongoDocument,
-} from '../../../src/order/persistence/OrderMongoMapper';
-import { getCollectionToken } from 'nest-mongodb';
 
 describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
@@ -74,7 +66,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     ({ agent } = await authorize(app, moduleRef, host.email, UserType.Host));
   });
 
-  const itemCountTestCases = [1, 2];
+  const itemCountTestCases = [[1], [2]];
 
   async function beforeEachTest(
     itemCount: number,
@@ -87,6 +79,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       itemCount,
     });
 
+    // slice(0, receivedCount) === [0, ..., receivedCount - 1]
     for (const receivedItem of order.items.slice(0, receivedCount)) {
       await receiveItem.execute({
         port: {
@@ -163,7 +156,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
   it.each(itemCountTestCases)(
     'Fail (%i item(s) received but not all photographed)',
-    async itemCount => {
+    async function(itemCount) {
       await beforeEachTest(itemCount, itemCount - 1);
 
       const requestPayload = {
@@ -180,6 +173,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
         .post('/order/shipmentInfo')
         .send(requestPayload);
 
+      // beforeEachTest -> receivedCount passed: itemCount - 1 => 1 item will not be received
+      expect(response.body.data.unfinalizedItems.length).toBe(1);
       expect(response.status).toBe(HttpStatus.FORBIDDEN);
 
       const updatedOrder: Order = await orderRepository.findOrder({

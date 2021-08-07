@@ -276,18 +276,20 @@ export async function createConfirmedOrder(
     IConfirmOrderHandler,
   );
 
+  const itemRequest = Array(itemCount)
+    .fill({})
+    .map((_, index) => ({
+      title: 'Item #' + (index + 1),
+      storeName: 'Random Store',
+      weight: 2000 / itemCount,
+    }));
+
   const { id: orderId } = await draftOrder.execute({
     port: {
       customerId: customer.id,
       originCountry,
       destination: customer.addresses[0],
-      items: Array(itemCount)
-        .fill({})
-        .map((_, index) => ({
-          title: 'Item #' + (index + 1),
-          storeName: 'Random Store',
-          weight: 2000 / itemCount,
-        })),
+      items: itemRequest,
     },
   });
 
