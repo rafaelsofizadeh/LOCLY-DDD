@@ -148,14 +148,14 @@ export class ConfirmOrder implements IConfirmOrder {
     return checkoutSession;
   }
 
-  private calculateTotalFee(): Cost {
+  calculateTotalFee(): Cost {
     return {
       currency: 'USD',
       amount: this.configService.get<number>('TOTAL_SERVICE_FEE_USD'),
     };
   }
 
-  private calculateLoclyFee({ currency, amount: totalAmount }: Cost): Cost {
+  calculateLoclyFee({ currency, amount: totalAmount }: Cost): Cost {
     return {
       currency,
       amount:

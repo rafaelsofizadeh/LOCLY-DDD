@@ -20,19 +20,23 @@ import {
   OrderStatus,
 } from '../../../src/order/entity/Order';
 import { Email, UUID } from '../../../src/common/domain';
-import { ConfigService } from '@nestjs/config';
-import { ConfirmOrderResult } from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import {
+  ConfirmOrderResult,
+  IConfirmOrder,
+} from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import { setupNestApp } from '../../../src/main';
-import { authorize, createTestCustomer } from '../utilities';
+import { authorize, createTestCustomer, createTestHost } from '../utilities';
 import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { UserType } from '../../../src/auth/entity/Token';
 import Stripe from 'stripe';
 import { STRIPE_CLIENT_TOKEN } from '@golevelup/nestjs-stripe';
+import { ConfirmOrder } from '../../../src/order/application/ConfirmOrder/ConfirmOrder';
+import { stripePrice } from '../../../src/common/application';
 
 type HostConfig = {
-  email: Email;
   verified: boolean;
   country: Country;
   available: boolean;
@@ -44,9 +48,11 @@ describe('Confirm Order – POST /order/confirm', () => {
   let moduleRef: TestingModule;
   let agent: ReturnType<typeof supertest.agent>;
   let stripe: Stripe;
+  let configService: ConfigService;
 
   let order: DraftedOrder;
   let draftOrder: IDraftOrder;
+  let confirmOrder: IConfirmOrder;
   let deleteOrder: IDeleteOrder;
   let orderRepository: IOrderRepository;
 
@@ -76,12 +82,12 @@ describe('Confirm Order – POST /order/confirm', () => {
     await app.init();
 
     stripe = await moduleRef.resolve(STRIPE_CLIENT_TOKEN);
-
-    const configService = await moduleRef.resolve(ConfigService);
+    configService = await moduleRef.resolve(ConfigService);
 
     orderRepository = await moduleRef.resolve(IOrderRepository);
     hostRepository = await moduleRef.resolve(IHostRepository);
     draftOrder = await moduleRef.resolve(IDraftOrder);
+    confirmOrder = await moduleRef.resolve(IConfirmOrder);
     deleteOrder = await moduleRef.resolve(IDeleteOrder);
 
     ({ customer, deleteCustomer } = await createTestCustomer(moduleRef));
@@ -146,7 +152,12 @@ describe('Confirm Order – POST /order/confirm', () => {
     await app.close();
   });
 
-  it.only(`Matches Order with a Host, completes Stripe checkout for Locly service fee payment`, async () => {
+  it(`Matches Order with a Host, completes Stripe checkout for Locly service fee payment`, async () => {
+    const notOriginCountries: Country[] = originCountriesAvailable.filter(
+      country => country !== originCountry,
+    );
+    const notOriginCountry: Country =
+      notOriginCountries[Math.floor(Math.random() * notOriginCountries.length)];
     const testHostConfigs: HostConfig[] = [
       /*
       Test host #1:
@@ -156,7 +167,6 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✔ lowest number of orders (1)
       */
       {
-        email: 'johndoe@example.com',
         verified: false,
         country: originCountry,
         available: true,
@@ -170,7 +180,6 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✔ lowest number of orders (1)
       */
       {
-        email: 'johndoe@example.com',
         verified: true,
         country: originCountry,
         available: false,
@@ -184,9 +193,8 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✔ lowest number of orders (1)
       */
       {
-        email: 'johndoe@example.com',
         verified: true,
-        country: 'XXX' as Country,
+        country: notOriginCountry,
         available: true,
         orderCount: 1,
       },
@@ -198,7 +206,6 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✔ available
       */
       {
-        email: 'johndoe@example.com',
         verified: true,
         country: originCountry,
         available: true,
@@ -212,9 +219,8 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✗ verified
       */
       {
-        email: 'johndoe@example.com',
         verified: false,
-        country: 'ZZZ' as Country,
+        country: notOriginCountry,
         available: false,
         orderCount: 3,
       },
@@ -226,16 +232,14 @@ describe('Confirm Order – POST /order/confirm', () => {
       ✔ lowest number of orders (1)
       */
       {
-        email: 'johndoe@example.com',
         verified: true,
         country: originCountry,
         available: true,
         orderCount: 1,
       },
     ];
-    hosts = configsToHosts(testHostConfigs);
-    await hostRepository.addManyHosts(hosts);
-    const testMatchedHost = hosts[hosts.length - 1];
+    hosts = await configsToHosts(moduleRef, testHostConfigs);
+    const testMatchedHost = hosts.slice(-1)[0];
 
     const loclyStripeBalanceBefore: Stripe.Balance = await stripe.balance.retrieve();
     const hostStripeBalanceBefore: Stripe.Balance = await stripe.balance.retrieve(
@@ -306,6 +310,40 @@ describe('Confirm Order – POST /order/confirm', () => {
       '\n AFTER:',
       hostStripeBalanceAfter,
     );
+
+    const totalFee = confirmOrder.calculateTotalFee();
+    const loclyFee = confirmOrder.calculateLoclyFee(totalFee);
+
+    const totalPrice = stripePrice(totalFee);
+    const loclyPrice = stripePrice(loclyFee);
+
+    const findBalance = ({ pending }: Stripe.Balance) =>
+      pending.find(({ currency }) => currency === totalPrice.currency);
+
+    const [
+      loclyPendingBefore,
+      loclyPendingAfter,
+      hostPendingBefore,
+      hostPendingAfter,
+    ] = [
+      loclyStripeBalanceBefore,
+      loclyStripeBalanceAfter,
+      hostStripeBalanceBefore,
+      hostStripeBalanceAfter,
+    ].map(findBalance);
+
+    // Stripe fee (without conversion): 2.9% + $0.3
+    // https://stripe.com/pricing
+    const stripeFee = totalPrice.unit_amount * 2.9 * 0.01 + 30;
+    const loclyAfterStripeFee = loclyPrice.unit_amount - stripeFee;
+
+    expect(loclyPendingAfter.amount - loclyPendingBefore.amount).toBe(
+      loclyAfterStripeFee,
+    );
+
+    expect(hostPendingAfter.amount - hostPendingBefore.amount).toBe(
+      totalPrice.unit_amount - loclyPrice.unit_amount,
+    );
   });
 
   it(`Doesn't match Order with a Host as no Host is available in given country`, async () => {
@@ -323,10 +361,9 @@ describe('Confirm Order – POST /order/confirm', () => {
         available: true,
         orderCount: 1,
         verified: true,
-        email: 'johndoe@example.com',
       }),
     );
-    hosts = configsToHosts(testHostConfigs);
+    hosts = await configsToHosts(moduleRef, testHostConfigs);
     await hostRepository.addManyHosts(hosts);
 
     const response: supertest.Response = await agent
@@ -401,26 +438,37 @@ async function fillStripeCheckoutForm(): Promise<void> {
   });
 }
 
-function generateUuids(n: number) {
-  const uuids: UUID[] = [];
-
-  for (let i = 0; i < n; i++) {
-    uuids.push(UUID());
-  }
-
-  return uuids;
-}
-
-function configsToHosts(hostConfigs: HostConfig[]): Host[] {
+async function configsToHosts(
+  moduleRef: TestingModule,
+  hostConfigs: HostConfig[],
+): Promise<Host[]> {
   // @ts-ignore
-  return hostConfigs.map(
-    ({ email, country, available, orderCount, verified }) => ({
-      id: UUID(),
-      email,
-      address: { country },
-      verified,
-      available,
-      orderIds: generateUuids(orderCount),
-    }),
+  // Stripe account creation rate-limiting
+  const hostsPerSecond = 3;
+  const hostCreateTimeout = 1000 / hostsPerSecond;
+
+  const hostPromises: Promise<Host>[] = [];
+
+  hostConfigs.map(({ country, available, orderCount, verified }, index) =>
+    setTimeout(
+      () =>
+        hostPromises.push(
+          createTestHost(
+            moduleRef,
+            country,
+            verified,
+            available,
+            true,
+            orderCount,
+          ).then(({ host }) => host),
+        ),
+      hostCreateTimeout * index,
+    ),
   );
+
+  await new Promise(res =>
+    setTimeout(res, hostCreateTimeout * hostConfigs.length),
+  );
+
+  return Promise.all(hostPromises);
 }
