@@ -3,7 +3,7 @@ import child_process from 'child_process';
 import path from 'path';
 import supertest from 'supertest';
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
@@ -28,6 +28,8 @@ import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustome
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { UserType } from '../../../src/auth/entity/Token';
+import Stripe from 'stripe';
+import { STRIPE_CLIENT_TOKEN } from '@golevelup/nestjs-stripe';
 
 type HostConfig = {
   email: Email;
@@ -39,7 +41,9 @@ type HostConfig = {
 
 describe('Confirm Order – POST /order/confirm', () => {
   let app: INestApplication;
+  let moduleRef: TestingModule;
   let agent: ReturnType<typeof supertest.agent>;
+  let stripe: Stripe;
 
   let order: DraftedOrder;
   let draftOrder: IDraftOrder;
@@ -61,7 +65,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     // https://stackoverflow.com/a/49864436/6539857
     jest.setTimeout(50000);
 
-    const moduleRef = await Test.createTestingModule({
+    moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
@@ -70,6 +74,8 @@ describe('Confirm Order – POST /order/confirm', () => {
     });
     await setupNestApp(app);
     await app.init();
+
+    stripe = await moduleRef.resolve(STRIPE_CLIENT_TOKEN);
 
     const configService = await moduleRef.resolve(ConfigService);
 
@@ -140,8 +146,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     await app.close();
   });
 
-  it(`Matches Order with a Host, updates Order's "hostId" property, and Host's "orderIds" property`, async () => {
-    // TODO: Vary 'verified' true-false
+  it.only(`Matches Order with a Host, completes Stripe checkout for Locly service fee payment`, async () => {
     const testHostConfigs: HostConfig[] = [
       /*
       Test host #1:
@@ -230,8 +235,12 @@ describe('Confirm Order – POST /order/confirm', () => {
     ];
     hosts = configsToHosts(testHostConfigs);
     await hostRepository.addManyHosts(hosts);
-
     const testMatchedHost = hosts[hosts.length - 1];
+
+    const loclyStripeBalanceBefore: Stripe.Balance = await stripe.balance.retrieve();
+    const hostStripeBalanceBefore: Stripe.Balance = await stripe.balance.retrieve(
+      { stripeAccount: testMatchedHost.stripeAccountId },
+    );
 
     const response: supertest.Response = await agent
       .post('/order/confirm')
@@ -248,11 +257,8 @@ describe('Confirm Order – POST /order/confirm', () => {
     expect(checkoutId.slice(0, 2)).toBe('cs'); // "Checkout Session"
 
     updatedStripeCheckoutSessionInTestPage(checkoutId);
-
     await fillStripeCheckoutForm();
-
     await new Promise(res => setTimeout(res, 15000));
-
     await page.screenshot({
       path: './test/e2e/order/stripe_form_result.png',
       fullPage: true,
@@ -281,6 +287,24 @@ describe('Confirm Order – POST /order/confirm', () => {
     expect(updatedTestHost.orderIds).toContain(order.id);
     expect(updatedTestHost.orderIds.length).toBe(
       testMatchedHost.orderIds.length + 1,
+    );
+
+    const loclyStripeBalanceAfter: Stripe.Balance = await stripe.balance.retrieve();
+    const hostStripeBalanceAfter: Stripe.Balance = await stripe.balance.retrieve(
+      { stripeAccount: testMatchedHost.stripeAccountId },
+    );
+
+    console.log(
+      'BEFORE:',
+      loclyStripeBalanceBefore,
+      '\n AFTER:',
+      loclyStripeBalanceAfter,
+    );
+    console.log(
+      '\nBEFORE:',
+      hostStripeBalanceBefore,
+      '\n AFTER:',
+      hostStripeBalanceAfter,
     );
   });
 

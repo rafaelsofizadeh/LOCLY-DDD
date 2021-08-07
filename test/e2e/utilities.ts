@@ -80,8 +80,11 @@ export async function createTestCustomer(
 
 export async function createTestHost(
   moduleRef: TestingModule,
-  orderOriginCountry: Country = originCountriesAvailable[0],
-  customCreateHost?: ICreateHost,
+  country: Country = originCountriesAvailable[0],
+  verified: boolean = true,
+  available: boolean = true,
+  profileComplete: boolean = true,
+  stripeAccountTransfersActive: boolean = true,
 ): Promise<{
   host: Host;
   createHost: ICreateHost;
@@ -89,43 +92,91 @@ export async function createTestHost(
   getHost: IGetHost;
   deleteHost: IDeleteHost;
 }> {
-  const createHost: ICreateHost =
-    customCreateHost || (await moduleRef.resolve(ICreateHost));
+  const createHost: ICreateHost = await moduleRef.resolve(ICreateHost);
   const editHost: IEditHost = await moduleRef.resolve(IEditHost);
   const getHost: IGetHost = await moduleRef.resolve(IGetHost);
   const deleteHost: IDeleteHost = await moduleRef.resolve(IDeleteHost);
-
   const hostRepository: IHostRepository = await moduleRef.resolve(
     IHostRepository,
   );
 
   const email = `${UUID()}@email.com`;
-  const country: Country = orderOriginCountry;
+
+  if (stripeAccountTransfersActive) {
+    createHost.createHostStripeAccount = async function createHostStripeAccount() {
+      const hostStripeAccount: Stripe.Account = await this.stripe.accounts.create(
+        {
+          type: 'custom',
+          email,
+          country: 'US',
+          capabilities: {
+            transfers: { requested: true },
+          },
+          business_type: 'individual',
+          business_profile: {
+            url: 'https://bestcookieco.com',
+          },
+          individual: {
+            address: {
+              line1: 'address_full_match​',
+              city: 'Cambridge​',
+              state: 'MA',
+              postal_code: '02140',
+            },
+            dob: {
+              day: 1,
+              month: 1,
+              year: 1901,
+            },
+            first_name: 'Rafael',
+            last_name: 'Sofizada',
+            ssn_last_4: '0000',
+          },
+          external_account: {
+            object: 'bank_account',
+            country: 'US',
+            currency: 'usd',
+            routing_number: '110000000',
+            account_number: '000999999991',
+          },
+          // Possible to do through Stripe dashboard
+          // https://stripe.com/docs/connect/service-agreement-types#choosing-type-with-express
+          // https://dashboard.stripe.com/settings/connect/express
+          tos_acceptance: {
+            date: Math.round(new Date().getTime() / 1000),
+            ip: '172.18.80.19',
+          },
+        },
+      );
+
+      if (hostStripeAccount.capabilities.transfers !== 'active') {
+        throw new Error(
+          'Error creating test host Stripe account: transfers capability not active',
+        );
+      }
+
+      return hostStripeAccount;
+    };
+  }
 
   const { id: hostId } = await createHost.execute({
     port: { email, country },
   });
 
-  const firstName = 'Host';
-  const lastName = 'Testov';
-  const address: Address = {
-    addressLine1: '42 Random St.',
-    locality: 'Random City',
-    country,
-  };
-
-  await editHost.execute({
-    port: {
-      currentHostProperties: { id: hostId },
-      firstName,
-      lastName,
-      address,
-    },
-  });
-
   await hostRepository.setProperties(
     { hostId },
-    { available: true, verified: true },
+    {
+      available,
+      verified,
+      profileComplete,
+      firstName: 'Host',
+      lastName: 'Testov',
+      address: {
+        addressLine1: '42 Random St.',
+        locality: 'Random City',
+        country,
+      },
+    },
   );
 
   const host: Host = await getHost.execute({
@@ -139,78 +190,6 @@ export async function createTestHost(
     getHost,
     deleteHost,
   };
-}
-
-export async function createTestHostWithStripeTransfersCapability(
-  moduleRef: TestingModule,
-  orderOriginCountry: Country,
-): Promise<{
-  host: Host;
-  createHost: ICreateHost;
-  editHost: IEditHost;
-  getHost: IGetHost;
-  deleteHost: IDeleteHost;
-}> {
-  const createHostMock: ICreateHost = await moduleRef.resolve(ICreateHost);
-
-  createHostMock.createHostStripeAccount = async function createHostStripeAccount({
-    email,
-  }) {
-    const hostStripeAccount: Stripe.Account = await this.stripe.accounts.create(
-      {
-        type: 'custom',
-        email,
-        country: 'US',
-        capabilities: {
-          transfers: { requested: true },
-        },
-        business_type: 'individual',
-        business_profile: {
-          url: 'https://bestcookieco.com',
-        },
-        individual: {
-          address: {
-            line1: 'address_full_match​',
-            city: 'Cambridge​',
-            state: 'MA',
-            postal_code: '02140',
-          },
-          dob: {
-            day: 1,
-            month: 1,
-            year: 1901,
-          },
-          first_name: 'Rafael',
-          last_name: 'Sofizada',
-          ssn_last_4: '0000',
-        },
-        external_account: {
-          object: 'bank_account',
-          country: 'US',
-          currency: 'usd',
-          routing_number: '110000000',
-          account_number: '000999999991',
-        },
-        // Possible to do through Stripe dashboard
-        // https://stripe.com/docs/connect/service-agreement-types#choosing-type-with-express
-        // https://dashboard.stripe.com/settings/connect/express
-        tos_acceptance: {
-          date: Math.round(new Date().getTime() / 1000),
-          ip: '172.18.80.19',
-        },
-      },
-    );
-
-    if (hostStripeAccount.capabilities.transfers !== 'active') {
-      throw new Error(
-        'Error creating test host Stripe account with createTestHostWithStripeTransfersCapability(): transfers capability not active',
-      );
-    }
-
-    return hostStripeAccount;
-  };
-
-  return createTestHost(moduleRef, orderOriginCountry, createHostMock);
 }
 
 export async function authorize(

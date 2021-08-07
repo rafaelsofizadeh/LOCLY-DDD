@@ -14,7 +14,6 @@ import {
   createConfirmedOrder,
   createTestCustomer,
   createTestHost,
-  createTestHostWithStripeTransfersCapability,
 } from '../utilities';
 import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
 import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
@@ -56,10 +55,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     orderRepository = await moduleRef.resolve(IOrderRepository);
 
     ({ customer } = await createTestCustomer(moduleRef, originCountry));
-    ({ host } = await createTestHostWithStripeTransfersCapability(
-      moduleRef,
-      originCountry,
-    ));
+    ({ host } = await createTestHost(moduleRef, originCountry));
 
     order = await createConfirmedOrder(moduleRef, orderRepository, {
       customer,
