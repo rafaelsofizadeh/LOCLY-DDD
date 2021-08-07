@@ -115,7 +115,7 @@ const testProviders: Provider[] = [];
             return new RegExp(
               `^${type}\\/(${allowedExtensions[type]
                 .map(ext => escapeRegex(ext))
-                .join('|')})`,
+                .join('|')})$`,
             );
           };
 
@@ -151,10 +151,18 @@ const testProviders: Provider[] = [];
           }
 
           if (
-            !filterGroups[pathDestination].every(filter =>
+            !filterGroups[pathDestination].some(filter =>
               createRegexFilter(filter).test(mimetype),
             )
           ) {
+            filterGroups[pathDestination].map(filter =>
+              console.log(
+                createRegexFilter(filter),
+                mimetype,
+                createRegexFilter(filter).test(mimetype),
+              ),
+            );
+
             try {
               throwCustomException(
                 'Unsupported file mimetype for path',
