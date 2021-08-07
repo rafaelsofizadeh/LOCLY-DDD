@@ -15,6 +15,7 @@ import {
   createConfirmedOrder,
   createTestCustomer,
   createTestHost,
+  createTestHostWithStripeTransfersCapability,
 } from '../utilities';
 import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
 import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
@@ -65,7 +66,10 @@ describe('[POST /order/draft] IDraftOrder', () => {
     receiveItem = await moduleRef.resolve(IReceiveItem);
 
     ({ customer } = await createTestCustomer(moduleRef, originCountry));
-    ({ host } = await createTestHost(moduleRef, originCountry));
+    ({ host } = await createTestHostWithStripeTransfersCapability(
+      moduleRef,
+      originCountry,
+    ));
 
     ({ agent } = await authorize(app, moduleRef, host.email, UserType.Host));
   });
@@ -161,13 +165,6 @@ describe('[POST /order/draft] IDraftOrder', () => {
     'Fail (%i item(s) received but not all photographed)',
     async itemCount => {
       await beforeEachTest(itemCount, itemCount - 1);
-
-      console.log(
-        'AFTER',
-        await orderRepository.findOrder({
-          orderId: order.id,
-        }),
-      );
 
       const requestPayload = {
         orderId: order.id,
