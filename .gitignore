@@ -1,5 +1,5 @@
 # passwords and keys
-.env
+.*.env
 
 # compiled output
 /dist

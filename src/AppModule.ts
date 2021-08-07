@@ -30,7 +30,9 @@ import { IOrderRepository } from './order/persistence/IOrderRepository';
 import { OrderMongoRepositoryAdapter } from './order/persistence/OrderMongoRepositoryAdapter';
 
 const infrastructureModules: DynamicModule[] = [
-  ConfigModule.forRoot(),
+  ConfigModule.forRoot({
+    envFilePath: ['.main.env', '.app.env'],
+  }),
   MongoModule.forFeature([
     'orders',
     'customers',
