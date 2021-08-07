@@ -13,6 +13,7 @@ import { CreateHostPayload, ICreateHost } from './ICreateHost';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 import { Country } from '../../../order/entity/Country';
 import { throwCustomException } from '../../../common/error-handling';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class CreateHost implements ICreateHost {
@@ -75,6 +76,7 @@ export class CreateHost implements ICreateHost {
   ];
 
   constructor(
+    private readonly configService: ConfigService,
     private readonly hostRepository: IHostRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
   ) {}
@@ -113,9 +115,13 @@ export class CreateHost implements ICreateHost {
         service_agreement: 'recipient',
       },
       settings: {
+        // https://stripe.com/docs/connect/manage-payout-schedule
+        // https://stripe.com/docs/payouts#alternative-schedules
         payouts: {
           schedule: {
-            delay_days: 10,
+            delay_days: this.configService.get<number>(
+              'HOST_PAYOUT_DELAY_DAYS',
+            ),
             interval: 'daily',
           },
         },

@@ -21,6 +21,7 @@ import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { ConfirmOrderPayload } from './IConfirmOrder';
 import { Customer } from '../../../customer/entity/Customer';
 import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
+import { ConfigService } from '@nestjs/config';
 
 export type Match = {
   orderId: UUID;
@@ -30,6 +31,7 @@ export type Match = {
 @Injectable()
 export class ConfirmOrder implements IConfirmOrder {
   constructor(
+    private readonly configService: ConfigService,
     private readonly orderRepository: IOrderRepository,
     private readonly hostRepository: IHostRepository,
     private readonly customerRepository: ICustomerRepository,
@@ -149,14 +151,17 @@ export class ConfirmOrder implements IConfirmOrder {
   private calculateTotalFee(): Cost {
     return {
       currency: 'USD',
-      amount: 100,
+      amount: this.configService.get<number>('TOTAL_SERVICE_FEE_USD'),
     };
   }
 
   private calculateLoclyFee({ currency, amount: totalAmount }: Cost): Cost {
     return {
       currency,
-      amount: totalAmount * 0.2,
+      amount:
+        totalAmount *
+        (0.01 *
+          this.configService.get<number>('LOCLY_SERVICE_FEE_CUT_PERCENT')),
     };
   }
 }
