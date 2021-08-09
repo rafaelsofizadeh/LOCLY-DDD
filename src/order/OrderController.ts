@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -46,7 +47,7 @@ import {
   AddItemPhotoRequest,
   IAddItemPhotos,
 } from './application/AddItemPhotos/IAddItemPhotos';
-import { FileUpload } from './persistence/OrderMongoMapper';
+import { FileUpload, FileUploadResult } from './persistence/OrderMongoMapper';
 import {
   SubmitShipmentInfoRequest,
   SubmitShipmentInfoResult,
@@ -242,20 +243,26 @@ export class OrderController {
     });
   }
 
+  // TODO(NOW): Add stripePaymentIntentId to order
   @Post('shipmentInfo')
   // file control/validation is done by MulterModule registration
-  @UseInterceptors(FileInterceptor('confirmationFile'))
+  @UseInterceptors(FileInterceptor('proofOfPayment'))
   async submitShipmentInfoHandler(
     @Body() unidSubmitShipmentInfoRequest: SubmitShipmentInfoRequest,
-    @UploadedFiles() photos: FileUpload[],
+    @UploadedFile() proofOfPayment: FileUpload,
     @VerifiedHostIdentity() { id: hostId }: Host,
   ): Promise<SubmitShipmentInfoResult> {
     const submitShipmentInfoPayload: SubmitShipmentInfoPayload = {
       ...unidSubmitShipmentInfoRequest,
       hostId,
+      proofOfPayment,
     };
 
-    await this.submitShipmentInfo.execute({ port: submitShipmentInfoPayload });
+    const proofOfPaymentUpload: FileUploadResult = await this.submitShipmentInfo.execute(
+      { port: submitShipmentInfoPayload },
+    );
+
+    return proofOfPaymentUpload;
   }
 
   @Post('payShipment')

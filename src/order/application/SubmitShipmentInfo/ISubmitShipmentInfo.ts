@@ -14,6 +14,10 @@ import { IsUUID, UUID } from '../../../common/domain';
 import { Gram } from '../../entity/Item';
 import { Cost as ICost } from '../../entity/Order';
 import { UnidHostRequest } from '../../../host/entity/Host';
+import {
+  FileUpload,
+  FileUploadResult,
+} from '../../persistence/OrderMongoMapper';
 
 export type URL = string;
 
@@ -24,6 +28,7 @@ export interface SubmitShipmentInfoPayload
     totalWeight: Gram;
     shipmentCost: Cost;
     calculatorResultUrl?: URL;
+    proofOfPayment: FileUpload;
   }> {}
 
 class Cost implements ICost {
@@ -36,7 +41,8 @@ class Cost implements ICost {
 }
 
 export class SubmitShipmentInfoRequest
-  implements UnidHostRequest<SubmitShipmentInfoPayload> {
+  implements
+    Omit<UnidHostRequest<SubmitShipmentInfoPayload>, 'proofOfPayment'> {
   @IsUUID()
   readonly orderId: UUID;
 
@@ -55,7 +61,7 @@ export class SubmitShipmentInfoRequest
   readonly calculatorResultUrl?: URL;
 }
 
-export type SubmitShipmentInfoResult = void;
+export type SubmitShipmentInfoResult = FileUploadResult;
 
 export abstract class ISubmitShipmentInfo extends UseCase<
   SubmitShipmentInfoPayload,

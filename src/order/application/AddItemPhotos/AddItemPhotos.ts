@@ -8,7 +8,7 @@ import {
 import {
   AddItemPhotoPayload,
   IAddItemPhotos,
-  ItemPhotosUploadResult,
+  AddItemPhotosResult,
 } from './IAddItemPhotos';
 import { OrderStatus } from '../../entity/Order';
 
@@ -21,7 +21,7 @@ export class AddItemPhotos implements IAddItemPhotos {
     port: addItemPhotoPayload,
     mongoTransactionSession,
   }: TransactionUseCasePort<AddItemPhotoPayload>): Promise<
-    ItemPhotosUploadResult
+    AddItemPhotosResult
   > {
     const itemPhotoUploadResults = await this.uploadItemPhoto(
       addItemPhotoPayload,
@@ -34,7 +34,7 @@ export class AddItemPhotos implements IAddItemPhotos {
   private uploadItemPhoto(
     { orderId, hostId, itemId, photos }: AddItemPhotoPayload,
     mongoTransactionSession: ClientSession,
-  ): Promise<ItemPhotosUploadResult> {
+  ): Promise<AddItemPhotosResult> {
     // addItemPhotos() requires the item to be marked as received (i.e. have a receivedDate)
     return this.orderRepository.addItemPhotos(
       {

@@ -23,8 +23,8 @@ import {
   OrderMongoDocument,
   normalizeOrderFilter,
   normalizeItemFilter,
-  FileUploadMongoDocument,
   FileUpload,
+  FileUploadResult,
 } from './OrderMongoMapper';
 import {
   mongoQuery,
@@ -34,7 +34,7 @@ import {
   serializeMongoData,
 } from '../../common/persistence';
 import { ItemFilter } from '../entity/Item';
-import { ItemPhotosUploadResult } from '../application/AddItemPhotos/IAddItemPhotos';
+import { AddItemPhotosResult } from '../application/AddItemPhotos/IAddItemPhotos';
 
 @Injectable()
 export class OrderMongoRepositoryAdapter implements IOrderRepository {
@@ -291,12 +291,13 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     );
   }
 
+  // TODO: Remove unnecessary filters and move them to application-side
   async addItemPhotos(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
     photos: FileUpload[],
     mongoTransactionSession?: ClientSession,
-  ): Promise<ItemPhotosUploadResult> {
+  ): Promise<AddItemPhotosResult> {
     const { status, ...restOrderFilterWithId } = normalizeOrderFilter(
       orderFilter,
     );
@@ -330,25 +331,24 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
 
     // TODO: Error handling on photos
     const photoMuuids = photos.map(({ id }) => id);
-    const photoUploadResults: ItemPhotosUploadResult = photos.map(
+    const photoUploadResults: AddItemPhotosResult = photos.map(
       ({ id, filename }) => ({
         id: muuidToUuid(id),
         name: filename,
       }),
     );
 
-    // https://docs.mongodb.com/manual/reference/operator/update/positional/
     const {
       matchedCount,
       modifiedCount,
     }: UpdateWriteOpResult = await this.orderCollection
       .updateOne(
         filterQuery,
-        // $each: https://docs.mongodb.com/manual/reference/operator/update/push/#append-multiple-values-to-an-array
-        // TODO:
         {
           $push: {
+            // $ – positional: https://docs.mongodb.com/manual/reference/operator/update/positional/
             'items.$.photoIds': {
+              // $each: https://docs.mongodb.com/manual/reference/operator/update/push/#append-multiple-values-to-an-array
               $each: photoMuuids,
             },
           },
@@ -381,5 +381,71 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     );
 
     return photoUploadResults;
+  }
+
+  async addFile(
+    orderFilter: OrderFilter,
+    file: FileUpload,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<FileUploadResult> {
+    // TODO: Add status normalization to normalizeOrderFilter
+    const { status, ...restOrderFilterWithId } = normalizeOrderFilter(
+      orderFilter,
+    );
+
+    const statusQuery = status
+      ? {
+          status: Array.isArray(status) ? { $in: status } : status,
+        }
+      : {};
+
+    const filterQuery = {
+      ...mongoQuery(restOrderFilterWithId),
+      ...statusQuery,
+      // For more than one item property, $elemMatch must be used:
+      // https://docs.mongodb.com/manual/reference/operator/update/positional/#update-embedded-documents-using-multiple-field-matches
+      $elemMatch: {
+        receivedDate: { $ne: null },
+        photoIds: { $ne: null },
+      },
+    };
+
+    // TODO: Error handling on file
+    const fileUploadResult: FileUploadResult = {
+      id: muuidToUuid(file.id),
+      name: file.filename,
+    };
+
+    const {
+      matchedCount,
+      modifiedCount,
+    }: UpdateWriteOpResult = await this.orderCollection
+      .updateOne(
+        filterQuery,
+        {
+          $push: {
+            proofOfPayment: fileUploadResult.id,
+          },
+        },
+        { session: mongoTransactionSession },
+      )
+      .catch(
+        throwCustomException('Error adding file id to order', {
+          orderFilter,
+        }),
+      );
+
+    expectOnlySingleResult(
+      [matchedCount, modifiedCount],
+      {
+        operation: 'adding file id to',
+        entity: 'order',
+      },
+      {
+        orderFilter,
+      },
+    );
+
+    return fileUploadResult;
   }
 }

@@ -8,10 +8,12 @@ import {
 import {
   SubmitShipmentInfoPayload,
   ISubmitShipmentInfo,
+  SubmitShipmentInfoResult,
 } from './ISubmitShipmentInfo';
 import { Order, OrderStatus } from '../../entity/Order';
 import { throwCustomException } from '../../../common/error-handling';
 import { UUID } from '../../../common/domain';
+import { FileUploadResult } from '../../persistence/OrderMongoMapper';
 
 enum UnfinalizedItemReason {
   NO_PHOTOS = 'no photos',
@@ -28,8 +30,15 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
   async execute({
     port: finalizeOrderRequest,
     mongoTransactionSession,
-  }: TransactionUseCasePort<SubmitShipmentInfoPayload>): Promise<void> {
-    await this.finalizeOrder(finalizeOrderRequest, mongoTransactionSession);
+  }: TransactionUseCasePort<SubmitShipmentInfoPayload>): Promise<
+    SubmitShipmentInfoResult
+  > {
+    const proofOfPaymentUpload: FileUploadResult = await this.finalizeOrder(
+      finalizeOrderRequest,
+      mongoTransactionSession,
+    );
+
+    return proofOfPaymentUpload;
   }
 
   private async finalizeOrder(
@@ -39,9 +48,10 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
       totalWeight,
       shipmentCost: finalShipmentCost,
       calculatorResultUrl,
+      proofOfPayment,
     }: SubmitShipmentInfoPayload,
     mongoTransactionSession: ClientSession,
-  ): Promise<void> {
+  ): Promise<SubmitShipmentInfoResult> {
     const unfinalizedItems: UnfinalizedItem[] = await this.getUnfinalizedItems(
       orderId,
       hostId,
@@ -64,6 +74,12 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
         status: OrderStatus.Finalized,
         ...(calculatorResultUrl ? { calculatorResultUrl } : {}),
       },
+      mongoTransactionSession,
+    );
+
+    return this.orderRepository.addFile(
+      { orderId },
+      proofOfPayment,
       mongoTransactionSession,
     );
   }

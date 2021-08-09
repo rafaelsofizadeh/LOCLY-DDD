@@ -9,6 +9,7 @@ import {
 import { PhysicalItem } from '../entity/Item';
 import { MongoDocument } from '../../common/persistence';
 import { MUUID } from 'uuid-mongodb';
+import { UUID } from '../../common/domain';
 
 export type ItemMongoSubdocument = MongoDocument<Item>;
 export type PhysicalItemMongoSubdocument = MongoDocument<PhysicalItem>;
@@ -27,7 +28,9 @@ export type FileUploadChunkMongoDocument = {
   n: number;
   data: Binary;
 };
+export type FileUploadResult = { name: string; id: UUID };
 
+// TODO: Add status normalization to normalizeOrderFilter
 export function normalizeOrderFilter({ orderId, ...restFilter }: OrderFilter) {
   return {
     ...(orderId ? { id: orderId } : {}),

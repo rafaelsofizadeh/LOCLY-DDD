@@ -29,7 +29,7 @@ import {
 } from '../../../src/order/persistence/OrderMongoMapper';
 import { getCollectionToken } from 'nest-mongodb';
 import {
-  ItemPhotosUploadResult,
+  AddItemPhotosResult,
   maxSimulataneousPhotoCount,
 } from '../../../src/order/application/AddItemPhotos/IAddItemPhotos';
 import { isUUID, UUID } from '../../../src/common/domain';
@@ -84,7 +84,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     ({ customer } = await createTestCustomer(moduleRef, originCountry));
     ({ host } = await createTestHost(
       moduleRef,
-      
+
       originCountry,
     ));
 
@@ -135,7 +135,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
     const [
       { id: photoId, name: photoName },
-    ] = response.body as ItemPhotosUploadResult;
+    ] = response.body as AddItemPhotosResult;
 
     expect(isUUID(photoId)).toBe(true);
     expect(isUUID(photoName)).toBe(true);
@@ -180,14 +180,12 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
     expect(response.status).toBe(HttpStatus.CREATED);
 
-    const itemPhotosUploadResult = response.body as ItemPhotosUploadResult;
+    const AddItemPhotosResult = response.body as AddItemPhotosResult;
 
-    expect(itemPhotosUploadResult.length).toBe(maxSimulataneousPhotoCount);
+    expect(AddItemPhotosResult.length).toBe(maxSimulataneousPhotoCount);
 
     expect(
-      itemPhotosUploadResult.every(
-        ({ id, name }) => isUUID(id) && isUUID(name),
-      ),
+      AddItemPhotosResult.every(({ id, name }) => isUUID(id) && isUUID(name)),
     ).toBe(true);
 
     const updatedOrder: Order = await orderRepository.findOrder({
@@ -201,7 +199,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
     expect(updatedItem.photoIds.length).toBe(newPhotosLength);
 
-    const resultPhotoIds: UUID[] = itemPhotosUploadResult.map(({ id }) => id);
+    const resultPhotoIds: UUID[] = AddItemPhotosResult.map(({ id }) => id);
     expect(
       resultPhotoIds.every(photoId => updatedItem.photoIds.includes(photoId)),
     ).toBe(true);
