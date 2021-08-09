@@ -125,13 +125,14 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     throwIfNotFound: boolean = true,
   ): Promise<Order> {
     // TODO: better typing using FilterQuery
-    const filterWithId = normalizeOrderFilter(filter);
-    const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(
-      filterWithId,
-    );
+    const { status, ...restFilter } = normalizeOrderFilter(filter);
+    const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(restFilter);
 
     const orderDocument: OrderMongoDocument = await this.orderCollection
-      .findOne(filterQuery, { session: mongoTransactionSession })
+      .findOne(
+        { ...filterQuery, ...(status ? { status } : {}) },
+        { session: mongoTransactionSession },
+      )
       .catch(throwCustomException('Error searching for an order', filter));
 
     if (!orderDocument) {
@@ -302,23 +303,11 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       orderFilter,
     );
 
-    const statusQuery = status
-      ? {
-          status: Array.isArray(status) ? { $in: status } : status,
-        }
-      : {};
-
     const itemFilterWithId = normalizeItemFilter(itemFilter);
-
-    // const filter = {
-    //   ...restOrderFilterWithId,
-    //   ...statusQuery,
-    //   items: { ...itemFilterWithId, receivedDate: { $ne: null } },
-    // };
 
     const filterQuery = {
       ...mongoQuery(restOrderFilterWithId),
-      ...statusQuery,
+      ...(status ? { status } : {}),
       items: {
         // For more than one item property, $elemMatch must be used:
         // https://docs.mongodb.com/manual/reference/operator/update/positional/#update-embedded-documents-using-multiple-field-matches
@@ -388,26 +377,19 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     file: FileUpload,
     mongoTransactionSession?: ClientSession,
   ): Promise<FileUploadResult> {
-    // TODO: Add status normalization to normalizeOrderFilter
-    const { status, ...restOrderFilterWithId } = normalizeOrderFilter(
+    const { status, ...restNormalizedOrderFilter } = normalizeOrderFilter(
       orderFilter,
     );
 
-    const statusQuery = status
-      ? {
-          status: Array.isArray(status) ? { $in: status } : status,
-        }
-      : {};
-
     const filterQuery = {
-      ...mongoQuery(restOrderFilterWithId),
-      ...statusQuery,
       // For more than one item property, $elemMatch must be used:
       // https://docs.mongodb.com/manual/reference/operator/update/positional/#update-embedded-documents-using-multiple-field-matches
       $elemMatch: {
         receivedDate: { $ne: null },
         photoIds: { $ne: null },
       },
+      ...mongoQuery(restNormalizedOrderFilter),
+      ...(status ? { status } : {}),
     };
 
     // TODO: Error handling on file

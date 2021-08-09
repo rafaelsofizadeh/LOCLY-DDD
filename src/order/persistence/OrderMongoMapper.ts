@@ -30,10 +30,18 @@ export type FileUploadChunkMongoDocument = {
 };
 export type FileUploadResult = { name: string; id: UUID };
 
-// TODO: Add status normalization to normalizeOrderFilter
-export function normalizeOrderFilter({ orderId, ...restFilter }: OrderFilter) {
+export function normalizeOrderFilter({
+  orderId,
+  status,
+  ...restFilter
+}: OrderFilter) {
   return {
     ...(orderId ? { id: orderId } : {}),
+    ...(status
+      ? {
+          status: Array.isArray(status) ? { $in: status } : status,
+        }
+      : {}),
     ...restFilter,
   };
 }
