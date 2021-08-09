@@ -46,8 +46,6 @@ export class AddItemPhotos implements IAddItemPhotos {
     );
     const item = order.items.find(({ id }) => id === itemId);
 
-    console.log(order, item);
-
     if (!item.receivedDate) {
       throwCustomException(
         'Item should be marked as received before uploading photos.',

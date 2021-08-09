@@ -21,6 +21,13 @@ import { IOrderRepository } from '../../../src/order/persistence/IOrderRepositor
 import { Host } from '../../../src/host/entity/Host';
 import { IReceiveItem } from '../../../src/order/application/ReceiveItem/IReceiveItem';
 import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
+import {
+  FileUploadChunkMongoDocument,
+  FileUploadMongoDocument,
+} from '../../../src/order/persistence/OrderMongoMapper';
+import { Collection } from 'mongodb';
+import { getCollectionToken } from 'nest-mongodb';
+import { AddItemPhotoRequest } from '../../../src/order/application/AddItemPhotos/IAddItemPhotos';
 
 describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
@@ -30,6 +37,9 @@ describe('[POST /order/draft] IDraftOrder', () => {
   let customerRepository: ICustomerRepository;
   let hostRepository: IHostRepository;
   let orderRepository: IOrderRepository;
+
+  let proofOfPaymentFileCollection: Collection<FileUploadMongoDocument>;
+  let proofOfPaymentChunkCollection: Collection<FileUploadChunkMongoDocument>;
 
   let receiveItem: IReceiveItem;
 
@@ -54,6 +64,13 @@ describe('[POST /order/draft] IDraftOrder', () => {
     customerRepository = await moduleRef.resolve(ICustomerRepository);
     hostRepository = await moduleRef.resolve(IHostRepository);
     orderRepository = await moduleRef.resolve(IOrderRepository);
+
+    proofOfPaymentFileCollection = await moduleRef.resolve(
+      getCollectionToken('host_shipment_payment_proofs.files'),
+    );
+    proofOfPaymentChunkCollection = await moduleRef.resolve(
+      getCollectionToken('host_shipment_payment_proofs.chunks'),
+    );
 
     receiveItem = await moduleRef.resolve(IReceiveItem);
 
@@ -90,10 +107,14 @@ describe('[POST /order/draft] IDraftOrder', () => {
         orderId: order.id,
       });
 
+      const payload: AddItemPhotoRequest = {
+        orderId: order.id,
+        itemId: receivedItem.id,
+      };
+
       await agent
         .post('/order/itemPhotos')
-        .field('orderId', order.id)
-        .field('itemId', receivedItem.id)
+        .field('payload', JSON.stringify(payload))
         .attach('photos', join(__dirname, './addItemPhotos-test-image.png'));
     }
   }
@@ -117,7 +138,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     async itemCount => {
       await beforeEachTest(itemCount);
 
-      const requestPayload = {
+      const payload = {
         orderId: order.id,
         totalWeight: 2000,
         shipmentCost: {
@@ -129,8 +150,13 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
       const response: supertest.Response = await agent
         .post('/order/shipmentInfo')
-        .send(requestPayload);
+        .field('payload', JSON.stringify(payload))
+        .attach(
+          'proofOfPayment',
+          join(__dirname, './submitShipmentInfo-test-image.png'),
+        );
 
+      console.log(response.body);
       expect(response.status).toBe(HttpStatus.CREATED);
 
       const updatedOrder: Order = await orderRepository.findOrder({
@@ -141,7 +167,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
         orderId: matchOrderId,
         shipmentCost: finalShipmentCost,
         ...restMatch
-      } = requestPayload;
+      } = payload;
 
       expect(updatedOrder).toMatchObject({
         ...restMatch,
@@ -156,7 +182,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
     async function(itemCount) {
       await beforeEachTest(itemCount, itemCount - 1);
 
-      const requestPayload = {
+      const payload = {
         orderId: order.id,
         totalWeight: 2000,
         shipmentCost: {
@@ -168,7 +194,11 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
       const response: supertest.Response = await agent
         .post('/order/shipmentInfo')
-        .send(requestPayload);
+        .field('payload', JSON.stringify(payload))
+        .attach(
+          'proofOfPayment',
+          join(__dirname, './submitShipmentInfo-test-image.png'),
+        );
 
       // beforeEachTest -> receivedCount passed: itemCount - 1 => 1 item will not be received
       expect(response.body.data.unfinalizedItems.length).toBe(1);

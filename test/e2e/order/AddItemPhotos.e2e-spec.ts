@@ -29,6 +29,7 @@ import {
 } from '../../../src/order/persistence/OrderMongoMapper';
 import { getCollectionToken } from 'nest-mongodb';
 import {
+  AddItemPhotoRequest,
   AddItemPhotosResult,
   maxSimulataneousPhotoCount,
 } from '../../../src/order/application/AddItemPhotos/IAddItemPhotos';
@@ -125,10 +126,14 @@ describe('[POST /order/draft] IDraftOrder', () => {
       orderId: order.id,
     });
 
+    const payload: AddItemPhotoRequest = {
+      orderId: order.id,
+      itemId: receivedItem.id,
+    };
+
     const response: supertest.Response = await agent
       .post('/order/itemPhotos')
-      .field('orderId', order.id)
-      .field('itemId', receivedItem.id)
+      .field('payload', JSON.stringify(payload))
       .attach('photos', join(__dirname, './addItemPhotos-test-image.png'));
 
     expect(response.status).toBe(HttpStatus.CREATED);
@@ -164,10 +169,14 @@ describe('[POST /order/draft] IDraftOrder', () => {
   it(`Adds ${maxSimulataneousPhotoCount} more item photos`, async () => {
     expect(receivedItem.photoIds.length).toBe(1);
 
+    const payload: AddItemPhotoRequest = {
+      orderId: order.id,
+      itemId: receivedItem.id,
+    };
+
     const request = agent
       .post('/order/itemPhotos')
-      .field('orderId', order.id)
-      .field('itemId', receivedItem.id);
+      .field('payload', JSON.stringify(payload));
 
     for (let i = 0; i < maxSimulataneousPhotoCount; i++) {
       request.attach(
@@ -217,10 +226,14 @@ describe('[POST /order/draft] IDraftOrder', () => {
     expect(receivedItem.receivedDate).toBeDefined();
     expect(receivedItem.photoIds.length).toBe(1 + maxSimulataneousPhotoCount);
 
+    const payload: AddItemPhotoRequest = {
+      orderId: order.id,
+      itemId: receivedItem.id,
+    };
+
     const request = agent
       .post('/order/itemPhotos')
-      .field('orderId', order.id)
-      .field('itemId', receivedItem.id);
+      .field('payload', JSON.stringify(payload));
 
     const repeats = 5;
     for (let i = 0; i < repeats; i++) {

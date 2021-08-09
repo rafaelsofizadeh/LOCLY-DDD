@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -79,6 +80,9 @@ import {
   GetItemPhotoResult,
   IGetItemPhoto,
 } from './application/GetItemPhoto/IGetItemPhoto';
+import { validate, validateOrReject } from 'class-validator';
+import { plainToClass } from 'class-transformer';
+import { throwCustomException } from '../common/error-handling';
 
 @Controller('order')
 export class OrderController {
@@ -207,10 +211,27 @@ export class OrderController {
   // file control/validation is done by MulterModule registration
   @UseInterceptors(FilesInterceptor('photos'))
   async addItemPhotoHandler(
-    @Body() unidAddItemPhotoRequest: AddItemPhotoRequest,
+    @Body() { payload: unidAddItemPhotoRequestJson }: { payload: string },
     @UploadedFiles() photos: FileUpload[],
     @VerifiedHostIdentity() { id: hostId }: Host,
   ) {
+    const unidAddItemPhotoRequest: AddItemPhotoRequest = plainToClass(
+      AddItemPhotoRequest,
+      JSON.parse(unidAddItemPhotoRequestJson),
+    );
+
+    await validateOrReject(unidAddItemPhotoRequest).catch(
+      throwCustomException('Error adding item photos: '),
+    );
+
+    if (!photos || !photos.length) {
+      throwCustomException(
+        'Photo files must be submitted.',
+        {},
+        HttpStatus.BAD_REQUEST,
+      )();
+    }
+
     const addItemPhotoPayload: AddItemPhotoPayload = {
       ...unidAddItemPhotoRequest,
       hostId,
@@ -248,10 +269,27 @@ export class OrderController {
   // file control/validation is done by MulterModule registration
   @UseInterceptors(FileInterceptor('proofOfPayment'))
   async submitShipmentInfoHandler(
-    @Body() unidSubmitShipmentInfoRequest: SubmitShipmentInfoRequest,
+    @Body() { payload: unidSubmitShipmentInfoRequestJson }: { payload: string },
     @UploadedFile() proofOfPayment: FileUpload,
     @VerifiedHostIdentity() { id: hostId }: Host,
   ): Promise<SubmitShipmentInfoResult> {
+    const unidSubmitShipmentInfoRequest: SubmitShipmentInfoRequest = plainToClass(
+      SubmitShipmentInfoRequest,
+      JSON.parse(unidSubmitShipmentInfoRequestJson),
+    );
+
+    await validateOrReject(unidSubmitShipmentInfoRequest).catch(
+      throwCustomException('Error submitting shipment info: '),
+    );
+
+    if (!proofOfPayment) {
+      throwCustomException(
+        'A proof of payment file must be submitted.',
+        {},
+        HttpStatus.BAD_REQUEST,
+      )();
+    }
+
     const submitShipmentInfoPayload: SubmitShipmentInfoPayload = {
       ...unidSubmitShipmentInfoRequest,
       hostId,

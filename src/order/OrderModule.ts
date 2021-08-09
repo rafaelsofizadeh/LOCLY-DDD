@@ -88,7 +88,7 @@ const testProviders: Provider[] = [];
             if (pathDestination === 'itemPhotos') {
               bucketName = 'host_item_photos';
             } else if (pathDestination === 'shipmentInfo') {
-              bucketName = 'host_item_receipts';
+              bucketName = 'host_shipment_payment_proofs';
             } else {
               throwCustomException(
                 'Path not allowed for file upload',

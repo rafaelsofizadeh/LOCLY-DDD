@@ -40,6 +40,8 @@ const infrastructureModules: DynamicModule[] = [
     // TODO: Configure bucket name (host_item_photo)
     'host_item_photos.files',
     'host_item_photos.chunks',
+    'host_shipment_payment_proofs.files',
+    'host_shipment_payment_proofs.chunks',
   ]),
   StripeModule.forRootAsync(StripeModule, {
     useFactory: async (configService: ConfigService) => {
