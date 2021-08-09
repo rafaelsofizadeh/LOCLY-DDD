@@ -292,7 +292,6 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     );
   }
 
-  // TODO: Remove unnecessary filters and move them to application-side
   async addItemPhotos(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
@@ -311,10 +310,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       items: {
         // For more than one item property, $elemMatch must be used:
         // https://docs.mongodb.com/manual/reference/operator/update/positional/#update-embedded-documents-using-multiple-field-matches
-        $elemMatch: {
-          ...mongoQuery(itemFilterWithId),
-          receivedDate: { $ne: null },
-        },
+        $elemMatch: mongoQuery(itemFilterWithId),
       },
     };
 
@@ -347,10 +343,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       .catch(
         throwCustomException('Error adding photo file id to order item', {
           orderFilter,
-          itemFilter: {
-            ...itemFilter,
-            receivedDate: 'NOT_NULL',
-          },
+          itemFilter,
         }),
       );
 
@@ -362,10 +355,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       },
       {
         orderFilter,
-        itemFilter: {
-          ...itemFilter,
-          receivedDate: 'NOT_NULL',
-        },
+        itemFilter,
       },
     );
 
@@ -382,12 +372,6 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     );
 
     const filterQuery = {
-      // For more than one item property, $elemMatch must be used:
-      // https://docs.mongodb.com/manual/reference/operator/update/positional/#update-embedded-documents-using-multiple-field-matches
-      $elemMatch: {
-        receivedDate: { $ne: null },
-        photoIds: { $ne: null },
-      },
       ...mongoQuery(restNormalizedOrderFilter),
       ...(status ? { status } : {}),
     };

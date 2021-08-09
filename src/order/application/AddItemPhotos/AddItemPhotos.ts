@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { ClientSession } from 'mongodb';
 import {
@@ -11,6 +11,7 @@ import {
   AddItemPhotosResult,
 } from './IAddItemPhotos';
 import { OrderStatus } from '../../entity/Order';
+import { throwCustomException } from '../../../common/error-handling';
 
 @Injectable()
 export class AddItemPhotos implements IAddItemPhotos {
@@ -31,17 +32,32 @@ export class AddItemPhotos implements IAddItemPhotos {
     return itemPhotoUploadResults;
   }
 
-  private uploadItemPhoto(
+  private async uploadItemPhoto(
     { orderId, hostId, itemId, photos }: AddItemPhotoPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<AddItemPhotosResult> {
-    // addItemPhotos() requires the item to be marked as received (i.e. have a receivedDate)
-    return this.orderRepository.addItemPhotos(
+    const order = await this.orderRepository.findOrder(
       {
         orderId,
         status: [OrderStatus.Confirmed, OrderStatus.Finalized],
         hostId,
       },
+      mongoTransactionSession,
+    );
+    const item = order.items.find(({ id }) => id === itemId);
+
+    console.log(order, item);
+
+    if (!item.receivedDate) {
+      throwCustomException(
+        'Item should be marked as received before uploading photos.',
+        { orderId, itemId },
+        HttpStatus.FORBIDDEN,
+      )();
+    }
+
+    return this.orderRepository.addItemPhotos(
+      { orderId },
       { itemId },
       photos,
       mongoTransactionSession,
