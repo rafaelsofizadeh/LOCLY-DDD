@@ -38,6 +38,7 @@ export type Order = Readonly<{
   initialShipmentCost: Cost;
   finalShipmentCost: Cost;
   calculatorResultUrl?: URL;
+  proofOfPayment: UUID;
 }>;
 
 export type DraftedOrder = Pick<

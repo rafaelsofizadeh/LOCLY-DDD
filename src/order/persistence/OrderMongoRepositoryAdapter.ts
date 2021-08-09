@@ -389,9 +389,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       .updateOne(
         filterQuery,
         {
-          $push: {
-            proofOfPayment: fileUploadResult.id,
-          },
+          $set: { proofOfPayment: fileUploadResult.id },
         },
         { session: mongoTransactionSession },
       )

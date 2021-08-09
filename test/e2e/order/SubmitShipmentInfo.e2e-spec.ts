@@ -28,6 +28,9 @@ import {
 import { Collection } from 'mongodb';
 import { getCollectionToken } from 'nest-mongodb';
 import { AddItemPhotoRequest } from '../../../src/order/application/AddItemPhotos/IAddItemPhotos';
+import { SubmitShipmentInfoResult } from '../../../src/order/application/SubmitShipmentInfo/ISubmitShipmentInfo';
+import { isUUID } from '../../../src/common/domain';
+import { uuidToMuuid } from '../../../src/common/persistence';
 
 describe('[POST /order/draft] IDraftOrder', () => {
   let app: INestApplication;
@@ -156,8 +159,15 @@ describe('[POST /order/draft] IDraftOrder', () => {
           join(__dirname, './submitShipmentInfo-test-image.png'),
         );
 
-      console.log(response.body);
       expect(response.status).toBe(HttpStatus.CREATED);
+
+      const {
+        id: fileId,
+        name: fileName,
+      } = response.body as SubmitShipmentInfoResult;
+
+      expect(isUUID(fileId)).toBe(true);
+      expect(isUUID(fileName)).toBe(true);
 
       const updatedOrder: Order = await orderRepository.findOrder({
         orderId: order.id,
@@ -173,7 +183,13 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ...restMatch,
         finalShipmentCost,
         id: matchOrderId,
+        proofOfPayment: fileId,
       });
+
+      const fileUploadRepoResult: FileUploadMongoDocument[] = await proofOfPaymentFileCollection
+        .find({ _id: uuidToMuuid(fileId) })
+        .toArray();
+      expect(fileUploadRepoResult.length).toBe(1);
     },
   );
 
@@ -212,6 +228,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       expect(updatedOrder.finalShipmentCost).toBeUndefined();
       expect(updatedOrder.totalWeight).toBeUndefined();
       expect(updatedOrder.calculatorResultUrl).toBeUndefined();
+      expect(updatedOrder.proofOfPayment).toBeUndefined();
     },
   );
 });
