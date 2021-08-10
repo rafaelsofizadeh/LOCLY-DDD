@@ -144,7 +144,7 @@ export async function createTestHost(
             currency: 'usd',
             // https://stripe.com/docs/connect/testing#account-numbers
             routing_number: '110000000',
-            account_number: '000999999991',
+            account_number: '000123456789',
           },
           // Possible to do through Stripe dashboard
           // https://stripe.com/docs/connect/service-agreement-types#choosing-type-with-express
