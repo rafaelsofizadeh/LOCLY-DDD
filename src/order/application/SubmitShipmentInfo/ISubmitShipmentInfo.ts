@@ -4,10 +4,12 @@ import {
   IsInt,
   IsPositive,
   IsUrl,
-  Equals,
   IsDefined,
   IsNotEmptyObject,
   ValidateNested,
+  IsCurrency,
+  IsNumber,
+  IsIn,
 } from 'class-validator';
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
@@ -18,6 +20,7 @@ import {
   FileUpload,
   FileUploadResult,
 } from '../../persistence/OrderMongoMapper';
+import { Currency } from '../../entity/Currency';
 
 export type URL = string;
 
@@ -32,12 +35,12 @@ export interface SubmitShipmentInfoPayload
   }> {}
 
 class Cost implements ICost {
-  @IsInt()
+  @IsNumber()
   @IsPositive()
   amount: number;
 
-  @Equals('USD')
-  currency: 'USD';
+  @IsIn(Currency)
+  currency: Currency;
 }
 
 export class SubmitShipmentInfoRequest
