@@ -32,7 +32,10 @@ import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuid
 import { UserType } from '../../../src/auth/entity/Token';
 import Stripe from 'stripe';
 import { STRIPE_CLIENT_TOKEN } from '@golevelup/nestjs-stripe';
-import { stripePrice } from '../../../src/common/application';
+import {
+  calculateStripeFee,
+  stripePrice,
+} from '../../../src/common/application';
 
 type HostConfig = {
   verified: boolean;
@@ -325,7 +328,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     // Stripe fee (without conversion): 2.9% + $0.3
     // https://stripe.com/pricing
-    const stripeFee = totalPrice.unit_amount * 2.9 * 0.01 + 30;
+    const stripeFee = calculateStripeFee(totalPrice);
     const loclyAfterStripeFee = loclyPrice.unit_amount - stripeFee;
 
     expect(loclyPendingAfter.amount - loclyPendingBefore.amount).toBe(
