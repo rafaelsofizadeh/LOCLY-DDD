@@ -16,7 +16,7 @@ import {
   Transaction,
   TransactionUseCasePort,
 } from '../../../common/application';
-import { OrderStatus } from '../../entity/Order';
+import { Cost, OrderStatus } from '../../entity/Order';
 import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { Customer } from '../../../customer/entity/Customer';
 import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
@@ -52,10 +52,20 @@ export class PayShipmentService implements IPayShipment {
     { orderId, customerId }: PayShipmentPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<StripeCheckoutSession> {
-    const { finalShipmentCost, hostId } = await this.orderRepository.findOrder(
+    const {
+      finalShipmentCost: finalShipmentCostPreFee,
+      hostId,
+    } = await this.orderRepository.findOrder(
       { orderId, status: OrderStatus.Finalized, customerId },
       mongoTransactionSession,
     );
+
+    const finalShipmentCost: Cost = {
+      ...finalShipmentCostPreFee,
+      // Account for Stripe fee in the final shipment cost.
+      amount:
+        Math.ceil(finalShipmentCostPreFee.amount / ((100 - 2.9) / 100)) + 0.3,
+    };
 
     const {
       stripeCustomerId,
@@ -67,7 +77,16 @@ export class PayShipmentService implements IPayShipment {
       hostId,
     });
 
-    const price: StripePrice = stripePrice(finalShipmentCost);
+    const finalShipmentCostStripe: StripePrice = stripePrice(finalShipmentCost);
+    const stripeApplicationFeeAmount =
+      finalShipmentCostStripe.unit_amount -
+      stripePrice(finalShipmentCostPreFee).unit_amount;
+
+    console.log(
+      finalShipmentCostPreFee.amount,
+      finalShipmentCost.amount,
+      stripeApplicationFeeAmount / 100,
+    );
 
     const checkoutSession = (await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -75,7 +94,7 @@ export class PayShipmentService implements IPayShipment {
       line_items: [
         {
           price_data: {
-            ...price,
+            ...finalShipmentCostStripe,
             product_data: {
               name: 'Order Shipment Fee',
             },
@@ -84,6 +103,7 @@ export class PayShipmentService implements IPayShipment {
         },
       ],
       payment_intent_data: {
+        application_fee_amount: stripeApplicationFeeAmount,
         transfer_data: { destination: hostStripeAccountId },
       },
       metadata: {

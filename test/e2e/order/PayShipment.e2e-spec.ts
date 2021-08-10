@@ -212,14 +212,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       hostStripeBalanceAfter,
     ].map(findBalance);
 
-    // Stripe fee (without conversion): 2.9% + $0.3
-    // https://stripe.com/pricing
-    // TODO: Increase the shipment fee paid by user by 2.9% + $0.3
-    const stripeFee = shipmentPrice.unit_amount * 2.9 * 0.01 + 30;
-
-    expect(loclyPendingBefore.amount - loclyPendingAfter.amount).toBe(
-      stripeFee,
-    );
+    expect(loclyPendingBefore.amount - loclyPendingAfter.amount).toBeCloseTo(0);
 
     expect(hostPendingAfter.amount - hostPendingBefore.amount).toBe(
       shipmentPrice.unit_amount,
