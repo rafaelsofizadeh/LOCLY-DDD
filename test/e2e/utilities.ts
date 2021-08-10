@@ -1,6 +1,7 @@
 import { TestingModule } from '@nestjs/testing';
+import { join } from 'path';
 import Stripe from 'stripe';
-import { SuperAgentTest, agent, Response } from 'supertest';
+import supertest, { SuperAgentTest, agent, Response } from 'supertest';
 import { IRequestAuth } from '../../src/auth/application/RequestAuth/IRequestAuth';
 import { UserType } from '../../src/auth/entity/Token';
 import {
@@ -21,8 +22,10 @@ import { Host } from '../../src/host/entity/Host';
 import { IHostRepository } from '../../src/host/persistence/IHostRepository';
 import { IConfirmOrder } from '../../src/order/application/ConfirmOrder/IConfirmOrder';
 import { IDraftOrder } from '../../src/order/application/DraftOrder/IDraftOrder';
+import { IReceiveItem } from '../../src/order/application/ReceiveItem/IReceiveItem';
 import { IConfirmOrderHandler } from '../../src/order/application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/IConfirmOrderHandler';
 import { Country } from '../../src/order/entity/Country';
+import { ConfirmedOrder, FinalizedOrder } from '../../src/order/entity/Order';
 import { IOrderRepository } from '../../src/order/persistence/IOrderRepository';
 
 export async function createTestCustomer(
@@ -130,6 +133,7 @@ export async function createTestHost(
             },
             first_name: 'Rafael',
             last_name: 'Sofizada',
+            id_number: '000000000',
             ssn_last_4: '0000',
           },
           external_account: {
@@ -251,7 +255,7 @@ export async function createConfirmedOrder(
     host: Host;
     itemCount?: number;
   },
-) {
+): Promise<ConfirmedOrder> {
   const draftOrder: IDraftOrder = await moduleRef.resolve(IDraftOrder);
   const confirmOrder: IConfirmOrder = await moduleRef.resolve(IConfirmOrder);
   const confirmOrderWebhookHandler: IConfirmOrderHandler = await moduleRef.resolve(
@@ -283,5 +287,91 @@ export async function createConfirmedOrder(
     port: { orderId, hostId: host.id },
   });
 
-  return await orderRepository.findOrder({ orderId });
+  return (await orderRepository.findOrder({ orderId })) as ConfirmedOrder;
+}
+
+export async function createFinalizedOrder(
+  moduleRef: TestingModule,
+  agent: supertest.SuperAgentTest,
+  orderRepository: IOrderRepository,
+  {
+    customer,
+    originCountry,
+    host,
+  }: {
+    customer: Customer;
+    originCountry: Country;
+    host: Host;
+  },
+): Promise<FinalizedOrder> {
+  const draftOrder: IDraftOrder = await moduleRef.resolve(IDraftOrder);
+  const confirmOrder: IConfirmOrder = await moduleRef.resolve(IConfirmOrder);
+  const confirmOrderWebhookHandler: IConfirmOrderHandler = await moduleRef.resolve(
+    IConfirmOrderHandler,
+  );
+  const receiveItem: IReceiveItem = await moduleRef.resolve(IReceiveItem);
+
+  const {
+    id: orderId,
+    items: [{ id: itemId }],
+  } = await draftOrder.execute({
+    port: {
+      customerId: customer.id,
+      originCountry,
+      destination: customer.addresses[0],
+      items: [
+        {
+          title: 'Item #1',
+          storeName: 'Random Store',
+          weight: 2000,
+        },
+      ],
+    },
+  });
+
+  await confirmOrder.execute({
+    port: { orderId, customerId: customer.id },
+  });
+
+  await confirmOrderWebhookHandler.execute({
+    port: { orderId, hostId: host.id },
+  });
+
+  await receiveItem.execute({
+    port: {
+      orderId,
+      itemId,
+      hostId: host.id,
+    },
+  });
+
+  console.log('received');
+
+  await agent
+    .post('/order/itemPhotos')
+    .field('payload', JSON.stringify({ orderId, itemId }))
+    .attach('photos', join(__dirname, './order/addItemPhotos-test-image.png'))
+    .then(res => console.log('itemPhotos', res.body));
+
+  await agent
+    .post('/order/shipmentInfo')
+    .field(
+      'payload',
+      JSON.stringify({
+        orderId,
+        totalWeight: 2000,
+        shipmentCost: {
+          amount: 100,
+          currency: 'USD',
+        },
+        calculatorResultUrl: 'news.ycombinator.com',
+      }),
+    )
+    .attach(
+      'proofOfPayment',
+      join(__dirname, './order/submitShipmentInfo-test-image.png'),
+    )
+    .then(res => console.log('shipmentInfo', res.body));
+
+  return (await orderRepository.findOrder({ orderId })) as FinalizedOrder;
 }

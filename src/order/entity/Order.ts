@@ -55,6 +55,12 @@ export type FinalizedOrder = Omit<ConfirmedOrder, 'status' | 'items'> &
     items: Array<ReceivedItem | FinalizedItem>;
   };
 
+export type PaidOrder = Omit<FinalizedOrder, 'status' | 'items'> &
+  Pick<Order, 'finalShipmentCost'> & {
+    status: OrderStatus.Finalized;
+    items: Array<FinalizedItem>;
+  };
+
 export type OrderFilter = EntityFilter<Order, { orderId: UUID }>;
 
 export type OrderItemFilter = OrderFilter & { item: ItemFilter };

@@ -26,6 +26,7 @@
     "test:receive-item": "NODE_ENV=dev jest -i 'ReceiveItem'",
     "test:add-item-photos": "NODE_ENV=dev jest -i 'AddItemPhotos'",
     "test:submit-shipment-info": "NODE_ENV=dev jest -i 'SubmitShipmentInfo'",
+    "test:pay-shipment": "NODE_ENV=dev jest -i 'PayShipment'",
     "test:request-auth": "NODE_ENV=dev jest -i 'RequestAuth'"
   },
   "dependencies": {

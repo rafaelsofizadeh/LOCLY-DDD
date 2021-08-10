@@ -19,8 +19,7 @@ import {
   ConfirmedOrder,
   OrderStatus,
 } from '../../../src/order/entity/Order';
-import { Email, UUID } from '../../../src/common/domain';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import {
   ConfirmOrderResult,
   IConfirmOrder,
@@ -33,7 +32,6 @@ import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuid
 import { UserType } from '../../../src/auth/entity/Token';
 import Stripe from 'stripe';
 import { STRIPE_CLIENT_TOKEN } from '@golevelup/nestjs-stripe';
-import { ConfirmOrder } from '../../../src/order/application/ConfirmOrder/ConfirmOrder';
 import { stripePrice } from '../../../src/common/application';
 
 type HostConfig = {
@@ -268,21 +266,14 @@ describe('Confirm Order – POST /order/confirm', () => {
       fullPage: true,
     });
 
-    let updatedTestOrder: ConfirmedOrder;
+    let updatedOrder: ConfirmedOrder = (await orderRepository.findOrder({
+      orderId: order.id,
+    })) as ConfirmedOrder;
 
-    updatedTestOrder = (await orderRepository.findOrder(
-      {
-        orderId: order.id,
-        status: OrderStatus.Confirmed,
-      },
-      undefined,
-      false,
-    )) as ConfirmedOrder;
-
-    expect(updatedTestOrder).toBeDefined();
-
-    expect(updatedTestOrder.hostId).toBeDefined();
-    expect(updatedTestOrder.hostId).toBe(testMatchedHost.id);
+    expect(updatedOrder).toBeDefined();
+    expect(updatedOrder.status).toBe(OrderStatus.Confirmed);
+    expect(updatedOrder.hostId).toBeDefined();
+    expect(updatedOrder.hostId).toBe(testMatchedHost.id);
 
     const updatedTestHost: Host = await hostRepository.findHost({
       hostId: testMatchedHost.id,
