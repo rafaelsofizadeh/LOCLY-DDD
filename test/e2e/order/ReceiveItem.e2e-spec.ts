@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
-import { Order } from '../../../src/order/entity/Order';
+import { ConfirmedOrder, Order } from '../../../src/order/entity/Order';
 import { Country } from '../../../src/order/entity/Country';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { setupNestApp } from '../../../src/main';
@@ -31,7 +31,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
   let hostRepository: IHostRepository;
   let orderRepository: IOrderRepository;
 
-  let order: Order;
+  let order: ConfirmedOrder;
   let receivedItem: Item;
   const originCountry: Country = originCountriesAvailable[0];
 

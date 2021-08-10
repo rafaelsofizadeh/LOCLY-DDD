@@ -46,8 +46,8 @@ export type DraftedOrder = Pick<
   'id' | 'customerId' | 'originCountry' | 'destination' | 'initialShipmentCost'
 > & { status: OrderStatus.Drafted; items: DraftedItem[] };
 
-export type ConfirmedOrder = Omit<DraftedOrder, 'status'> &
-  Pick<Order, 'hostId'> & { status: OrderStatus.Confirmed };
+export type ConfirmedOrder = Omit<DraftedOrder, 'status' | 'items'> &
+  Pick<Order, 'hostId'> & { status: OrderStatus.Confirmed; items: Item[] };
 
 export type FinalizedOrder = Omit<ConfirmedOrder, 'status' | 'items'> &
   Pick<Order, 'totalWeight' | 'initialShipmentCost' | 'calculatorResultUrl'> & {
