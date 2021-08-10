@@ -121,6 +121,7 @@ export async function createTestHost(
           },
           individual: {
             address: {
+              // https://stripe.com/docs/connect/testing#test-verification-addresses
               line1: 'address_full_match​',
               city: 'Cambridge​',
               state: 'MA',
@@ -133,6 +134,7 @@ export async function createTestHost(
             },
             first_name: 'Rafael',
             last_name: 'Sofizada',
+            // https://stripe.com/docs/connect/testing#test-personal-id-numbers
             id_number: '000000000',
             ssn_last_4: '0000',
           },
@@ -140,6 +142,7 @@ export async function createTestHost(
             object: 'bank_account',
             country: 'US',
             currency: 'usd',
+            // https://stripe.com/docs/connect/testing#account-numbers
             routing_number: '110000000',
             account_number: '000999999991',
           },
@@ -345,18 +348,16 @@ export async function createFinalizedOrder(
     },
   });
 
-  console.log('received');
-
   await agent
     .post('/order/itemPhotos')
     .field('payload', JSON.stringify({ orderId, itemId }))
-    .attach('photos', join(__dirname, './order/addItemPhotos-test-image.png'))
-    .then(res => console.log('itemPhotos', res.body));
+    .attach('photos', join(__dirname, './order/addItemPhotos-test-image.png'));
 
   await agent
     .post('/order/shipmentInfo')
     .field(
       'payload',
+      // TODO: Pass as parameter
       JSON.stringify({
         orderId,
         totalWeight: 2000,
@@ -370,8 +371,7 @@ export async function createFinalizedOrder(
     .attach(
       'proofOfPayment',
       join(__dirname, './order/submitShipmentInfo-test-image.png'),
-    )
-    .then(res => console.log('shipmentInfo', res.body));
+    );
 
   return (await orderRepository.findOrder({ orderId })) as FinalizedOrder;
 }
