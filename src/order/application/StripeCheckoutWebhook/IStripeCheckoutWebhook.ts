@@ -25,5 +25,5 @@ export type StripeCheckoutResult =
   | PayShipmentWebhookResult;
 
 export abstract class IStripeCheckoutWebhook {
-  abstract execute(event: StripeCheckoutEvent): Promise<StripeCheckoutResult>;
+  abstract execute(event: StripeCheckoutEvent): Promise<void>;
 }
