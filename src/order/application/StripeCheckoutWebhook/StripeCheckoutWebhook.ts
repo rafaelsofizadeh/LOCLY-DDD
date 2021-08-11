@@ -28,18 +28,18 @@ export class StripeCheckoutWebhook implements IStripeCheckoutWebhook {
   ) {}
 
   @StripeWebhookHandler('checkout.session.completed')
-  execute(event: StripeEvent): Promise<StripeCheckoutResult> {
+  async execute(event: StripeEvent): Promise<void> {
     const session = event.data.object as StripeCheckoutSession;
     const webhookPayload = session.metadata as StripeCheckoutWebhookPayload;
 
     //https://stripe.com/docs/payments/checkout/fulfill-orders
     switch (webhookPayload.feeType) {
       case FeeType.Service:
-        return this.confirmOrderWebhookGateway.execute({
+        await this.confirmOrderWebhookGateway.execute({
           port: webhookPayload as ConfirmOrderWebhookPayload,
         });
       case FeeType.Shipment:
-        return this.payShipmentWebhookGateway.execute({
+        await this.payShipmentWebhookGateway.execute({
           port: webhookPayload as PayShipmentWebhookPayload,
         });
       default:
@@ -48,5 +48,8 @@ export class StripeCheckoutWebhook implements IStripeCheckoutWebhook {
           { webhookPayload },
         )();
     }
+
+    // Stripe webhooks should receive a successful 20X HTTP response as fast as possible.
+    return;
   }
 }
