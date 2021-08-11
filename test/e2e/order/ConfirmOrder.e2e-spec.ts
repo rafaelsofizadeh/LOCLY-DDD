@@ -36,6 +36,7 @@ import {
   calculateStripeFee,
   stripePrice,
 } from '../../../src/common/application';
+import { UUID } from '../../../src/common/domain';
 
 type HostConfig = {
   verified: boolean;
@@ -239,7 +240,7 @@ describe('Confirm Order – POST /order/confirm', () => {
         orderCount: 1,
       },
     ];
-    hosts = await configsToHosts(moduleRef, testHostConfigs);
+    hosts = await configsToOnboardedHosts(moduleRef, testHostConfigs);
     const testMatchedHost = hosts.slice(-1)[0];
 
     const loclyStripeBalanceBefore: Stripe.Balance = await stripe.balance.retrieve();
@@ -275,8 +276,8 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     expect(updatedOrder).toBeDefined();
     expect(updatedOrder.status).toBe(OrderStatus.Confirmed);
-    expect(updatedOrder.hostId).toBeDefined();
     expect(updatedOrder.hostId).toBe(testMatchedHost.id);
+    expect(updatedOrder.hostAddress).toMatchObject(testMatchedHost.address);
 
     const updatedTestHost: Host = await hostRepository.findHost({
       hostId: testMatchedHost.id,
@@ -342,13 +343,13 @@ describe('Confirm Order – POST /order/confirm', () => {
 
   it(`Doesn't match Order with a Host as no Host is available in given country`, async () => {
     // https://stackoverflow.com/a/49864436/6539857
-    // All hosts are available, but none are in the given country
     const incompatibleCountries = ([
       'XXX',
       'YYY',
       'ZZZ',
     ] as unknown[]) as Country[];
 
+    // All hosts are available, but none are in the given country
     const testHostConfigs: HostConfig[] = incompatibleCountries.map(
       country => ({
         country,
@@ -357,7 +358,7 @@ describe('Confirm Order – POST /order/confirm', () => {
         verified: true,
       }),
     );
-    hosts = await configsToHosts(moduleRef, testHostConfigs);
+    hosts = configsToHosts(testHostConfigs);
     await hostRepository.addManyHosts(hosts);
 
     const response: supertest.Response = await agent
@@ -432,7 +433,21 @@ async function fillStripeCheckoutForm(): Promise<void> {
   });
 }
 
-async function configsToHosts(
+function configsToHosts(hostConfigs: HostConfig[]): Host[] {
+  // @ts-ignore
+  return hostConfigs.map(({ country, available, orderCount, verified }) => ({
+    id: UUID(),
+    email: UUID() + '@gmail.com',
+    address: { country },
+    verified,
+    available,
+    orderIds: Array(orderCount)
+      .fill('')
+      .map(() => UUID()),
+  }));
+}
+
+async function configsToOnboardedHosts(
   moduleRef: TestingModule,
   hostConfigs: HostConfig[],
 ): Promise<Host[]> {

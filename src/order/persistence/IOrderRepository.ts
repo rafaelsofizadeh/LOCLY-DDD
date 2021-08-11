@@ -77,7 +77,8 @@ export abstract class IOrderRepository {
       | 'items'
       | 'originCountry'
       | 'destination'
-      | 'initialShipmentCost',
+      | 'initialShipmentCost'
+      | 'hostAddress',
       OrderStatus.Confirmed
     >,
     mongoTransactionSession?: ClientSession,

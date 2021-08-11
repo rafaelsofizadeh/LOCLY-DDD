@@ -28,14 +28,15 @@ export enum OrderStatus {
 
 export type Order = Readonly<{
   id: UUID;
-  status: OrderStatus;
-  customerId: UUID;
-  hostId: UUID;
-  items: Item[];
-  totalWeight: Gram;
   originCountry: Country;
   destination: Address;
+  status: OrderStatus;
+  customerId: UUID;
+  items: Item[];
   initialShipmentCost: Cost;
+  hostId: UUID;
+  hostAddress: Address;
+  totalWeight: Gram;
   finalShipmentCost: Cost;
   calculatorResultUrl?: URL;
   proofOfPayment: UUID;
@@ -47,7 +48,10 @@ export type DraftedOrder = Pick<
 > & { status: OrderStatus.Drafted; items: DraftedItem[] };
 
 export type ConfirmedOrder = Omit<DraftedOrder, 'status' | 'items'> &
-  Pick<Order, 'hostId'> & { status: OrderStatus.Confirmed; items: Item[] };
+  Pick<Order, 'hostId' | 'hostAddress'> & {
+    status: OrderStatus.Confirmed;
+    items: Item[];
+  };
 
 export type FinalizedOrder = Omit<ConfirmedOrder, 'status' | 'items'> &
   Pick<Order, 'totalWeight' | 'initialShipmentCost' | 'calculatorResultUrl'> & {
