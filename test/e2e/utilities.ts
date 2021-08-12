@@ -25,7 +25,11 @@ import { IDraftOrder } from '../../src/order/application/DraftOrder/IDraftOrder'
 import { IReceiveItem } from '../../src/order/application/ReceiveItem/IReceiveItem';
 import { IConfirmOrderHandler } from '../../src/order/application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/IConfirmOrderHandler';
 import { Country } from '../../src/order/entity/Country';
-import { ConfirmedOrder, FinalizedOrder } from '../../src/order/entity/Order';
+import {
+  ConfirmedOrder,
+  Cost,
+  FinalizedOrder,
+} from '../../src/order/entity/Order';
 import { IOrderRepository } from '../../src/order/persistence/IOrderRepository';
 
 export async function createTestCustomer(
@@ -301,10 +305,15 @@ export async function createFinalizedOrder(
     customer,
     originCountry,
     host,
+    shipmentCost = {
+      amount: 100,
+      currency: 'USD',
+    },
   }: {
     customer: Customer;
     originCountry: Country;
     host: Host;
+    shipmentCost?: Cost;
   },
 ): Promise<FinalizedOrder> {
   const draftOrder: IDraftOrder = await moduleRef.resolve(IDraftOrder);
@@ -361,10 +370,7 @@ export async function createFinalizedOrder(
       JSON.stringify({
         orderId,
         totalWeight: 2000,
-        shipmentCost: {
-          amount: 100,
-          currency: 'USD',
-        },
+        shipmentCost,
         calculatorResultUrl: 'news.ycombinator.com',
       }),
     )
