@@ -38,10 +38,12 @@ export class StripeCheckoutWebhook implements IStripeCheckoutWebhook {
         await this.confirmOrderWebhookGateway.execute({
           port: webhookPayload as ConfirmOrderWebhookPayload,
         });
+        break;
       case FeeType.Shipment:
         await this.payShipmentWebhookGateway.execute({
           port: webhookPayload as PayShipmentWebhookPayload,
         });
+        break;
       default:
         throwCustomException(
           "Unexpected Stripe 'checkout.session.completed' webhook type",
