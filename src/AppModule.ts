@@ -28,6 +28,7 @@ import { HostMongoRepositoryAdapter } from './host/persistence/HostMongoReposito
 import { IHostRepository } from './host/persistence/IHostRepository';
 import { IOrderRepository } from './order/persistence/IOrderRepository';
 import { OrderMongoRepositoryAdapter } from './order/persistence/OrderMongoRepositoryAdapter';
+import { GlobalModule } from './GlobalModule';
 
 const infrastructureModules: DynamicModule[] = [
   ConfigModule.forRoot({
@@ -83,6 +84,7 @@ const persistenceProviders: Provider[] = [
 @Global()
 @Module({
   imports: [
+    GlobalModule,
     ...infrastructureModules,
     EmailModule,
     AuthModule,
