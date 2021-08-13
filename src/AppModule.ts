@@ -33,6 +33,16 @@ const infrastructureModules: DynamicModule[] = [
   ConfigModule.forRoot({
     envFilePath: ['.main.env', '.app.env'],
   }),
+  MongoModule.forRootAsync({
+    useFactory: async (configService: ConfigService) => ({
+      uri: configService.get<string>('MONGO_CONNECTION_STRING'),
+      dbName:
+        configService.get<string>('NODE_ENV') === 'prod'
+          ? configService.get<string>('MONGO_PROD_DB_NAME')
+          : configService.get<string>('MONGO_DEV_DB_NAME'),
+    }),
+    inject: [ConfigService],
+  }),
   MongoModule.forFeature([
     'orders',
     'customers',
@@ -74,16 +84,6 @@ const persistenceProviders: Provider[] = [
 @Module({
   imports: [
     ...infrastructureModules,
-    MongoModule.forRootAsync({
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_CONNECTION_STRING'),
-        dbName:
-          configService.get<string>('NODE_ENV') === 'prod'
-            ? configService.get<string>('MONGO_PROD_DB_NAME')
-            : configService.get<string>('MONGO_DEV_DB_NAME'),
-      }),
-      inject: [ConfigService],
-    }),
     EmailModule,
     AuthModule,
     HostModule,
