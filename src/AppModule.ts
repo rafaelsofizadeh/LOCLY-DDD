@@ -21,13 +21,13 @@ import { CustomerModule } from './customer/CustomerModule';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 import { AuthModule } from './auth/AuthModule';
 import { HostModule } from './host/HostModule';
-import { EmailModule } from './infrastructure/email/EmailModule';
 import { ICustomerRepository } from './customer/persistence/ICustomerRepository';
 import { CustomerMongoRepositoryAdapter } from './customer/persistence/CustomerMongoRepositoryAdapter';
 import { HostMongoRepositoryAdapter } from './host/persistence/HostMongoRepositoryAdapter';
 import { IHostRepository } from './host/persistence/IHostRepository';
 import { IOrderRepository } from './order/persistence/IOrderRepository';
 import { OrderMongoRepositoryAdapter } from './order/persistence/OrderMongoRepositoryAdapter';
+import { NotificationModule } from './infrastructure/notification/NotificationModule';
 import { GlobalModule } from './GlobalModule';
 
 const infrastructureModules: DynamicModule[] = [
@@ -86,7 +86,7 @@ const persistenceProviders: Provider[] = [
   imports: [
     GlobalModule,
     ...infrastructureModules,
-    EmailModule,
+    NotificationModule,
     AuthModule,
     HostModule,
     CustomerModule,

@@ -7,6 +7,6 @@ export type EmailData = {
   html: string;
 };
 
-export abstract class IEmailService implements IEmailService {
+export abstract class IEmailService {
   sendEmail: (data: EmailData) => Promise<void>;
 }

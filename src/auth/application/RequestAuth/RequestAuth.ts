@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientSession } from 'mongodb';
 import {
@@ -17,7 +17,11 @@ import { tokenToString } from '../utils';
 import { Email, UUID } from '../../../common/domain';
 import { throwCustomException } from '../../../common/error-handling';
 import { Country } from '../../../order/entity/Country';
-import { IAuthDeliveryStrategy } from '../../infrastructure/AuthDeliveryStrategy/IAuthDeliveryStrategy';
+import {
+  INotificationService,
+  NotificationType,
+} from '../../../infrastructure/notification/INotificationService';
+import { DOMAIN } from '../../../GlobalModule';
 
 /**
  * Functionality for the first step in user auth – accepting user email, generating a verification token and sending it
@@ -29,7 +33,8 @@ export class RequestAuth implements IRequestAuth {
     private readonly getCustomerUpsert: IGetCustomerUpsert,
     private readonly getHostUpsert: IGetHostUpsert,
     private readonly configService: ConfigService,
-    private readonly authDeliveryStrategy: IAuthDeliveryStrategy,
+    private readonly notificationService: INotificationService,
+    @Inject(DOMAIN) private readonly domain: string,
   ) {}
 
   @Transaction
@@ -51,10 +56,8 @@ export class RequestAuth implements IRequestAuth {
       mongoTransactionSession,
     );
 
-    const key = this.configService.get<string>('TOKEN_SIGNING_KEY');
-    const expiresIn = this.configService.get<string>(
-      'VERIFICATION_TOKEN_EXPIRES_IN',
-    );
+    const key = this.configService.get('TOKEN_SIGNING_KEY');
+    const expiresIn = this.configService.get('VERIFICATION_TOKEN_EXPIRES_IN');
 
     // Create and sign a verification token to be sent by email.
     const tokenString: string = tokenToString(
@@ -63,7 +66,12 @@ export class RequestAuth implements IRequestAuth {
       expiresIn,
     );
 
-    return this.authDeliveryStrategy.deliverAuth(tokenString, email);
+    await this.notificationService.notify(email, NotificationType.Auth, {
+      domain: this.domain,
+      token: tokenString,
+    });
+
+    return tokenString;
   }
 
   // For login, the GetCustomer/HostUpsert use cases are expected to always only GET.
