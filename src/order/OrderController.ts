@@ -130,7 +130,7 @@ export class OrderController {
     @Body() unidDraftOrderRequest: DraftOrderRequest,
     @CustomerIdentity() customerId: UUID,
   ): Promise<DraftedOrder> {
-    // TODO: Decorator for attaching identity id to request
+    // TODO: Decorator for attaching identity id to request body
     const draftOrderPayload: DraftOrderPayload = {
       ...unidDraftOrderRequest,
       customerId,

@@ -85,7 +85,6 @@ export class DraftOrder implements IDraftOrder {
     };
   }
 
-  // TODO: Currencies
   private approximateShipmentCost(
     originCountry: Country,
     { country: destinationCountry }: Address,

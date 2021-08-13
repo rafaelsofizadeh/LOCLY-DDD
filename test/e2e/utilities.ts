@@ -366,7 +366,6 @@ export async function createFinalizedOrder(
     .post('/order/shipmentInfo')
     .field(
       'payload',
-      // TODO: Pass as parameter
       JSON.stringify({
         orderId,
         totalWeight: 2000,
