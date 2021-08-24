@@ -8,7 +8,8 @@ then
     sed -i "" '/.env/d' ./.gitignore
     cp Procfile dist/Procfile
     cp package.deployment.json dist/package.json
-    cp .env dist/.env
+    cp .app.env dist/.app.env
+    cp .main.env dist/.main.env
     BRANCH = $(git rev-parse --abbrev-ref HEAD)
     git add .
     git commit -m "Edit .gitignore to publish"
