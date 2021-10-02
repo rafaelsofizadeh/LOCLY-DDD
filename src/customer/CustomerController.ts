@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Patch } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch } from '@nestjs/common';
 import { CustomerIdentity } from '../auth/infrastructure/IdentityDecorator';
 import { UUID } from '../common/domain';
+import { IDeleteCustomer } from './application/DeleteCustomer/IDeleteCustomer';
 import {
   EditCustomerRequest,
   IEditCustomer,
@@ -13,6 +14,7 @@ export class CustomerController {
   constructor(
     private readonly getCustomer: IGetCustomer,
     private readonly editCustomer: IEditCustomer,
+    private readonly deleteCustomer: IDeleteCustomer,
   ) {}
 
   @Get()
@@ -37,5 +39,12 @@ export class CustomerController {
     await this.editCustomer.execute({
       port: { customerId, ...editOrderRequest },
     });
+  }
+
+  @Delete()
+  async deleteCustomerController(
+    @CustomerIdentity() customerId: UUID,
+  ): Promise<void> {
+    await this.deleteCustomer.execute({ port: { customerId } });
   }
 }

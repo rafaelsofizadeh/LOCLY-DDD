@@ -42,9 +42,14 @@ export class ConfirmOrderHandler implements IConfirmOrderHandler {
     { orderId, hostId }: ConfirmOrderWebhookPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<Address> {
+    const { address: hostAddress }: Host = await this.hostRepository.findHost(
+      { hostId },
+      mongoTransactionSession,
+    );
+
     await this.orderRepository.setProperties(
       { orderId, status: OrderStatus.Drafted },
-      { status: OrderStatus.Confirmed, hostId },
+      { status: OrderStatus.Confirmed, hostId, hostAddress },
       mongoTransactionSession,
     );
 
@@ -54,11 +59,6 @@ export class ConfirmOrderHandler implements IConfirmOrderHandler {
       mongoTransactionSession,
     );
 
-    const { address }: Host = await this.hostRepository.findHost(
-      { hostId },
-      mongoTransactionSession,
-    );
-
-    return address;
+    return hostAddress;
   }
 }

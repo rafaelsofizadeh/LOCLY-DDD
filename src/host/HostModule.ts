@@ -1,6 +1,8 @@
 import { Module, Provider } from '@nestjs/common';
 import { CreateHost } from './application/CreateHost/CreateHost';
 import { ICreateHost } from './application/CreateHost/ICreateHost';
+import { DeleteHost } from './application/DeleteHost/DeleteHost';
+import { IDeleteHost } from './application/DeleteHost/IDeleteHost';
 import { EditHost } from './application/EditHost/EditHost';
 import { IEditHost } from './application/EditHost/IEditHost';
 import { GetHost } from './application/GetHost/GetHost';
@@ -23,6 +25,7 @@ const useCaseProviders: Provider[] = [
   { provide: IGetHostUpsert, useClass: GetHostUpsert },
   { provide: IGetHostAccountLink, useClass: GetHostAccountLink },
   { provide: IEditHost, useClass: EditHost },
+  { provide: IDeleteHost, useClass: DeleteHost },
   { provide: ISetHostAvailability, useClass: SetHostAvailability },
   {
     provide: IStripeAccountUpdatedWebhook,

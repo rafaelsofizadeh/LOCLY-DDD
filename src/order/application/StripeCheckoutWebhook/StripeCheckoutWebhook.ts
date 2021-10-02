@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import {
   StripeCheckoutSession,
   StripeEvent,
-  Transaction,
 } from '../../../common/application';
 import { throwCustomException } from '../../../common/error-handling';
 import {
@@ -28,30 +27,31 @@ export class StripeCheckoutWebhook implements IStripeCheckoutWebhook {
     private readonly payShipmentWebhookGateway: IPayShipmentHandler,
   ) {}
 
-  // TODO: Don't run AuthInterceptor on webhooks !!!!!!!!! NOW NOW
   @StripeWebhookHandler('checkout.session.completed')
-  execute({
-    port: event,
-  }: {
-    port: StripeEvent;
-  }): Promise<StripeCheckoutResult> {
-    const webhookPayload = (event.data.object as StripeCheckoutSession)
-      .metadata as StripeCheckoutWebhookPayload;
+  async execute(event: StripeEvent): Promise<void> {
+    const session = event.data.object as StripeCheckoutSession;
+    const webhookPayload = session.metadata as StripeCheckoutWebhookPayload;
 
+    //https://stripe.com/docs/payments/checkout/fulfill-orders
     switch (webhookPayload.feeType) {
       case FeeType.Service:
-        return this.confirmOrderWebhookGateway.execute({
+        await this.confirmOrderWebhookGateway.execute({
           port: webhookPayload as ConfirmOrderWebhookPayload,
         });
+        break;
       case FeeType.Shipment:
-        return this.payShipmentWebhookGateway.execute({
+        await this.payShipmentWebhookGateway.execute({
           port: webhookPayload as PayShipmentWebhookPayload,
         });
+        break;
       default:
         throwCustomException(
           "Unexpected Stripe 'checkout.session.completed' webhook type",
           { webhookPayload },
         )();
     }
+
+    // Stripe webhooks should receive a successful 20X HTTP response as fast as possible.
+    return;
   }
 }

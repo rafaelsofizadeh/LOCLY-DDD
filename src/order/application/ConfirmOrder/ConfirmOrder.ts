@@ -21,6 +21,7 @@ import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { ConfirmOrderPayload } from './IConfirmOrder';
 import { Customer } from '../../../customer/entity/Customer';
 import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
+import { ConfigService } from '@nestjs/config';
 
 export type Match = {
   orderId: UUID;
@@ -30,6 +31,7 @@ export type Match = {
 @Injectable()
 export class ConfirmOrder implements IConfirmOrder {
   constructor(
+    private readonly configService: ConfigService,
     private readonly orderRepository: IOrderRepository,
     private readonly hostRepository: IHostRepository,
     private readonly customerRepository: ICustomerRepository,
@@ -60,7 +62,7 @@ export class ConfirmOrder implements IConfirmOrder {
       mongoTransactionSession,
     )) as DraftedOrder;
 
-    const hostId: UUID = await this.findMatchingHost(
+    const host: Host = await this.findMatchingHost(
       draftOrder,
       mongoTransactionSession,
     );
@@ -71,7 +73,7 @@ export class ConfirmOrder implements IConfirmOrder {
 
     const checkoutSession: StripeCheckoutSession = await this.createStripeCheckoutSession(
       draftOrder,
-      hostId,
+      host,
       stripeCustomerId,
     );
 
@@ -81,15 +83,15 @@ export class ConfirmOrder implements IConfirmOrder {
   private async findMatchingHost(
     { originCountry }: DraftedOrder,
     mongoTransactionSession: ClientSession,
-  ): Promise<UUID> {
+  ): Promise<Host> {
     try {
-      const matchedHost: Host = await this.hostRepository.findHostAvailableInCountryWithMinimumNumberOfOrders(
+      return this.hostRepository.findHostAvailableInCountryWithMinimumNumberOfOrders(
         originCountry,
         mongoTransactionSession,
       );
-
-      return matchedHost.id;
     } catch (error) {
+      console.error(error);
+
       throwCustomException(
         'No available host',
         { originCountry },
@@ -101,39 +103,28 @@ export class ConfirmOrder implements IConfirmOrder {
   // TODO: Error handling and rejection events
   private async createStripeCheckoutSession(
     { id: orderId }: DraftedOrder,
-    hostId: UUID,
+    host: Host,
     stripeCustomerId: Stripe.Customer['id'],
   ): Promise<StripeCheckoutSession> {
-    const loclyFee: Cost = await this.calculateLoclyFee();
-    const price: StripePrice = stripePrice(loclyFee);
+    const totalFee: Cost = this.calculateTotalFee();
+    const localFee: Cost = this.calculateLoclyFee(totalFee);
+
+    const totalPrice: StripePrice = stripePrice(totalFee);
+    const loclyPrice: StripePrice = stripePrice(localFee);
+
     const match: Match = {
       orderId,
-      hostId,
+      hostId: host.id,
     };
 
-    /**
-     * Scenarios:
-     *
-     * I. Match Order with Host, store hostId on Order BEFORE Payment:
-     *
-     * 1. Host matched to Order -> Customer didn't finalize Payment -> Customer requests Order info,
-     *    sees Order.Host(Id), requests Host info -> gets Host address without Paying.
-     * 2. CURRENT:  Host matched to Order -> while Customer finalizes Payment, Host decides to set their status to
-     *    "unavailable" -> Customer payed, but Order couldn't be matched to/executed by Host
-     *    TODO: Potential solution: prohibit Host from setting status as "unavailable" while the Host has unfinalized
-     *    Orders. I.e. "book" the host while the payment is being processed.
-     *
-     * II. Payment BEFORE matching Host:
-     *
-     * 1. Customer pays Order -> Order tries to match with a Host -> no Host available
-     */
+    // Edge case: the matched host sets availability to "not available" inbetween the customer confirming the order and paying.
     const checkoutSession = (await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       customer: stripeCustomerId,
       line_items: [
         {
           price_data: {
-            ...price,
+            ...totalPrice,
             product_data: {
               name: 'Locly and Host Service Fee',
             },
@@ -141,6 +132,10 @@ export class ConfirmOrder implements IConfirmOrder {
           quantity: 1,
         },
       ],
+      payment_intent_data: {
+        application_fee_amount: loclyPrice.unit_amount,
+        transfer_data: { destination: host.stripeAccountId },
+      },
       metadata: {
         feeType: FeeType.Service,
         ...match,
@@ -153,10 +148,20 @@ export class ConfirmOrder implements IConfirmOrder {
     return checkoutSession;
   }
 
-  private async calculateLoclyFee(): Promise<Cost> {
+  calculateTotalFee(): Cost {
     return {
       currency: 'USD',
-      amount: 100,
+      amount: this.configService.get<number>('TOTAL_SERVICE_FEE_USD'),
+    };
+  }
+
+  calculateLoclyFee({ currency, amount: totalAmount }: Cost): Cost {
+    return {
+      currency,
+      amount:
+        totalAmount *
+        (0.01 *
+          this.configService.get<number>('LOCLY_SERVICE_FEE_CUT_PERCENT')),
     };
   }
 }

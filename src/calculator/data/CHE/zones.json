@@ -1,0 +1,112 @@
+{
+  "1": [
+    {
+      "iso3": "AUT",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "BEL",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "DNK",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "FRA",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "DEU",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "ITA",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "NLD",
+      "maxWeight": 20000
+    },
+    {
+      "iso3": "GBR",
+      "maxWeight": 30000
+    }
+  ],
+  "2": [
+    {
+      "iso3": "POL",
+      "maxWeight": 20000
+    },
+    {
+      "iso3": "PRT",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "ESP",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "SWE",
+      "maxWeight": 30000
+    }
+  ],
+  "3": [
+    {
+      "iso3": "ROU",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "RUS",
+      "maxWeight": 20000
+    },
+    {
+      "iso3": "TUR",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "UKR",
+      "maxWeight": 30000
+    }
+  ],
+  "4": [
+    {
+      "iso3": "CAN",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "USA",
+      "maxWeight": 30000
+    }
+  ],
+  "5": [
+    {
+      "iso3": "AUS",
+      "maxWeight": 20000
+    },
+    {
+      "iso3": "BRA",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "CHN",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "IND",
+      "maxWeight": 20000
+    },
+    {
+      "iso3": "JPN",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "NZL",
+      "maxWeight": 30000
+    },
+    {
+      "iso3": "THA",
+      "maxWeight": 30000
+    }
+  ]
+}

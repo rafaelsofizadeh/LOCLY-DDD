@@ -2,25 +2,25 @@ import { HttpStatus } from '@nestjs/common';
 import { throwCustomException } from '../common/error-handling';
 import { Country } from '../order/entity/Country';
 import { Currency } from '../order/entity/Currency';
-import { Gram, PhysicalItem } from '../order/entity/Item';
+import { Gram } from '../order/entity/Item';
 import { priceGuide } from './data/PriceGuide';
 
 type PriceTableSpecification = {
-  rowsName: string;
-  colsName: string;
   deliveryZoneNames: string[];
   weightIntervals: Gram[];
   currency: Currency;
 };
+
+type CountryWeight = { iso3: Country; maxWeight: Gram };
+type DeliveryZone = Country[] | CountryWeight[];
 
 export type ShipmentCostSpecification = {
   // Should've been type Country: https://github.com/microsoft/TypeScript/issues/37448
   [countryIsoCode: string]: {
     postalServiceName: string;
     priceTableSpecification: PriceTableSpecification;
-    deliveryZones: { [key: string]: Country[] };
+    deliveryZones: { [key: string]: DeliveryZone };
     deliveryServices: Array<{
-      id: string;
       name: string;
       tracked: boolean;
       serviceAvailability: Array<Country | 'all'>;
@@ -32,7 +32,8 @@ export type ShipmentCostSpecification = {
 export type ShipmentCostQuote = {
   postalServiceName: string;
   currency: Currency;
-  services: { name: string; tracked: boolean; price: number }[];
+  deliveryZone: string;
+  services: Array<{ name: string; tracked: boolean; price: number }>;
 };
 
 type Index = number;
@@ -54,37 +55,48 @@ function getNumericInterval(numericIntervals: number[], point: number): Index {
   );
 }
 
+// TODO: Overload by DeliveryZone subtype
 function determineDeliveryZone(
-  deliveryZones: { [key: string]: Country[] },
+  deliveryZones: {
+    [key: string]: DeliveryZone;
+  },
   country: Country,
-) {
-  return Object.keys(deliveryZones).find(zone =>
-    deliveryZones[zone].includes(country),
-  );
+): [[string, DeliveryZone], Country | CountryWeight] {
+  let countryEntry: Country | CountryWeight;
+
+  const determinedZone = Object.entries(deliveryZones).find(([name, zone]) => {
+    if (Array.isArray(zone)) {
+      if (typeof zone[0] === 'string') {
+        return (zone as Country[]).includes(country);
+      }
+
+      if (typeof zone[0] === 'object') {
+        countryEntry = (zone as Array<{
+          iso3: Country;
+          maxWeight: Gram;
+        }>).find(({ iso3 }) => iso3 === country);
+
+        return Boolean(countryEntry);
+      }
+    }
+
+    return false;
+  });
+
+  return [determinedZone, countryEntry];
 }
 
 function validateOriginCountry(originCountry: Country): void {
   if (!priceGuide.hasOwnProperty(originCountry)) {
-    throw new Error(
-      `Origin country ${originCountry} is not supported by the calculator.`,
-    );
+    throw `Origin country ${originCountry} is not supported by Locly.`;
   }
 }
 
-function validatePackageDimensions(
-  weightIntervals: Gram[],
-  packages: PhysicalItem[],
-): Index {
-  const totalWeight = packages
-    .map(pkg => pkg.weight)
-    .reduce((totalWeight, weight) => totalWeight + weight, 0);
-
+function validateWeight(weightIntervals: Gram[], totalWeight: Gram): Index {
   const maxWeight = weightIntervals.slice(-1)[0];
 
   if (totalWeight > maxWeight) {
-    throw new Error(
-      `Weight ${totalWeight} exceeds max specified weight ${maxWeight}.`,
-    );
+    throw `Weight ${totalWeight} exceeds max specified weight ${maxWeight}.`;
   }
 
   const weightIntervalIndex = getNumericInterval(weightIntervals, totalWeight);
@@ -92,13 +104,18 @@ function validatePackageDimensions(
   return weightIntervalIndex;
 }
 
+// TODO: weight or measurement-based results
 export function getShipmentCostQuote(
   originCountry: Country,
   destinationCountry: Country,
-  packages: PhysicalItem[],
+  totalWeight: Gram,
 ): ShipmentCostQuote {
   try {
     validateOriginCountry(originCountry);
+
+    if (originCountry === destinationCountry) {
+      throw "Origin country can't be equal to destination country";
+    }
 
     const {
       postalServiceName,
@@ -107,23 +124,30 @@ export function getShipmentCostQuote(
       deliveryServices,
     } = priceGuide[originCountry];
 
-    const weightIntervalIndex: Index = validatePackageDimensions(
+    const weightIntervalIndex: Index = validateWeight(
       weightIntervals,
-      packages,
+      totalWeight,
     );
 
-    const deliveryZone = determineDeliveryZone(
-      deliveryZones,
-      destinationCountry,
-    );
+    let deliveryZoneName, deliveryZone, countryEntry;
 
-    if (!deliveryZone) {
-      throw new Error(
-        `Destination country ${destinationCountry} is not supported by ${postalServiceName} of ${originCountry}.`,
+    try {
+      [[deliveryZoneName, deliveryZone], countryEntry] = determineDeliveryZone(
+        deliveryZones,
+        destinationCountry,
       );
+    } catch (err) {
+      throw `Destination country ${destinationCountry} is not supported by ${postalServiceName} postal service of ${originCountry}.`;
     }
 
-    const deliveryZoneTableIndex = deliveryZoneNames.indexOf(deliveryZone);
+    if (
+      typeof countryEntry === 'object' &&
+      totalWeight > countryEntry.maxWeight
+    ) {
+      throw `Weight ${totalWeight} exceeds max specified weight ${countryEntry.maxWeight}.`;
+    }
+
+    const deliveryZoneTableIndex = deliveryZoneNames.indexOf(deliveryZoneName);
 
     const availableDeliveryServices = deliveryServices.filter(
       ({ serviceAvailability }) =>
@@ -132,9 +156,7 @@ export function getShipmentCostQuote(
     );
 
     if (!availableDeliveryServices.length) {
-      throw new Error(
-        `Destination country ${destinationCountry} is not supported by ${postalServiceName}.`,
-      );
+      throw `Destination country ${destinationCountry} is not supported by ${postalServiceName} of ${originCountry}.`;
     }
 
     const services = availableDeliveryServices.map(service => {
@@ -147,7 +169,7 @@ export function getShipmentCostQuote(
       );
 
       if (isNaN(price)) {
-        throw new Error('Unexpected error occurred');
+        throw 'Unexpected error occurred';
       }
 
       return {
@@ -160,19 +182,20 @@ export function getShipmentCostQuote(
     return {
       postalServiceName,
       currency,
+      deliveryZone: deliveryZoneName,
       services,
     };
-  } catch (error) {
+  } catch (message) {
     throwCustomException(
-      error.message,
-      { originCountry, destinationCountry, packages },
+      message,
+      { originCountry, destinationCountry, totalWeight },
       HttpStatus.SERVICE_UNAVAILABLE,
-    )(error);
+    )();
   }
 }
 
 export type ShipmentCostQuoteFn = (
   originCountry: Country,
   destinationCountry: Country,
-  packages: Array<{ weight: Gram }>,
+  totalWeight: Gram,
 ) => ShipmentCostQuote;

@@ -3,9 +3,12 @@ import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepo
 
 import { DraftOrderPayload, IDraftOrder } from './IDraftOrder';
 
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ClientSession } from 'mongodb';
-import { Transaction, TransactionUseCasePort } from '../../../common/application';
+import {
+  Transaction,
+  TransactionUseCasePort,
+} from '../../../common/application';
 import {
   getShipmentCostQuote,
   ShipmentCostQuote,
@@ -15,7 +18,6 @@ import { DraftedItem } from '../../entity/Item';
 import { Address, UUID } from '../../../common/domain';
 import { Country } from '../../entity/Country';
 import { DraftedOrder, Cost, OrderStatus } from '../../entity/Order';
-import { throwCustomException } from '../../../common/error-handling';
 
 @Injectable()
 export class DraftOrder implements IDraftOrder {
@@ -40,7 +42,7 @@ export class DraftOrder implements IDraftOrder {
       draftOrderPayload,
     );
 
-    // TODO(IMPORANT): Document MongoDb concurrent transaction limitations.
+    // TODO(IMPORTANT): Document MongoDb concurrent transaction limitations.
     // https://jira.mongodb.org/browse/SERVER-36428?focusedCommentId=2136170&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-2136170
     // (GLOBAL) DON'T parallelize this. Promise.all()'ing these, together with transactions, will lead to random
     // TransientTransactionError errors.
@@ -60,15 +62,6 @@ export class DraftOrder implements IDraftOrder {
     items: itemsWithoutId,
     destination,
   }: DraftOrderPayload): DraftedOrder {
-    // TODO: class-validator decorator https://github.com/typestack/class-validator/issues/486
-    if (originCountry === destination.country) {
-      throwCustomException(
-        "Origin country can't be equal to destination country",
-        { originCountry, destinationCountry: destination.country },
-        HttpStatus.SERVICE_UNAVAILABLE,
-      )();
-    }
-
     const items: DraftedItem[] = itemsWithoutId.map(itemWithoutId => ({
       ...itemWithoutId,
       id: UUID(),
@@ -92,7 +85,6 @@ export class DraftOrder implements IDraftOrder {
     };
   }
 
-  // TODO: Currencies
   private approximateShipmentCost(
     originCountry: Country,
     { country: destinationCountry }: Address,
@@ -102,7 +94,7 @@ export class DraftOrder implements IDraftOrder {
     const { currency, services }: ShipmentCostQuote = getShipmentCostQuote(
       originCountry,
       destinationCountry,
-      items.map(({ weight }) => ({ weight })),
+      items.reduce((totalWeight, { weight }) => totalWeight + weight, 0),
     );
 
     // TODO: Service choice logic

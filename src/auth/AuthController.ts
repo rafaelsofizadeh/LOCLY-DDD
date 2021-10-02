@@ -60,6 +60,18 @@ export class AuthController {
       maxAge: authCookieMaxAge,
       httpOnly: true,
     });
+
+    // The auth token is an httpOnly cookie, hence there's no straightforward way for the front-end JS to
+    // check whether the user is logged in or not. We add a second, client-accessible cookie, indicating the
+    // auth status of the user (auth=true or auth=false), that doesn't participate in any back-end logic.
+    const authIndicatorCookieName = this.configService.get<string>(
+      'AUTH_INDICATOR_COOKIE_NAME',
+    );
+
+    response.cookie(authIndicatorCookieName, true, {
+      httpOnly: false,
+      maxAge: authCookieMaxAge,
+    });
   }
 
   // TODO: GET 'logout' causes routing conflicts with GET ':token'
@@ -70,5 +82,13 @@ export class AuthController {
   ): Promise<void> {
     const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
     response.clearCookie(authCookieName);
+
+    const authIndicatorCookieName = this.configService.get<string>(
+      'AUTH_INDICATOR_COOKIE_NAME',
+    );
+    response.cookie(authIndicatorCookieName, false, {
+      httpOnly: false,
+      maxAge: 365 * 24 * 60 * 60 * 10,
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { ClientSession } from 'mongodb';
 import {
@@ -7,13 +7,14 @@ import {
 } from '../../../common/application';
 import {
   AddItemPhotoPayload,
-  IAddItemPhoto,
-  ItemPhotosUploadResult,
-} from './IAddItemPhoto';
+  IAddItemPhotos,
+  AddItemPhotosResult,
+} from './IAddItemPhotos';
 import { OrderStatus } from '../../entity/Order';
+import { throwCustomException } from '../../../common/error-handling';
 
 @Injectable()
-export class AddItemPhoto implements IAddItemPhoto {
+export class AddItemPhotos implements IAddItemPhotos {
   constructor(private readonly orderRepository: IOrderRepository) {}
 
   @Transaction
@@ -21,7 +22,7 @@ export class AddItemPhoto implements IAddItemPhoto {
     port: addItemPhotoPayload,
     mongoTransactionSession,
   }: TransactionUseCasePort<AddItemPhotoPayload>): Promise<
-    ItemPhotosUploadResult
+    AddItemPhotosResult
   > {
     const itemPhotoUploadResults = await this.uploadItemPhoto(
       addItemPhotoPayload,
@@ -31,16 +32,30 @@ export class AddItemPhoto implements IAddItemPhoto {
     return itemPhotoUploadResults;
   }
 
-  private uploadItemPhoto(
+  private async uploadItemPhoto(
     { orderId, hostId, itemId, photos }: AddItemPhotoPayload,
     mongoTransactionSession: ClientSession,
-  ): Promise<ItemPhotosUploadResult> {
-    return this.orderRepository.addItemPhotos(
+  ): Promise<AddItemPhotosResult> {
+    const order = await this.orderRepository.findOrder(
       {
         orderId,
         status: [OrderStatus.Confirmed, OrderStatus.Finalized],
         hostId,
       },
+      mongoTransactionSession,
+    );
+    const item = order.items.find(({ id }) => id === itemId);
+
+    if (!item.receivedDate) {
+      throwCustomException(
+        'Item should be marked as received before uploading photos.',
+        { orderId, itemId },
+        HttpStatus.FORBIDDEN,
+      )();
+    }
+
+    return this.orderRepository.addItemPhotos(
+      { orderId },
       { itemId },
       photos,
       mongoTransactionSession,

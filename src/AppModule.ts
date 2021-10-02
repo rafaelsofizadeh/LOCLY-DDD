@@ -21,17 +21,39 @@ import { CustomerModule } from './customer/CustomerModule';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 import { AuthModule } from './auth/AuthModule';
 import { HostModule } from './host/HostModule';
-import { EmailModule } from './infrastructure/email/EmailModule';
 import { ICustomerRepository } from './customer/persistence/ICustomerRepository';
 import { CustomerMongoRepositoryAdapter } from './customer/persistence/CustomerMongoRepositoryAdapter';
 import { HostMongoRepositoryAdapter } from './host/persistence/HostMongoRepositoryAdapter';
 import { IHostRepository } from './host/persistence/IHostRepository';
 import { IOrderRepository } from './order/persistence/IOrderRepository';
 import { OrderMongoRepositoryAdapter } from './order/persistence/OrderMongoRepositoryAdapter';
+import { NotificationModule } from './infrastructure/notification/NotificationModule';
+import { GlobalModule } from './GlobalModule';
 
 const infrastructureModules: DynamicModule[] = [
-  ConfigModule.forRoot(),
-  MongoModule.forFeature(['orders', 'customers', 'hosts']),
+  ConfigModule.forRoot({
+    envFilePath: ['.main.env', '.app.env'],
+  }),
+  MongoModule.forRootAsync({
+    useFactory: async (configService: ConfigService) => ({
+      uri: configService.get<string>('MONGO_CONNECTION_STRING'),
+      dbName:
+        configService.get<string>('NODE_ENV') === 'prod'
+          ? configService.get<string>('MONGO_PROD_DB_NAME')
+          : configService.get<string>('MONGO_DEV_DB_NAME'),
+    }),
+    inject: [ConfigService],
+  }),
+  MongoModule.forFeature([
+    'orders',
+    'customers',
+    'hosts',
+    // TODO: Configure bucket name (host_item_photo)
+    'host_item_photos.files',
+    'host_item_photos.chunks',
+    'host_shipment_payment_proofs.files',
+    'host_shipment_payment_proofs.chunks',
+  ]),
   StripeModule.forRootAsync(StripeModule, {
     useFactory: async (configService: ConfigService) => {
       return {
@@ -62,15 +84,9 @@ const persistenceProviders: Provider[] = [
 @Global()
 @Module({
   imports: [
+    GlobalModule,
     ...infrastructureModules,
-    MongoModule.forRootAsync({
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_LOCLY_CONNECTION_STRING'),
-        dbName: configService.get<string>('MONGO_LOCLY_DB_NAME'),
-      }),
-      inject: [ConfigService],
-    }),
-    EmailModule,
+    NotificationModule,
     AuthModule,
     HostModule,
     CustomerModule,

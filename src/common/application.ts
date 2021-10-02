@@ -68,10 +68,8 @@ async function withExistingSessionTransaction<T>(
 ): Promise<T> {
   // Session already in transaction, program will assume it's already wrapped in mongoTransactionSession.withTransaction
   if (mongoTransactionSession.inTransaction()) {
-    console.warn(
-      "Session already in transaction, program will assume it's already wrapped in mongoTransactionSession.withTransaction",
-    );
-    return fn(mongoTransactionSession);
+    const result: T = await fn(mongoTransactionSession);
+    return result;
   }
 
   let result: T;
@@ -101,9 +99,15 @@ async function withNewSessionTransaction<T>(
 
 export function stripePrice({ currency, amount }: Cost): StripePrice {
   return {
-    currency: currency,
+    currency: currency.toLocaleLowerCase(),
     unit_amount: Math.floor(amount * 100),
   };
+}
+
+export function calculateStripeFee({
+  unit_amount,
+}: StripePrice): StripePrice['unit_amount'] {
+  return unit_amount * 2.9 * 0.01 + 30;
 }
 
 export type StripePrice = Pick<

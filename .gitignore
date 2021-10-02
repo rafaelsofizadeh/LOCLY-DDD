@@ -1,9 +1,9 @@
 # passwords and keys
-.env
+.*.env
 
 # compiled output
-/dist
 /node_modules
+/dist
 
 # Logs
 logs

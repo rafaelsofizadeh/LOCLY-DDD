@@ -12,10 +12,8 @@ const providers: Provider[] = [
     useFactory: (configService: ConfigService) => {
       switch (configService.get<string>('EMAIL_SERVICE')) {
         case 'sendgrid':
-          console.log('Using SendGrid for emails.');
           return new SendgridEmailService(configService);
         case 'ethereal_pseudo':
-          console.log('Using Ethereal for emails.');
           return new EtherealPseudoEmailService(configService);
         default:
           console.log(

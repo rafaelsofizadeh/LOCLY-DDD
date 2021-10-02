@@ -2,17 +2,19 @@ import {
   CallHandler,
   ExecutionContext,
   HttpStatus,
+  Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { EntityType, Token } from '../entity/Token';
+import { UserType, Token } from '../entity/Token';
 import { stringToToken } from '../application/utils';
 import { IHostRepository } from '../../host/persistence/IHostRepository';
 import { throwCustomException } from '../../common/error-handling';
 import { Host } from '../../host/entity/Host';
 import { Identity, IdentityType, IdentifiedRequest } from '../entity/Identity';
 
+@Injectable()
 export class CookieAuthInterceptor implements NestInterceptor {
   constructor(
     private readonly configService: ConfigService,
@@ -37,11 +39,11 @@ export class CookieAuthInterceptor implements NestInterceptor {
       return { entity: token, type: IdentityType.VerificationToken };
     }
 
-    if (token.type === EntityType.Customer) {
+    if (token.type === UserType.Customer) {
       return { entity: token.id, type: IdentityType.Customer };
     }
 
-    if (token.type === EntityType.Host) {
+    if (token.type === UserType.Host) {
       const host: Host = await this.hostRepository
         .findHost({
           hostId: token.id,
@@ -72,8 +74,29 @@ export class CookieAuthInterceptor implements NestInterceptor {
 
   async intercept(context: ExecutionContext, next: CallHandler) {
     const request: Request = context.switchToHttp().getRequest();
+    const response: Response = context.switchToHttp().getResponse();
+
+    const path = request.path;
+    if (path === this.configService.get<string>('STRIPE_WEBHOOK_PATH')) {
+      return next.handle();
+    }
 
     const cookies = this.getCookies(request);
+
+    const authIndicatorCookieName = this.configService.get<string>(
+      'AUTH_INDICATOR_COOKIE_NAME',
+    );
+    const authIndicator: string = cookies?.[authIndicatorCookieName];
+
+    // Response is undefined if the response is injected in the controller (using @Res())
+    // https://stackoverflow.com/questions/55205145/why-does-nestjs-interceptor-return-undefined
+    if (response && !authIndicator) {
+      response.cookie(authIndicatorCookieName, false, {
+        httpOnly: false,
+        maxAge: 365 * 24 * 60 * 60 * 10,
+      });
+    }
+
     const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
     const tokenString: string = cookies?.[authCookieName];
     let token: Token;

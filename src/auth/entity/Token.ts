@@ -1,12 +1,12 @@
 import { UUID } from '../../common/domain';
 
-export enum EntityType {
+export enum UserType {
   Customer = 'customer',
   Host = 'host',
 }
 
 export type Token = Readonly<{
   id: UUID;
-  type: EntityType;
+  type: UserType;
   isVerification: boolean;
 }>;

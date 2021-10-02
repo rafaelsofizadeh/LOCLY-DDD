@@ -10,7 +10,8 @@ export type StripeAccountUpdatedWebhookPayload = UpdateHostAccountPayload;
 
 export type StripeAccountUpdatedResult = UpdateHostAccountResult;
 
-export abstract class IStripeAccountUpdatedWebhook extends UseCase<
-  StripeAccountUpdatedEvent,
-  StripeAccountUpdatedResult
-> {}
+export abstract class IStripeAccountUpdatedWebhook {
+  abstract execute(
+    event: StripeAccountUpdatedEvent,
+  ): Promise<StripeAccountUpdatedResult>;
+}

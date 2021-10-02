@@ -23,20 +23,23 @@ export enum OrderStatus {
   Confirmed = 'confirmed',
   Finalized = 'finalized',
   Paid = 'paid',
+  Completed = 'completed',
 }
 
 export type Order = Readonly<{
   id: UUID;
-  status: OrderStatus;
-  customerId: UUID;
-  hostId: UUID;
-  items: Item[];
-  totalWeight: Gram;
   originCountry: Country;
   destination: Address;
+  status: OrderStatus;
+  customerId: UUID;
+  items: Item[];
   initialShipmentCost: Cost;
+  hostId: UUID;
+  hostAddress: Address;
+  totalWeight: Gram;
   finalShipmentCost: Cost;
   calculatorResultUrl?: URL;
+  proofOfPayment: UUID;
 }>;
 
 export type DraftedOrder = Pick<
@@ -44,13 +47,22 @@ export type DraftedOrder = Pick<
   'id' | 'customerId' | 'originCountry' | 'destination' | 'initialShipmentCost'
 > & { status: OrderStatus.Drafted; items: DraftedItem[] };
 
-export type ConfirmedOrder = Omit<DraftedOrder, 'status'> &
-  Pick<Order, 'hostId'> & { status: OrderStatus.Confirmed };
+export type ConfirmedOrder = Omit<DraftedOrder, 'status' | 'items'> &
+  Pick<Order, 'hostId' | 'hostAddress'> & {
+    status: OrderStatus.Confirmed;
+    items: Item[];
+  };
 
 export type FinalizedOrder = Omit<ConfirmedOrder, 'status' | 'items'> &
   Pick<Order, 'totalWeight' | 'initialShipmentCost' | 'calculatorResultUrl'> & {
     status: OrderStatus.Finalized;
     items: Array<ReceivedItem | FinalizedItem>;
+  };
+
+export type PaidOrder = Omit<FinalizedOrder, 'status' | 'items'> &
+  Pick<Order, 'finalShipmentCost'> & {
+    status: OrderStatus.Finalized;
+    items: Array<FinalizedItem>;
   };
 
 export type OrderFilter = EntityFilter<Order, { orderId: UUID }>;

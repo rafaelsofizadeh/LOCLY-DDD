@@ -13,6 +13,7 @@ import { isNotEmptyObject } from 'class-validator';
 
 import { UUID } from '../../common/domain';
 import {
+  expectOnlyNResults,
   expectOnlySingleResult,
   throwCustomException,
 } from '../../common/error-handling';
@@ -20,9 +21,10 @@ import { IOrderRepository } from './IOrderRepository';
 import { Order, DraftedOrder, OrderFilter } from '../entity/Order';
 import {
   OrderMongoDocument,
-  Photo,
   normalizeOrderFilter,
   normalizeItemFilter,
+  FileUpload,
+  FileUploadResult,
 } from './OrderMongoMapper';
 import {
   mongoQuery,
@@ -32,7 +34,7 @@ import {
   serializeMongoData,
 } from '../../common/persistence';
 import { ItemFilter } from '../entity/Item';
-import { ItemPhotosUploadResult } from '../application/AddItemPhoto/IAddItemPhoto';
+import { AddItemPhotosResult } from '../application/AddItemPhotos/IAddItemPhotos';
 
 @Injectable()
 export class OrderMongoRepositoryAdapter implements IOrderRepository {
@@ -123,13 +125,14 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     throwIfNotFound: boolean = true,
   ): Promise<Order> {
     // TODO: better typing using FilterQuery
-    const filterWithId = normalizeOrderFilter(filter);
-    const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(
-      filterWithId,
-    );
+    const { status, ...restFilter } = normalizeOrderFilter(filter);
+    const filterQuery: FilterQuery<OrderMongoDocument> = mongoQuery(restFilter);
 
     const orderDocument: OrderMongoDocument = await this.orderCollection
-      .findOne(filterQuery, { session: mongoTransactionSession })
+      .findOne(
+        { ...filterQuery, ...(status ? { status } : {}) },
+        { session: mongoTransactionSession },
+      )
       .catch(throwCustomException('Error searching for an order', filter));
 
     if (!orderDocument) {
@@ -205,6 +208,29 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
     );
   }
 
+  async deleteOrders(
+    orderIds: UUID[],
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void> {
+    const orderMongoBinaryIds: Binary[] = orderIds.map(orderId =>
+      uuidToMuuid(orderId),
+    );
+
+    const {
+      deletedCount,
+    }: DeleteWriteOpResultObject = await this.orderCollection
+      .deleteMany(
+        { _id: { $in: orderMongoBinaryIds } },
+        { session: mongoTransactionSession },
+      )
+      .catch(throwCustomException('Error deleting many orders', { orderIds }));
+
+    expectOnlyNResults(orderIds.length, [deletedCount], {
+      operation: 'deleting',
+      entity: 'order',
+    });
+  }
+
   async setItemProperties(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
@@ -226,7 +252,12 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       ...orderFilterWithId,
       items: itemFilterWithId,
     };
-    const filterQuery = mongoQuery(filter);
+
+    const filterQuery = {
+      ...mongoQuery(orderFilterWithId),
+      // https://docs.mongodb.com/manual/reference/operator/update/positional/#update-embedded-documents-using-multiple-field-matches
+      items: { $elemMatch: { ...mongoQuery(itemFilterWithId) } },
+    } as any;
 
     const itemSetQuery = mongoQuery({ 'items.$': properties });
 
@@ -264,59 +295,45 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
   async addItemPhotos(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
-    photos: Photo[],
+    photos: FileUpload[],
     mongoTransactionSession?: ClientSession,
-  ): Promise<ItemPhotosUploadResult> {
+  ): Promise<AddItemPhotosResult> {
     const { status, ...restOrderFilterWithId } = normalizeOrderFilter(
       orderFilter,
     );
+
     const itemFilterWithId = normalizeItemFilter(itemFilter);
 
-    const filter = {
-      ...restOrderFilterWithId,
-      items: itemFilterWithId,
-    };
-
-    const filterQueryWithoutReceivedCheck = mongoQuery(filter);
-    // TODO:
-    const receivedCheck = {
-      'items.receivedDate': { $ne: null },
-    };
-
-    const statusQuery = status
-      ? {
-          status: Array.isArray(status) ? { $in: status } : status,
-        }
-      : {};
-
     const filterQuery = {
-      ...filterQueryWithoutReceivedCheck,
-      ...statusQuery,
-      ...receivedCheck,
+      ...mongoQuery(restOrderFilterWithId),
+      ...(status ? { status } : {}),
+      items: {
+        // For more than one item property, $elemMatch must be used:
+        // https://docs.mongodb.com/manual/reference/operator/update/positional/#update-embedded-documents-using-multiple-field-matches
+        $elemMatch: mongoQuery(itemFilterWithId),
+      },
     };
 
-    // TODO: typing
     // TODO: Error handling on photos
     const photoMuuids = photos.map(({ id }) => id);
-    const photoUploadResults: ItemPhotosUploadResult = photos.map(
+    const photoUploadResults: AddItemPhotosResult = photos.map(
       ({ id, filename }) => ({
         id: muuidToUuid(id),
-        photoName: filename,
+        name: filename,
       }),
     );
 
-    // https://docs.mongodb.com/manual/reference/operator/update/positional/
     const {
       matchedCount,
       modifiedCount,
     }: UpdateWriteOpResult = await this.orderCollection
       .updateOne(
         filterQuery,
-        // $each: https://docs.mongodb.com/manual/reference/operator/update/push/#append-multiple-values-to-an-array
-        // TODO:
         {
           $push: {
-            'items.$.photos': {
+            // $ – positional: https://docs.mongodb.com/manual/reference/operator/update/positional/
+            'items.$.photoIds': {
+              // $each: https://docs.mongodb.com/manual/reference/operator/update/push/#append-multiple-values-to-an-array
               $each: photoMuuids,
             },
           },
@@ -326,10 +343,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       .catch(
         throwCustomException('Error adding photo file id to order item', {
           orderFilter,
-          itemFilter: {
-            ...itemFilter,
-            receivedDate: 'NOT_NULL',
-          },
+          itemFilter,
         }),
       );
 
@@ -341,14 +355,61 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
       },
       {
         orderFilter,
-        // TODO:
-        itemFilter: {
-          ...itemFilter,
-          receivedDate: 'NOT_NULL',
-        },
+        itemFilter,
       },
     );
 
     return photoUploadResults;
+  }
+
+  async addFile(
+    orderFilter: OrderFilter,
+    file: FileUpload,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<FileUploadResult> {
+    const { status, ...restNormalizedOrderFilter } = normalizeOrderFilter(
+      orderFilter,
+    );
+
+    const filterQuery = {
+      ...mongoQuery(restNormalizedOrderFilter),
+      ...(status ? { status } : {}),
+    };
+
+    // TODO: Error handling on file
+    const fileUploadResult: FileUploadResult = {
+      id: muuidToUuid(file.id),
+      name: file.filename,
+    };
+
+    const {
+      matchedCount,
+      modifiedCount,
+    }: UpdateWriteOpResult = await this.orderCollection
+      .updateOne(
+        filterQuery,
+        {
+          $set: { proofOfPayment: fileUploadResult.id },
+        },
+        { session: mongoTransactionSession },
+      )
+      .catch(
+        throwCustomException('Error adding file id to order', {
+          orderFilter,
+        }),
+      );
+
+    expectOnlySingleResult(
+      [matchedCount, modifiedCount],
+      {
+        operation: 'adding file id to',
+        entity: 'order',
+      },
+      {
+        orderFilter,
+      },
+    );
+
+    return fileUploadResult;
   }
 }

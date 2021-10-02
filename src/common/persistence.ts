@@ -208,7 +208,7 @@ export function convertToMongoDocument(
 }
 
 // TODO: typing
-// TODO: Support status array
+// TODO: Support status array (see OrderRepositoryAdapter status destructuring)
 export function mongoQuery(input: object) {
   const convertedToMongo = convertToMongoDocument(input);
   const convertedToMongoDotNotation = flattenObject(convertedToMongo);

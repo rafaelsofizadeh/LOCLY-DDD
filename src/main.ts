@@ -3,10 +3,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './AppModule';
 import { CustomExceptionFilter } from './infrastructure/CustomExceptionFilter';
 
-// TODO(GLOBAL): Rethink everything related to event emitting; email notifications & maybe server-sent events
+// TODO(GLOBAL): Email notifications & maybe server-sent events
 // TODO(GLOBAL): Rethink order statuses and change status to "belongs-to-user" and "belongs-to-host"
 // TODO(GLOBAL)(IMPORTANT): Query db documents only through uuid, and only then check additional properties, to improve
 // query performance
+// TODO(GLOBAL): Stripe statement descriptors
 
 declare const module: any;
 
@@ -24,9 +25,15 @@ export async function setupNestApp(app: INestApplication) {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bodyParser: false });
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false,
+    cors: {
+      origin: ['https://www.test-cors.org', 'https://locly.netlify.app'],
+      credentials: true,
+    },
+  });
   await setupNestApp(app);
-  await app.listen(3000);
+  await app.listen(process.env.PORT || 3000);
 
   if (module.hot) {
     module.hot.accept();

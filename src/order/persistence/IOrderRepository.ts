@@ -2,8 +2,8 @@ import { ClientSession } from 'mongodb';
 import { UUID } from '../../common/domain';
 import { ItemFilter } from '../entity/Item';
 import { Order, DraftedOrder, OrderFilter, OrderStatus } from '../entity/Order';
-import { ItemPhotosUploadResult } from '../application/AddItemPhoto/IAddItemPhoto';
-import { Photo } from './OrderMongoMapper';
+import { AddItemPhotosResult } from '../application/AddItemPhotos/IAddItemPhotos';
+import { FileUpload, FileUploadResult } from './OrderMongoMapper';
 
 type T<K extends keyof Order = any> = Omit<
   OrderFilter,
@@ -64,6 +64,11 @@ export abstract class IOrderRepository {
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 
+  abstract deleteOrders(
+    orderIds: UUID[],
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void>;
+
   abstract setProperties(
     filter: OrderFilterWithStatus<OrderStatus.Drafted>,
     properties: AllowedOrderProperties<
@@ -72,7 +77,8 @@ export abstract class IOrderRepository {
       | 'items'
       | 'originCountry'
       | 'destination'
-      | 'initialShipmentCost',
+      | 'initialShipmentCost'
+      | 'hostAddress',
       OrderStatus.Confirmed
     >,
     mongoTransactionSession?: ClientSession,
@@ -115,7 +121,13 @@ export abstract class IOrderRepository {
   abstract addItemPhotos(
     orderFilter: OrderFilter,
     itemFilter: ItemFilter,
-    photos: Photo[],
+    photos: FileUpload[],
     mongoTransactionSession?: ClientSession,
-  ): Promise<ItemPhotosUploadResult>;
+  ): Promise<AddItemPhotosResult>;
+
+  abstract addFile(
+    orderFilter: OrderFilter,
+    file: FileUpload,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<FileUploadResult>;
 }

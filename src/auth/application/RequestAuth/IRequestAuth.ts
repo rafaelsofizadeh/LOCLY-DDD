@@ -2,11 +2,11 @@ import { IsEmail, IsEnum, IsISO31661Alpha3, IsOptional } from 'class-validator';
 import { UseCase } from '../../../common/application';
 import { Email } from '../../../common/domain';
 import { Country } from '../../../order/entity/Country';
-import { EntityType } from '../../entity/Token';
+import { UserType } from '../../entity/Token';
 
 export type RequestAuthPayload = Readonly<{
   email: Email;
-  type: EntityType;
+  type: UserType;
   // country is expected to be defined only during host registration. All other cases (login, customer registration),
   // country will be undefined.
   country?: Country;
@@ -16,8 +16,8 @@ export class RequestAuthRequest implements RequestAuthPayload {
   @IsEmail()
   readonly email: Email;
 
-  @IsEnum(EntityType)
-  readonly type: EntityType;
+  @IsEnum(UserType)
+  readonly type: UserType;
 
   @IsOptional()
   @IsISO31661Alpha3()

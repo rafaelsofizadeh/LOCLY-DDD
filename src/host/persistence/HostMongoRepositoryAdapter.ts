@@ -111,7 +111,9 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
     mongoTransactionSession?: ClientSession,
   ) {
     if (!isNotEmptyObject(filter) || !isNotEmptyObject(properties)) {
-      return;
+      throw new Error(
+        "setProperties – filter and/or properties can't be empty",
+      );
     }
 
     const filterWithId = normalizeHostFilter(filter);
@@ -214,6 +216,7 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
           {
             $match: {
               'address.country': country,
+              verified: true,
               available: true,
             },
           },
@@ -242,9 +245,9 @@ export class HostMongoRepositoryAdapter implements IHostRepository {
 
     if (!hostDocument) {
       throwCustomException(
-        'No host found',
+        `No host available in ${country}.`,
         { country },
-        HttpStatus.NOT_FOUND,
+        HttpStatus.SERVICE_UNAVAILABLE,
       )();
     }
 

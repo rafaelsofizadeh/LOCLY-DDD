@@ -1,38 +1,57 @@
 import supertest from 'supertest';
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
+import { getCollectionToken } from 'nest-mongodb';
 import { isUUID } from 'class-validator';
 
+import countries from '../../../src/calculator/data/CountryIsoCodes';
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
-import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
+import { serializeMongoData } from '../../../src/common/persistence';
 import { Address, UUID } from '../../../src/common/domain';
-import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
-import { DraftOrderPayload } from '../../../src/order/application/DraftOrder/IDraftOrder';
-import { OrderStatus, DraftedOrder } from '../../../src/order/entity/Order';
-import { Country } from '../../../src/order/entity/Country';
 import {
-  getDestinationCountriesAvailable,
-  originCountriesAvailable,
-} from '../../../src/calculator/data/PriceGuide';
+  DraftOrderPayload,
+  DraftOrderRequest,
+  IDraftOrder,
+} from '../../../src/order/application/DraftOrder/IDraftOrder';
+import {
+  OrderStatus,
+  DraftedOrder,
+  Order,
+} from '../../../src/order/entity/Order';
+import { Country } from '../../../src/order/entity/Country';
+import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { setupNestApp } from '../../../src/main';
+import { UserType } from '../../../src/auth/entity/Token';
+import { authorize, createTestCustomer } from '../utilities';
+import { IGetOrder } from '../../../src/order/application/GetOrder/IGetOrder';
+import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
+import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
+import { throwCustomException } from '../../../src/common/error-handling';
+import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
+import { Collection } from 'mongodb';
+import { OrderMongoDocument } from '../../../src/order/persistence/OrderMongoMapper';
 
-// TODO(GLOBAL)(TESTING): Substitute database name in tests
-
-describe('[POST /order/draft] IDraftOrder', () => {
+describe('Draft Order – POST /order', () => {
   let app: INestApplication;
+  let moduleRef: TestingModule;
+  let agent: ReturnType<typeof supertest.agent>;
 
   let customerRepository: ICustomerRepository;
   let orderRepository: IOrderRepository;
 
-  let testOrderId: UUID;
-  let testCustomer: Customer;
-  let testCustomerAddress: Address;
+  let draftOrder: IDraftOrder;
 
-  const originCountry = originCountriesAvailable[0];
+  let customer: Customer;
+  let address: Address;
+
+  let orderId: UUID;
+  const originCountry: Country = originCountriesAvailable[0];
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
+    jest.setTimeout(20000);
+
+    moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
@@ -40,50 +59,38 @@ describe('[POST /order/draft] IDraftOrder', () => {
     await setupNestApp(app);
     await app.init();
 
-    customerRepository = (await moduleRef.resolve(
-      ICustomerRepository,
-    )) as ICustomerRepository;
+    customerRepository = await moduleRef.resolve(ICustomerRepository);
+    orderRepository = await moduleRef.resolve(IOrderRepository);
 
-    orderRepository = (await moduleRef.resolve(
-      IOrderRepository,
-    )) as IOrderRepository;
+    ({ customer } = await createTestCustomer(moduleRef, originCountry));
+    address = customer.addresses[0];
+
+    ({ agent } = await authorize(
+      app,
+      moduleRef,
+      customer.email,
+      UserType.Customer,
+    ));
+
+    draftOrder = await moduleRef.resolve(IDraftOrder);
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  describe('interact with DB and require invididual teardown', () => {
-    beforeEach(async () => {
-      testCustomerAddress = {
-        addressLine1: '10 Bandz',
-        locality: 'Juicy',
-        country: getDestinationCountriesAvailable(originCountry)[0],
-      };
-
-      // TODO: Use CreateCustomer usecase
-      testCustomer = {
-        id: UUID(),
-        email: 'random@email.com',
-        addresses: [testCustomerAddress],
-        orderIds: [],
-      };
-
-      await customerRepository.addCustomer(testCustomer);
-    });
-
-    afterEach(() =>
+  describe('interact with DB, require invididual teardown', () => {
+    afterAll(() =>
       Promise.all([
-        customerRepository.deleteCustomer({ customerId: testCustomer.id }),
-        orderRepository.deleteOrder({ orderId: testOrderId }),
+        orderRepository.deleteOrder({ orderId }),
+        customerRepository.deleteCustomer({ customerId: customer.id }),
       ]),
     );
 
-    it('successfully creates a Order', async () => {
-      const testOrderRequest: DraftOrderPayload = {
-        customerId: testCustomer.id,
-        originCountry: originCountriesAvailable[0],
-        destination: testCustomerAddress,
+    it('creates a Order', async () => {
+      const testOrderRequest: DraftOrderRequest = {
+        originCountry,
+        destination: address,
         items: [
           {
             title: 'Laptop',
@@ -93,44 +100,97 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await supertest(app.getHttpServer())
-        .post('/order/draft')
+      const response: supertest.Response = await agent
+        .post('/order')
         .send(testOrderRequest);
 
       expect(response.status).toBe(HttpStatus.CREATED);
 
       const { id, customerId, destination } = response.body as DraftedOrder;
 
-      // 1. order id should be a UUID
+      // Order id should be a UUID
       expect(isUUID(id)).toBe(true);
 
-      testOrderId = UUID(id);
+      orderId = UUID(id);
 
-      // 2. order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
+      // Order should be added to the db and its status should be OrderStatus.Drafted and the resulting Order object
       // should be a DraftedOrder
-      const addedOrder: DraftedOrder = (await orderRepository.findOrder(
-        {
-          orderId: testOrderId,
-          status: OrderStatus.Drafted,
-          customerId: testCustomer.id,
-        },
-        undefined,
-        false,
-      )) as DraftedOrder;
+      const addedOrder: Order = await orderRepository.findOrder({ orderId });
 
+      // Order should have a 'Drafted' status
       expect(addedOrder.status).toBe(OrderStatus.Drafted);
+      // Order should be assigned its customer's id.
+      expect(addedOrder.customerId).toBe(customer.id);
 
-      // Load the test customer from the database
-      const updatedTestCustomer: Customer = await customerRepository.findCustomer(
-        { customerId: testCustomer.id },
+      // Load the updated customer from the database
+      const updatedCustomer: Customer = await customerRepository.findCustomer({
+        customerId: customer.id,
+      });
+
+      // Order customerId should be the same as customer id
+      expect(customerId).toEqual(updatedCustomer.id);
+      // Order id should be added to customer orderIds (i.e. order is assigned to customer)
+      expect(updatedCustomer.orderIds).toContain(orderId);
+      // Customer's address should be set on the order
+      expect(destination).toEqual(address);
+    });
+
+    it('transaction rollback on uncaught exceptions', async () => {
+      const orderCollection: Collection<OrderMongoDocument> = await moduleRef.resolve(
+        getCollectionToken('orders'),
       );
 
-      // 3. order customerId should be the same as customer id
-      expect(customerId).toEqual(updatedTestCustomer.id);
-      // 4. order id should be added to customer orderIds (i.e. order is assigned to customer)
-      expect(updatedTestCustomer.orderIds).toContain(testOrderId);
-      // 5. customer's address should be set on the order
-      expect(destination).toEqual(testCustomerAddress);
+      const addOrder = customerRepository.addOrder.bind(customerRepository);
+      const testException = 'TEST EXCEPTION';
+      jest
+        .spyOn(customerRepository, 'addOrder')
+        .mockImplementationOnce(async (...args: any[]) => {
+          addOrder(...args);
+          throwCustomException(testException)();
+        });
+
+      const getAllOrders = (): Promise<Order[]> =>
+        orderCollection
+          .find()
+          .toArray()
+          .then(orderDocuments =>
+            orderDocuments.map(orderDocument =>
+              serializeMongoData(orderDocument),
+            ),
+          );
+
+      const beforeOrderDatabaseSnapshot: Order[] = await getAllOrders();
+      const beforeCustomer: Customer = await customerRepository.findCustomer({
+        customerId: customer.id,
+      });
+
+      const testOrderRequest: DraftOrderRequest = {
+        originCountry,
+        destination: address,
+        items: [
+          {
+            title: 'Laptop',
+            storeName: 'Amazon',
+            weight: 1500,
+          },
+        ],
+      };
+
+      const response: supertest.Response = await agent
+        .post('/order')
+        .send(testOrderRequest);
+
+      expect(response.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+      const { message } = response.body;
+      expect(message).toMatch(testException);
+
+      const afterOrderDatabaseSnapshot: Order[] = await getAllOrders();
+      const afterCustomer: Customer = await customerRepository.findCustomer({
+        customerId: customer.id,
+      });
+
+      expect(afterOrderDatabaseSnapshot).toEqual(beforeOrderDatabaseSnapshot);
+      expect(afterCustomer).toEqual(beforeCustomer);
     });
   });
 
@@ -138,14 +198,13 @@ describe('[POST /order/draft] IDraftOrder', () => {
     it('fails on invalid request format #1', async () => {
       const invalidTestOrderRequest = {};
 
-      const response: supertest.Response = await supertest(app.getHttpServer())
-        .post('/order/draft')
+      const response: supertest.Response = await agent
+        .post('/order')
         .send(invalidTestOrderRequest);
 
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
 
       expect(response.body.message).toEqual([
-        'customerId must be an UUID',
         'originCountry must be a valid ISO31661 Alpha3 code',
         'destination should not be null or undefined',
         'destination must be a non-empty object',
@@ -164,14 +223,13 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await supertest(app.getHttpServer())
-        .post('/order/draft')
+      const response: supertest.Response = await agent
+        .post('/order')
         .send(invalidTestOrderRequest);
 
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
 
       expect(response.body.message).toEqual([
-        'customerId must be an UUID',
         'originCountry must be a valid ISO31661 Alpha3 code',
         'destination should not be null or undefined',
         'destination must be a non-empty object',
@@ -181,13 +239,13 @@ describe('[POST /order/draft] IDraftOrder', () => {
     });
 
     it('fails due to unavailable service in country', async () => {
-      // TODO: [allCountries - originCountry].chooseRandom()
-      const unavailableOriginCountry: Country = 'ITA';
+      const unavailableOriginCountry: Country = countries.find(
+        (country: Country) => !originCountriesAvailable.includes(country),
+      ) as Country;
 
-      const testOrderRequest: DraftOrderPayload = {
-        customerId: testCustomer.id,
+      const testOrderRequest: DraftOrderRequest = {
         originCountry: unavailableOriginCountry,
-        destination: testCustomerAddress,
+        destination: address,
         items: [
           {
             title: 'Laptop',
@@ -197,20 +255,18 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await supertest(app.getHttpServer())
-        .post('/order/draft')
+      const response: supertest.Response = await agent
+        .post('/order')
         .send(testOrderRequest);
 
       // HTTP 503 'SERVICE UNAVAILABLE'
       expect(response.status).toBe(HttpStatus.SERVICE_UNAVAILABLE);
 
-      // TODO: Error typing
       const { message, data } = response.body;
 
-      // TODO: Better way to check error message
-      // 1. Check the error format
+      // Check the error format
       expect(message.split(':')[0]).toBe(
-        `SERVICE_UNAVAILABLE | Origin country ${unavailableOriginCountry} is not supported by the calculator. `,
+        `SERVICE_UNAVAILABLE | Origin country ${unavailableOriginCountry} is not supported by Locly. `,
       );
     });
 
@@ -219,8 +275,8 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
       const invalidTestOrderRequest: DraftOrderPayload = {
         customerId: nonexistentCustomerId,
-        originCountry: originCountriesAvailable[0],
-        destination: testCustomerAddress,
+        originCountry,
+        destination: address,
         items: [
           {
             title: 'Laptop',
@@ -230,33 +286,15 @@ describe('[POST /order/draft] IDraftOrder', () => {
         ],
       };
 
-      const response: supertest.Response = await supertest(app.getHttpServer())
-        .post('/order/draft')
-        .send(invalidTestOrderRequest);
-
-      expect(response.status).toBe(HttpStatus.NOT_FOUND);
-
-      expect(response.body.message).toMatch(
-        // TODO: Remove necessity for the entire string (toMatch apparently doesn't work with non-exact matches)
-        new RegExp(
-          `${
-            HttpStatus[HttpStatus.NOT_FOUND]
-          } | Order couldn't be added to customer \(orderId: [a-zA-Z0-9-]+, customerId: ${nonexistentCustomerId}\): customer with given id doesn't exist`,
-        ),
-      );
+      try {
+        await draftOrder.execute({ port: invalidTestOrderRequest });
+      } catch (error) {
+        expect(error.error.message).toMatch(
+          'less than 1 customer with given requirements',
+        );
+      }
     });
 
-    /**
-     * TODO: Test for transaction rollback success.
-     *
-     * 1. Count the number of documents in collection
-     * 2. IDraftOrder -> failure
-     * 3. Count the number of documents in collection again. 3 === 1, else failure
-     *
-     * You can either knowingly make the UseCase fail (like in 'fails on nonexistent customer'),
-     * or mock a function to __always__ fail. But how to mock the function, for example, addOrder?
-     *
-     * TODO: Test for all granular calculator errors
-     */
+    // TODO: Test for all granular calculator errors
   });
 });
