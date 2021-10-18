@@ -31,6 +31,7 @@ export interface SubmitShipmentInfoPayload
     totalWeight: Gram;
     shipmentCost: Cost;
     calculatorResultUrl?: URL;
+    deliveryEstimateDays?: number;
     proofOfPayment: FileUpload;
   }> {}
 
@@ -62,6 +63,11 @@ export class SubmitShipmentInfoRequest
   @IsOptional()
   @IsUrl()
   readonly calculatorResultUrl?: URL;
+
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  readonly deliveryEstimateDays?: number;
 }
 
 export type SubmitShipmentInfoResult = FileUploadResult;

@@ -11,12 +11,12 @@ export type PhysicalItem = Readonly<{
 export type Item = PhysicalItem &
   Readonly<{
     title: string;
-    storeName: string;
+    url?: string;
     photoIds: UUID[];
     receivedDate: Date;
   }>;
 
-export type DraftedItem = Pick<Item, 'id' | 'title' | 'storeName' | 'weight'>;
+export type DraftedItem = Pick<Item, 'id' | 'title' | 'url' | 'weight'>;
 export type ReceivedItem = DraftedItem & Pick<Item, 'receivedDate'>;
 export type FinalizedItem = ReceivedItem & Pick<Item, 'photoIds'>;
 

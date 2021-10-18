@@ -87,7 +87,11 @@ export abstract class IOrderRepository {
   abstract setProperties(
     filter: OrderFilterWithStatus<OrderStatus.Confirmed>,
     properties: AllowedOrderProperties<
-      'status' | 'totalWeight' | 'finalShipmentCost' | 'calculatorResultUrl',
+      | 'status'
+      | 'totalWeight'
+      | 'finalShipmentCost'
+      | 'calculatorResultUrl'
+      | 'deliveryEstimateDays',
       OrderStatus.Finalized
     >,
     mongoTransactionSession?: ClientSession,

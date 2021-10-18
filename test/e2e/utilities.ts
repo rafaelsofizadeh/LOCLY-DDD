@@ -121,7 +121,7 @@ export async function createTestHost(
           },
           business_type: 'individual',
           business_profile: {
-            url: 'https://bestcookieco.com',
+            url: 'https://amazon.com',
           },
           individual: {
             address: {
@@ -273,7 +273,7 @@ export async function createConfirmedOrder(
     .fill({})
     .map((_, index) => ({
       title: 'Item #' + (index + 1),
-      storeName: 'Random Store',
+      url: 'https://amazon.com',
       weight: 2000 / itemCount,
     }));
 
@@ -334,7 +334,7 @@ export async function createFinalizedOrder(
       items: [
         {
           title: 'Item #1',
-          storeName: 'Random Store',
+          url: 'https://amazon.com',
           weight: 2000,
         },
       ],
@@ -371,6 +371,7 @@ export async function createFinalizedOrder(
         totalWeight: 2000,
         shipmentCost,
         calculatorResultUrl: 'news.ycombinator.com',
+        deliveryEstimateDays: 15,
       }),
     )
     .attach(

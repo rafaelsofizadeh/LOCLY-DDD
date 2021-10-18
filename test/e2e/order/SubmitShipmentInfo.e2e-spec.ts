@@ -153,6 +153,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
           currency: 'USD',
         },
         calculatorResultUrl: 'news.ycombinator.com',
+        deliveryEstimateDays: 15,
       };
 
       const response: supertest.Response = await agent
@@ -211,6 +212,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
           currency: 'USD',
         },
         calculatorResultUrl: 'news.ycombinator.com',
+        deliveryEstimateDays: 15,
       };
 
       const response: supertest.Response = await agent
@@ -233,6 +235,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
       expect(updatedOrder.finalShipmentCost).toBeUndefined();
       expect(updatedOrder.totalWeight).toBeUndefined();
       expect(updatedOrder.calculatorResultUrl).toBeUndefined();
+      expect(updatedOrder.deliveryEstimateDays).toBeUndefined();
       expect(updatedOrder.proofOfPayment).toBeUndefined();
     },
   );

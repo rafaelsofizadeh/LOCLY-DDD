@@ -5,7 +5,7 @@ import { join } from 'path';
 
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
-import { Order } from '../../../src/order/entity/Order';
+import { ConfirmedOrder, Order } from '../../../src/order/entity/Order';
 import { Country } from '../../../src/order/entity/Country';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { setupNestApp } from '../../../src/main';
@@ -50,7 +50,7 @@ describe('[POST /order/draft] IDraftOrder', () => {
 
   let receiveItem: IReceiveItem;
 
-  let order: Order;
+  let order: ConfirmedOrder;
   let receivedItem: Item;
   const originCountry: Country = originCountriesAvailable[0];
 
@@ -122,9 +122,9 @@ describe('[POST /order/draft] IDraftOrder', () => {
       },
     });
 
-    order = await orderRepository.findOrder({
+    order = (await orderRepository.findOrder({
       orderId: order.id,
-    });
+    })) as ConfirmedOrder;
 
     const payload: AddItemPhotoRequest = {
       orderId: order.id,
@@ -145,9 +145,9 @@ describe('[POST /order/draft] IDraftOrder', () => {
     expect(isUUID(photoId)).toBe(true);
     expect(isUUID(photoName)).toBe(true);
 
-    const updatedOrder: Order = await orderRepository.findOrder({
+    const updatedOrder = (await orderRepository.findOrder({
       orderId: order.id,
-    });
+    })) as ConfirmedOrder;
     const updatedItem: Item = updatedOrder.items.find(
       ({ id }) => id === receivedItem.id,
     );
@@ -197,9 +197,9 @@ describe('[POST /order/draft] IDraftOrder', () => {
       AddItemPhotosResult.every(({ id, name }) => isUUID(id) && isUUID(name)),
     ).toBe(true);
 
-    const updatedOrder: Order = await orderRepository.findOrder({
+    const updatedOrder = (await orderRepository.findOrder({
       orderId: order.id,
-    });
+    })) as ConfirmedOrder;
     const updatedItem: Item = updatedOrder.items.find(
       ({ id }) => id === receivedItem.id,
     );

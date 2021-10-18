@@ -128,7 +128,7 @@ describe('Confirm Order – POST /order/confirm', () => {
         items: [
           {
             title: 'Laptop',
-            storeName: 'Amazon',
+            url: 'https://amazon.com',
             weight: 10,
           },
         ],

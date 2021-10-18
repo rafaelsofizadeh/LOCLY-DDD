@@ -48,6 +48,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
       totalWeight,
       shipmentCost: finalShipmentCost,
       calculatorResultUrl,
+      deliveryEstimateDays,
       proofOfPayment,
     }: SubmitShipmentInfoPayload,
     mongoTransactionSession: ClientSession,
@@ -73,6 +74,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
         finalShipmentCost,
         status: OrderStatus.Finalized,
         ...(calculatorResultUrl ? { calculatorResultUrl } : {}),
+        ...(deliveryEstimateDays ? { deliveryEstimateDays } : {}),
       },
       mongoTransactionSession,
     );

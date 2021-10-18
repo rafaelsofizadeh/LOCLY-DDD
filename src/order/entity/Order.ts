@@ -39,6 +39,7 @@ export type Order = Readonly<{
   totalWeight: Gram;
   finalShipmentCost: Cost;
   calculatorResultUrl?: URL;
+  deliveryEstimateDays?: number;
   proofOfPayment: UUID;
 }>;
 
@@ -54,7 +55,13 @@ export type ConfirmedOrder = Omit<DraftedOrder, 'status' | 'items'> &
   };
 
 export type FinalizedOrder = Omit<ConfirmedOrder, 'status' | 'items'> &
-  Pick<Order, 'totalWeight' | 'initialShipmentCost' | 'calculatorResultUrl'> & {
+  Pick<
+    Order,
+    | 'totalWeight'
+    | 'initialShipmentCost'
+    | 'calculatorResultUrl'
+    | 'deliveryEstimateDays'
+  > & {
     status: OrderStatus.Finalized;
     items: Array<ReceivedItem | FinalizedItem>;
   };

@@ -94,7 +94,7 @@ describe('Draft Order – POST /order', () => {
         items: [
           {
             title: 'Laptop',
-            storeName: 'Amazon',
+            url: 'https://amazon.com',
             weight: 1500,
           },
         ],
@@ -170,7 +170,7 @@ describe('Draft Order – POST /order', () => {
         items: [
           {
             title: 'Laptop',
-            storeName: 'Amazon',
+            url: 'https://amazon.com',
             weight: 1500,
           },
         ],
@@ -218,7 +218,7 @@ describe('Draft Order – POST /order', () => {
         items: [
           {
             title: 'some passing title',
-            storeName: 'some passing storeName',
+            url: 'https://amazon.com',
           },
         ],
       };
@@ -249,7 +249,7 @@ describe('Draft Order – POST /order', () => {
         items: [
           {
             title: 'Laptop',
-            storeName: 'Amazon',
+            url: 'https://amazon.com',
             weight: 1500,
           },
         ],
@@ -280,7 +280,7 @@ describe('Draft Order – POST /order', () => {
         items: [
           {
             title: 'Laptop',
-            storeName: 'Amazon',
+            url: 'https://amazon.com',
             weight: 1500,
           },
         ],

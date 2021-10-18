@@ -6,8 +6,10 @@ import {
   IsInt,
   IsISO31661Alpha3,
   IsNotEmptyObject,
+  IsOptional,
   IsPositive,
   IsString,
+  IsUrl,
   Length,
   ValidateNested,
 } from 'class-validator';
@@ -38,9 +40,9 @@ class DraftItemRequestSchema implements DraftItemRequest {
   @Length(5, 280)
   title: string;
 
-  @IsString()
-  @Length(2, 50)
-  storeName: string;
+  @IsOptional()
+  @IsUrl()
+  url?: string;
 
   @IsInt()
   @IsPositive()
