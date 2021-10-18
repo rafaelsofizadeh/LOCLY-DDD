@@ -10,7 +10,7 @@ then
     cp package.deployment.json dist/package.json
     cp .app.env dist/.app.env
     cp .main.env dist/.main.env
-    BRANCH = $(git rev-parse --abbrev-ref HEAD)
+    BRANCH=$(git rev-parse --abbrev-ref HEAD)
     git add .
     git commit -m "Edit .gitignore to publish"
     # https://stackoverflow.com/a/65733058/6539857
