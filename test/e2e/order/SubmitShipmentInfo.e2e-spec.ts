@@ -87,6 +87,10 @@ describe('[POST /order/draft] IDraftOrder', () => {
     ({ agent } = await authorize(app, moduleRef, host.email, UserType.Host));
   });
 
+  afterAll(async () => {
+    await app.close();
+  });
+
   const itemCountTestCases = [[1], [2]];
 
   async function beforeEachTest(

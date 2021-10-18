@@ -115,16 +115,16 @@ describe('Confirm Order – POST /order/confirm', () => {
 
   afterEach(async () => {
     await Promise.allSettled([
-      // deleteOrder.execute({
-      //   port: { customerId: customer.id, orderId: order.id },
-      // }),
+      deleteOrder.execute({
+        port: { customerId: customer.id, orderId: order.id },
+      }),
     ]);
   });
 
   afterAll(async () => {
     await Promise.allSettled([
-      // deleteHost.execute({ port: { hostId: host.id } }),
-      // deleteCustomer.execute({ port: { customerId: customer.id } }),
+      deleteHost.execute({ port: { hostId: host.id } }),
+      deleteCustomer.execute({ port: { customerId: customer.id } }),
     ]);
 
     stripeListener.kill();
