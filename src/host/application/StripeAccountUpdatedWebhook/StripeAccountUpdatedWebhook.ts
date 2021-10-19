@@ -19,6 +19,7 @@ export class StripeAccountUpdatedWebhook
   // TODO: Auth for Stripe webhooks
   @StripeWebhookHandler('account.updated')
   execute(event: StripeEvent): Promise<StripeAccountUpdatedResult> {
+    console.log('pzdc temadi yeti');
     // TODO: event.data.object extracting decorator
     const webhookPayload = event.data.object as Stripe.Account;
 
