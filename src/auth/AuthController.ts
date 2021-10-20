@@ -72,6 +72,8 @@ export class AuthController {
       httpOnly: false,
       maxAge: authCookieMaxAge,
     });
+
+    return response.redirect('https://locly.netlify.app/');
   }
 
   // TODO: GET 'logout' causes routing conflicts with GET ':token'
