@@ -24,8 +24,6 @@ import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuid
 import { setupNestApp } from '../../../src/main';
 import { UserType } from '../../../src/auth/entity/Token';
 import { authorize, createTestCustomer } from '../utilities';
-import { IGetOrder } from '../../../src/order/application/GetOrder/IGetOrder';
-import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
 import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
 import { throwCustomException } from '../../../src/common/error-handling';
 import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';

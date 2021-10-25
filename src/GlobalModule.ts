@@ -11,9 +11,9 @@ export const DOMAIN = Symbol('DOMAIN');
       useFactory: (configService: ConfigService) => {
         switch (configService.get('NODE_ENV')) {
           case 'prod':
-            return 'http://aqueous-caverns-91110.herokuapp.com';
+            return configService.get('DOMAIN_PROD');
           case 'dev':
-            return 'http://localhost:3000';
+            return configService.get('DOMAIN_DEV');
           default:
             throw new Error('Wrong NODE_ENV value');
         }

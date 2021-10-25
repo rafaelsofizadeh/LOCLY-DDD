@@ -57,7 +57,9 @@ const infrastructureModules: DynamicModule[] = [
   StripeModule.forRootAsync(StripeModule, {
     useFactory: async (configService: ConfigService) => {
       return {
-        apiKey: configService.get<string>('STRIPE_SECRET_API_TEST_KEY'),
+        apiKey: configService.get('NODE_ENV') === 'prod' ? 
+            configService.get('STRIPE_SECRET_API_KEY_PROD'):
+            configService.get('STRIPE_SECRET_API_KEY_DEV'),
         webhookConfig: {
           stripeWebhookSecret: configService.get<string>(
             'STRIPE_WEBHOOK_SECRET',

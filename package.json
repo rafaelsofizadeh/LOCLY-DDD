@@ -18,17 +18,9 @@
     "start:prod": "NODE_ENV=prod node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "NODE_ENV=dev jest --runInBand",
-    "test:prod": "NODE_ENV=prod jest --runInBand",
     "test:watch": "NODE_ENV=dev jest --watch",
     "test:cov": "NODE_ENV=dev jest --coverage",
-    "test:debug": "NODE_ENV=dev node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:draft-order": "NODE_ENV=dev jest -i 'DraftOrder'",
-    "test:confirm-order": "NODE_ENV=dev jest -i 'ConfirmOrder'",
-    "test:receive-item": "NODE_ENV=dev jest -i 'ReceiveItem'",
-    "test:add-item-photos": "NODE_ENV=dev jest -i 'AddItemPhotos'",
-    "test:submit-shipment-info": "NODE_ENV=dev jest -i 'SubmitShipmentInfo'",
-    "test:pay-shipment": "NODE_ENV=dev jest -i 'PayShipment'",
-    "test:request-auth": "NODE_ENV=dev jest -i 'RequestAuth'"
+    "test:debug": "NODE_ENV=dev node --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
     "@golevelup/nestjs-stripe": "^0.1.0",
