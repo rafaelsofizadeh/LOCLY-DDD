@@ -36,7 +36,7 @@ import { SubmitShipmentInfoResult } from '../../../src/order/application/SubmitS
 import { isUUID } from '../../../src/common/domain';
 import { uuidToMuuid } from '../../../src/common/persistence';
 
-describe('[POST /order/draft] IDraftOrder', () => {
+describe('Submit Shipment Info – POST /order/shipmentInfo', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
   let agent: ReturnType<typeof requestAgent>;

@@ -36,7 +36,7 @@ import {
 import { isUUID, UUID } from '../../../src/common/domain';
 import { uuidToMuuid } from '../../../src/common/persistence';
 
-describe('[POST /order/draft] IDraftOrder', () => {
+describe('Add Item Photos – POST /order/itemPhotos', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
   let agent: ReturnType<typeof requestAgent>;

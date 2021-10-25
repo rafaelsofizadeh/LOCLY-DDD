@@ -154,7 +154,7 @@ describe('Confirm Order – POST /order/confirm', () => {
     await app.close();
   });
 
-  it(`Matches Order with a Host, completes Stripe checkout for Locly service fee payment`, async () => {
+  it.only(`Matches Order with a Host, completes Stripe checkout for Locly service fee payment`, async () => {
     const notOriginCountries: Country[] = originCountriesAvailable.filter(
       country => country !== originCountry,
     );
@@ -263,16 +263,22 @@ describe('Confirm Order – POST /order/confirm', () => {
     expect(checkoutId.slice(0, 2)).toBe('cs'); // "Checkout Session"
 
     updatedStripeCheckoutSessionInTestPage(checkoutId);
+    console.log('updated');
     await fillStripeCheckoutForm();
     await new Promise(res => setTimeout(res, 15000));
     await page.screenshot({
       path: './test/e2e/order/stripe_form_result.png',
       fullPage: true,
     });
+    await page.close();
+
+    console.log('wagwan');
 
     let updatedOrder: ConfirmedOrder = (await orderRepository.findOrder({
       orderId: order.id,
     })) as ConfirmedOrder;
+
+    console.log({updatedOrder});
 
     expect(updatedOrder).toBeDefined();
     expect(updatedOrder.status).toBe(OrderStatus.Confirmed);
@@ -282,6 +288,8 @@ describe('Confirm Order – POST /order/confirm', () => {
     const updatedTestHost: Host = await hostRepository.findHost({
       hostId: testMatchedHost.id,
     });
+
+    console.log({updatedTestHost});
 
     expect(updatedTestHost.orderIds).toContain(order.id);
     expect(updatedTestHost.orderIds.length).toBe(

@@ -22,7 +22,7 @@ import { ReceiveItemRequest } from '../../../src/order/application/ReceiveItem/I
 import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
 import { Item } from '../../../src/order/entity/Item';
 
-describe('[POST /order/draft] IDraftOrder', () => {
+describe('Receive Item – POST /order/receiveItem', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
   let agent: ReturnType<typeof requestAgent>;

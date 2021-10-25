@@ -38,7 +38,7 @@ import {
   PayShipmentResult,
 } from '../../../src/order/application/PayShipment/IPayShipment';
 
-describe('Confirm Order – POST /order/confirm', () => {
+describe('Pay Shipment – POST /order/payShipment', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
   let agent: ReturnType<typeof supertest.agent>;
@@ -83,14 +83,12 @@ describe('Confirm Order – POST /order/confirm', () => {
     ({ host, deleteHost } = await createTestHost(moduleRef, originCountry));
     ({ customer, deleteCustomer } = await createTestCustomer(moduleRef));
 
-    console.log(host);
-
     ({ agent } = await authorize(app, moduleRef, host.email, UserType.Host));
 
     stripeListener = child_process.spawn('stripe', [
       'listen',
       '--forward-to',
-      `localhost:3000/${configService.get<string>('STRIPE_WEBHOOK_PATH')}`,
+      `${configService.get<string>('DOMAIN_DEV')}/${configService.get<string>('STRIPE_WEBHOOK_PATH')}`,
     ]);
 
     await new Promise(resolve => {
@@ -248,6 +246,7 @@ async function fillStripeCheckoutForm(): Promise<void> {
   await page.goto(
     'file:///Users/rafaelsofizadeh/Documents/Developer/LOCLY-DDD/test/e2e/order/CheckoutPage.html',
   );
+  console.log('here');
   await page.click('#checkout-button');
 
   await page.waitForSelector('#cardNumber');
