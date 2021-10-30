@@ -54,8 +54,8 @@ export class UpdateHostAccountHandler implements IUpdateHostAccount {
       charges_enabled &&
       payouts_enabled &&
       details_submitted &&
-      requirements.currently_due.length === 0 &&
-      !requirements.disabled_reason &&
+      (requirements ? (!requirements.currently_due || requirements.currently_due.length === 0) : true) &&
+      !requirements?.disabled_reason &&
       capabilities.transfers === 'active'
     );
   }
