@@ -57,6 +57,8 @@ const infrastructureModules: DynamicModule[] = [
   StripeModule.forRootAsync(StripeModule, {
     useFactory: async (configService: ConfigService) => {
       return {
+        // REMINDER: Keep track of all Stripe integrations' (including webhooks) API version
+        apiVersion: '2020-08-27',
         apiKey: configService.get('NODE_ENV') === 'prod' ? 
             (console.log(configService.get('STRIPE_SECRET_API_KEY_PROD')), configService.get('STRIPE_SECRET_API_KEY_PROD')) :
             configService.get('STRIPE_SECRET_API_KEY_DEV'),
