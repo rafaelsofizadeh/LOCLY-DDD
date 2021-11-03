@@ -27,10 +27,7 @@ export async function setupNestApp(app: INestApplication) {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bodyParser: false,
-    cors: {
-      origin: ['https://www.test-cors.org', 'https://locly.netlify.app'],
-      credentials: true,
-    },
+    cors: true
   });
   await setupNestApp(app);
   await app.listen(process.env.PORT || 3000);
