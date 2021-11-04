@@ -59,7 +59,7 @@ export class EmailNotificationService implements INotificationService {
     const html = this.templates[notificationType](templateArgs);
     const subject = this.subjects[notificationType];
 
-    await this.emailService.sendEmail({
+    this.emailService.sendEmail({
       to: recipient,
       subject,
       html,
