@@ -11,7 +11,7 @@ import { CustomExceptionFilter } from './infrastructure/CustomExceptionFilter';
 
 declare const module: any;
 
-export async function setupNestApp(app: INestApplication) {
+export function setupNestApp(app: INestApplication) {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -20,16 +20,16 @@ export async function setupNestApp(app: INestApplication) {
       forbidUnknownValues: true,
     }),
   );
+  app.enableCors();
   app.useGlobalFilters(new CustomExceptionFilter());
   // app.setGlobalPrefix('api');
 }
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    bodyParser: false,
-    cors: true
+    bodyParser: false
   });
-  await setupNestApp(app);
+  setupNestApp(app);
   await app.listen(process.env.PORT || 3000);
 
   if (module.hot) {
