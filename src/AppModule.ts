@@ -55,12 +55,10 @@ const infrastructureModules: DynamicModule[] = [
     'host_shipment_payment_proofs.chunks',
   ]),
   StripeModule.forRootAsync(StripeModule, {
-    useFactory: async (configService: ConfigService) => {
-      console.log(configService.get('NODE_ENV'), configService.get('STRIPE_SECRET_API_KEY_PROD'));
-
-      return {
+    useFactory: (configService: ConfigService) => {
+      const config = {
         // REMINDER: Keep track of all Stripe integrations' (including webhooks) API version
-        apiVersion: '2020-08-27',
+        apiVersion: '2020-08-27' as const,
         apiKey: configService.get('NODE_ENV') === 'prod' ? 
             configService.get('STRIPE_SECRET_API_KEY_PROD') :
             configService.get('STRIPE_SECRET_API_KEY_DEV'),
@@ -70,6 +68,9 @@ const infrastructureModules: DynamicModule[] = [
           ),
         },
       };
+
+      console.log(config);
+      return config;
     },
     inject: [ConfigService],
   }),
