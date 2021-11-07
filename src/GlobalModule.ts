@@ -35,6 +35,6 @@ export const COOKIE_CORS_CONFIG = Symbol('COOKIE_CORS_CONFIG');
       inject: [ConfigService],
     },
   ],
-  exports: [DOMAIN],
+  exports: [DOMAIN, COOKIE_CORS_CONFIG],
 })
 export class GlobalModule {}
