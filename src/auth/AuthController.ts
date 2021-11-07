@@ -1,7 +1,7 @@
 import ms from 'ms';
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
+import { CookieOptions, Response } from 'express';
 import {
   RequestAuthRequest,
   IRequestAuth,
@@ -15,6 +15,7 @@ import {
 } from './infrastructure/IdentityDecorator';
 import { UUID } from '../common/domain';
 import { Host } from '../host/entity/Host';
+import { COOKIE_CORS_CONFIG } from '../GlobalModule';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +23,7 @@ export class AuthController {
     private readonly configService: ConfigService,
     private readonly requestAuth: IRequestAuth,
     private readonly verifyAuth: IVerifyAuth,
+    @Inject(COOKIE_CORS_CONFIG) private readonly cookieCorsConfig: Partial<CookieOptions>,
   ) {}
 
   /**
@@ -56,13 +58,7 @@ export class AuthController {
 
     const cookieConfig = {
       maxAge: authCookieMaxAge,
-      // Only 'SameSite=None; Secure' cookies are forwarded in third-party requests,
-      // which is necessary in production to allow the front-end on domain X (see main.ts :: enableCors config)
-      // to send request to server on domain Y:
-      // https://stackoverflow.com/a/46412839/6539857
-      // https://digiday.com/media/what-is-chrome-samesite/
-      secure: this.configService.get('NODE_ENV') === 'prod' ? true : false,
-      sameSite: 'none' as const
+      ...this.cookieCorsConfig,
     };
 
     // Newly created auth token gets signed and reset in request cookies in place of the old (verification) token
@@ -100,6 +96,7 @@ export class AuthController {
       'AUTH_INDICATOR_COOKIE_NAME',
     );
     response.cookie(authIndicatorCookieName, false, {
+      ...this.cookieCorsConfig,
       httpOnly: false,
       // 10 years
       maxAge: 365 * 24 * 60 * 60 * 10,

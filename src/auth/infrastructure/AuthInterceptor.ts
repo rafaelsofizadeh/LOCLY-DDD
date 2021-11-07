@@ -2,10 +2,11 @@ import {
   CallHandler,
   ExecutionContext,
   HttpStatus,
+  Inject,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { CookieOptions, Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { UserType, Token } from '../entity/Token';
 import { stringToToken } from '../application/utils';
@@ -13,12 +14,14 @@ import { IHostRepository } from '../../host/persistence/IHostRepository';
 import { throwCustomException } from '../../common/error-handling';
 import { Host } from '../../host/entity/Host';
 import { Identity, IdentityType, IdentifiedRequest } from '../entity/Identity';
+import { COOKIE_CORS_CONFIG } from '../../GlobalModule';
 
 @Injectable()
 export class CookieAuthInterceptor implements NestInterceptor {
   constructor(
     private readonly configService: ConfigService,
     private readonly hostRepository: IHostRepository,
+    @Inject(COOKIE_CORS_CONFIG) private readonly cookieCorsConfig: Partial<CookieOptions>,
   ) {}
 
   private getCookies(request: Request): Record<string, any> {
@@ -92,6 +95,7 @@ export class CookieAuthInterceptor implements NestInterceptor {
     // https://stackoverflow.com/questions/55205145/why-does-nestjs-interceptor-return-undefined
     if (response && !authIndicator) {
       response.cookie(authIndicatorCookieName, false, {
+      ...this.cookieCorsConfig,
         httpOnly: false,
         // 10 years
         maxAge: 365 * 24 * 60 * 60 * 10,
