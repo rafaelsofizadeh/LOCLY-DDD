@@ -22,7 +22,7 @@ export function setupNestApp(app: INestApplication) {
   );
 
   app.enableCors({
-    origin: ['locly.netlify.app', 'test-cors.org'],
+    origin: true, /*[/https:\/\/locly.netlify.app/, /.*test-cors\.org/],*/
     credentials: true, 
   });
 
