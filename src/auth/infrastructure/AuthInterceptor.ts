@@ -93,6 +93,7 @@ export class CookieAuthInterceptor implements NestInterceptor {
     if (response && !authIndicator) {
       response.cookie(authIndicatorCookieName, false, {
         httpOnly: false,
+        // 10 years
         maxAge: 365 * 24 * 60 * 60 * 10,
       });
     }

@@ -54,10 +54,21 @@ export class AuthController {
       this.configService.get<string>('AUTH_TOKEN_EXPIRES_IN'),
     );
 
+    const cookieConfig = {
+      maxAge: authCookieMaxAge,
+      // Only 'SameSite=None; Secure' cookies are forwarded in third-party requests,
+      // which is necessary in production to allow the front-end on domain X (see main.ts :: enableCors config)
+      // to send request to server on domain Y:
+      // https://stackoverflow.com/a/46412839/6539857
+      // https://digiday.com/media/what-is-chrome-samesite/
+      secure: this.configService.get('NODE_ENV') === 'prod' ? true : false,
+      sameSite: 'none' as const
+    };
+
     // Newly created auth token gets signed and reset in request cookies in place of the old (verification) token
     // cookie. This auth token lets the user subsequently repeatedly authorize requests. User is logged in.
     response.cookie(authCookieName, authTokenString, {
-      maxAge: authCookieMaxAge,
+      ...cookieConfig,
       httpOnly: true,
     });
 
@@ -69,8 +80,8 @@ export class AuthController {
     );
 
     response.cookie(authIndicatorCookieName, true, {
+      ...cookieConfig,
       httpOnly: false,
-      maxAge: authCookieMaxAge,
     });
 
     return response.redirect('https://locly.netlify.app/auth/success');
@@ -90,6 +101,7 @@ export class AuthController {
     );
     response.cookie(authIndicatorCookieName, false, {
       httpOnly: false,
+      // 10 years
       maxAge: 365 * 24 * 60 * 60 * 10,
     });
   }

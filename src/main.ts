@@ -20,7 +20,12 @@ export function setupNestApp(app: INestApplication) {
       forbidUnknownValues: true,
     }),
   );
-  app.enableCors();
+
+  app.enableCors({
+    origin: ['locly.netlify.app', 'test-cors.org'],
+    credentials: true, 
+  });
+
   app.useGlobalFilters(new CustomExceptionFilter());
   // app.setGlobalPrefix('api');
 }
