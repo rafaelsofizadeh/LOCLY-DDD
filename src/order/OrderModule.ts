@@ -155,14 +155,6 @@ const testProviders: Provider[] = [];
               createRegexFilter(filter).test(mimetype),
             )
           ) {
-            filterGroups[pathDestination].map(filter =>
-              console.log(
-                createRegexFilter(filter),
-                mimetype,
-                createRegexFilter(filter).test(mimetype),
-              ),
-            );
-
             try {
               throwCustomException(
                 'Unsupported file mimetype for path',
