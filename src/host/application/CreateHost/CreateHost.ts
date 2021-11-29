@@ -17,6 +17,7 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class CreateHost implements ICreateHost {
+  // TODO: US and cross-border payouts?
   // Important for the host to be available for cross-border payouts.
   // https://stripe.com/docs/connect/cross-border-payouts
   private readonly stripeSupportedCountries: Country[] = [
@@ -73,6 +74,10 @@ export class CreateHost implements ICreateHost {
     'TTO',
     'GBR',
     'URY',
+    // 'USA' is actually not supported for cross-border payouts.
+    // However, Locly is registered in USA, so no cross-border
+    // payout would occur.
+    'USA',
   ];
 
   constructor(
