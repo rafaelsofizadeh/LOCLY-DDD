@@ -124,5 +124,5 @@ export type StripeCheckoutSession = Stripe.Checkout.Session & {
 };
 
 export type StripeCheckoutSessionResult = {
-  readonly checkoutId: string;
+  readonly checkoutUrl: string;
 };

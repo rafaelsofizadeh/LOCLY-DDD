@@ -43,7 +43,7 @@ export class PayShipmentService implements IPayShipment {
     );
 
     return {
-      checkoutId: checkoutSession.id,
+      checkoutUrl: checkoutSession.url,
     };
   }
 
@@ -81,12 +81,6 @@ export class PayShipmentService implements IPayShipment {
     const stripeApplicationFeeAmount =
       finalShipmentCostStripe.unit_amount -
       stripePrice(finalShipmentCostPreFee).unit_amount;
-
-    console.log(
-      finalShipmentCostPreFee.amount,
-      finalShipmentCost.amount,
-      stripeApplicationFeeAmount / 100,
-    );
 
     const checkoutSession = (await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],

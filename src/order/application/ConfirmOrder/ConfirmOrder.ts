@@ -49,7 +49,7 @@ export class ConfirmOrder implements IConfirmOrder {
     );
 
     return {
-      checkoutId: checkoutSession.id,
+      checkoutUrl: checkoutSession.url,
     };
   }
 
