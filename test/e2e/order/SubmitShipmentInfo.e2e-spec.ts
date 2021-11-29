@@ -36,6 +36,8 @@ import { SubmitShipmentInfoResult } from '../../../src/order/application/SubmitS
 import { isUUID } from '../../../src/common/domain';
 import { uuidToMuuid } from '../../../src/common/persistence';
 
+jest.setTimeout(30000);
+
 describe('Submit Shipment Info – POST /order/shipmentInfo', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
@@ -58,14 +60,12 @@ describe('Submit Shipment Info – POST /order/shipmentInfo', () => {
   let host: Host;
 
   beforeAll(async () => {
-    jest.setTimeout(30000);
-
     moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleRef.createNestApplication();
-    await setupNestApp(app);
+    setupNestApp(app);
     await app.init();
 
     customerRepository = await moduleRef.resolve(ICustomerRepository);
@@ -87,7 +87,17 @@ describe('Submit Shipment Info – POST /order/shipmentInfo', () => {
     ({ agent } = await authorize(app, moduleRef, host.email, UserType.Host));
   });
 
+  afterEach(
+    async () =>
+      await Promise.all([orderRepository.deleteOrder({ orderId: order.id })]),
+  );
+
   afterAll(async () => {
+    await Promise.all([
+      hostRepository.deleteHost({ hostId: host.id }),
+      customerRepository.deleteCustomer({ customerId: customer.id }),
+    ]);
+
     await app.close();
   });
 
@@ -129,20 +139,6 @@ describe('Submit Shipment Info – POST /order/shipmentInfo', () => {
         .attach('photos', join(__dirname, './addItemPhotos-test-image.png'));
     }
   }
-
-  afterEach(
-    async () =>
-      await Promise.all([orderRepository.deleteOrder({ orderId: order.id })]),
-  );
-
-  afterAll(async () => {
-    await Promise.all([
-      hostRepository.deleteHost({ hostId: host.id }),
-      customerRepository.deleteCustomer({ customerId: customer.id }),
-    ]);
-
-    await app.close();
-  });
 
   it.each(itemCountTestCases)(
     'Successful (%i item(s) received and photographed)',

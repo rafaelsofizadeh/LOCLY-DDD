@@ -30,7 +30,7 @@ describe('[POST /auth] IRequestAuth', () => {
     emailService = await moduleRef.resolve(IEmailService);
 
     app = moduleRef.createNestApplication();
-    await setupNestApp(app);
+    setupNestApp(app);
     await app.init();
   });
 

@@ -54,7 +54,7 @@ describe('Draft Order – POST /order', () => {
     }).compile();
 
     app = moduleRef.createNestApplication();
-    await setupNestApp(app);
+    setupNestApp(app);
     await app.init();
 
     customerRepository = await moduleRef.resolve(ICustomerRepository);

@@ -1,6 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
 import child_process from 'child_process';
-import path from 'path';
 import supertest from 'supertest';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -11,7 +9,6 @@ import { Host } from '../../../src/host/entity/Host';
 
 import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
 import { Country } from '../../../src/order/entity/Country';
-import { isString } from 'class-validator';
 import {
   OrderStatus,
   FinalizedOrder,
@@ -37,6 +34,9 @@ import {
   PayShipmentRequest,
   PayShipmentResult,
 } from '../../../src/order/application/PayShipment/IPayShipment';
+import { fillStripeCheckoutForm } from './ConfirmOrder.e2e-spec';
+
+jest.setTimeout(50000);
 
 describe('Pay Shipment – POST /order/payShipment', () => {
   let app: INestApplication;
@@ -60,10 +60,6 @@ describe('Pay Shipment – POST /order/payShipment', () => {
   const originCountry: Country = originCountriesAvailable[0];
 
   beforeAll(async () => {
-    // Setting timeout in before*(): https://stackoverflow.com/a/67392078/6539857
-    // https://stackoverflow.com/a/49864436/6539857
-    jest.setTimeout(50000);
-
     moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -71,7 +67,7 @@ describe('Pay Shipment – POST /order/payShipment', () => {
     app = moduleRef.createNestApplication(undefined, {
       bodyParser: false,
     });
-    await setupNestApp(app);
+    setupNestApp(app);
     await app.init();
 
     stripe = await moduleRef.resolve(STRIPE_CLIENT_TOKEN);
@@ -88,7 +84,9 @@ describe('Pay Shipment – POST /order/payShipment', () => {
     stripeListener = child_process.spawn('stripe', [
       'listen',
       '--forward-to',
-      `${configService.get<string>('DOMAIN_DEV')}/${configService.get<string>('STRIPE_WEBHOOK_PATH')}`,
+      `${configService.get<string>('DOMAIN_DEV')}/${configService.get<string>(
+        'STRIPE_WEBHOOK_PATH',
+      )}`,
     ]);
 
     await new Promise(resolve => {
@@ -153,19 +151,11 @@ describe('Pay Shipment – POST /order/payShipment', () => {
 
     expect(response.status).toBe(HttpStatus.CREATED);
 
-    const { checkoutId } = response.body as PayShipmentResult;
+    const { checkoutUrl } = response.body as PayShipmentResult;
+    expect(checkoutUrl).toMatch(/https:\/\/checkout\.stripe\.com\/pay\/cs/);
 
-    expect(checkoutId).toBeDefined();
-    expect(isString(checkoutId)).toBe(true);
-    expect(checkoutId.slice(0, 2)).toBe('cs'); // "Checkout Session"
-
-    updatedStripeCheckoutSessionInTestPage(checkoutId);
-    await fillStripeCheckoutForm();
+    await fillStripeCheckoutForm(checkoutUrl);
     await new Promise(res => setTimeout(res, 15000));
-    await page.screenshot({
-      path: './test/e2e/order/stripe_form_result.png',
-      fullPage: true,
-    });
 
     const updatedOrder = (await orderRepository.findOrder({
       orderId: order.id,
@@ -177,19 +167,6 @@ describe('Pay Shipment – POST /order/payShipment', () => {
     const loclyStripeBalanceAfter: Stripe.Balance = await stripe.balance.retrieve();
     const hostStripeBalanceAfter: Stripe.Balance = await stripe.balance.retrieve(
       { stripeAccount: host.stripeAccountId },
-    );
-
-    console.log(
-      'BEFORE:',
-      loclyStripeBalanceBefore,
-      '\n AFTER:',
-      loclyStripeBalanceAfter,
-    );
-    console.log(
-      '\nBEFORE:',
-      hostStripeBalanceBefore,
-      '\n AFTER:',
-      hostStripeBalanceAfter,
     );
 
     const shipmentFee = updatedOrder.finalShipmentCost;
@@ -217,62 +194,3 @@ describe('Pay Shipment – POST /order/payShipment', () => {
     );
   });
 });
-
-function updatedStripeCheckoutSessionInTestPage(checkoutId: string) {
-  const checkoutPagePath = path.join(__dirname, './CheckoutPage.html');
-
-  const checkoutPage: string = readFileSync(checkoutPagePath, 'utf8');
-
-  const updatedStripeCheckoutSessionFileContent = checkoutPage.replace(
-    /cs_test_[\w\d]+/g,
-    checkoutId,
-  );
-
-  writeFileSync(
-    checkoutPagePath,
-    updatedStripeCheckoutSessionFileContent,
-    'utf8',
-  );
-}
-
-// TODO: Retry on Stripe form error (will eliminate majority of test failures)
-async function fillStripeCheckoutForm(): Promise<void> {
-  const typingOptions = { delay: 300 };
-  const testCardNumber = '4242424242424242';
-  const testCardExpirty = '0424';
-  const testCardCvc = '100';
-  const testNameOnCard = 'TEST TESTOV';
-
-  await page.goto(
-    'file:///Users/rafaelsofizadeh/Documents/Developer/LOCLY-DDD/test/e2e/order/CheckoutPage.html',
-  );
-  console.log('here');
-  await page.click('#checkout-button');
-
-  await page.waitForSelector('#cardNumber');
-  await page.screenshot({
-    path: './test/e2e/order/stripe_form.png',
-    fullPage: true,
-  });
-  await page.click('#cardNumber');
-  await page.focus('#cardNumber');
-  await page.keyboard.type(testCardNumber, typingOptions);
-
-  await page.click('#cardExpiry');
-  await page.focus('#cardExpiry');
-  await page.keyboard.type(testCardExpirty, typingOptions);
-
-  await page.click('#cardCvc');
-  await page.focus('#cardCvc');
-  await page.keyboard.type(testCardCvc, typingOptions);
-
-  await page.click('#billingName');
-  await page.focus('#billingName');
-  await page.keyboard.type(testNameOnCard, typingOptions);
-
-  await page.evaluate(() => {
-    (document.getElementsByClassName(
-      'SubmitButton-IconContainer',
-    )[0] as HTMLElement).click();
-  });
-}

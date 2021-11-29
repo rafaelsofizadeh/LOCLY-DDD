@@ -36,6 +36,8 @@ import {
 import { isUUID, UUID } from '../../../src/common/domain';
 import { uuidToMuuid } from '../../../src/common/persistence';
 
+jest.setTimeout(30000);
+
 describe('Add Item Photos – POST /order/itemPhotos', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
@@ -59,14 +61,12 @@ describe('Add Item Photos – POST /order/itemPhotos', () => {
   let host: Host;
 
   beforeAll(async () => {
-    jest.setTimeout(30000);
-
     moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleRef.createNestApplication();
-    await setupNestApp(app);
+    setupNestApp(app);
     await app.init();
 
     customerRepository = await moduleRef.resolve(ICustomerRepository);
@@ -108,7 +108,9 @@ describe('Add Item Photos – POST /order/itemPhotos', () => {
     await app.close();
   });
 
-  it('Adds 1 item photo', async () => {
+  it.only('Adds 1 item photo', async () => {
+    console.log('start');
+
     // Item needs to be received before uploading an image
     receivedItem = order.items[0];
 
@@ -121,6 +123,8 @@ describe('Add Item Photos – POST /order/itemPhotos', () => {
         hostId: host.id,
       },
     });
+
+    console.log('executed');
 
     order = (await orderRepository.findOrder({
       orderId: order.id,
@@ -152,15 +156,18 @@ describe('Add Item Photos – POST /order/itemPhotos', () => {
       ({ id }) => id === receivedItem.id,
     );
 
+    console.log({ updatedOrder });
+
     expect(updatedItem.photoIds.length).toBe(1);
     expect(updatedItem.photoIds[0]).toBe(photoId);
 
     const photoUploadRepoResult: FileUploadMongoDocument[] = await photoFileCollection
       .find({ _id: uuidToMuuid(photoId) })
       .toArray();
-    expect(photoUploadRepoResult.length).toBe(1);
 
-    const photoDocument: FileUploadMongoDocument = photoUploadRepoResult[0];
+    console.log(photoUploadRepoResult);
+
+    expect(photoUploadRepoResult.length).toBe(1);
 
     order = updatedOrder;
     receivedItem = updatedItem;

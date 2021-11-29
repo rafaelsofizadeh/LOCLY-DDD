@@ -22,6 +22,8 @@ import { ReceiveItemRequest } from '../../../src/order/application/ReceiveItem/I
 import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
 import { Item } from '../../../src/order/entity/Item';
 
+jest.setTimeout(30000);
+
 describe('Receive Item – POST /order/receiveItem', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
@@ -40,14 +42,12 @@ describe('Receive Item – POST /order/receiveItem', () => {
   let host: Host;
 
   beforeAll(async () => {
-    jest.setTimeout(30000);
-
     moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleRef.createNestApplication();
-    await setupNestApp(app);
+    setupNestApp(app);
     await app.init();
 
     customerRepository = await moduleRef.resolve(ICustomerRepository);
