@@ -41,6 +41,7 @@ const infrastructureModules: DynamicModule[] = [
         configService.get<string>('NODE_ENV') === 'prod'
           ? configService.get<string>('MONGO_PROD_DB_NAME')
           : configService.get<string>('MONGO_DEV_DB_NAME'),
+      clientOptions: { useUnifiedTopology: true },
     }),
     inject: [ConfigService],
   }),
@@ -55,23 +56,27 @@ const infrastructureModules: DynamicModule[] = [
     'host_shipment_payment_proofs.chunks',
   ]),
   StripeModule.forRootAsync(StripeModule, {
-    useFactory: (configService: ConfigService) => {
-      const config = {
-        // REMINDER: Keep track of all Stripe integrations' (including webhooks) API version
-        apiVersion: '2020-08-27' as const,
-        apiKey: configService.get('NODE_ENV') === 'prod' ? 
-            configService.get('STRIPE_SECRET_API_KEY_PROD') :
-            configService.get('STRIPE_SECRET_API_KEY_DEV'),
-        webhookConfig: {
-          stripeWebhookSecret: configService.get<string>(
-            'STRIPE_WEBHOOK_SECRET',
-          ),
-        },
-      };
-
-      console.log(config);
-      return config;
-    },
+    useFactory: (configService: ConfigService) => ({
+      // REMINDER: Keep track of all Stripe integrations' (including webhooks API version
+      apiVersion: '2020-08-27' as const,
+      ...(configService.get('NODE_ENV') === 'prod'
+        ? {
+            apiKey: configService.get('STRIPE_SECRET_API_KEY_PROD'),
+            webhookConfig: {
+              stripeWebhookSecret: configService.get<string>(
+                'STRIPE_WEBHOOK_SECRET_PROD',
+              ),
+            },
+          }
+        : {
+            apiKey: configService.get('STRIPE_SECRET_API_KEY_DEV'),
+            webhookConfig: {
+              stripeWebhookSecret: configService.get<string>(
+                'STRIPE_WEBHOOK_SECRET_DEV',
+              ),
+            },
+          }),
+    }),
     inject: [ConfigService],
   }),
 ];
