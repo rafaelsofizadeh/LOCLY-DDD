@@ -24,13 +24,14 @@ export const COOKIE_CORS_CONFIG = Symbol('COOKIE_CORS_CONFIG');
     {
       provide: COOKIE_CORS_CONFIG,
       useFactory: (configService: ConfigService) => ({
-          // Only 'SameSite=None; Secure' cookies are forwarded in third-party requests,
-          // which is necessary in production to allow the front-end on domain X (see main.ts :: enableCors config)
-          // to send request to server on domain Y:
-          // https://stackoverflow.com/a/46412839/6539857
-          // https://digiday.com/media/what-is-chrome-samesite/
-          secure: configService.get('NODE_ENV') === 'prod' ? true : false,
-          sameSite: 'none' as const
+        // Only 'SameSite=None; Secure' cookies are forwarded in third-party requests,
+        // which is necessary in production to allow the front-end on domain X (see main.ts :: enableCors config)
+        // to send request to server on domain Y:
+        // https://stackoverflow.com/a/46412839/6539857
+        // https://digiday.com/media/what-is-chrome-samesite/
+        ...(configService.get('NODE_ENV') === 'prod'
+          ? { secure: true, sameSite: 'none' as const }
+          : { secure: false, sameSite: 'lax' }),
       }),
       inject: [ConfigService],
     },
