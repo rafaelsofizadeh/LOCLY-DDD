@@ -1,6 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
 import child_process from 'child_process';
-import path from 'path';
 import supertest from 'supertest';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -12,7 +10,6 @@ import { Host } from '../../../src/host/entity/Host';
 import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
 import { IDraftOrder } from '../../../src/order/application/DraftOrder/IDraftOrder';
 import { Country } from '../../../src/order/entity/Country';
-import { isString } from 'class-validator';
 import { IHostRepository } from '../../../src/host/persistence/IHostRepository';
 import {
   DraftedOrder,
@@ -25,7 +22,12 @@ import {
   IConfirmOrder,
 } from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import { setupNestApp } from '../../../src/main';
-import { authorize, createTestCustomer, createTestHost } from '../utilities';
+import {
+  authorize,
+  createTestCustomer,
+  createTestHost,
+  initStripe,
+} from '../utilities';
 import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
@@ -99,23 +101,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       UserType.Customer,
     ));
 
-    stripeListener = child_process.spawn('stripe', [
-      'listen',
-      '--forward-to',
-      `localhost:3000/${configService.get<string>('STRIPE_WEBHOOK_PATH')}`,
-    ]);
-
-    await new Promise(resolve => {
-      const stdHandler = (data: Buffer) => {
-        console.log(data.toString());
-        if (data.toString().includes('Ready!')) {
-          return resolve('Stripe finished');
-        }
-      };
-
-      stripeListener.stdout.on('data', stdHandler);
-      stripeListener.stderr.on('data', stdHandler);
-    });
+    stripeListener = await initStripe(configService);
   });
 
   beforeEach(async () => {

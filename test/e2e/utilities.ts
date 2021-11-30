@@ -1,7 +1,10 @@
-import { TestingModule } from '@nestjs/testing';
 import { join } from 'path';
+import * as child_process from 'child_process';
 import Stripe from 'stripe';
 import supertest, { SuperAgentTest, agent, Response } from 'supertest';
+
+import { TestingModule } from '@nestjs/testing';
+
 import { IRequestAuth } from '../../src/auth/application/RequestAuth/IRequestAuth';
 import { UserType } from '../../src/auth/entity/Token';
 import {
@@ -31,6 +34,7 @@ import {
   FinalizedOrder,
 } from '../../src/order/entity/Order';
 import { IOrderRepository } from '../../src/order/persistence/IOrderRepository';
+import { ConfigService } from '@nestjs/config';
 
 export async function createTestCustomer(
   moduleRef: TestingModule,
@@ -380,4 +384,27 @@ export async function createFinalizedOrder(
     );
 
   return (await orderRepository.findOrder({ orderId })) as FinalizedOrder;
+}
+
+export async function initStripe(configService: ConfigService) {
+  const stripeListener = child_process.spawn('stripe', [
+    'listen',
+    '--forward-to',
+    `${configService.get<string>('DOMAIN_DEV')}/${configService.get<string>(
+      'STRIPE_WEBHOOK_PATH',
+    )}`,
+  ]);
+
+  await new Promise(resolve => {
+    const stdHandler = (data: Buffer) => {
+      if (data.toString().includes('Ready!')) {
+        return resolve('Stripe finished');
+      }
+    };
+
+    stripeListener.stdout.on('data', stdHandler);
+    stripeListener.stderr.on('data', stdHandler);
+  });
+
+  return stripeListener;
 }

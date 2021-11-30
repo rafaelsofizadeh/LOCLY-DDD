@@ -2,6 +2,7 @@ import child_process from 'child_process';
 import supertest from 'supertest';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
@@ -14,13 +15,13 @@ import {
   FinalizedOrder,
   PaidOrder,
 } from '../../../src/order/entity/Order';
-import { ConfigService } from '@nestjs/config';
 import { setupNestApp } from '../../../src/main';
 import {
   authorize,
   createFinalizedOrder,
   createTestCustomer,
   createTestHost,
+  initStripe,
 } from '../utilities';
 import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
@@ -81,24 +82,7 @@ describe('Pay Shipment – POST /order/payShipment', () => {
 
     ({ agent } = await authorize(app, moduleRef, host.email, UserType.Host));
 
-    stripeListener = child_process.spawn('stripe', [
-      'listen',
-      '--forward-to',
-      `${configService.get<string>('DOMAIN_DEV')}/${configService.get<string>(
-        'STRIPE_WEBHOOK_PATH',
-      )}`,
-    ]);
-
-    await new Promise(resolve => {
-      const stdHandler = (data: Buffer) => {
-        if (data.toString().includes('Ready!')) {
-          return resolve('Stripe finished');
-        }
-      };
-
-      stripeListener.stdout.on('data', stdHandler);
-      stripeListener.stderr.on('data', stdHandler);
-    });
+    stripeListener = await initStripe(configService);
   });
 
   beforeEach(async () => {
