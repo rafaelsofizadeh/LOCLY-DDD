@@ -1,6 +1,8 @@
 import child_process from 'child_process';
 import supertest from 'supertest';
+
 import { HttpStatus, INestApplication } from '@nestjs/common';
+import { STRIPE_CLIENT_TOKEN } from '@golevelup/nestjs-stripe';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 
@@ -22,20 +24,16 @@ import {
   createTestCustomer,
   createTestHost,
   initStripe,
+  testCheckoutResponse,
 } from '../utilities';
 import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { UserType } from '../../../src/auth/entity/Token';
 import Stripe from 'stripe';
-import { STRIPE_CLIENT_TOKEN } from '@golevelup/nestjs-stripe';
 import { stripePrice } from '../../../src/common/application';
 import { IDeleteHost } from '../../../src/host/application/DeleteHost/IDeleteHost';
-import {
-  PayShipmentRequest,
-  PayShipmentResult,
-} from '../../../src/order/application/PayShipment/IPayShipment';
-import { fillStripeCheckoutForm } from './ConfirmOrder.e2e-spec';
+import { PayShipmentRequest } from '../../../src/order/application/PayShipment/IPayShipment';
 
 jest.setTimeout(50000);
 
@@ -135,11 +133,7 @@ describe('Pay Shipment – POST /order/payShipment', () => {
 
     expect(response.status).toBe(HttpStatus.CREATED);
 
-    const { checkoutUrl } = response.body as PayShipmentResult;
-    expect(checkoutUrl).toMatch(/https:\/\/checkout\.stripe\.com\/pay\/cs/);
-
-    await fillStripeCheckoutForm(checkoutUrl);
-    await new Promise(res => setTimeout(res, 15000));
+    await testCheckoutResponse(response);
 
     const updatedOrder = (await orderRepository.findOrder({
       orderId: order.id,

@@ -27,6 +27,7 @@ import {
   createTestCustomer,
   createTestHost,
   initStripe,
+  testCheckoutResponse,
 } from '../utilities';
 import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustomer/IDeleteCustomer';
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
@@ -241,11 +242,7 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     expect(response.status).toBe(HttpStatus.CREATED);
 
-    const { checkoutUrl } = response.body as ConfirmOrderResult;
-    expect(checkoutUrl).toMatch(/https:\/\/checkout\.stripe\.com\/pay\/cs/);
-
-    await fillStripeCheckoutForm(checkoutUrl);
-    await new Promise(res => setTimeout(res, 15000));
+    await testCheckoutResponse(response);
 
     let updatedOrder: ConfirmedOrder = (await orderRepository.findOrder({
       orderId: order.id,

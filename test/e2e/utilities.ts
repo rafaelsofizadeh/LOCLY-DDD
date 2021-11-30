@@ -23,7 +23,10 @@ import { IEditHost } from '../../src/host/application/EditHost/IEditHost';
 import { IGetHost } from '../../src/host/application/GetHost/IGetHost';
 import { Host } from '../../src/host/entity/Host';
 import { IHostRepository } from '../../src/host/persistence/IHostRepository';
-import { IConfirmOrder } from '../../src/order/application/ConfirmOrder/IConfirmOrder';
+import {
+  ConfirmOrderResult,
+  IConfirmOrder,
+} from '../../src/order/application/ConfirmOrder/IConfirmOrder';
 import { IDraftOrder } from '../../src/order/application/DraftOrder/IDraftOrder';
 import { IReceiveItem } from '../../src/order/application/ReceiveItem/IReceiveItem';
 import { IConfirmOrderHandler } from '../../src/order/application/StripeCheckoutWebhook/handlers/ConfirmOrderHandler/IConfirmOrderHandler';
@@ -35,6 +38,8 @@ import {
 } from '../../src/order/entity/Order';
 import { IOrderRepository } from '../../src/order/persistence/IOrderRepository';
 import { ConfigService } from '@nestjs/config';
+import { fillStripeCheckoutForm } from './order/ConfirmOrder.e2e-spec';
+import { PayShipmentResult } from 'src/order/application/PayShipment/IPayShipment';
 
 export async function createTestCustomer(
   moduleRef: TestingModule,
@@ -407,4 +412,15 @@ export async function initStripe(configService: ConfigService) {
   });
 
   return stripeListener;
+}
+
+export async function testCheckoutResponse(response: Response) {
+  const { checkoutUrl } = response.body as
+    | PayShipmentResult
+    | ConfirmOrderResult;
+
+  expect(checkoutUrl).toMatch(/https:\/\/checkout\.stripe\.com\/pay\/cs/);
+
+  await fillStripeCheckoutForm(checkoutUrl);
+  await new Promise(res => setTimeout(res, 15000));
 }
