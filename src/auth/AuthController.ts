@@ -19,13 +19,24 @@ import { COOKIE_CORS_CONFIG } from '../GlobalModule';
 
 @Controller('auth')
 export class AuthController {
+  private cookieConfig: CookieOptions;
+
   constructor(
     private readonly configService: ConfigService,
     private readonly requestAuth: IRequestAuth,
     private readonly verifyAuth: IVerifyAuth,
     @Inject(COOKIE_CORS_CONFIG)
     private readonly cookieCorsConfig: Partial<CookieOptions>,
-  ) {}
+  ) {
+    const authCookieMaxAge = ms(
+      this.configService.get<string>('AUTH_TOKEN_EXPIRES_IN'),
+    );
+
+    this.cookieConfig = {
+      maxAge: authCookieMaxAge,
+      ...this.cookieCorsConfig,
+    };
+  }
 
   /**
    * First step in user auth/login. See RequestAuthn.
@@ -53,19 +64,11 @@ export class AuthController {
   ): Promise<void> {
     const authTokenString: string = this.verifyAuth.execute(verificationToken);
     const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
-    const authCookieMaxAge = ms(
-      this.configService.get<string>('AUTH_TOKEN_EXPIRES_IN'),
-    );
-
-    const cookieConfig = {
-      maxAge: authCookieMaxAge,
-      ...this.cookieCorsConfig,
-    };
 
     // Newly created auth token gets signed and reset in request cookies in place of the old (verification) token
     // cookie. This auth token lets the user subsequently repeatedly authorize requests. User is logged in.
     response.cookie(authCookieName, authTokenString, {
-      ...cookieConfig,
+      ...this.cookieConfig,
       httpOnly: true,
     });
 
@@ -77,7 +80,7 @@ export class AuthController {
     );
 
     response.cookie(authIndicatorCookieName, true, {
-      ...cookieConfig,
+      ...this.cookieConfig,
       httpOnly: false,
     });
 
@@ -91,10 +94,10 @@ export class AuthController {
     @AnyEntityIdentity() identity: Host | UUID,
   ): Promise<void> {
     const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
-    response.clearCookie(authCookieName, {
-      ...this.cookieCorsConfig,
-      httpOnly: true,
-    });
+    // https://expressjs.com/en/4x/api.html#res.clearCookie
+    // Web browsers and other compliant clients will only clear the cookie if the given options is identical to those
+    // given to res.cookie(), excluding expires and maxAge.
+    response.clearCookie(authCookieName, this.cookieConfig);
 
     const authIndicatorCookieName = this.configService.get<string>(
       'AUTH_INDICATOR_COOKIE_NAME',
