@@ -96,6 +96,7 @@ export class PayShipmentService implements IPayShipment {
           quantity: 1,
         },
       ],
+      allow_promotion_codes: true,
       payment_intent_data: {
         application_fee_amount: stripeApplicationFeeAmount,
         transfer_data: { destination: hostStripeAccountId },

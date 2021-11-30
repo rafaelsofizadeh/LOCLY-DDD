@@ -132,6 +132,7 @@ export class ConfirmOrder implements IConfirmOrder {
           quantity: 1,
         },
       ],
+      allow_promotion_codes: true,
       payment_intent_data: {
         application_fee_amount: loclyPrice.unit_amount,
         transfer_data: { destination: host.stripeAccountId },

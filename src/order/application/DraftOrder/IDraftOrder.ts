@@ -37,7 +37,7 @@ export interface DraftOrderPayload
 
 class DraftItemRequestSchema implements DraftItemRequest {
   @IsString()
-  @Length(5, 280)
+  @Length(1, 280)
   title: string;
 
   @IsOptional()
