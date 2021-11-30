@@ -96,6 +96,9 @@ export class AuthController {
       ...this.tokenCookieConfig,
     });
 
+    console.log(response.header('set-cookie'));
+    console.log(this.tokenCookieConfig);
+
     const authIndicatorCookieName = this.configService.get<string>(
       'AUTH_INDICATOR_COOKIE_NAME',
     );
