@@ -111,7 +111,7 @@ describe('Pay Shipment – POST /order/payShipment', () => {
     await app.close();
   });
 
-  it(`Matches Order with a Host, completes Stripe checkout for Locly service fee payment`, async () => {
+  it(`Finalizes the order and completes Stripe checkout for shipment fee`, async () => {
     const loclyStripeBalanceBefore: Stripe.Balance = await stripe.balance.retrieve();
     // The shipment fee should go only to the host
     const hostStripeBalanceBefore: Stripe.Balance = await stripe.balance.retrieve(
