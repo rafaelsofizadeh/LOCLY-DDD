@@ -91,13 +91,7 @@ export class AuthController {
     // https://expressjs.com/en/4x/api.html#res.clearCookie
     // Web browsers and other compliant clients will only clear the cookie if the given options is identical to those
     // given to res.cookie(), excluding expires and maxAge.
-    response.cookie(tokenCookieName, 'a', {
-      expires: new Date(1),
-      ...this.tokenCookieConfig,
-    });
-
-    console.log(response.header('set-cookie'));
-    console.log(this.tokenCookieConfig);
+    response.clearCookie(tokenCookieName, this.tokenCookieConfig);
 
     const authIndicatorCookieName = this.configService.get<string>(
       'AUTH_INDICATOR_COOKIE_NAME',
