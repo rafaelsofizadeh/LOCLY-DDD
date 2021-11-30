@@ -340,43 +340,6 @@ describe('Confirm Order – POST /order/confirm', () => {
   });
 });
 
-// TODO: Retry on Stripe form error (will eliminate majority of test failures)
-export async function fillStripeCheckoutForm(
-  checkoutUrl: string,
-): Promise<void> {
-  const typingOptions = { delay: 300 };
-  const testCardNumber = '4242424242424242';
-  const testCardExpirty = '0424';
-  const testCardCvc = '100';
-  const testNameOnCard = 'TEST TESTOV';
-
-  await page.goto(checkoutUrl);
-
-  await page.waitForSelector('#cardNumber');
-  await page.click('#cardNumber');
-  await page.focus('#cardNumber');
-  await page.keyboard.type(testCardNumber, typingOptions);
-
-  await page.click('#cardExpiry');
-  await page.focus('#cardExpiry');
-  await page.keyboard.type(testCardExpirty, typingOptions);
-
-  await page.click('#cardCvc');
-  await page.focus('#cardCvc');
-  await page.keyboard.type(testCardCvc, typingOptions);
-
-  await page.click('#billingName');
-  await page.focus('#billingName');
-  await page.keyboard.type(testNameOnCard, typingOptions);
-
-  // Page will close automatically after this action
-  await page.evaluate(() => {
-    (document.getElementsByClassName(
-      'SubmitButton-IconContainer',
-    )[0] as HTMLElement).click();
-  });
-}
-
 function configsToHosts(hostConfigs: HostConfig[]): Host[] {
   // @ts-ignore
   return hostConfigs.map(({ country, available, orderCount, verified }) => ({
