@@ -23,7 +23,8 @@ export class AuthController {
     private readonly configService: ConfigService,
     private readonly requestAuth: IRequestAuth,
     private readonly verifyAuth: IVerifyAuth,
-    @Inject(COOKIE_CORS_CONFIG) private readonly cookieCorsConfig: Partial<CookieOptions>,
+    @Inject(COOKIE_CORS_CONFIG)
+    private readonly cookieCorsConfig: Partial<CookieOptions>,
   ) {}
 
   /**
@@ -90,7 +91,10 @@ export class AuthController {
     @AnyEntityIdentity() identity: Host | UUID,
   ): Promise<void> {
     const authCookieName = this.configService.get<string>('TOKEN_COOKIE_NAME');
-    response.clearCookie(authCookieName);
+    response.clearCookie(authCookieName, {
+      ...this.cookieCorsConfig,
+      httpOnly: true,
+    });
 
     const authIndicatorCookieName = this.configService.get<string>(
       'AUTH_INDICATOR_COOKIE_NAME',
