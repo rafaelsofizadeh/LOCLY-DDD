@@ -1,5 +1,7 @@
+import Stripe from 'stripe';
 import {
   StripeCheckoutSessionResult,
+  StripePrice,
   UseCase,
 } from '../../../common/application';
 
@@ -24,7 +26,7 @@ export abstract class IConfirmOrder extends UseCase<
   ConfirmOrderPayload,
   ConfirmOrderResult
 > {
-  abstract calculateTotalFee(): Cost;
-
-  abstract calculateLoclyFee({ currency, amount: totalAmount }: Cost): Cost;
+  abstract calculateLoclyCut(
+    totalPriceId: Stripe.Price['id'],
+  ): Promise<{ total: StripePrice; loclyFee: StripePrice }>;
 }

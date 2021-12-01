@@ -1,7 +1,10 @@
 import child_process from 'child_process';
 import supertest from 'supertest';
+import Stripe from 'stripe';
+import { STRIPE_CLIENT_TOKEN } from '@golevelup/nestjs-stripe';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
@@ -16,11 +19,7 @@ import {
   ConfirmedOrder,
   OrderStatus,
 } from '../../../src/order/entity/Order';
-import { ConfigService } from '@nestjs/config';
-import {
-  ConfirmOrderResult,
-  IConfirmOrder,
-} from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
+import { IConfirmOrder } from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import { setupNestApp } from '../../../src/main';
 import {
   authorize,
@@ -33,12 +32,7 @@ import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustome
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { UserType } from '../../../src/auth/entity/Token';
-import Stripe from 'stripe';
-import { STRIPE_CLIENT_TOKEN } from '@golevelup/nestjs-stripe';
-import {
-  calculateStripeFee,
-  stripePrice,
-} from '../../../src/common/application';
+import { calculateStripeFee } from '../../../src/common/application';
 import { UUID } from '../../../src/common/domain';
 
 type HostConfig = {
@@ -267,14 +261,11 @@ describe('Confirm Order – POST /order/confirm', () => {
       { stripeAccount: testMatchedHost.stripeAccountId },
     );
 
-    const totalFee = confirmOrder.calculateTotalFee();
-    const loclyFee = confirmOrder.calculateLoclyFee(totalFee);
-
-    const totalPrice = stripePrice(totalFee);
-    const loclyPrice = stripePrice(loclyFee);
+    const priceId: string = configService.get('LOCLY_FEE_PRICE_ID');
+    const { total, loclyFee } = await confirmOrder.calculateLoclyCut(priceId);
 
     const findBalance = ({ pending }: Stripe.Balance) =>
-      pending.find(({ currency }) => currency === totalPrice.currency);
+      pending.find(({ currency }) => currency === total.currency);
 
     const [
       loclyPendingBefore,
@@ -290,15 +281,15 @@ describe('Confirm Order – POST /order/confirm', () => {
 
     // Stripe fee (without conversion): 2.9% + $0.3
     // https://stripe.com/pricing
-    const stripeFee = calculateStripeFee(totalPrice);
-    const loclyAfterStripeFee = loclyPrice.unit_amount - stripeFee;
+    const stripeFee = calculateStripeFee(total);
+    const loclyAfterStripeFee = loclyFee.unit_amount - stripeFee;
 
     expect(loclyPendingAfter.amount - loclyPendingBefore.amount).toBe(
       loclyAfterStripeFee,
     );
 
     expect(hostPendingAfter.amount - hostPendingBefore.amount).toBe(
-      totalPrice.unit_amount - loclyPrice.unit_amount,
+      total.unit_amount - loclyFee.unit_amount,
     );
   });
 

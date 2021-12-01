@@ -12,11 +12,10 @@ import {
   ReceivedItem,
 } from './Item';
 
-export interface Cost
-  extends Readonly<{
-    currency: Currency;
-    amount: number;
-  }> {}
+export type Cost = Readonly<{
+  currency: Currency;
+  amount: number;
+}>;
 
 export enum OrderStatus {
   Drafted = 'drafted',

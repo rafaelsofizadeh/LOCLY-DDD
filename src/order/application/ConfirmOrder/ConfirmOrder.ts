@@ -10,11 +10,10 @@ import { ClientSession } from 'mongodb';
 import {
   StripeCheckoutSession,
   StripePrice,
-  stripePrice,
   Transaction,
   TransactionUseCasePort,
 } from '../../../common/application';
-import { OrderStatus, DraftedOrder, Cost } from '../../entity/Order';
+import { OrderStatus, DraftedOrder } from '../../entity/Order';
 import { IHostRepository } from '../../../host/persistence/IHostRepository';
 import { throwCustomException } from '../../../common/error-handling';
 import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
@@ -106,11 +105,8 @@ export class ConfirmOrder implements IConfirmOrder {
     host: Host,
     stripeCustomerId: Stripe.Customer['id'],
   ): Promise<StripeCheckoutSession> {
-    const totalFee: Cost = this.calculateTotalFee();
-    const localFee: Cost = this.calculateLoclyFee(totalFee);
-
-    const totalPrice: StripePrice = stripePrice(totalFee);
-    const loclyPrice: StripePrice = stripePrice(localFee);
+    const priceId: string = this.configService.get('LOCLY_FEE_PRICE_ID');
+    const { loclyFee } = await this.calculateLoclyCut(priceId);
 
     const match: Match = {
       orderId,
@@ -123,18 +119,13 @@ export class ConfirmOrder implements IConfirmOrder {
       customer: stripeCustomerId,
       line_items: [
         {
-          price_data: {
-            ...totalPrice,
-            product_data: {
-              name: 'Locly and Host Service Fee',
-            },
-          },
+          price: priceId,
           quantity: 1,
         },
       ],
       allow_promotion_codes: true,
       payment_intent_data: {
-        application_fee_amount: loclyPrice.unit_amount,
+        application_fee_amount: loclyFee.unit_amount,
         transfer_data: { destination: host.stripeAccountId },
       },
       metadata: {
@@ -149,20 +140,22 @@ export class ConfirmOrder implements IConfirmOrder {
     return checkoutSession;
   }
 
-  calculateTotalFee(): Cost {
-    return {
-      currency: 'USD',
-      amount: this.configService.get<number>('TOTAL_SERVICE_FEE_USD'),
-    };
-  }
-
-  calculateLoclyFee({ currency, amount: totalAmount }: Cost): Cost {
-    return {
+  async calculateLoclyCut(totalPriceId: Stripe.Price['id']) {
+    const {
       currency,
-      amount:
-        totalAmount *
-        (0.01 *
-          this.configService.get<number>('LOCLY_SERVICE_FEE_CUT_PERCENT')),
+      unit_amount,
+    }: Stripe.Price = await this.stripe.prices.retrieve(totalPriceId);
+
+    const percentage =
+      0.01 *
+      Number(this.configService.get<number>('LOCLY_SERVICE_FEE_CUT_PERCENT'));
+
+    return {
+      total: { currency, unit_amount },
+      loclyFee: {
+        currency,
+        unit_amount: unit_amount * percentage,
+      },
     };
   }
 }
