@@ -108,9 +108,7 @@ describe('Add Item Photos – POST /order/itemPhotos', () => {
     await app.close();
   });
 
-  it.only('Adds 1 item photo', async () => {
-    console.log('start');
-
+  it('Adds 1 item photo', async () => {
     // Item needs to be received before uploading an image
     receivedItem = order.items[0];
 
@@ -123,8 +121,6 @@ describe('Add Item Photos – POST /order/itemPhotos', () => {
         hostId: host.id,
       },
     });
-
-    console.log('executed');
 
     order = (await orderRepository.findOrder({
       orderId: order.id,

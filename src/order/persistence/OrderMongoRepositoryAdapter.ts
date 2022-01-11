@@ -130,7 +130,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
 
     const orderDocument: OrderMongoDocument = await this.orderCollection
       .findOne(
-        { ...filterQuery, ...(status ? { status } : {}) },
+        { ...filterQuery, ...(status && { status }) },
         { session: mongoTransactionSession },
       )
       .catch(throwCustomException('Error searching for an order', filter));
@@ -306,7 +306,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
 
     const filterQuery = {
       ...mongoQuery(restOrderFilterWithId),
-      ...(status ? { status } : {}),
+      ...(status && { status }),
       items: {
         // For more than one item property, $elemMatch must be used:
         // https://docs.mongodb.com/manual/reference/operator/update/positional/#update-embedded-documents-using-multiple-field-matches
@@ -373,7 +373,7 @@ export class OrderMongoRepositoryAdapter implements IOrderRepository {
 
     const filterQuery = {
       ...mongoQuery(restNormalizedOrderFilter),
-      ...(status ? { status } : {}),
+      ...(status && { status }),
     };
 
     // TODO: Error handling on file

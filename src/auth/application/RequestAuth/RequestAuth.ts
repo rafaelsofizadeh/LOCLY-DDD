@@ -1,5 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 import { ClientSession } from 'mongodb';
 import {
   Transaction,
@@ -14,14 +13,13 @@ import { IGetCustomerUpsert } from '../../../customer/application/GetCustomerUps
 import { UserType } from '../../entity/Token';
 import { IGetHostUpsert } from '../../../host/application/GetHostUpsert/IGetHostUpsert';
 import { tokenToString } from '../utils';
-import { Email, UUID } from '../../../common/domain';
+import { UUID } from '../../../common/domain';
 import { throwCustomException } from '../../../common/error-handling';
-import { Country } from '../../../order/entity/Country';
 import {
   INotificationService,
   NotificationType,
 } from '../../../infrastructure/notification/INotificationService';
-import { DOMAIN } from '../../../GlobalModule';
+import config from '../../../../main.configuration';
 
 /**
  * Functionality for the first step in user auth – accepting user email, generating a verification token and sending it
@@ -32,9 +30,7 @@ export class RequestAuth implements IRequestAuth {
   constructor(
     private readonly getCustomerUpsert: IGetCustomerUpsert,
     private readonly getHostUpsert: IGetHostUpsert,
-    private readonly configService: ConfigService,
     private readonly notificationService: INotificationService,
-    @Inject(DOMAIN) private readonly domain: string,
   ) {}
 
   @Transaction
@@ -46,18 +42,18 @@ export class RequestAuth implements IRequestAuth {
   }
 
   private async requestAuth(
-    { email, type: entityRequestType, country }: RequestAuthPayload,
+    requestAuthPayload: RequestAuthPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<string> {
     const { id: entityId, type: userType } = await this.findOrCreateEntity(
-      email,
-      entityRequestType,
-      country,
+      requestAuthPayload,
       mongoTransactionSession,
     );
 
-    const key = this.configService.get('TOKEN_SIGNING_KEY');
-    const expiresIn = this.configService.get('VERIFICATION_TOKEN_EXPIRES_IN');
+    const {
+      domain,
+      auth: { tokenKey: key, verificationTokenExpiration: expiresIn },
+    } = config;
 
     // Create and sign a verification token to be sent by email.
     const tokenString: string = tokenToString(
@@ -66,10 +62,14 @@ export class RequestAuth implements IRequestAuth {
       expiresIn,
     );
 
-    await this.notificationService.notify(email, NotificationType.Auth, {
-      domain: this.domain,
-      token: tokenString,
-    });
+    await this.notificationService.notify(
+      requestAuthPayload.email,
+      NotificationType.Auth,
+      {
+        domain,
+        token: tokenString,
+      },
+    );
 
     return tokenString;
   }
@@ -77,11 +77,9 @@ export class RequestAuth implements IRequestAuth {
   // For login, the GetCustomer/HostUpsert use cases are expected to always only GET.
   // For registration, the use cases are expected to always only UPSERT.
   private async findOrCreateEntity(
-    email: Email,
-    userType: UserType,
+    { email, type: userType, country }: RequestAuthPayload,
     // country is expected to be defined only during host registration. All other cases (login, customer registration),
     // country will be undefined.
-    country?: Country,
     mongoTransactionSession?: ClientSession,
   ): Promise<{ id: UUID; type: UserType }> {
     if (userType === UserType.Customer) {
@@ -98,7 +96,7 @@ export class RequestAuth implements IRequestAuth {
 
     if (userType === UserType.Host) {
       const { host } = await this.getHostUpsert.execute({
-        port: { email, ...(country ? { country } : {}) },
+        port: { email, ...(country && { country }) },
         mongoTransactionSession,
       });
 

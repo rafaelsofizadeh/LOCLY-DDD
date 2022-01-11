@@ -2,8 +2,9 @@ import { join } from 'path';
 import * as child_process from 'child_process';
 import Stripe from 'stripe';
 import supertest, { SuperAgentTest, agent, Response } from 'supertest';
-
 import { TestingModule } from '@nestjs/testing';
+
+import config from '../../main.configuration';
 
 import { IRequestAuth } from '../../src/auth/application/RequestAuth/IRequestAuth';
 import { UserType } from '../../src/auth/entity/Token';
@@ -390,13 +391,11 @@ export async function createFinalizedOrder(
   return (await orderRepository.findOrder({ orderId })) as FinalizedOrder;
 }
 
-export async function initStripe(configService: ConfigService) {
+export async function initStripe() {
   const stripeListener = child_process.spawn('stripe', [
     'listen',
     '--forward-to',
-    `${configService.get<string>('DOMAIN_DEV')}/${configService.get<string>(
-      'STRIPE_WEBHOOK_PATH',
-    )}`,
+    `${config.domain}/stripe/webhook`,
   ]);
 
   await new Promise(resolve => {

@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+
+import config from '../../../../main.configuration';
+
 import { Token } from '../../entity/Token';
 import { tokenToString } from '../utils';
 import { IVerifyAuth } from './IVerifyAuth';
@@ -10,8 +12,6 @@ import { IVerifyAuth } from './IVerifyAuth';
  */
 @Injectable()
 export class VerifyAuth implements IVerifyAuth {
-  constructor(private readonly configService: ConfigService) {}
-
   execute(verificationToken: Token): string {
     return this.verificationTokenToAuthToken(verificationToken);
   }
@@ -22,9 +22,12 @@ export class VerifyAuth implements IVerifyAuth {
    * the verification token to an auth/session token, expiration set is updated with a much longer period.
    */
   private verificationTokenToAuthToken({ id, type }: Token): string {
-    const key = this.configService.get<string>('TOKEN_SIGNING_KEY');
-    const expiresIn = this.configService.get<string>('AUTH_TOKEN_EXPIRES_IN');
+    const { tokenKey, verificationTokenExpiration } = config.auth;
 
-    return tokenToString({ id, type, isVerification: false }, key, expiresIn);
+    return tokenToString(
+      { id, type, isVerification: false },
+      tokenKey,
+      verificationTokenExpiration,
+    );
   }
 }

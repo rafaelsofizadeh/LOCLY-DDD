@@ -14,7 +14,6 @@ import {
   IPayShipmentHandler,
 } from './handlers/PayShipmentHandler/IPayShipmentHandler';
 import {
-  StripeCheckoutResult,
   IStripeCheckoutWebhook,
   FeeType,
   StripeCheckoutWebhookPayload,

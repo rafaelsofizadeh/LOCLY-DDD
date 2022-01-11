@@ -104,10 +104,10 @@ export function stripePrice({ currency, amount }: Cost): StripePrice {
   };
 }
 
-export function calculateStripeFee({
-  unit_amount,
-}: StripePrice): StripePrice['unit_amount'] {
-  return unit_amount * 2.9 * 0.01 + 30;
+export function calculateStripeFee(
+  unitAmount: number,
+): StripePrice['unit_amount'] {
+  return unitAmount * 2.9 * 0.01 + 30;
 }
 
 export type StripePrice = Pick<

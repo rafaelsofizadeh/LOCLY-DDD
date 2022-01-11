@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ClientSession } from 'mongodb';
+
+import appConfig from '../../../../../../app.configuration';
+
 import {
   Transaction,
   TransactionUseCasePort,

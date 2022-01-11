@@ -1,22 +1,22 @@
 import { Module, Provider } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+
+import config from '../../../main.configuration';
+
 import { EmailModule } from '../email/EmailModule';
 import { INotificationService } from './INotificationService';
 import { EmailNotificationService } from './EmailNotificationService';
 import { IEmailService } from '../email/IEmailService';
+import { ConsoleNotificationService } from './ConsoleNotificationService';
 
 const providers: Provider[] = [
   {
     provide: INotificationService,
-    useFactory: async (
-      configService: ConfigService,
-      emailService: IEmailService,
-    ) => {
-      const nodeEnv = configService.get<string>('NODE_ENV');
+    useFactory: async (emailService: IEmailService) => {
+      const { nodeEnv } = config;
 
       switch (nodeEnv) {
         case 'dev':
-        // console notification service
+          return new ConsoleNotificationService();
         case 'prod':
           // TODO: Conditional useClass / instantiate classes in useFactory without dependencies
           return new EmailNotificationService(emailService);
@@ -24,7 +24,7 @@ const providers: Provider[] = [
           throw new Error(`Invalid NODE_ENV: ${nodeEnv}`);
       }
     },
-    inject: [ConfigService, IEmailService],
+    inject: [IEmailService],
   },
 ];
 

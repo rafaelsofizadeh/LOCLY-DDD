@@ -37,7 +37,7 @@ export class UpdateHostAccountHandler implements IUpdateHostAccount {
       {
         verified,
         // If host becomes not verified, automatically set availability to false
-        ...(!verified ? { available: false } : {}),
+        ...(!verified && { available: false }),
       },
       mongoTransactionSession,
     );
@@ -54,7 +54,9 @@ export class UpdateHostAccountHandler implements IUpdateHostAccount {
       charges_enabled &&
       payouts_enabled &&
       details_submitted &&
-      (requirements ? (!requirements.currently_due || requirements.currently_due.length === 0) : true) &&
+      (requirements
+        ? !requirements.currently_due || requirements.currently_due.length === 0
+        : true) &&
       !requirements?.disabled_reason &&
       capabilities.transfers === 'active'
     );

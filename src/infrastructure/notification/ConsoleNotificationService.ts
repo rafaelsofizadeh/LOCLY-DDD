@@ -10,31 +10,17 @@ import {
 
 @Injectable()
 // TODO: Add notifications to all actions
-export class EmailNotificationService implements INotificationService {
-  constructor(private readonly emailService: IEmailService) {}
+export class ConsoleNotificationService implements INotificationService {
+  constructor() {}
 
   templates: Templates = {
-    [NotificationType.Auth]: ({ domain, token }) =>
-      `<a href="${domain}/auth/${token}">Click here to log-in to Locly.</a>`,
+    [NotificationType.Auth]: ({ domain, token }) => `${domain}/auth/${token}`,
     [NotificationType.CustomerConfirmedOrder]: ({ order }) => 'a',
     [NotificationType.HostReceivedItem]: ({ order, receivedItemId }) => 'a',
     [NotificationType.HostUploadedItemPhoto]: ({ order, receivedItemId }) =>
       'a',
     [NotificationType.HostSubmittedShipmentInfo]: ({ order }) => 'a',
     [NotificationType.CustomerPaidShipment]: ({ order }) => 'a',
-  };
-
-  subjects: Record<NotificationType, string> = {
-    [NotificationType.Auth]: 'Your Locly log-in link',
-    [NotificationType.CustomerConfirmedOrder]:
-      'You have created and confirmed a new order',
-    [NotificationType.HostReceivedItem]:
-      'Your host has received an item from your order',
-    [NotificationType.HostUploadedItemPhoto]:
-      'Your host has uploaded a photo for an item from your order',
-    [NotificationType.HostSubmittedShipmentInfo]:
-      "Your host submitted your order's shipment info",
-    [NotificationType.CustomerPaidShipment]: 'Your order payment receipt',
   };
 
   async notify(
@@ -54,16 +40,7 @@ export class EmailNotificationService implements INotificationService {
       ? TemplateArgs<NotificationType.CustomerPaidShipment>
       : never,
   ): Promise<void> {
-    // Property access creates an intersection type instead of union:
-    // https://github.com/microsoft/TypeScript/issues/31694
-    // https://stackoverflow.com/questions/57389826/typescript-union-of-type-is-resolved-as-intersection-of-types
-    const html = this.templates[notificationType](templateArgs);
-    const subject = this.subjects[notificationType];
-
-    this.emailService.sendEmail({
-      to: recipient,
-      subject,
-      html,
-    });
+    const content = this.templates[notificationType](templateArgs);
+    console.log(content);
   }
 }

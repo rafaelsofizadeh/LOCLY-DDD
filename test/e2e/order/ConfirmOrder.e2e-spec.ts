@@ -4,7 +4,8 @@ import Stripe from 'stripe';
 import { STRIPE_CLIENT_TOKEN } from '@golevelup/nestjs-stripe';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
+
+import appConfig from '../../../app.configuration';
 
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';

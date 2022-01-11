@@ -1,10 +1,8 @@
 import child_process from 'child_process';
 import supertest from 'supertest';
-
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { STRIPE_CLIENT_TOKEN } from '@golevelup/nestjs-stripe';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
 
 import { AppModule } from '../../../src/AppModule';
 import { Customer } from '../../../src/customer/entity/Customer';
@@ -42,7 +40,6 @@ describe('Pay Shipment – POST /order/payShipment', () => {
   let moduleRef: TestingModule;
   let agent: ReturnType<typeof supertest.agent>;
   let stripe: Stripe;
-  let configService: ConfigService;
 
   let order: FinalizedOrder;
   let deleteOrder: IDeleteOrder;
@@ -70,7 +67,6 @@ describe('Pay Shipment – POST /order/payShipment', () => {
     await app.init();
 
     stripe = await moduleRef.resolve(STRIPE_CLIENT_TOKEN);
-    configService = await moduleRef.resolve(ConfigService);
 
     orderRepository = await moduleRef.resolve(IOrderRepository);
     deleteOrder = await moduleRef.resolve(IDeleteOrder);
@@ -80,7 +76,7 @@ describe('Pay Shipment – POST /order/payShipment', () => {
 
     ({ agent } = await authorize(app, moduleRef, host.email, UserType.Host));
 
-    stripeListener = await initStripe(configService);
+    stripeListener = await initStripe();
   });
 
   beforeEach(async () => {

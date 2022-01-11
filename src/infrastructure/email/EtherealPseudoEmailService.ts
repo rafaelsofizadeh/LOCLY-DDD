@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { createTransport, Transporter } from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import { Email } from '../../common/domain';
+
+import config, { EtherealEmailConfig } from '../../../main.configuration';
+
 import { throwCustomException } from '../../common/error-handling';
 import { EmailData, IEmailService } from './IEmailService';
 
@@ -11,14 +12,13 @@ export class EtherealPseudoEmailService implements IEmailService {
   private readonly nodemailerTransportConfig: SMTPTransport.Options;
   private readonly transporter: Transporter;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor() {
+    const { email: user, password: pass } = config.email as EtherealEmailConfig;
+
     this.nodemailerTransportConfig = {
       host: 'smtp.ethereal.email',
       port: 587,
-      auth: {
-        user: this.configService.get<Email>('ETHEREAL_EMAIL'),
-        pass: this.configService.get<Email>('ETHEREAL_PASSWORD'),
-      },
+      auth: { user, pass },
     };
 
     this.transporter = createTransport(this.nodemailerTransportConfig);

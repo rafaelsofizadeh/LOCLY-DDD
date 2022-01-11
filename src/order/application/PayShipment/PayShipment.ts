@@ -2,6 +2,8 @@ import Stripe from 'stripe';
 import { Injectable } from '@nestjs/common';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
+import config from '../../../../main.configuration';
+
 import {
   PayShipmentPayload,
   IPayShipment,
@@ -96,7 +98,8 @@ export class PayShipmentService implements IPayShipment {
           quantity: 1,
         },
       ],
-      allow_promotion_codes: true,
+      // Don't allow promo codes on shipment payments
+      allow_promotion_codes: false,
       payment_intent_data: {
         application_fee_amount: stripeApplicationFeeAmount,
         transfer_data: { destination: hostStripeAccountId },
@@ -106,8 +109,8 @@ export class PayShipmentService implements IPayShipment {
         orderId,
       },
       mode: 'payment',
-      success_url: 'https://news.ycombinator.com',
-      cancel_url: 'https://reddit.com',
+      success_url: config.stripe.successPageUrl,
+      cancel_url: config.stripe.cancelPageUrl,
     })) as Stripe.Response<StripeCheckoutSession>;
 
     return checkoutSession;

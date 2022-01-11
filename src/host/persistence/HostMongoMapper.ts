@@ -28,7 +28,7 @@ export function hostToMongoDocument(host: Host): HostMongoDocument {
 
 export function normalizeHostFilter({ hostId, ...restFilter }: HostFilter) {
   return {
-    ...(hostId ? { id: hostId } : {}),
+    ...(hostId && { id: hostId }),
     ...restFilter,
   };
 }

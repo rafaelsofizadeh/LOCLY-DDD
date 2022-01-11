@@ -1,7 +1,11 @@
 import Stripe from 'stripe';
-import { Injectable } from '@nestjs/common';
 import { ClientSession } from 'mongodb';
+import { Injectable } from '@nestjs/common';
+import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 import { alpha3ToAlpha2 } from 'i18n-iso-countries';
+
+import appConfig from '../../../../app.configuration';
+
 import { IHostRepository } from '../../../host/persistence/IHostRepository';
 import {
   Transaction,
@@ -10,10 +14,8 @@ import {
 import { Address, UUID } from '../../../common/domain';
 import { Host } from '../../entity/Host';
 import { CreateHostPayload, ICreateHost } from './ICreateHost';
-import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 import { Country } from '../../../order/entity/Country';
 import { throwCustomException } from '../../../common/error-handling';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class CreateHost implements ICreateHost {
@@ -81,7 +83,6 @@ export class CreateHost implements ICreateHost {
   ];
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly hostRepository: IHostRepository,
     @InjectStripeClient() private readonly stripe: Stripe,
   ) {}
@@ -155,9 +156,7 @@ export class CreateHost implements ICreateHost {
         // https://stripe.com/docs/payouts#alternative-schedules
         payouts: {
           schedule: {
-            delay_days: this.configService.get<number>(
-              'HOST_PAYOUT_DELAY_DAYS',
-            ),
+            delay_days: appConfig.host.payoutDelayDays,
             interval: 'daily',
           },
         },

@@ -36,16 +36,14 @@ export function normalizeOrderFilter({
   ...restFilter
 }: OrderFilter) {
   return {
-    ...(orderId ? { id: orderId } : {}),
-    ...(status
-      ? {
-          status: Array.isArray(status) ? { $in: status } : status,
-        }
-      : {}),
+    ...(orderId && { id: orderId }),
+    ...(status && {
+      status: Array.isArray(status) ? { $in: status } : status,
+    }),
     ...restFilter,
   };
 }
 
 export function normalizeItemFilter({ itemId, ...restFilter }: ItemFilter) {
-  return { ...(itemId ? { id: itemId } : {}), ...restFilter };
+  return { ...(itemId && { id: itemId }), ...restFilter };
 }

@@ -1,6 +1,7 @@
 import supertest from 'supertest';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Collection } from 'mongodb';
 import { getCollectionToken } from 'nest-mongodb';
 import { isUUID } from 'class-validator';
 
@@ -27,7 +28,6 @@ import { authorize, createTestCustomer } from '../utilities';
 import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
 import { throwCustomException } from '../../../src/common/error-handling';
 import { IOrderRepository } from '../../../src/order/persistence/IOrderRepository';
-import { Collection } from 'mongodb';
 import { OrderMongoDocument } from '../../../src/order/persistence/OrderMongoMapper';
 
 describe('Draft Order – POST /order', () => {

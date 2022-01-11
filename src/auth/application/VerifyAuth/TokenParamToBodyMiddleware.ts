@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
+
+import config from '../../../../main.configuration';
 
 @Injectable()
 /**
@@ -10,15 +11,10 @@ import { Request, Response, NextFunction } from 'express';
  * AuthInterceptor and let it do its thing.
  */
 export class VerificationTokenParamToBodyMiddleware {
-  constructor(private readonly configService: ConfigService) {}
-
   use(request: Request, response: Response, next: NextFunction) {
     // Should match '/auth/verify/:token'
     const { token: verificationToken } = request.params;
-    const verificationCookieName = this.configService.get<string>(
-      'TOKEN_COOKIE_NAME',
-    );
-    request.cookies[verificationCookieName] = verificationToken;
+    request.cookies[config.cookie.tokenName] = verificationToken;
 
     return next();
   }

@@ -2,6 +2,9 @@ import Stripe from 'stripe';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
+import mainConfig from '../../../../main.configuration';
+import appConfig from '../../../../app.configuration';
+
 import { ConfirmOrderResult, IConfirmOrder } from './IConfirmOrder';
 import { IOrderRepository } from '../../persistence/IOrderRepository';
 import { Host } from '../../../host/entity/Host';
@@ -9,7 +12,6 @@ import { UUID } from '../../../common/domain';
 import { ClientSession } from 'mongodb';
 import {
   StripeCheckoutSession,
-  StripePrice,
   Transaction,
   TransactionUseCasePort,
 } from '../../../common/application';
@@ -20,7 +22,6 @@ import { FeeType } from '../StripeCheckoutWebhook/IStripeCheckoutWebhook';
 import { ConfirmOrderPayload } from './IConfirmOrder';
 import { Customer } from '../../../customer/entity/Customer';
 import { ICustomerRepository } from '../../../customer/persistence/ICustomerRepository';
-import { ConfigService } from '@nestjs/config';
 
 export type Match = {
   orderId: UUID;
@@ -30,7 +31,6 @@ export type Match = {
 @Injectable()
 export class ConfirmOrder implements IConfirmOrder {
   constructor(
-    private readonly configService: ConfigService,
     private readonly orderRepository: IOrderRepository,
     private readonly hostRepository: IHostRepository,
     private readonly customerRepository: ICustomerRepository,
