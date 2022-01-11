@@ -121,10 +121,9 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
       filterWithId,
     );
 
+    const queryArgument = { [prop]: entity };
     const updateQuery =
-      action === 'add'
-        ? { $push: { [prop]: entity } }
-        : { $pull: { $elemMatch: { [prop]: entity } } };
+      action === 'add' ? { $push: queryArgument } : { $pull: queryArgument };
 
     const errorAction = `${action === 'add' ? 'adding to' : 'removing from'}`;
 
