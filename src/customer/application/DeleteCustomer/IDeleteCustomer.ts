@@ -1,9 +1,9 @@
+import { Customer } from '../../../customer/entity/Customer';
 import { UseCase } from '../../../common/application';
-import { UUID } from '../../../common/domain';
 
-export interface DeleteCustomerPayload {
-  customerId: UUID;
-}
+export type DeleteCustomerPayload = Readonly<{
+  customerId: Customer['id'];
+}>;
 
 export type DeleteCustomerResult = void;
 

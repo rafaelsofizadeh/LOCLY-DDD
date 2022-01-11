@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { InjectClient } from 'nest-mongodb';
-import { ClientSession, MongoClient } from 'mongodb';
-import { Transaction, TransactionUseCasePort } from '../../../common/application';
+import { ClientSession } from 'mongodb';
+import {
+  Transaction,
+  TransactionUseCasePort,
+} from '../../../common/application';
 import {
   GetCustomerUpsertPayload,
   GetCustomerUpsertResult,

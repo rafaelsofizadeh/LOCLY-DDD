@@ -34,7 +34,7 @@ export function normalizeCustomerFilter({
   ...restFilter
 }: CustomerFilter) {
   return {
-    ...(customerId ? { id: customerId } : {}),
+    ...(customerId && { id: customerId }),
     ...restFilter,
   };
 }
