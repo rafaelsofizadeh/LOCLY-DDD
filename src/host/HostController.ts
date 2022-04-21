@@ -40,10 +40,10 @@ export class HostController {
 
   @Get('dashboard')
   async getHostAccountLinkController(
-    @AnyHostIdentity() host: Host,
+    @AnyHostIdentity() { stripeAccountId }: Host,
   ): Promise<HostAccountLink> {
     const accountLink: HostAccountLink = await this.getHostAccountLink.execute({
-      port: host,
+      port: { stripeAccountId },
     });
 
     return accountLink;
@@ -51,6 +51,7 @@ export class HostController {
 
   @Patch()
   async editHostController(
+    // See 'availability'
     @AnyHostIdentity() host: Host,
     @Body() editHostRequest: EditHostRequest,
   ): Promise<void> {
@@ -64,6 +65,9 @@ export class HostController {
 
   @Patch('availability')
   async setHostAvailabilityController(
+    // @VerifiedHostIdentity() already queries the DB for the host, and gets the entire object.
+    // GetHostAccountLink will need some host properties in its workflow,
+    // so to not have to query the DB twice for the same host, we pass the entire object.
     @VerifiedHostIdentity() host: Host,
     @Body() setHostAvailabilityRequest: SetHostAvailabilityRequest,
   ): Promise<void> {
@@ -76,7 +80,9 @@ export class HostController {
   }
 
   @Delete()
-  async deleteHostController(@AnyHostIdentity() host: Host): Promise<void> {
-    await this.deleteHost.execute({ port: { hostId: host.id } });
+  async deleteHostController(
+    @AnyHostIdentity() { id: hostId }: Host,
+  ): Promise<void> {
+    await this.deleteHost.execute({ port: { hostId } });
   }
 }

@@ -32,19 +32,4 @@ export class EditHostRequest
   address?: Address;
 }
 
-export class HostProfileValidationSchema
-  implements Omit<EditHostPayload, 'currentHostProperties'> {
-  @IsString()
-  @Length(1, 32)
-  firstName: string;
-
-  @IsString()
-  @Length(1, 32)
-  lastName: string;
-
-  @ValidateNested()
-  @Type(() => AddressValidationSchema)
-  address: Address;
-}
-
 export abstract class IEditHost extends UseCase<EditHostPayload, void> {}

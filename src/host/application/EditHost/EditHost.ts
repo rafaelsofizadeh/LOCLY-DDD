@@ -1,19 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
-import { validateSync } from 'class-validator';
 import { ClientSession } from 'mongodb';
 import {
   Transaction,
   TransactionUseCasePort,
 } from '../../../common/application';
 import { IHostRepository } from '../../persistence/IHostRepository';
-import {
-  EditHostPayload,
-  HostProfileValidationSchema,
-  IEditHost,
-} from './IEditHost';
+import { EditHostPayload, IEditHost } from './IEditHost';
 
-// TODO: Add country editing (but only once) for those who didn't select country during registration
 @Injectable()
 export class EditHost implements IEditHost {
   constructor(private readonly hostRepository: IHostRepository) {}
@@ -30,21 +23,32 @@ export class EditHost implements IEditHost {
     { currentHostProperties, ...editProperties }: EditHostPayload,
     sessionWithTransaction: ClientSession,
   ) {
-    const { firstName, lastName, address } = {
-      ...(currentHostProperties || {}),
-      ...editProperties,
-    };
-
-    const profile: HostProfileValidationSchema = plainToClass(
-      HostProfileValidationSchema,
-      { firstName, lastName, address },
+    const editPropertiesOnlyDefined = Object.entries(editProperties).reduce(
+      (defined, [k, v]) => {
+        // https://stackoverflow.com/a/21273362/6539857 for !=
+        if (v != null) defined[k] = v;
+        return defined;
+      },
+      {},
     );
 
-    const profileComplete = !validateSync(profile).length;
+    const profile = {
+      ...currentHostProperties,
+      ...editPropertiesOnlyDefined,
+    };
+
+    const profileComplete = ['firstName', 'lastName', 'address'].every(
+      k =>
+        // https://stackoverflow.com/a/21273362/6539857 for !=
+        profile[k] != null &&
+        (typeof profile[k] === 'object'
+          ? Object.keys(profile[k]).length !== 0
+          : true),
+    );
 
     return this.hostRepository.setProperties(
       { hostId: currentHostProperties.id },
-      { ...editProperties, profileComplete },
+      { ...editPropertiesOnlyDefined, profileComplete },
       sessionWithTransaction,
     );
   }

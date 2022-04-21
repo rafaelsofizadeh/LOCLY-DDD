@@ -1,6 +1,6 @@
 import { IsBoolean } from 'class-validator';
 import { UseCase } from '../../../common/application';
-import { Host, UnidHostRequest } from '../../entity/Host';
+import { Host } from '../../entity/Host';
 
 export type SetHostAvailabilityPayload = Readonly<{
   host: Host;
