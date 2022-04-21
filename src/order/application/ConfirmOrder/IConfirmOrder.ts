@@ -1,23 +1,27 @@
-import Stripe from 'stripe';
+import { IsInt, IsNumber, IsPositive, Min } from 'class-validator';
 import {
   StripeCheckoutSessionResult,
-  StripePrice,
   UseCase,
 } from '../../../common/application';
 
 import { IsUUID, UUID } from '../../../common/domain';
 import { UnidCustomerRequest } from '../../../customer/entity/Customer';
-import { Cost } from '../../entity/Order';
 
-export interface ConfirmOrderPayload {
-  readonly orderId: UUID;
-  readonly customerId: UUID;
-}
+export type ConfirmOrderPayload = Readonly<{
+  orderId: UUID;
+  customerId: UUID;
+  balanceDiscountUsdCents: number;
+}>;
 
 export class ConfirmOrderRequest
   implements UnidCustomerRequest<ConfirmOrderPayload> {
   @IsUUID()
   readonly orderId: UUID;
+
+  @IsNumber()
+  @IsInt()
+  @Min(0)
+  readonly balanceDiscountUsdCents: number = 0;
 }
 
 export type ConfirmOrderResult = StripeCheckoutSessionResult;
@@ -25,8 +29,4 @@ export type ConfirmOrderResult = StripeCheckoutSessionResult;
 export abstract class IConfirmOrder extends UseCase<
   ConfirmOrderPayload,
   ConfirmOrderResult
-> {
-  abstract calculateLoclyCut(
-    totalPriceId: Stripe.Price['id'],
-  ): Promise<{ total: StripePrice; loclyFee: StripePrice }>;
-}
+> {}

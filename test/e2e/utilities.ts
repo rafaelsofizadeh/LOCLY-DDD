@@ -38,8 +38,7 @@ import {
   FinalizedOrder,
 } from '../../src/order/entity/Order';
 import { IOrderRepository } from '../../src/order/persistence/IOrderRepository';
-import { ConfigService } from '@nestjs/config';
-import { PayShipmentResult } from 'src/order/application/PayShipment/IPayShipment';
+import { PayShipmentResult } from '../../src/order/application/PayShipment/IPayShipment';
 
 export async function createTestCustomer(
   moduleRef: TestingModule,
@@ -296,7 +295,7 @@ export async function createConfirmedOrder(
   });
 
   await confirmOrder.execute({
-    port: { orderId, customerId: customer.id },
+    port: { orderId, customerId: customer.id, balanceDiscountUsdCents: 0 },
   });
 
   await confirmOrderWebhookHandler.execute({
@@ -351,7 +350,7 @@ export async function createFinalizedOrder(
   });
 
   await confirmOrder.execute({
-    port: { orderId, customerId: customer.id },
+    port: { orderId, customerId: customer.id, balanceDiscountUsdCents: 0 },
   });
 
   await confirmOrderWebhookHandler.execute({

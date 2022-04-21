@@ -1,4 +1,6 @@
 import { Module, Provider } from '@nestjs/common';
+import { AddReferralCode } from './application/AddReferralCode/AddReferralCode';
+import { IAddReferralCode } from './application/AddReferralCode/IAddReferralCode';
 import { CreateCustomer } from './application/CreateCustomer/CreateCustomer';
 import { ICreateCustomer } from './application/CreateCustomer/ICreateCustomer';
 import { DeleteCustomer } from './application/DeleteCustomer/DeleteCustomer';
@@ -16,6 +18,7 @@ const useCaseProviders: Provider[] = [
   { provide: IGetCustomer, useClass: GetCustomer },
   { provide: IGetCustomerUpsert, useClass: GetCustomerUpsert },
   { provide: IEditCustomer, useClass: EditCustomer },
+  { provide: IAddReferralCode, useClass: AddReferralCode },
   { provide: IDeleteCustomer, useClass: DeleteCustomer },
 ];
 

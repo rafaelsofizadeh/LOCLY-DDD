@@ -8,7 +8,6 @@ import {
   TransactionUseCasePort,
 } from '../../../../../common/application';
 import { Host } from '../../../../../host/entity/Host';
-
 import { OrderStatus } from '../../../../entity/Order';
 import {
   ConfirmOrderWebhookPayload,
@@ -16,13 +15,15 @@ import {
   ConfirmOrderWebhookResult,
 } from './IConfirmOrderHandler';
 import { IHostRepository } from '../../../../../host/persistence/IHostRepository';
-import { IOrderRepository } from '../../../../persistence/IOrderRepository';
+import { IOrderRepository } from '../../../../../order/persistence/IOrderRepository';
 import { Address } from '../../../../../common/domain';
+import { ICustomerRepository } from '../../../../../customer/persistence/ICustomerRepository';
 
 @Injectable()
 export class ConfirmOrderHandler implements IConfirmOrderHandler {
   constructor(
     private readonly orderRepository: IOrderRepository,
+    private readonly customerRepository: ICustomerRepository,
     private readonly hostRepository: IHostRepository,
   ) {}
 
@@ -34,6 +35,12 @@ export class ConfirmOrderHandler implements IConfirmOrderHandler {
     ConfirmOrderWebhookResult
   > {
     const matchedHostAddress: Address = await this.confirmOrder(
+      confirmOrderRequest,
+      mongoTransactionSession,
+    );
+
+    await this.referralReward(confirmOrderRequest, mongoTransactionSession);
+    await this.updateBalanceAfterDiscount(
       confirmOrderRequest,
       mongoTransactionSession,
     );
@@ -63,5 +70,29 @@ export class ConfirmOrderHandler implements IConfirmOrderHandler {
     );
 
     return hostAddress;
+  }
+
+  private async updateBalanceAfterDiscount(
+    { customerId, balanceDiscountUsdCents }: ConfirmOrderWebhookPayload,
+    mongoTransactionSession: ClientSession,
+  ): Promise<void> {
+    await this.customerRepository.updateBalance(
+      { customerId },
+      -balanceDiscountUsdCents,
+      mongoTransactionSession,
+    );
+  }
+
+  private async referralReward(
+    { refereeCustomerId }: ConfirmOrderWebhookPayload,
+    mongoTransactionSession: ClientSession,
+  ): Promise<void> {
+    const referralRewardUsdCents: number = appConfig.rewards.referralUsd * 100;
+
+    await this.customerRepository.updateBalance(
+      { customerId: refereeCustomerId },
+      referralRewardUsdCents,
+      mongoTransactionSession,
+    );
   }
 }

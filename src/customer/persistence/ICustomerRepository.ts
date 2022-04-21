@@ -2,7 +2,10 @@ import { ClientSession } from 'mongodb';
 import { UUID } from '../../common/domain';
 import { Customer, CustomerFilter } from '../entity/Customer';
 
-export type AllowedCustomerProperties = Omit<CustomerFilter, 'customerId'>;
+export type AllowedCustomerProperties = Omit<
+  CustomerFilter,
+  'customerId' | 'referralCode'
+>;
 
 export abstract class ICustomerRepository {
   abstract addCustomer(
@@ -30,6 +33,12 @@ export abstract class ICustomerRepository {
   abstract setProperties(
     filter: CustomerFilter,
     properties: AllowedCustomerProperties,
+    mongoTransactionSession?: ClientSession,
+  ): Promise<void>;
+
+  abstract updateBalance(
+    filter: CustomerFilter,
+    deltaUsdCents: number,
     mongoTransactionSession?: ClientSession,
   ): Promise<void>;
 

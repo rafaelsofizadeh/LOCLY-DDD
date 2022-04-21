@@ -53,7 +53,7 @@ export class ConfirmOrder implements IConfirmOrder {
   }
 
   private async matchOrderAndCheckout(
-    { orderId, customerId }: ConfirmOrderPayload,
+    { orderId, customerId, balanceDiscountUsdCents }: ConfirmOrderPayload,
     mongoTransactionSession: ClientSession,
   ): Promise<StripeCheckoutSession> {
     const draftOrder = (await this.orderRepository.findOrder(
@@ -68,12 +68,19 @@ export class ConfirmOrder implements IConfirmOrder {
 
     const {
       stripeCustomerId,
+      refereeCustomerId,
     }: Customer = await this.customerRepository.findCustomer({ customerId });
 
     const checkoutSession: StripeCheckoutSession = await this.createStripeCheckoutSession(
-      draftOrder,
-      host,
-      stripeCustomerId,
+      {
+        customerId,
+        orderId,
+        host,
+        stripeCustomerId,
+        balanceDiscountUsdCents,
+        refereeCustomerId,
+      },
+      mongoTransactionSession,
     );
 
     return checkoutSession;
@@ -101,61 +108,115 @@ export class ConfirmOrder implements IConfirmOrder {
 
   // TODO: Error handling and rejection events
   private async createStripeCheckoutSession(
-    { id: orderId }: DraftedOrder,
-    host: Host,
-    stripeCustomerId: Stripe.Customer['id'],
+    {
+      customerId,
+      orderId,
+      host,
+      stripeCustomerId,
+      balanceDiscountUsdCents,
+      refereeCustomerId,
+    }: {
+      customerId: Customer['id'];
+      orderId: DraftedOrder['id'];
+      host: Host;
+      stripeCustomerId: Stripe.Customer['id'];
+      balanceDiscountUsdCents: number;
+      refereeCustomerId: Customer['id'];
+    },
+    mongoTransactionSession: ClientSession,
   ): Promise<StripeCheckoutSession> {
-    const priceId: string = this.configService.get('LOCLY_FEE_PRICE_ID');
-    const { loclyFee } = await this.calculateLoclyCut(priceId);
+    if (
+      !(await this.verifyBalanceAndDiscount(
+        customerId,
+        balanceDiscountUsdCents,
+        mongoTransactionSession,
+      ))
+    ) {
+      return throwCustomException(
+        `Not enough balance to apply discount ${balanceDiscountUsdCents /
+          100} USD`,
+        { customerId, balanceDiscountUsdCents },
+      )();
+    }
+
+    const {
+      stripeProductId: serviceFeeProductId,
+      stripePriceId: serviceFeePriceId,
+      loclyCutPercent,
+    } = appConfig.serviceFee;
+
+    const percentage = 0.01 * loclyCutPercent;
+
+    const {
+      unit_amount: serviceFeeAmount,
+      currency,
+    } = await this.stripe.prices.retrieve(serviceFeePriceId);
+    const loclyFeeAmount = serviceFeeAmount * percentage;
 
     const match: Match = {
       orderId,
       hostId: host.id,
     };
 
-    // Edge case: the matched host sets availability to "not available" inbetween the customer confirming the order and paying.
+    let loclyFeeConfig: Stripe.Checkout.SessionCreateParams['payment_intent_data'];
+
+    if (loclyFeeAmount > balanceDiscountUsdCents) {
+      loclyFeeConfig = {
+        application_fee_amount: loclyFeeAmount - balanceDiscountUsdCents,
+        transfer_data: { destination: host.stripeAccountId },
+      };
+      // Minimum Stripe processable amount: $0.5
+      // TODO: Put into config
+    } else if (serviceFeeAmount - balanceDiscountUsdCents < 50) {
+      balanceDiscountUsdCents = serviceFeeAmount - 50;
+    }
+
     const checkoutSession = (await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       customer: stripeCustomerId,
       line_items: [
         {
-          price: priceId,
+          price_data: {
+            product: serviceFeeProductId,
+            unit_amount: serviceFeeAmount - balanceDiscountUsdCents,
+            currency,
+          },
           quantity: 1,
         },
       ],
-      allow_promotion_codes: true,
-      payment_intent_data: {
-        application_fee_amount: loclyFee.unit_amount,
-        transfer_data: { destination: host.stripeAccountId },
-      },
+      ...(loclyFeeConfig && { payment_intent_data: loclyFeeConfig }),
+      // Can't accept promo codes if customer requests discount via balance
+      allow_promotion_codes: !Boolean(balanceDiscountUsdCents),
       metadata: {
         feeType: FeeType.Service,
+        ...(balanceDiscountUsdCents && {
+          customerId,
+          balanceDiscountUsdCents,
+        }),
+        refereeCustomerId,
         ...match,
       },
       mode: 'payment',
-      success_url: 'https://news.ycombinator.com',
-      cancel_url: 'https://reddit.com',
+      success_url: mainConfig.stripe.successPageUrl,
+      cancel_url: mainConfig.stripe.cancelPageUrl,
     })) as Stripe.Response<StripeCheckoutSession>;
 
     return checkoutSession;
   }
 
-  async calculateLoclyCut(totalPriceId: Stripe.Price['id']) {
+  private async verifyBalanceAndDiscount(
+    customerId: Customer['id'],
+    balanceDiscountUsdCents: number,
+    mongoTransactionSession: ClientSession,
+  ): Promise<boolean> {
     const {
-      currency,
-      unit_amount,
-    }: Stripe.Price = await this.stripe.prices.retrieve(totalPriceId);
+      balanceUsdCents,
+    }: Customer = await this.customerRepository.findCustomer(
+      { customerId },
+      mongoTransactionSession,
+      true,
+    );
 
-    const percentage =
-      0.01 *
-      Number(this.configService.get<number>('LOCLY_SERVICE_FEE_CUT_PERCENT'));
-
-    return {
-      total: { currency, unit_amount },
-      loclyFee: {
-        currency,
-        unit_amount: unit_amount * percentage,
-      },
-    };
+    return balanceUsdCents >= balanceDiscountUsdCents;
   }
 }

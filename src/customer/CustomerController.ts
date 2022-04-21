@@ -1,6 +1,10 @@
-import { Body, Controller, Delete, Get, Patch } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
 import { CustomerIdentity } from '../auth/infrastructure/IdentityDecorator';
 import { UUID } from '../common/domain';
+import {
+  AddReferralCodeRequest,
+  IAddReferralCode,
+} from './application/AddReferralCode/IAddReferralCode';
 import { IDeleteCustomer } from './application/DeleteCustomer/IDeleteCustomer';
 import {
   EditCustomerRequest,
@@ -14,6 +18,7 @@ export class CustomerController {
   constructor(
     private readonly getCustomer: IGetCustomer,
     private readonly editCustomer: IEditCustomer,
+    private readonly addReferralCode: IAddReferralCode,
     private readonly deleteCustomer: IDeleteCustomer,
   ) {}
 
@@ -29,6 +34,16 @@ export class CustomerController {
     });
 
     return customer;
+  }
+
+  @Post('referral')
+  async addReferralCodeController(
+    @CustomerIdentity() customerId: UUID,
+    @Body() addReferralCodeRequest: AddReferralCodeRequest,
+  ) {
+    await this.addReferralCode.execute({
+      port: { customerId, ...addReferralCodeRequest },
+    });
   }
 
   @Patch()

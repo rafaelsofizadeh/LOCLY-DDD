@@ -222,4 +222,43 @@ export class CustomerMongoRepositoryAdapter implements ICustomerRepository {
       { filter, properties },
     );
   }
+
+  async updateBalance(
+    filter: CustomerFilter,
+    deltaUsdCents: number,
+    mongoTransactionSession: ClientSession,
+  ): Promise<void> {
+    if (!isNotEmptyObject(filter)) {
+      return;
+    }
+
+    const filterWithId = normalizeCustomerFilter(filter);
+    const filterQuery: FilterQuery<CustomerMongoDocument> = mongoQuery(
+      filterWithId,
+    );
+
+    const {
+      matchedCount,
+      modifiedCount,
+    }: UpdateWriteOpResult = await this.customerCollection
+      .updateOne(
+        filterQuery,
+        { $inc: { balanceUsdCents: deltaUsdCents } },
+        { session: mongoTransactionSession },
+      )
+      .catch(
+        throwCustomException('Error updating balance', {
+          filter,
+        }),
+      );
+
+    expectOnlySingleResult(
+      [matchedCount, modifiedCount],
+      {
+        operation: 'updating balance',
+        entity: 'customer',
+      },
+      { filter },
+    );
+  }
 }

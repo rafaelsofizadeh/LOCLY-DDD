@@ -1,12 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import Stripe from 'stripe';
 import { ClientSession } from 'mongodb';
+import { Injectable } from '@nestjs/common';
+import { InjectStripeClient } from '@golevelup/nestjs-stripe';
+
+import appConfig from '../../../../app.configuration';
+
 import { ICustomerRepository } from '../../persistence/ICustomerRepository';
-import { Transaction, TransactionUseCasePort } from '../../../common/application';
+import {
+  Transaction,
+  TransactionUseCasePort,
+} from '../../../common/application';
 import { UUID } from '../../../common/domain';
 import { Customer } from '../../entity/Customer';
 import { CreateCustomerPayload, ICreateCustomer } from './ICreateCustomer';
-import Stripe from 'stripe';
-import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
 @Injectable()
 export class CreateCustomer extends ICreateCustomer {
@@ -39,6 +45,8 @@ export class CreateCustomer extends ICreateCustomer {
       id: UUID(),
       email,
       stripeCustomerId,
+      balanceUsdCents: 0,
+      referralCode: this.referralCode(),
       orderIds: [],
       addresses: [],
     };
@@ -49,5 +57,13 @@ export class CreateCustomer extends ICreateCustomer {
     );
 
     return customer;
+  }
+
+  private referralCode(): string {
+    const length = Number(appConfig.rewards.codeLength);
+
+    return Math.random()
+      .toString(36)
+      .slice(2, 2 + length);
   }
 }

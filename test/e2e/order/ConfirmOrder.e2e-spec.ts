@@ -20,7 +20,6 @@ import {
   ConfirmedOrder,
   OrderStatus,
 } from '../../../src/order/entity/Order';
-import { IConfirmOrder } from '../../../src/order/application/ConfirmOrder/IConfirmOrder';
 import { setupNestApp } from '../../../src/main';
 import {
   authorize,
@@ -33,8 +32,9 @@ import { IDeleteCustomer } from '../../../src/customer/application/DeleteCustome
 import { IDeleteOrder } from '../../../src/order/application/DeleteOrder/IDeleteOrder';
 import { originCountriesAvailable } from '../../../src/calculator/data/PriceGuide';
 import { UserType } from '../../../src/auth/entity/Token';
-import { calculateStripeFee } from '../../../src/common/application';
 import { UUID } from '../../../src/common/domain';
+import { calculateStripeFee } from '../../../src/common/application';
+import { ICustomerRepository } from '../../../src/customer/persistence/ICustomerRepository';
 
 type HostConfig = {
   verified: boolean;
@@ -50,15 +50,15 @@ describe('Confirm Order – POST /order/confirm', () => {
   let moduleRef: TestingModule;
   let agent: ReturnType<typeof supertest.agent>;
   let stripe: Stripe;
-  let configService: ConfigService;
 
   let order: DraftedOrder;
   let draftOrder: IDraftOrder;
-  let confirmOrder: IConfirmOrder;
   let deleteOrder: IDeleteOrder;
   let orderRepository: IOrderRepository;
 
   let customer: Customer;
+  const customerBalanceUsdCentsBefore = 10000;
+  let customerRepository: ICustomerRepository;
   let deleteCustomer: IDeleteCustomer;
 
   let hosts: Host[];
@@ -80,15 +80,23 @@ describe('Confirm Order – POST /order/confirm', () => {
     await app.init();
 
     stripe = await moduleRef.resolve(STRIPE_CLIENT_TOKEN);
-    configService = await moduleRef.resolve(ConfigService);
 
+    customerRepository = await moduleRef.resolve(ICustomerRepository);
     orderRepository = await moduleRef.resolve(IOrderRepository);
     hostRepository = await moduleRef.resolve(IHostRepository);
+
     draftOrder = await moduleRef.resolve(IDraftOrder);
-    confirmOrder = await moduleRef.resolve(IConfirmOrder);
     deleteOrder = await moduleRef.resolve(IDeleteOrder);
 
+    stripeListener = await initStripe();
+  });
+
+  beforeEach(async () => {
     ({ customer, deleteCustomer } = await createTestCustomer(moduleRef));
+    await customerRepository.setProperties(
+      { customerId: customer.id },
+      { balanceUsdCents: customerBalanceUsdCentsBefore },
+    );
 
     ({ agent } = await authorize(
       app,
@@ -97,10 +105,6 @@ describe('Confirm Order – POST /order/confirm', () => {
       UserType.Customer,
     ));
 
-    stripeListener = await initStripe(configService);
-  });
-
-  beforeEach(async () => {
     order = await draftOrder.execute({
       port: {
         customerId: customer.id,
@@ -123,175 +127,218 @@ describe('Confirm Order – POST /order/confirm', () => {
       deleteOrder.execute({
         port: { customerId: customer.id, orderId: order.id },
       }),
-    ]);
-  });
-
-  afterAll(async () => {
-    await Promise.allSettled([
       deleteCustomer.execute({ port: { customerId: customer.id } }),
     ]);
 
+    hosts = undefined;
+    order = undefined;
+    customer = undefined;
+  });
+
+  afterAll(async () => {
     stripeListener.kill();
     await app.close();
   });
 
-  it(`Matches Order with a Host, completes Stripe checkout for Locly service fee payment`, async () => {
-    const notOriginCountries: Country[] = originCountriesAvailable.filter(
-      country => country !== originCountry,
-    );
-    const notOriginCountry: Country =
-      notOriginCountries[Math.floor(Math.random() * notOriginCountries.length)];
-    const testHostConfigs: HostConfig[] = [
-      /*
-      Test host #1:
-      ✗ NOT verified
-      ✔ available
-      ✔ same country as the order
-      ✔ lowest number of orders (1)
-      */
-      {
-        verified: false,
-        country: originCountry,
-        available: true,
-        orderCount: 1,
-      },
-      /*
-      Test host #2:
-      ✗ NOT available
-      ✔ verified
-      ✔ same country as the order
-      ✔ lowest number of orders (1)
-      */
-      {
-        verified: true,
-        country: originCountry,
-        available: false,
-        orderCount: 1,
-      },
-      /*
-      Test host #3:
-      ✗ NOT the same country as the order
-      ✔ verified
-      ✔ available
-      ✔ lowest number of orders (1)
-      */
-      {
-        verified: true,
-        country: notOriginCountry,
-        available: true,
-        orderCount: 1,
-      },
-      /*
-      Test host #4:
-      ✗ NOT the lowest number of orders (2)
-      ✔ verified
-      ✔ same country as the order
-      ✔ available
-      */
-      {
-        verified: true,
-        country: originCountry,
-        available: true,
-        orderCount: 2,
-      },
-      /*
-      Test host #5:
-      ✗ NOT the lowest number of orders (2)
-      ✗ NOT the same country as the order
-      ✗ NOT available
-      ✗ verified
-      */
-      {
-        verified: false,
-        country: notOriginCountry,
-        available: false,
-        orderCount: 3,
-      },
-      /*
-      Test host #6 (WILL BE SELECTED):
-      ✔ available
-      ✔ verified
-      ✔ same country as the order
-      ✔ lowest number of orders (1)
-      */
-      {
-        verified: true,
-        country: originCountry,
-        available: true,
-        orderCount: 1,
-      },
-    ];
-    hosts = await configsToOnboardedHosts(moduleRef, testHostConfigs);
-    const testMatchedHost = hosts.slice(-1)[0];
+  describe('Matches Order with a Host', () => {
+    let serviceFeeAmount: number;
+    let loclyFeeAmount: number;
+    let currency: string;
 
-    const loclyStripeBalanceBefore: Stripe.Balance = await stripe.balance.retrieve();
-    const hostStripeBalanceBefore: Stripe.Balance = await stripe.balance.retrieve(
-      { stripeAccount: testMatchedHost.stripeAccountId },
-    );
+    beforeAll(async () => {
+      const { stripePriceId, loclyCutPercent } = appConfig.serviceFee;
 
-    const response: supertest.Response = await agent
-      .post('/order/confirm')
-      .send({
-        orderId: order.id,
-      });
+      const percentage = 0.01 * loclyCutPercent;
 
-    expect(response.status).toBe(HttpStatus.CREATED);
+      ({
+        unit_amount: serviceFeeAmount,
+        currency,
+      } = await stripe.prices.retrieve(stripePriceId));
 
-    await testCheckoutResponse(response);
-
-    let updatedOrder: ConfirmedOrder = (await orderRepository.findOrder({
-      orderId: order.id,
-    })) as ConfirmedOrder;
-
-    expect(updatedOrder).toBeDefined();
-    expect(updatedOrder.status).toBe(OrderStatus.Confirmed);
-    expect(updatedOrder.hostId).toBe(testMatchedHost.id);
-    expect(updatedOrder.hostAddress).toMatchObject(testMatchedHost.address);
-
-    const updatedTestHost: Host = await hostRepository.findHost({
-      hostId: testMatchedHost.id,
+      loclyFeeAmount = serviceFeeAmount * percentage;
     });
 
-    expect(updatedTestHost.orderIds).toContain(order.id);
-    expect(updatedTestHost.orderIds.length).toBe(
-      testMatchedHost.orderIds.length + 1,
-    );
+    describe('Completes Stripe checkout for Locly service fee payment', () => {
+      [
+        [0, 'none'],
+        [Math.floor(loclyFeeAmount / 2), 'less than locly fee'],
+        [loclyFeeAmount, 'locly fee'],
+        [loclyFeeAmount * 2, 'more than locly fee'],
+      ].forEach(([balanceDiscountUsdCents, description]: [number, string]) => {
+        it(`${balanceDiscountUsdCents} cents out of balance exchanged for service fee discount (${description})`, async () => {
+          const notOriginCountries: Country[] = originCountriesAvailable.filter(
+            country => country !== originCountry,
+          );
+          const notOriginCountry: Country =
+            notOriginCountries[
+              Math.floor(Math.random() * notOriginCountries.length)
+            ];
+          const testHostConfigs: HostConfig[] = [
+            /*
+            Test host #1:
+            ✗ NOT verified
+            ✔ available
+            ✔ same country as the order
+            ✔ lowest number of orders (1)
+            */
+            {
+              verified: false,
+              country: originCountry,
+              available: true,
+              orderCount: 1,
+            },
+            /*
+            Test host #2:
+            ✗ NOT available
+            ✔ verified
+            ✔ same country as the order
+            ✔ lowest number of orders (1)
+            */
+            {
+              verified: true,
+              country: originCountry,
+              available: false,
+              orderCount: 1,
+            },
+            /*
+            Test host #3:
+            ✗ NOT the same country as the order
+            ✔ verified
+            ✔ available
+            ✔ lowest number of orders (1)
+            */
+            {
+              verified: true,
+              country: notOriginCountry,
+              available: true,
+              orderCount: 1,
+            },
+            /*
+            Test host #4:
+            ✗ NOT the lowest number of orders (2)
+            ✔ verified
+            ✔ same country as the order
+            ✔ available
+            */
+            {
+              verified: true,
+              country: originCountry,
+              available: true,
+              orderCount: 2,
+            },
+            /*
+            Test host #5:
+            ✗ NOT the lowest number of orders (2)
+            ✗ NOT the same country as the order
+            ✗ NOT available
+            ✗ verified
+            */
+            {
+              verified: false,
+              country: notOriginCountry,
+              available: false,
+              orderCount: 3,
+            },
+            /*
+            Test host #6 (WILL BE SELECTED):
+            ✔ available
+            ✔ verified
+            ✔ same country as the order
+            ✔ lowest number of orders (1)
+            */
+            {
+              verified: true,
+              country: originCountry,
+              available: true,
+              orderCount: 1,
+            },
+          ];
+          hosts = await configsToOnboardedHosts(moduleRef, testHostConfigs);
+          const testMatchedHost = hosts.slice(-1)[0];
 
-    const loclyStripeBalanceAfter: Stripe.Balance = await stripe.balance.retrieve();
-    const hostStripeBalanceAfter: Stripe.Balance = await stripe.balance.retrieve(
-      { stripeAccount: testMatchedHost.stripeAccountId },
-    );
+          const loclyStripeBalanceBefore: Stripe.Balance = await stripe.balance.retrieve();
+          const hostStripeBalanceBefore: Stripe.Balance = await stripe.balance.retrieve(
+            { stripeAccount: testMatchedHost.stripeAccountId },
+          );
 
-    const priceId: string = configService.get('LOCLY_FEE_PRICE_ID');
-    const { total, loclyFee } = await confirmOrder.calculateLoclyCut(priceId);
+          const response: supertest.Response = await agent
+            .post('/order/confirm')
+            .send({
+              orderId: order.id,
+              balanceDiscountUsdCents,
+            });
 
-    const findBalance = ({ pending }: Stripe.Balance) =>
-      pending.find(({ currency }) => currency === total.currency);
+          expect(response.status).toBe(HttpStatus.CREATED);
 
-    const [
-      loclyPendingBefore,
-      loclyPendingAfter,
-      hostPendingBefore,
-      hostPendingAfter,
-    ] = [
-      loclyStripeBalanceBefore,
-      loclyStripeBalanceAfter,
-      hostStripeBalanceBefore,
-      hostStripeBalanceAfter,
-    ].map(findBalance);
+          await testCheckoutResponse(response);
 
-    // Stripe fee (without conversion): 2.9% + $0.3
-    // https://stripe.com/pricing
-    const stripeFee = calculateStripeFee(total);
-    const loclyAfterStripeFee = loclyFee.unit_amount - stripeFee;
+          let updatedOrder: ConfirmedOrder = (await orderRepository.findOrder({
+            orderId: order.id,
+          })) as ConfirmedOrder;
 
-    expect(loclyPendingAfter.amount - loclyPendingBefore.amount).toBe(
-      loclyAfterStripeFee,
-    );
+          expect(updatedOrder).toBeDefined();
+          expect(updatedOrder.status).toBe(OrderStatus.Confirmed);
+          expect(updatedOrder.hostId).toBe(testMatchedHost.id);
+          expect(updatedOrder.hostAddress).toMatchObject(
+            testMatchedHost.address,
+          );
 
-    expect(hostPendingAfter.amount - hostPendingBefore.amount).toBe(
-      total.unit_amount - loclyFee.unit_amount,
-    );
+          const updatedTestHost: Host = await hostRepository.findHost({
+            hostId: testMatchedHost.id,
+          });
+
+          expect(updatedTestHost.orderIds).toContain(order.id);
+          expect(updatedTestHost.orderIds.length).toBe(
+            testMatchedHost.orderIds.length + 1,
+          );
+
+          const loclyStripeBalanceAfter: Stripe.Balance = await stripe.balance.retrieve();
+          const hostStripeBalanceAfter: Stripe.Balance = await stripe.balance.retrieve(
+            { stripeAccount: testMatchedHost.stripeAccountId },
+          );
+
+          const findBalance = ({ pending }: Stripe.Balance) =>
+            pending.find(({ currency: c }) => c === currency);
+
+          const [
+            loclyPendingBefore,
+            loclyPendingAfter,
+            hostPendingBefore,
+            hostPendingAfter,
+          ] = [
+            loclyStripeBalanceBefore,
+            loclyStripeBalanceAfter,
+            hostStripeBalanceBefore,
+            hostStripeBalanceAfter,
+          ].map(findBalance);
+
+          // Stripe fee (without conversion): 2.9% + $0.3
+          // https://stripe.com/pricing
+          const stripeFeeAmount = calculateStripeFee(serviceFeeAmount);
+          const loclyFeeAfterStripeFee = loclyFeeAmount - stripeFeeAmount;
+          const finalLoclyFee =
+            balanceDiscountUsdCents > loclyFeeAmount
+              ? 0
+              : loclyFeeAfterStripeFee - balanceDiscountUsdCents;
+
+          console.log({
+            finalLoclyFee,
+            balanceDiscountUsdCents,
+            loclyFeeAmount,
+            loclyFeeAfterStripeFee,
+            stripeFeeAmount,
+          });
+
+          expect(loclyPendingAfter.amount - loclyPendingBefore.amount).toBe(
+            finalLoclyFee,
+          );
+
+          expect(hostPendingAfter.amount - hostPendingBefore.amount).toBe(
+            serviceFeeAmount - loclyFeeAmount,
+          );
+        });
+      });
+    });
   });
 
   it(`Doesn't match Order with a Host as no Host is available in given country`, async () => {
@@ -318,6 +365,7 @@ describe('Confirm Order – POST /order/confirm', () => {
       .post('/order/confirm')
       .send({
         orderId: order.id,
+        balanceDiscountUsdCents: 0,
       });
 
     expect(response.status).toBe(HttpStatus.SERVICE_UNAVAILABLE);

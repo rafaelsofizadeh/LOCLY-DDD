@@ -8,6 +8,9 @@ export type Customer = Readonly<{
   firstName?: string;
   lastName?: string;
   phone?: string;
+  balanceUsdCents: number;
+  referralCode: string;
+  refereeCustomerId?: Customer['id'];
   stripeCustomerId: Stripe.Customer['id'];
   addresses: Address[];
   orderIds: UUID[];
