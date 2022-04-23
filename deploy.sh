@@ -5,11 +5,9 @@ if [[ $STATUS == *"nothing to commit, working tree clean"* ]]
 then
     npm run build
     sed -i "" '/dist/d' ./.gitignore
-    sed -i "" '/.env/d' ./.gitignore
+    sed -i "" '/.configuration/d' ./.gitignore
     cp Procfile dist/Procfile
     cp package.deployment.json dist/package.json
-    cp .app.env dist/.app.env
-    cp .main.env dist/.main.env
     BRANCH=$(git rev-parse --abbrev-ref HEAD)
     git add .
     git commit -m "Edit .gitignore to publish"
