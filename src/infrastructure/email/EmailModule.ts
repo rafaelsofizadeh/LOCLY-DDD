@@ -2,7 +2,7 @@ import { Module, Provider } from '@nestjs/common';
 
 import config from '../../../main.configuration';
 
-import { SendgridEmailService } from './SendgridEmailService';
+import { MailchimpEmailService } from './MailchimpEmailService';
 import { IEmailService } from './IEmailService';
 import { EtherealPseudoEmailService } from './EtherealPseudoEmailService';
 
@@ -13,8 +13,8 @@ const providers: Provider[] = [
     // https://github.com/nestjs/nest/issues/4476
     useFactory: () => {
       switch (config.email.service) {
-        case 'sendgrid':
-          return new SendgridEmailService();
+        case 'mailchimp':
+          return new MailchimpEmailService();
         case 'ethereal':
           return new EtherealPseudoEmailService();
         default:
