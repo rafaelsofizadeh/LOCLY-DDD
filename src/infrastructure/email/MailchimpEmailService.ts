@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import e from 'express';
 import { createTransport, Transporter } from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
@@ -13,15 +14,12 @@ export class MailchimpEmailService implements IEmailService {
   private readonly transporter: Transporter;
 
   constructor() {
-    const {
-      apiKey,
-      verificationSenderEmail,
-    } = config.email as MailchimpEmailConfig;
+    const { email, password } = config.email as MailchimpEmailConfig;
 
     this.nodemailerTransportConfig = {
       host: 'smtp.mandrillapp.com',
       port: 25,
-      auth: { user: verificationSenderEmail, pass: apiKey },
+      auth: { user: email, pass: password },
     };
 
     this.transporter = createTransport(this.nodemailerTransportConfig);
@@ -32,8 +30,12 @@ export class MailchimpEmailService implements IEmailService {
       options.from = this.nodemailerTransportConfig.auth.user;
     }
 
-    const emailSendingResult = await this.transporter
-      .sendMail(options)
-      .catch(throwCustomException('Error sending email', options));
+    try {
+      const emailSendingResult = await this.transporter
+        .sendMail(options)
+        .catch(throwCustomException('Error sending email', options));
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
