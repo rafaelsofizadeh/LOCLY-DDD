@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "start": "NODE_ENV=prod pwd && node main"
+    "start": "NODE_ENV=prod pwd && ls && node main"
   },
   "dependencies": {
     "@golevelup/nestjs-stripe": "^0.1.0",
