@@ -1,0 +1,14 @@
+version: "3.3"
+
+services:
+  front-end:
+    build: .
+    restart: always
+    networks:
+      - backend
+    ports:
+      - "127.0.0.1:8080:3000"
+
+networks:
+  backend:
+    external: true
