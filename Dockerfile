@@ -2,7 +2,6 @@ FROM node:17-bullseye-slim
 
 # Metadata
 WORKDIR /usr/src/app
-ENV APP_ENV dev
 EXPOSE 3000
 
 # Install Nest
