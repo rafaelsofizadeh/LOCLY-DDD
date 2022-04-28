@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
@@ -83,6 +84,7 @@ import {
 import { validate, validateOrReject } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { throwCustomException } from '../common/error-handling';
+import { request } from 'http';
 
 @Controller('order')
 export class OrderController {
@@ -211,15 +213,10 @@ export class OrderController {
   // file control/validation is done by MulterModule registration
   @UseInterceptors(FilesInterceptor('photos'))
   async addItemPhotoHandler(
-    @Body() { payload: unidAddItemPhotoRequestJson }: { payload: string },
+    @Body() unidAddItemPhotoRequest: AddItemPhotoRequest,
     @UploadedFiles() photos: FileUpload[],
     @VerifiedHostIdentity() { id: hostId }: Host,
   ) {
-    const unidAddItemPhotoRequest: AddItemPhotoRequest = plainToClass(
-      AddItemPhotoRequest,
-      JSON.parse(unidAddItemPhotoRequestJson),
-    );
-
     await validateOrReject(unidAddItemPhotoRequest).catch(
       throwCustomException('Error adding item photos: '),
     );
