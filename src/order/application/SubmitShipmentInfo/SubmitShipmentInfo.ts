@@ -48,6 +48,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
       totalWeight,
       shipmentCost: finalShipmentCost,
       calculatorResultUrl,
+      trackingNumber,
       deliveryEstimateDays,
       proofOfPayment,
     }: SubmitShipmentInfoPayload,
@@ -74,6 +75,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
         finalShipmentCost,
         status: OrderStatus.Finalized,
         ...(calculatorResultUrl && { calculatorResultUrl }),
+        ...(trackingNumber && { trackingNumber }),
         ...(deliveryEstimateDays && { deliveryEstimateDays }),
       },
       mongoTransactionSession,
@@ -92,7 +94,7 @@ export class SubmitShipmentInfo implements ISubmitShipmentInfo {
   ): Promise<UnfinalizedItem[]> {
     const order: Order = await this.orderRepository.findOrder({
       orderId,
-      status: OrderStatus.Confirmed,
+      status: [OrderStatus.Confirmed, OrderStatus.Finalized],
       hostId,
     });
 

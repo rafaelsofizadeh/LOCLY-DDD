@@ -213,7 +213,7 @@ export class OrderController {
   // file control/validation is done by MulterModule registration
   @UseInterceptors(FilesInterceptor('photos'))
   async addItemPhotoHandler(
-    @Body() unidAddItemPhotoRequest: AddItemPhotoRequest,
+    @Body() unidAddItemPhotoRequest: Record<keyof AddItemPhotoRequest, string>,
     @UploadedFiles() photos: FileUpload[],
     @VerifiedHostIdentity() { id: hostId }: Host,
   ) {
@@ -266,13 +266,23 @@ export class OrderController {
   // file control/validation is done by MulterModule registration
   @UseInterceptors(FileInterceptor('proofOfPayment'))
   async submitShipmentInfoHandler(
-    @Body() { payload: unidSubmitShipmentInfoRequestJson }: { payload: string },
+    @Body()
+    unidSubmitShipmentInfoRequestJson: Record<
+      keyof SubmitShipmentInfoRequest,
+      string
+    >,
     @UploadedFile() proofOfPayment: FileUpload,
     @VerifiedHostIdentity() { id: hostId }: Host,
   ): Promise<SubmitShipmentInfoResult> {
     const unidSubmitShipmentInfoRequest: SubmitShipmentInfoRequest = plainToClass(
       SubmitShipmentInfoRequest,
-      JSON.parse(unidSubmitShipmentInfoRequestJson),
+      {
+        ...unidSubmitShipmentInfoRequestJson,
+        shipmentCost: JSON.parse(
+          unidSubmitShipmentInfoRequestJson.shipmentCost,
+        ),
+        totalWeight: Number(unidSubmitShipmentInfoRequestJson.totalWeight),
+      },
     );
 
     await validateOrReject(unidSubmitShipmentInfoRequest).catch(

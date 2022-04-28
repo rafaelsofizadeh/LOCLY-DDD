@@ -7,9 +7,10 @@ import {
   IsDefined,
   IsNotEmptyObject,
   ValidateNested,
-  IsCurrency,
   IsNumber,
   IsIn,
+  IsString,
+  Length,
 } from 'class-validator';
 import { UseCase } from '../../../common/application';
 import { IsUUID, UUID } from '../../../common/domain';
@@ -31,6 +32,7 @@ export interface SubmitShipmentInfoPayload
     totalWeight: Gram;
     shipmentCost: Cost;
     calculatorResultUrl?: URL;
+    trackingNumber?: string;
     deliveryEstimateDays?: number;
     proofOfPayment: FileUpload;
   }> {}
@@ -63,6 +65,11 @@ export class SubmitShipmentInfoRequest
   @IsOptional()
   @IsUrl()
   readonly calculatorResultUrl?: URL;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  readonly trackingNumber?: string;
 
   @IsOptional()
   @IsInt()

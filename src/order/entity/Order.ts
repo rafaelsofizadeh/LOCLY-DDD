@@ -40,6 +40,7 @@ export type Order = Readonly<{
   calculatorResultUrl?: URL;
   deliveryEstimateDays?: number;
   proofOfPayment: UUID;
+  trackingNumber: string;
 }>;
 
 export type DraftedOrder = Pick<
