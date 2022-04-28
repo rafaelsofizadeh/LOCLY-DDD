@@ -12,11 +12,8 @@ import { IVerifyAuth } from './application/VerifyAuth/IVerifyAuth';
 import { Token } from './entity/Token';
 import {
   AnonymousIdentity,
-  AnyEntityIdentity,
   VerificationTokenIdentity,
 } from './infrastructure/IdentityDecorator';
-import { UUID } from '../common/domain';
-import { Host } from '../host/entity/Host';
 
 @Controller('auth')
 export class AuthController {
@@ -94,7 +91,6 @@ export class AuthController {
   @Post('logout')
   async logoutHandler(
     @Res({ passthrough: true }) response: Response,
-    @AnyEntityIdentity() identity: Host | UUID,
   ): Promise<void> {
     // https://expressjs.com/en/4x/api.html#res.clearCookie
     // Web browsers and other compliant clients will only clear the cookie if the given options is identical to those

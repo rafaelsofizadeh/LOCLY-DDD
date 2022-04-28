@@ -22,12 +22,16 @@ export class VerifyAuth implements IVerifyAuth {
    * the verification token to an auth/session token, expiration set is updated with a much longer period.
    */
   private verificationTokenToAuthToken({ id, type }: Token): string {
-    const { tokenKey, verificationTokenExpiration } = config.auth;
+    const {
+      tokenKey,
+      verificationTokenExpiration,
+      authTokenExpiration,
+    } = config.auth;
 
     return tokenToString(
       { id, type, isVerification: false },
       tokenKey,
-      verificationTokenExpiration,
+      authTokenExpiration,
     );
   }
 }

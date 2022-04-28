@@ -76,7 +76,7 @@ export class CookieAuthInterceptor implements NestInterceptor {
     const response: Response = context.switchToHttp().getResponse();
 
     const path = request.path;
-    if (path === 'stripe/webhook') {
+    if (path === 'stripe/webhook' || path === 'order/logout') {
       return next.handle();
     }
 
@@ -107,7 +107,7 @@ export class CookieAuthInterceptor implements NestInterceptor {
       );
 
       // TODO: Refresh token?
-      if (Boolean(expiredAt)) {
+      if (expiredAt) {
         throwCustomException(
           'Token expired' + (errorMessage ? `: ${errorMessage}` : ''),
           { expiredAt },
@@ -115,7 +115,7 @@ export class CookieAuthInterceptor implements NestInterceptor {
         )();
       }
 
-      if (Boolean(errorMessage)) {
+      if (errorMessage) {
         throwCustomException(
           'Invalid auth token' + (errorMessage ? `: ${errorMessage}` : ''),
           undefined,
