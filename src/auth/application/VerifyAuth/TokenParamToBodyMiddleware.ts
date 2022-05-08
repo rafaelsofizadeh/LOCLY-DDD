@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 
-import config from '../../../../main.configuration';
+import config from '../../../../app.configuration';
 
 @Injectable()
 /**

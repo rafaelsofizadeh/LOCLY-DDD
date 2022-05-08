@@ -3,7 +3,7 @@ import e from 'express';
 import { createTransport, Transporter } from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-import config, { MailchimpEmailConfig } from '../../../main.configuration';
+import config, { MailchimpEmailConfig } from '../../../app.configuration';
 
 import { throwCustomException } from '../../common/error-handling';
 import { EmailData, IEmailService } from './IEmailService';

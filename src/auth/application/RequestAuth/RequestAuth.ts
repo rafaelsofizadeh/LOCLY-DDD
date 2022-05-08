@@ -19,7 +19,7 @@ import {
   INotificationService,
   NotificationType,
 } from '../../../infrastructure/notification/INotificationService';
-import config from '../../../../main.configuration';
+import config from '../../../../app.configuration';
 
 /**
  * Functionality for the first step in user auth – accepting user email, generating a verification token and sending it

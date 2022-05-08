@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { Injectable } from '@nestjs/common';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
-import config from '../../../../main.configuration';
+import config from '../../../../app.configuration';
 
 import {
   PayShipmentPayload,

@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 
-import mainConfig from '../../../../main.configuration';
+import mainConfig from '../../../../app.configuration';
 import appConfig from '../../../../app.configuration';
 
 import { ConfirmOrderResult, IConfirmOrder } from './IConfirmOrder';

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { createTransport, Transporter } from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-import config, { EtherealEmailConfig } from '../../../main.configuration';
+import config, { EtherealEmailConfig } from '../../../app.configuration';
 
 import { throwCustomException } from '../../common/error-handling';
 import { EmailData, IEmailService } from './IEmailService';

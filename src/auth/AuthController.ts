@@ -2,7 +2,7 @@ import ms from 'ms';
 import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { CookieOptions, Response } from 'express';
 
-import config from '../../main.configuration';
+import config from '../../app.configuration';
 
 import {
   RequestAuthRequest,

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import config from '../../../../main.configuration';
+import config from '../../../../app.configuration';
 
 import { Token } from '../../entity/Token';
 import { tokenToString } from '../utils';

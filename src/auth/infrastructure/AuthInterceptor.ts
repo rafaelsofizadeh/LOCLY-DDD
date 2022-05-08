@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import config from '../../../main.configuration';
+import config from '../../../app.configuration';
 
 import { UserType, Token } from '../entity/Token';
 import { stringToToken } from '../application/utils';

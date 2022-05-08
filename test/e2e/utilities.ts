@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 import supertest, { SuperAgentTest, agent, Response } from 'supertest';
 import { TestingModule } from '@nestjs/testing';
 
-import config from '../../main.configuration';
+import config from '../../app.configuration';
 
 import { IRequestAuth } from '../../src/auth/application/RequestAuth/IRequestAuth';
 import { UserType } from '../../src/auth/entity/Token';

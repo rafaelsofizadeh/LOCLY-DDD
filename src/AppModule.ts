@@ -16,7 +16,7 @@ import {
   RawBodyMiddleware,
 } from '@golevelup/nestjs-webhooks';
 
-import config from '../main.configuration';
+import config from '../app.configuration';
 
 import { OrderModule } from './order/OrderModule';
 import { CustomerModule } from './customer/CustomerModule';

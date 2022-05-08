@@ -1,6 +1,6 @@
 # passwords and keys
 .*.env
-*.configuration.ts
+secrets.ts
 
 # compiled output
 /node_modules

@@ -1,6 +1,6 @@
 import { Module, Provider } from '@nestjs/common';
 
-import config from '../../../main.configuration';
+import config from '../../../app.configuration';
 
 import { EmailModule } from '../email/EmailModule';
 import { INotificationService } from './INotificationService';
