@@ -4,6 +4,7 @@ secrets.ts
 
 # compiled output
 /node_modules
+/dist
 
 # Logs
 logs

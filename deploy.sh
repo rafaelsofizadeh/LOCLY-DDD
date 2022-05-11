@@ -5,7 +5,7 @@ if [[ $STATUS == *"nothing to commit, working tree clean"* ]]
 then
     npm run build
     sed -i "" '/dist/d' ./.gitignore
-    sed -i "" '/.configuration/d' ./.gitignore
+    sed -i "" '/secrets.ts/d' ./.gitignore
     cp Procfile dist/Procfile
     cp package.deployment.json dist/package.json
     BRANCH=$(git rev-parse --abbrev-ref HEAD)
