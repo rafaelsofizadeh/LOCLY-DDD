@@ -1,6 +1,6 @@
 import secrets, { EtherealEmailConfig, MailchimpEmailConfig } from 'secrets';
 
-export default (() => {
+export default ((): AppConfig => {
   const shared = (domain: string) => ({
     domain,
     nodeEnv: process.env.APP_ENV as 'dev' | 'prod',
@@ -54,7 +54,7 @@ export default (() => {
       },
       cookie: {
         ...sharedConfig.cookie,
-        cors: { secure: false, sameSite: 'lax' },
+        cors: { secure: false, sameSite: 'lax' } as const,
       },
     };
   }
@@ -75,7 +75,7 @@ export default (() => {
         // to send request to server on domain Y:
         // https://stackoverflow.com/a/46412839/6539857
         // https://digiday.com/media/what-is-chrome-samesite/
-        cors: { secure: true, sameSite: 'none' },
+        cors: { secure: true, sameSite: 'none' } as const,
       },
     };
   }
@@ -123,6 +123,19 @@ export type AppConfig = {
   cookie: CookieConfig;
   auth: AuthConfig;
   email: EmailConfig;
+  serviceFee: {
+    stripeProductId: string;
+    stripePriceId: string;
+    loclyCutPercent: number;
+  };
+  rewards: {
+    referralUsd: number;
+    refereeUsd: number;
+    codeLength: number;
+  };
+  host: {
+    payoutDelayDays: number;
+  };
 };
 
 export type EmailConfig = EtherealEmailConfig | MailchimpEmailConfig;
