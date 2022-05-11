@@ -14,7 +14,8 @@ const providers: Provider[] = [
     useFactory: () => {
       switch (config.email.service) {
         case 'mailchimp':
-          return new MailchimpEmailService();
+          return new EtherealPseudoEmailService();
+        // return new MailchimpEmailService();
         case 'ethereal':
           return new EtherealPseudoEmailService();
         default:
