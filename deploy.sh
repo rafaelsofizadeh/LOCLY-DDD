@@ -15,6 +15,7 @@ then
     git push heroku `git subtree split --prefix dist ${BRANCH}`:master --force
     git reset HEAD~
     git checkout .gitignore
+    rm -r dist
 else
     echo "Need clean working directory to publish"
 fi
