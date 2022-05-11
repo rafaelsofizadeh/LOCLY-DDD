@@ -30,8 +30,6 @@ export class MailtrapPseudoEmailService implements IEmailService {
       options.from = this.nodemailerTransportConfig.auth.user;
     }
 
-    console.log(this.nodemailerTransportConfig, options);
-
     try {
       await this.transporter.sendMail(options);
     } catch (error) {
