@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmailModule = void 0;
 const common_1 = require("@nestjs/common");
 const app_configuration_1 = __importDefault(require("../../../app.configuration"));
-const MailchimpEmailService_1 = require("./MailchimpEmailService");
 const IEmailService_1 = require("./IEmailService");
 const EtherealPseudoEmailService_1 = require("./EtherealPseudoEmailService");
 const providers = [
@@ -21,7 +20,7 @@ const providers = [
         useFactory: () => {
             switch (app_configuration_1.default.email.service) {
                 case 'mailchimp':
-                    return new MailchimpEmailService_1.MailchimpEmailService();
+                    return new EtherealPseudoEmailService_1.EtherealPseudoEmailService();
                 case 'ethereal':
                     return new EtherealPseudoEmailService_1.EtherealPseudoEmailService();
                 default:
