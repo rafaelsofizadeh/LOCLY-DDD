@@ -60,7 +60,7 @@ export default ((): AppConfig => {
   }
 
   if (process.env.APP_ENV === 'prod') {
-    const sharedConfig = shared('https://aqueous-caverns-91110.herokuapp.com');
+    const sharedConfig = shared('https://locky.vercel.app');
 
     return {
       ...sharedConfig,
