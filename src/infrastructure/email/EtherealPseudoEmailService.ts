@@ -19,6 +19,7 @@ export class EtherealPseudoEmailService implements IEmailService {
     this.nodemailerTransportConfig = {
       host: 'smtp.ethereal.email',
       port: 587,
+      secure: false,
       auth: { user, pass },
     };
 
@@ -30,8 +31,11 @@ export class EtherealPseudoEmailService implements IEmailService {
       options.from = this.nodemailerTransportConfig.auth.user;
     }
 
-    const emailSendingResult = await this.transporter
-      .sendMail(options)
-      .catch(throwCustomException('Error sending email', options));
+    try {
+      await this.transporter.sendMail(options);
+    } catch (error) {
+      console.log(error);
+      return throwCustomException('Error sending email', options)(error);
+    }
   }
 }
