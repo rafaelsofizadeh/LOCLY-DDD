@@ -5,6 +5,7 @@ import config from '../../../app.configuration';
 import { MailchimpEmailService } from './MailchimpEmailService';
 import { IEmailService } from './IEmailService';
 import { EtherealPseudoEmailService } from './EtherealPseudoEmailService';
+import { MailtrapPseudoEmailService } from './MailtrapPseudoEmailService';
 
 const providers: Provider[] = [
   {
@@ -14,10 +15,10 @@ const providers: Provider[] = [
     useFactory: () => {
       switch (config.email.service) {
         case 'mailchimp':
-          return new EtherealPseudoEmailService();
         // return new MailchimpEmailService();
+        case 'mailtrap':
         case 'ethereal':
-          return new EtherealPseudoEmailService();
+          return new MailtrapPseudoEmailService();
         default:
           console.log(
             'No email service specified. Falling back to default Ethereal for emails.',

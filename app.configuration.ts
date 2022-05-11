@@ -1,4 +1,4 @@
-import secrets, { EtherealEmailConfig, MailchimpEmailConfig } from 'secrets';
+import secrets, { EmailConfig } from 'secrets';
 
 export default ((): AppConfig => {
   const shared = (domain: string) => ({
@@ -137,5 +137,3 @@ export type AppConfig = {
     payoutDelayDays: number;
   };
 };
-
-export type EmailConfig = EtherealEmailConfig | MailchimpEmailConfig;

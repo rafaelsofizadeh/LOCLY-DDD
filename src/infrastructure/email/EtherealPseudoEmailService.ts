@@ -3,7 +3,7 @@ import { createTransport, Transporter } from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 import config from '../../../app.configuration';
-import { EtherealEmailConfig } from '../../../secrets';
+import { EmailConfig } from '../../../secrets';
 
 import { throwCustomException } from '../../common/error-handling';
 import { EmailData, IEmailService } from './IEmailService';
@@ -14,7 +14,7 @@ export class EtherealPseudoEmailService implements IEmailService {
   private readonly transporter: Transporter;
 
   constructor() {
-    const { email: user, password: pass } = config.email as EtherealEmailConfig;
+    const { user, pass } = config.email as EmailConfig;
 
     this.nodemailerTransportConfig = {
       host: 'smtp.ethereal.email',
