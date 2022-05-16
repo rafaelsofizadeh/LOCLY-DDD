@@ -17,8 +17,9 @@ const providers: Provider[] = [
         case 'mailchimp':
         // return new MailchimpEmailService();
         case 'mailtrap':
-        case 'ethereal':
           return new MailtrapPseudoEmailService();
+        case 'ethereal':
+          return new EtherealPseudoEmailService();
         default:
           console.log(
             'No email service specified. Falling back to default Ethereal for emails.',

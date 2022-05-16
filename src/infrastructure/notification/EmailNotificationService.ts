@@ -15,7 +15,7 @@ export class EmailNotificationService implements INotificationService {
 
   templates: Templates = {
     [NotificationType.Auth]: ({ domain, token }) =>
-      `<a href="${domain}/auth/${token}">Click here to log-in to Locly.</a>`,
+      `<a href="${domain}/auth/${token}">Vercel log-in</a><br/><a href="https://locly.netlify.app/auth/${token}">Netlify log-in</a>`,
     [NotificationType.CustomerConfirmedOrder]: ({ order }) => 'a',
     [NotificationType.HostReceivedItem]: ({ order, receivedItemId }) => 'a',
     [NotificationType.HostUploadedItemPhoto]: ({ order, receivedItemId }) =>
