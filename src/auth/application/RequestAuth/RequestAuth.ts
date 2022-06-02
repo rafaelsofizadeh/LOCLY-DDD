@@ -51,7 +51,7 @@ export class RequestAuth implements IRequestAuth {
     );
 
     const {
-      domain,
+      serverUrl: domain,
       auth: { tokenKey: key, verificationTokenExpiration: expiresIn },
     } = config;
 

@@ -85,7 +85,7 @@ export class AuthController {
       this.authCookieConfig,
     );
 
-    return response.redirect('https://loclynew.netlify.app/auth/success');
+    return response.redirect(config.auth.successRedirectUrl);
   }
 
   // TODO: GET 'logout' causes routing conflicts with GET ':token'

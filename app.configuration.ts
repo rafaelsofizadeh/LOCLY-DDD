@@ -1,13 +1,14 @@
 import secrets, { EmailConfig } from 'secrets';
 
 export default ((): AppConfig => {
-  const shared = (domain: string) => ({
-    domain,
+  const shared = (frontUrl: string) => ({
+    frontUrl,
+    serverUrl: 'https://aqueous-caverns-91110.herokuapp.com',
     nodeEnv: process.env.APP_ENV as 'dev' | 'prod',
     stripe: {
       apiKey: secrets.stripe.apiKey,
-      successPageUrl: `${domain}/order/thank-you`,
-      cancelPageUrl: `${domain}/order/error`,
+      successPageUrl: `${frontUrl}/order/thank-you`,
+      cancelPageUrl: `${frontUrl}/order/error`,
       // IMPORTANT: Keep track of all Stripe integrations' api versions (including webhooks)
       apiVersion: '2020-08-27' as const,
       webhook: {
@@ -25,6 +26,7 @@ export default ((): AppConfig => {
       tokenKey: secrets.authTokenKey,
       verificationTokenExpiration: '30m',
       authTokenExpiration: '7d',
+      successRedirectUrl: `${frontUrl}/auth/success`,
     },
     mongo: { connectionString: secrets.mongoConnectionString },
     email: secrets.email,
@@ -113,10 +115,12 @@ export type AuthConfig = {
   tokenKey: string;
   verificationTokenExpiration: string;
   authTokenExpiration: string;
+  successRedirectUrl: string;
 };
 
 export type AppConfig = {
-  domain: string;
+  frontUrl: string;
+  serverUrl: string;
   nodeEnv: 'dev' | 'prod';
   stripe: StripeConfig;
   mongo: MongoConfig;
