@@ -60,7 +60,7 @@ export default ((): AppConfig => {
   }
 
   if (process.env.APP_ENV === 'prod') {
-    const sharedConfig = shared('https://locky.vercel.app');
+    const sharedConfig = shared('https://loclynew.netlify.app');
 
     return {
       ...sharedConfig,

@@ -49,6 +49,7 @@ export class AuthController {
     @Body() requestAuthRequest: RequestAuthRequest,
     @AnonymousIdentity() identity: null,
   ): Promise<void> {
+    console.log('AUTH');
     await this.requestAuth.execute({ port: requestAuthRequest });
   }
 
@@ -84,7 +85,7 @@ export class AuthController {
       this.authCookieConfig,
     );
 
-    return response.redirect('https://locly.netlify.app/auth/success');
+    return response.redirect('https://loclynew.netlify.app/auth/success');
   }
 
   // TODO: GET 'logout' causes routing conflicts with GET ':token'
